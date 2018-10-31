@@ -3,7 +3,7 @@
 Install the module:
 
 ```
-composer config repositories.laravel-remote-queue vcs https://github.com/biigle/maia
+composer config repositories.maia vcs https://github.com/biigle/maia
 composer require biigle/maia
 ```
 
