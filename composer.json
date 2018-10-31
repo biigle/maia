@@ -1,0 +1,20 @@
+{
+    "name": "biigle/maia",
+    "description": "Perform the Machine Learning Assisted Image Annotation method in BIIGLE",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Martin Zurowietz",
+            "email": "martin@cebitec.uni-bielefeld.de"
+        }
+    ],
+    "require": {
+        "biigle/volumes": "^2.7",
+        "biigle/label-trees": "^1.19"
+    },
+    "autoload": {
+        "psr-4": {
+            "Biigle\\Modules\\Maia\\": "src"
+        }
+    }
+}
