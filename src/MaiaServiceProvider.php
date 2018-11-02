@@ -5,6 +5,7 @@ namespace Biigle\Modules\Maia;
 use Biigle\Services\Modules;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Factory as EloquentFactory;
 
 class MaiaServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,7 @@ class MaiaServiceProvider extends ServiceProvider
     public function boot(Modules $modules, Router $router)
     {
         // $this->loadViewsFrom(__DIR__.'/resources/views', 'maia');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
 
         // $this->publishes([
         //     __DIR__.'/public/assets' => public_path('vendor/maia'),
@@ -52,6 +54,10 @@ class MaiaServiceProvider extends ServiceProvider
         //     return new \Biigle\Modules\Maia\Console\Commands\Publish;
         // });
         // $this->commands('command.maia.publish');
+
+        if (config('app.env') === 'testing') {
+            $this->registerEloquentFactoriesFrom(__DIR__.'/database/factories');
+        }
     }
 
     /**
@@ -64,5 +70,16 @@ class MaiaServiceProvider extends ServiceProvider
         // return [
         //     'command.maia.publish',
         // ];
+    }
+
+    /**
+     * Register factories.
+     *
+     * @param  string  $path
+     * @return void
+     */
+    protected function registerEloquentFactoriesFrom($path)
+    {
+        $this->app->make(EloquentFactory::class)->load($path);
     }
 }

@@ -10,7 +10,9 @@
     ],
     "require": {
         "biigle/volumes": "^2.7",
-        "biigle/label-trees": "^1.19"
+        "biigle/label-trees": "^1.19",
+        "biigle/largo": "^2.4",
+        "biigle/annotations": "^3.9"
     },
     "autoload": {
         "psr-4": {
