@@ -64,7 +64,11 @@ class MaiaAnnotationTest extends ModelTestCase
 
     public function testGetShape()
     {
-        $annotation = static::make(['shape_id' => Shape::$pointId]);
-        $this->assertEquals(Shape::$pointId, $annotation->getShape()->id);
+        $this->assertEquals($this->model->shape, $this->model->getShape());
+    }
+
+    public function testGetImage()
+    {
+        $this->assertEquals($this->model->image, $this->model->getImage());
     }
 }
