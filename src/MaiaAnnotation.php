@@ -4,10 +4,14 @@ namespace Biigle\Modules\Maia;
 
 use Biigle\Image;
 use Biigle\Shape;
+use Biigle\Traits\HasPointsAttribute;
 use Illuminate\Database\Eloquent\Model;
+use Biigle\Contracts\Annotation as AnnotationContract;
 
-class MaiaAnnotation extends Model
+class MaiaAnnotation extends Model implements AnnotationContract
 {
+    use HasPointsAttribute;
+
     /**
      * Don't maintain timestamps for this model.
      *
@@ -15,12 +19,13 @@ class MaiaAnnotation extends Model
      */
     public $timestamps = false;
 
-     /**
+    /**
      * The attributes that should be casted to native types.
      *
      * @var array
      */
     protected $casts = [
+        'points' => 'array',
         'selected' => 'boolean',
     ];
 
@@ -98,5 +103,21 @@ class MaiaAnnotation extends Model
     public function job()
     {
         return $this->belongsTo(MaiaJob::class);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPoints(): array
+    {
+        return $this->points;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getShape(): Shape
+    {
+        return $this->shape;
     }
 }

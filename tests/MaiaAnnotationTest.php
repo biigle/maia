@@ -2,6 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
+use Biigle\Shape;
 use ModelTestCase;
 use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 use Biigle\Modules\Maia\MaiaAnnotation as Annotation;
@@ -23,6 +24,12 @@ class MaiaAnnotationTest extends ModelTestCase
         $this->assertNotNull($this->model->selected);
         $this->assertNull($this->model->created_at);
         $this->assertNull($this->model->updated_at);
+    }
+
+    public function testCastPoints()
+    {
+        $annotation = static::create(['points' => [1, 2, 3, 4]]);
+        $this->assertEquals([1, 2, 3, 4], $annotation->fresh()->points);
     }
 
     public function testScopeTrainingProposals()
@@ -47,5 +54,17 @@ class MaiaAnnotationTest extends ModelTestCase
         $selected = self::create(['selected' => true]);
         $ids = Annotation::unselected()->pluck('id')->all();
         $this->assertEquals([$unselected->id], $ids);
+    }
+
+    public function testGetPoints()
+    {
+        $annotation = static::make(['points' => [1, 2]]);
+        $this->assertEquals([1, 2], $annotation->getPoints());
+    }
+
+    public function testGetShape()
+    {
+        $annotation = static::make(['shape_id' => Shape::$pointId]);
+        $this->assertEquals(Shape::$pointId, $annotation->getShape()->id);
     }
 }

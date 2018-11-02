@@ -13,7 +13,6 @@ class InitializeMaiaTables extends Migration
      */
     public function up()
     {
-
         Schema::create('maia_job_states', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 64);
