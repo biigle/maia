@@ -21,11 +21,11 @@ class MaiaAnnotationTypeTest extends ModelTestCase
 
     public function testTrainingProposalId()
     {
-        $this->assertNotNull(MaiaAnnotationType::$trainingProposalId);
+        $this->assertNotNull(MaiaAnnotationType::trainingProposalId());
     }
 
     public function testAnnotationCandidateId()
     {
-        $this->assertNotNull(MaiaAnnotationType::$annotationCandidateId);
+        $this->assertNotNull(MaiaAnnotationType::annotationCandidateId());
     }
 }

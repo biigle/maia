@@ -38,7 +38,7 @@ class MaiaAnnotation extends Model implements AnnotationContract
      */
     public function scopeTrainingProposals($query)
     {
-        return $query->where('maia_annotations.type_id', MaiaAnnotationType::$trainingProposalId);
+        return $query->where('maia_annotations.type_id', MaiaAnnotationType::trainingProposalId());
     }
 
     /**
@@ -50,7 +50,7 @@ class MaiaAnnotation extends Model implements AnnotationContract
      */
     public function scopeAnnotationCandidates($query)
     {
-        return $query->where('maia_annotations.type_id', MaiaAnnotationType::$annotationCandidateId);
+        return $query->where('maia_annotations.type_id', MaiaAnnotationType::annotationCandidateId());
     }
 
     /**

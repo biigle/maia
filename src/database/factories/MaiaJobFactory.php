@@ -8,6 +8,6 @@ $factory->define(Biigle\Modules\Maia\MaiaJob::class, function ($faker) {
         'user_id' => function () {
             return factory(Biigle\User::class)->create()->id;
         },
-        'state_id' => Biigle\Modules\Maia\MaiaJobState::$noveltyDetectionId,
+        'state_id' => Biigle\Modules\Maia\MaiaJobState::noveltyDetectionId(),
     ];
 });

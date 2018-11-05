@@ -21,21 +21,21 @@ class MaiaJobStateTest extends ModelTestCase
 
     public function testNoveltyDetectionId()
     {
-        $this->assertNotNull(MaiaJobState::$noveltyDetectionId);
+        $this->assertNotNull(MaiaJobState::noveltyDetectionId());
     }
 
     public function testTrainingProposalsId()
     {
-        $this->assertNotNull(MaiaJobState::$trainingProposalsId);
+        $this->assertNotNull(MaiaJobState::trainingProposalsId());
     }
 
     public function testInstanceSegmentationId()
     {
-        $this->assertNotNull(MaiaJobState::$instanceSegmentationId);
+        $this->assertNotNull(MaiaJobState::instanceSegmentationId());
     }
 
     public function testAnnotationCandidatesId()
     {
-        $this->assertNotNull(MaiaJobState::$annotationCandidatesId);
+        $this->assertNotNull(MaiaJobState::annotationCandidatesId());
     }
 }

@@ -77,7 +77,7 @@ class InitializeMaiaTables extends Migration
         */
         Schema::create('maia_annotations', function (Blueprint $table) {
             $table->increments('id');
-            // JSON type cant have a default value so it must be nullable
+            // JSON type cant have a default value so it must be nullable.
             $table->json('points')->nullable();
             $table->float('score');
             $table->boolean('selected');

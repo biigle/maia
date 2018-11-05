@@ -2,59 +2,33 @@
 
 namespace Biigle\Modules\Maia;
 
-use Cache;
+use Biigle\Traits\HasConstantInstances;
 use Illuminate\Database\Eloquent\Model;
 
 class MaiaJobState extends Model
 {
+    use HasConstantInstances;
+
+    /**
+     * The constant instances of this model.
+     *
+     * @var array
+     */
+    const INSTANCES = [
+        // The novelty detection stage.
+        'noveltyDetection' => 'novelty-detection',
+        // The manual filtering and refinement of training proposals stage.
+        'trainingProposals' => 'training-proposals',
+        // The instance segmentation stage.
+        'instanceSegmentation' => 'instance-segmentation',
+        // The manual filtering of annotation candidated stage.
+        'annotationCandidates' => 'annotation-candidates',
+    ];
+
     /**
      * Don't maintain timestamps for this model.
      *
      * @var bool
      */
     public $timestamps = false;
-
-    /**
-     * The novelty detection stage ID.
-     *
-     * @var int
-     */
-    public static $noveltyDetectionId;
-
-    /**
-     * The manual filtering and refinement of training proposals stage ID.
-     *
-     * @var int
-     */
-    public static $trainingProposalsId;
-
-    /**
-     * The instance segmentation stage ID.
-     *
-     * @var int
-     */
-    public static $instanceSegmentationId;
-
-    /**
-     * The manual filtering of annotation candidated stage ID.
-     *
-     * @var int
-     */
-    public static $annotationCandidatesId;
 }
-
-MaiaJobState::$noveltyDetectionId = Cache::rememberForever('maia-job-state-novelty-detection', function () {
-    return MaiaJobState::whereName('novelty-detection')->first()->id;
-});
-
-MaiaJobState::$trainingProposalsId = Cache::rememberForever('maia-job-state-training-proposals', function () {
-    return MaiaJobState::whereName('training-proposals')->first()->id;
-});
-
-MaiaJobState::$instanceSegmentationId = Cache::rememberForever('maia-job-state-instance-segmentation', function () {
-    return MaiaJobState::whereName('instance-segmentation')->first()->id;
-});
-
-MaiaJobState::$annotationCandidatesId = Cache::rememberForever('maia-job-state-annotation-candidates', function () {
-    return MaiaJobState::whereName('annotation-candidates')->first()->id;
-});

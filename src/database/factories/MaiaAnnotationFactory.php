@@ -5,7 +5,7 @@ $factory->define(Biigle\Modules\Maia\MaiaAnnotation::class, function ($faker) {
         'image_id' => function () {
             return factory(Biigle\Image::class)->create()->id;
         },
-        'shape_id' => Biigle\Shape::$circleId,
+        'shape_id' => Biigle\Shape::circleId(),
         'type_id' => function () {
             return factory(Biigle\Modules\Maia\MaiaAnnotationType::class)->create()->id;
         },

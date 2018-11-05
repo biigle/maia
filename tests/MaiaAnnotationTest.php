@@ -34,16 +34,16 @@ class MaiaAnnotationTest extends ModelTestCase
 
     public function testScopeTrainingProposals()
     {
-        $proposal = self::create(['type_id' => Type::$trainingProposalId]);
-        $candidate = self::create(['type_id' => Type::$annotationCandidateId]);
+        $proposal = self::create(['type_id' => Type::trainingProposalId()]);
+        $candidate = self::create(['type_id' => Type::annotationCandidateId()]);
         $ids = Annotation::trainingProposals()->pluck('id')->all();
         $this->assertEquals([$proposal->id], $ids);
     }
 
     public function testScopeAnnotationCandidates()
     {
-        $proposal = self::create(['type_id' => Type::$trainingProposalId]);
-        $candidate = self::create(['type_id' => Type::$annotationCandidateId]);
+        $proposal = self::create(['type_id' => Type::trainingProposalId()]);
+        $candidate = self::create(['type_id' => Type::annotationCandidateId()]);
         $ids = Annotation::annotationCandidates()->pluck('id')->all();
         $this->assertEquals([$candidate->id], $ids);
     }
