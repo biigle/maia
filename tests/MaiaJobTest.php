@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Maia;
 
 use ModelTestCase;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
 
 class MaiaJobTest extends ModelTestCase
 {
@@ -25,5 +26,32 @@ class MaiaJobTest extends ModelTestCase
     {
         $annotation = MaiaAnnotationTest::create(['job_id' => $this->model->id]);
         $this->assertEquals($annotation->id, $this->model->annotations()->first()->id);
+    }
+
+    public function testCastsParams()
+    {
+        $this->model->params = ['test'];
+        $this->model->save();
+        $this->assertEquals(['test'], $this->model->fresh()->params);
+    }
+
+    public function testIsRunning()
+    {
+        $this->assertTrue($this->model->isRunning());
+        $this->model->state_id = State::finishedId();
+        $this->assertFalse($this->model->isRunning());
+    }
+
+    public function testRequiresAction()
+    {
+        $this->assertFalse($this->model->requiresAction());
+        $this->model->state_id = State::trainingProposalsId();
+        $this->assertTrue($this->model->requiresAction());
+        $this->model->state_id = State::instanceSegmentationId();
+        $this->assertFalse($this->model->requiresAction());
+        $this->model->state_id = State::annotationCandidatesId();
+        $this->assertTrue($this->model->requiresAction());
+        $this->model->state_id = State::finishedId();
+        $this->assertFalse($this->model->requiresAction());
     }
 }

@@ -24,6 +24,7 @@ class InitializeMaiaTables extends Migration
             ['name' => 'training-proposals'],
             ['name' => 'instance-segmentation'],
             ['name' => 'annotation-candidates'],
+            ['name' => 'finished'],
         ]);
 
         /*

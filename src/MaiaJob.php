@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Model;
 class MaiaJob extends Model
 {
     /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'params' => 'array',
+    ];
+
+    /**
      * The volume, this MAIA job belongs to.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -46,5 +55,28 @@ class MaiaJob extends Model
     public function annotations()
     {
         return $this->hasMany(MaiaAnnotation::class, 'job_id');
+    }
+
+    /**
+     * Determine if the job is currently running.
+     *
+     * @return boolean
+     */
+    public function isRunning()
+    {
+        return $this->state_id !== MaiaJobState::finishedId();
+    }
+
+    /**
+     * Determine if the job requires a user action to continue
+     *
+     * @return boolean
+     */
+    public function requiresAction()
+    {
+        return in_array($this->state_id, [
+            MaiaJobState::trainingProposalsId(),
+            MaiaJobState::annotationCandidatesId(),
+        ]);
     }
 }

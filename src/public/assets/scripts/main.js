@@ -1,0 +1,1 @@
+biigle.$viewModel("maia-job-form",function(e){new Vue({el:e,data:{showAdvanced:!1},methods:{toggle:function(){this.showAdvanced=!this.showAdvanced}}})});

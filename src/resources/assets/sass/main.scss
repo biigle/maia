@@ -1,0 +1,11 @@
+@import "variables";
+
+.maia-status {
+    text-align: center;
+    color: $brand-success;
+    margin-bottom: $navbar-margin-bottom;
+}
+
+.maia-status--running {
+    color: $brand-warning;
+}

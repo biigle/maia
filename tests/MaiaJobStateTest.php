@@ -19,23 +19,28 @@ class MaiaJobStateTest extends ModelTestCase
         $this->assertNull($this->model->updated_at);
     }
 
-    public function testNoveltyDetectionId()
+    public function testNoveltyDetection()
     {
-        $this->assertNotNull(MaiaJobState::noveltyDetectionId());
+        $this->assertNotNull(MaiaJobState::noveltyDetection());
     }
 
-    public function testTrainingProposalsId()
+    public function testTrainingProposals()
     {
-        $this->assertNotNull(MaiaJobState::trainingProposalsId());
+        $this->assertNotNull(MaiaJobState::trainingProposals());
     }
 
-    public function testInstanceSegmentationId()
+    public function testInstanceSegmentation()
     {
-        $this->assertNotNull(MaiaJobState::instanceSegmentationId());
+        $this->assertNotNull(MaiaJobState::instanceSegmentation());
     }
 
-    public function testAnnotationCandidatesId()
+    public function testAnnotationCandidates()
     {
-        $this->assertNotNull(MaiaJobState::annotationCandidatesId());
+        $this->assertNotNull(MaiaJobState::annotationCandidates());
+    }
+
+    public function testFinished()
+    {
+        $this->assertNotNull(MaiaJobState::finished());
     }
 }
