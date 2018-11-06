@@ -1,6 +1,6 @@
 <div class="sidebar-tab__content">
     <p>
-        Job #{{$job->id}} started <span title="{{$job->created_at->toIso8601String()}}">{{$job->created_at->diffForHumans()}}</span>
+        Job #{{$job->id}} created <span title="{{$job->created_at->toIso8601String()}}">{{$job->created_at->diffForHumans()}}</span>
     </p>
     <p>
         Status: @include('maia::mixins.job-state', ['job' => $job])

@@ -24,7 +24,7 @@
         @endif
     </div>
 
-    <fieldset v-hide v-show="showAdvanced">
+    <fieldset v-cloak v-show="showAdvanced">
         <div class="form-group{{ $errors->has('threshold') ? ' has-error' : '' }}">
             <label for="threshold">Threshold percentile</label>
             <input type="number" class="form-control" name="threshold" id="threshold" value="{{ old('threshold', 99) }}" required min="0" max="99" step="1">

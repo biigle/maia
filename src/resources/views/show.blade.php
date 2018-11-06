@@ -32,21 +32,30 @@
         <sidebar-tab name="info" icon="info-circle" title="Job information">
             @include('maia::show.info-tab')
         </sidebar-tab>
-        <sidebar-tab name="filter-training-proposals" icon="plus-square" title="Filter training proposals" v-bind:highlight="tpTabHighlight" @if ($job->state_id < $states['training-proposals']) disabled @endif>
-            <div class="sidebar-tab__content">
-                filter proposals
-            </div>
-        </sidebar-tab>
-        <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals" @if ($job->state_id < $states['training-proposals']) disabled @endif>
-            <div class="sidebar-tab__content">
-                refine
-            </div>
-        </sidebar-tab>
-        <sidebar-tab name="filter-annotation-candidates" icon="check-square" title="Filter annotation candidates" v-bind:highlight="acTabHighlight" @if ($job->state_id < $states['annotation-candidates']) disabled @endif>
-            <div class="sidebar-tab__content">
-                filter candidates
-            </div>
-        </sidebar-tab>
+        @if ($job->state_id < $states['training-proposals'])
+            <sidebar-tab name="filter-training-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
+            <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
+        @else
+            <sidebar-tab name="filter-training-proposals" icon="plus-square" title="Filter training proposals" v-bind:highlight="tpTabHighlight">
+                <div class="sidebar-tab__content">
+                    @include('maia::show.filter-tp-tab')
+                </div>
+            </sidebar-tab>
+            <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals">
+                <div class="sidebar-tab__content">
+                    @include('maia::show.refine-tp-tab')
+                </div>
+            </sidebar-tab>
+        @endif
+        @if ($job->state_id < $states['annotation-candidates'])
+            <sidebar-tab name="filter-annotation-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
+        @else
+            <sidebar-tab name="filter-annotation-candidates" icon="check-square" title="Filter annotation candidates" v-bind:highlight="acTabHighlight">
+                <div class="sidebar-tab__content">
+                    @include('maia::show.filter-ac-tab')
+                </div>
+            </sidebar-tab>
+        @endif
     </sidebar>
 </div>
 @endsection
