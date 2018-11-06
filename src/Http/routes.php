@@ -8,6 +8,11 @@ $router->group([
             'as' => 'volumes-maia',
             'uses' => 'MaiaController@index',
         ]);
+
+        $router->get('maia/{id}', [
+            'as' => 'maia',
+            'uses' => 'MaiaController@show',
+        ]);
 });
 
 $router->group([

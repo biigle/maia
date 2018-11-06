@@ -43,7 +43,7 @@ class MaiaServiceProvider extends ServiceProvider
             // ],
         ]);
 
-        // Gate::policy(MaiaJob::class, Policies\MaiaJobPolicy::class);
+        Gate::policy(MaiaJob::class, Policies\MaiaJobPolicy::class);
     }
 
     /**

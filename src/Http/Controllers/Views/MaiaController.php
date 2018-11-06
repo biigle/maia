@@ -33,4 +33,27 @@ class MaiaController extends Controller
             'jobRunning'
         ));
     }
+
+    /**
+     * Show a MAIA job
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $job = MaiaJob::findOrFail($id);
+        $this->authorize('access', $job);
+        $volume = $job->volume;
+        $states = collect([
+            'novelty-detection' => State::noveltyDetectionId(),
+            'training-proposals' => State::trainingProposalsId(),
+            'instance-segmentation' => State::instanceSegmentationId(),
+            'annotation-candidates' => State::annotationCandidatesId(),
+            'finished' => State::finishedId(),
+        ]);
+
+        return view('maia::show', compact('job', 'volume', 'states'));
+    }
 }

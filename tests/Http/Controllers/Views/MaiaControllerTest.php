@@ -3,10 +3,11 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Views;
 
 use ApiTestCase;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
 
 class MaiaControllerTest extends ApiTestCase
 {
-    public function testShow()
+    public function testIndex()
     {
         $id = $this->volume()->id;
 
@@ -23,5 +24,24 @@ class MaiaControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->get("volumes/{$id}/maia")->assertStatus(200);
+    }
+
+    public function testShow()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+
+        // Not logged in.
+        $this->get("maia/{$job->id}")->assertStatus(302);
+
+        // Doesn't belong to project.
+        $this->beUser();
+        $this->get("maia/{$job->id}")->assertStatus(403);
+
+        // Not allowed to see MAIA jobs.
+        $this->beGuest();
+        $this->get("maia/{$job->id}")->assertStatus(403);
+
+        $this->beEditor();
+        $this->get("maia/{$job->id}")->assertStatus(200);
     }
 }

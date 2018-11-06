@@ -36,13 +36,20 @@ class MaiaController extends Controller
         $job->volume_id = $request->volume->id;
         $job->user_id = $request->user()->id;
         $job->state_id = State::noveltyDetectionId();
-        $job->params = $request->all();
+        $job->params = $request->only([
+            'clusters',
+            'patch_size',
+            'threshold',
+            'latent_size',
+            'trainset_size',
+            'epochs',
+        ]);
         $job->save();
 
         if ($this->isAutomatedRequest()) {
             return $job;
         }
 
-        return $this->fuzzyRedirect('volumes-maia', $request->volume->id);
+        return $this->fuzzyRedirect('maia', $job->id);
     }
 }

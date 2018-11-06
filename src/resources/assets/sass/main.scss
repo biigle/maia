@@ -9,3 +9,11 @@
 .maia-status--running {
     color: $brand-warning;
 }
+
+.maia-info-content {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+}
