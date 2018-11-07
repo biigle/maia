@@ -5,6 +5,7 @@ namespace Biigle\Modules\Maia;
 use Biigle\User;
 use Biigle\Volume;
 use Illuminate\Database\Eloquent\Model;
+use Biigle\Modules\Maia\Listeners\MaiaJobCreated;
 
 class MaiaJob extends Model
 {
@@ -15,6 +16,15 @@ class MaiaJob extends Model
      */
     protected $casts = [
         'params' => 'array',
+    ];
+
+    /**
+     * The event map for the model.
+     *
+     * @var array
+     */
+    protected $dispatchesEvents = [
+        'created' => MaiaJobCreated::class,
     ];
 
     /**

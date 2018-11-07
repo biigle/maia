@@ -2,9 +2,11 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
+use Event;
 use ModelTestCase;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Listeners\MaiaJobCreated;
 
 class MaiaJobTest extends ModelTestCase
 {
@@ -53,5 +55,12 @@ class MaiaJobTest extends ModelTestCase
         $this->assertTrue($this->model->requiresAction());
         $this->model->state_id = State::finishedId();
         $this->assertFalse($this->model->requiresAction());
+    }
+
+    public function testDispatchesCreatedEvent()
+    {
+        Event::fake();
+        static::create();
+        Event::assertDispatched(MaiaJobCreated::class);
     }
 }

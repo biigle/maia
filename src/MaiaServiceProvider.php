@@ -53,6 +53,8 @@ class MaiaServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/config/maia.php', 'maia');
+
         $this->app->singleton('command.maia.publish', function ($app) {
             return new \Biigle\Modules\Maia\Console\Commands\Publish;
         });
