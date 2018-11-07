@@ -42,6 +42,6 @@ class MaiaControllerTest extends ApiTestCase
         $this->get("maia/{$job->id}")->assertStatus(403);
 
         $this->beEditor();
-        $this->get("maia/{$job->id}")->assertStatus(200);
+        $response = $this->get("maia/{$job->id}")->assertStatus(200);
     }
 }

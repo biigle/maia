@@ -1,5 +1,5 @@
 @extends('app')
-@section('title', "Maia job #{$job->id}")
+@section('title', "MAIA job #{$job->id}")
 @section('full-navbar', true)
 
 @push('styles')

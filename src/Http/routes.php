@@ -24,4 +24,9 @@ $router->group([
             'only' => ['store'],
             'parameters' => ['volumes' => 'id'],
         ]);
+
+        $router->resource('maia', 'MaiaController', [
+            'only' => ['destroy'],
+            'parameters' => ['maia' => 'id'],
+        ]);
 });

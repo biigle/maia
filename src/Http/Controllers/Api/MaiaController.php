@@ -7,11 +7,12 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Http\Requests\StoreMaiaJob;
+use Biigle\Modules\Maia\Http\Requests\DestroyMaiaJob;
 
 class MaiaController extends Controller
 {
     /**
-     * Creates a new MAIA job for the specified volume
+     * Creates a new MAIA job for the specified volume.
      *
      * @api {post} volumes/:id/maia Create a new MAIA job
      * @apiGroup Volumes
@@ -28,7 +29,7 @@ class MaiaController extends Controller
      * @apiParam (Required attributes) {number} epochs Time spent on training when determining the training proposals.
      *
      * @param StoreMaiaJob $request
-     * @return Volume
+     * @return \Illuminate\Http\Response
      */
     public function store(StoreMaiaJob $request)
     {
@@ -51,5 +52,30 @@ class MaiaController extends Controller
         }
 
         return $this->fuzzyRedirect('maia', $job->id);
+    }
+
+    /**
+     * Delete a MAIA job.
+     *
+     * @api {delete} maia/:id
+     * @apiGroup Volumes
+     * @apiName DestroyVolumesMaiaJob
+     * @apiPermission projectEditor
+     *
+     * @apiParam {Number} id The job ID.
+     *
+     * @param DestroyMaiaJob $request
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(DestroyMaiaJob $request)
+    {
+        $volumeId = $request->job->volume_id;
+        $request->job->delete();
+
+        if (!$this->isAutomatedRequest()) {
+            return $this->fuzzyRedirect('volumes-maia', $volumeId)
+                ->with('message', 'Job deleted')
+                ->with('messageType', 'success');
+        }
     }
 }

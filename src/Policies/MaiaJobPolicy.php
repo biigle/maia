@@ -53,4 +53,17 @@ class MaiaJobPolicy extends CachedPolicy
                 ->exists();
         });
     }
+
+    /**
+     * Determine if the given user can destroy the MAIA job.
+     *
+     * @param User $user
+     * @param MaiaJob $job
+     *
+     * @return bool
+     */
+    public function destroy(User $user, MaiaJob $job)
+    {
+        return $this->access($user, $job);
+    }
 }

@@ -13,7 +13,7 @@ class StoreMaiaJob extends FormRequest
     /**
      * The volume to create the MAIA job for.
      *
-     * @var Project
+     * @var Volume
      */
     public $volume;
 

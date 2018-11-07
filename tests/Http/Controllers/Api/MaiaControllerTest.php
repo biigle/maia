@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
 
 class MaiaControllerTest extends ApiTestCase
@@ -50,5 +51,24 @@ class MaiaControllerTest extends ApiTestCase
 
         // only one running job at a time
         $this->postJson("/api/v1/volumes/{$id}/maia", $params)->assertStatus(422);
+    }
+
+    public function testDestroy()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $this->doTestApiRoute('DELETE', "/api/v1/maia/{$job->id}");
+
+        $this->beGuest();
+        $this->deleteJson("/api/v1/maia/{$job->id}")->assertStatus(403);
+
+        $this->beEditor();
+        // cannot be deleted during novelty detection
+        $this->deleteJson("/api/v1/maia/{$job->id}")->assertStatus(422);
+
+        $job->state_id = State::trainingProposalsId();
+        $job->save();
+
+        $this->deleteJson("/api/v1/maia/{$job->id}")->assertStatus(200);
+        $this->assertNull($job->fresh());
     }
 }
