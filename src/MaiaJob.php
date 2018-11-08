@@ -6,6 +6,7 @@ use Biigle\User;
 use Biigle\Volume;
 use Illuminate\Database\Eloquent\Model;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
+use Biigle\Modules\Maia\Events\MaiaJobDeleted;
 
 class MaiaJob extends Model
 {
@@ -25,6 +26,7 @@ class MaiaJob extends Model
      */
     protected $dispatchesEvents = [
         'created' => MaiaJobCreated::class,
+        'deleted' => MaiaJobDeleted::class,
     ];
 
     /**

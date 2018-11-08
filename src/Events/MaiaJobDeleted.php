@@ -3,18 +3,15 @@
 namespace Biigle\Modules\Maia\Events;
 
 use Biigle\Modules\Maia\MaiaJob;
-use Illuminate\Queue\SerializesModels;
 
-class MaiaJobCreated
+class MaiaJobDeleted
 {
-    use SerializesModels;
-
     /**
-     * The job that caused this event.
+     * The ID of the job that caused this event.
      *
-     * @var MaiaJob
+     * @var int
      */
-    public $job;
+    public $id;
 
     /**
      * Create a new instance
@@ -23,6 +20,6 @@ class MaiaJobCreated
      */
     public function __construct(MaiaJob $job)
     {
-        $this->job = $job;
+        $this->id = $job->id;
     }
 }

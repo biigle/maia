@@ -7,6 +7,7 @@ use ModelTestCase;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
+use Biigle\Modules\Maia\Events\MaiaJobDeleted;
 
 class MaiaJobTest extends ModelTestCase
 {
@@ -62,5 +63,12 @@ class MaiaJobTest extends ModelTestCase
         Event::fake();
         static::create();
         Event::assertDispatched(MaiaJobCreated::class);
+    }
+
+    public function testDispatchesDeletedEvent()
+    {
+        Event::fake();
+        $this->model->delete();
+        Event::assertDispatched(MaiaJobDeleted::class);
     }
 }
