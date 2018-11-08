@@ -19,6 +19,6 @@ class DispatchNoveltyDetectionRequest implements ShouldQueue
     {
         $request = new NoveltyDetectionRequest($event->job);
         Queue::connection(config('maia.request_connection'))
-            ->push($request, '', config('maia.request_queue'));
+            ->pushOn(config('maia.request_queue'), $request);
     }
 }

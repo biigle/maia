@@ -61,7 +61,12 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
         // TODO Run actual novelty detection here.
         if ($this->images->isNotEmpty()) {
             $id = $this->images->keys()->first();
-            $this->dispatchResponse([$id => [[200, 200, 100, 0.5]]]);
+            $this->dispatchResponse([$id => [
+                [200, 200, 100, 0.5],
+                [400, 400, 100, 0.7],
+                [200, 400, 100, 0.1],
+                [400, 200, 100, 1.0],
+            ]]);
         } else {
             $this->dispatchResponse([]);
         }
@@ -76,6 +81,6 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
     {
         $response = new NoveltyDetectionResponse($this->jobId, $trainingProposals);
         Queue::connection(config('maia.response_connection'))
-            ->push($response, '', config('maia.response_queue'));
+            ->pushOn(config('maia.response_queue'), $response);
     }
 }
