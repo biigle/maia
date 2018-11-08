@@ -3,7 +3,6 @@
 namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Shape;
-use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaAnnotation;
 use Illuminate\Contracts\Queue\ShouldQueue;

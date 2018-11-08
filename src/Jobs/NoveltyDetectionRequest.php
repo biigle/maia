@@ -2,7 +2,6 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\MaiaJob;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
@@ -59,8 +58,12 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
     public function handle()
     {
         // TODO Run actual novelty detection here.
-        $id = array_keys($this->images)[0];
-        $this->dispatchResponse([$id => [200, 200, 100, 0.5]]);
+        if ($this->images->isNotEmpty()) {
+            $id = array_keys($this->images)[0];
+            $this->dispatchResponse([$id => [200, 200, 100, 0.5]]);
+        } else {
+            $this->dispatchResponse([]);
+        }
     }
 
     /**
