@@ -7,7 +7,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
 
-class MaiaControllerTest extends ApiTestCase
+class MaiaJobControllerTest extends ApiTestCase
 {
     public function testStore()
     {

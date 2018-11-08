@@ -27,6 +27,7 @@ class MaiaAnnotation extends Model implements AnnotationContract
     protected $casts = [
         'points' => 'array',
         'selected' => 'boolean',
+        'score' => 'float',
     ];
 
     /**
@@ -51,6 +52,18 @@ class MaiaAnnotation extends Model implements AnnotationContract
     public function scopeAnnotationCandidates($query)
     {
         return $query->where('maia_annotations.type_id', MaiaAnnotationType::annotationCandidateId());
+    }
+
+    /**
+     * Scope the query to all selected annotations
+     *
+     * @param Illuminate\Database\Query\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSelected($query)
+    {
+        return $query->where('maia_annotations.selected', true);
     }
 
     /**

@@ -5,7 +5,7 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Views;
 use ApiTestCase;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 
-class MaiaControllerTest extends ApiTestCase
+class MaiaJobControllerTest extends ApiTestCase
 {
     public function testIndex()
     {

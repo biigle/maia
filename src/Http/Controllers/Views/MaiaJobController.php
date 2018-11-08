@@ -7,7 +7,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Http\Controllers\Views\Controller;
 use Biigle\Modules\Maia\MaiaJobState as State;
 
-class MaiaController extends Controller
+class MaiaJobController extends Controller
 {
     /**
      * Show the overview of MAIA jobs for a volume

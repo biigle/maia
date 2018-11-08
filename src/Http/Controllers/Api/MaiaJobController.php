@@ -9,7 +9,7 @@ use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Http\Requests\StoreMaiaJob;
 use Biigle\Modules\Maia\Http\Requests\DestroyMaiaJob;
 
-class MaiaController extends Controller
+class MaiaJobController extends Controller
 {
     /**
      * Creates a new MAIA job for the specified volume.

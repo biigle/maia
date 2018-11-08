@@ -48,6 +48,14 @@ class MaiaAnnotationTest extends ModelTestCase
         $this->assertEquals([$candidate->id], $ids);
     }
 
+    public function testScopeSelected()
+    {
+        $unselected = $this->model;
+        $selected = self::create(['selected' => true]);
+        $ids = Annotation::selected()->pluck('id')->all();
+        $this->assertEquals([$selected->id], $ids);
+    }
+
     public function testScopeUnselected()
     {
         $unselected = $this->model;
