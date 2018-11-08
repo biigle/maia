@@ -5,7 +5,7 @@ namespace Biigle\Modules\Maia;
 use Biigle\User;
 use Biigle\Volume;
 use Illuminate\Database\Eloquent\Model;
-use Biigle\Modules\Maia\Listeners\MaiaJobCreated;
+use Biigle\Modules\Maia\Events\MaiaJobCreated;
 
 class MaiaJob extends Model
 {

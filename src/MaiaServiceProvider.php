@@ -2,11 +2,14 @@
 
 namespace Biigle\Modules\Maia;
 
+use Event;
 use Biigle\Services\Modules;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Illuminate\Database\Eloquent\Factory as EloquentFactory;
+use Biigle\Modules\Maia\Listeners\DispatchNoveltyDetectionRequest;
 
 class MaiaServiceProvider extends ServiceProvider
 {
@@ -44,6 +47,7 @@ class MaiaServiceProvider extends ServiceProvider
         ]);
 
         Gate::policy(MaiaJob::class, Policies\MaiaJobPolicy::class);
+        Event::listen(MaiaJobCreated::class, DispatchNoveltyDetectionRequest::class);
     }
 
     /**

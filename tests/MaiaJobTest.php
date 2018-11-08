@@ -6,7 +6,7 @@ use Event;
 use ModelTestCase;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Listeners\MaiaJobCreated;
+use Biigle\Modules\Maia\Events\MaiaJobCreated;
 
 class MaiaJobTest extends ModelTestCase
 {
