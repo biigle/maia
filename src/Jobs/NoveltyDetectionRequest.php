@@ -51,8 +51,6 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
         $this->jobParams = $job->params;
         $this->volumeUrl = $job->volume->url;
         $this->images = $job->volume->images()->pluck('filename', 'id');
-        $this->connection = config('maia.request_connection');
-        $this->queue = config('maia.request_queue');
     }
 
     /**
@@ -62,8 +60,8 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
     {
         // TODO Run actual novelty detection here.
         if ($this->images->isNotEmpty()) {
-            $id = array_keys($this->images)[0];
-            $this->dispatchResponse([$id => [200, 200, 100, 0.5]]);
+            $id = $this->images->keys()->first();
+            $this->dispatchResponse([$id => [[200, 200, 100, 0.5]]]);
         } else {
             $this->dispatchResponse([]);
         }
@@ -76,6 +74,8 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
      */
     protected function dispatchResponse($trainingProposals)
     {
-        Queue::push(new NoveltyDetectionResponse($this->jobId, $trainingProposals));
+        $response = new NoveltyDetectionResponse($this->jobId, $trainingProposals);
+        Queue::connection(config('maia.response_connection'))
+            ->push($response, '', config('maia.response_queue'));
     }
 }

@@ -49,8 +49,6 @@ class NoveltyDetectionResponse extends Job implements ShouldQueue
     {
         $this->jobId = $jobId;
         $this->trainingProposals = $trainingProposals;
-        $this->connection = config('maia.response_connection');
-        $this->queue = config('maia.response_queue');
     }
 
     /**
