@@ -20,4 +20,9 @@ return [
     | Queue connection to submit the result data of MAIA jobs to.
     */
     'response_connection' => env('MAIA_RESPONSE_CONNECTION', 'biigle'),
+
+    /*
+    | Directory where the annotation patch images will be stored
+    */
+    'patch_storage' => storage_path('maia_patches'),
 ];

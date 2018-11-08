@@ -8,29 +8,6 @@ use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
 
 class MaiaJobCreated implements ShouldQueue
 {
-    /**
-     * Queue to use for new jobs.
-     *
-     * @var string
-     */
-    protected $queue;
-
-    /**
-     * Queue connection to use for new jobs.
-     *
-     * @var string
-     */
-    protected $connection;
-
-    /**
-     * Create a new instance.
-     */
-    public function __construct()
-    {
-        $this->queue = config('maia.request_queue');
-        $this->connection = config('maia.request_connection');
-    }
-
    /**
      * Handle the event.
      *
@@ -40,7 +17,7 @@ class MaiaJobCreated implements ShouldQueue
     public function handle(MaiaJob $job)
     {
         NoveltyDetectionRequest::dispatch($job)
-            ->onQueue($this->queue)
-            ->onConnection($this->connection);
+            ->onQueue(config('maia.request_queue'))
+            ->onConnection(config('maia.request_connection'));
     }
 }

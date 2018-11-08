@@ -29,7 +29,9 @@
             </div>
         @endif
         @include('maia::index.job-list')
-        @unless($jobRunning)
+        @if ($jobRunning)
+            <p class="text-muted">New jobs cannot be created while another job is running.</p>
+        @else
             @include('maia::index.job-form')
         @endunless
     </div>
