@@ -19,7 +19,7 @@ return [
     /*
     | Queue connection to submit the result data of MAIA jobs to.
     */
-    'response_connection' => env('MAIA_RESPONSE_CONNECTION', 'biigle'),
+    'response_connection' => env('MAIA_RESPONSE_CONNECTION', 'gpu-response'),
 
     /*
     | Directory where the annotation patch images will be stored

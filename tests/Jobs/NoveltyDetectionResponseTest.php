@@ -18,11 +18,7 @@ class NoveltyDetectionResponseTest extends TestCase
         $job = MaiaJobTest::create();
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
-        $proposals = [
-            $image->id => [
-                [100, 200, 20, 0.9],
-            ],
-        ];
+        $proposals = [$image->id => [[100, 200, 20, 0.9]]];
 
         $this->assertEquals(State::noveltyDetectionId(), $job->state_id);
 

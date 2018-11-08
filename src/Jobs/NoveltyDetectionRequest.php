@@ -58,8 +58,9 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
      */
     public function handle()
     {
-        // TODO
-        $this->dispatchResponse([]);
+        // TODO Run actual novelty detection here.
+        $id = array_keys($this->images)[0];
+        $this->dispatchResponse([$id => [200, 200, 100, 0.5]]);
     }
 
     /**
