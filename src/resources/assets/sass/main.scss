@@ -10,8 +10,11 @@
     color: $brand-warning;
 }
 
-.maia-info-content {
+.maia-content {
     height: 100%;
+}
+
+.maia-content--info {
     display: flex;
     align-items: center;
     justify-content: center;

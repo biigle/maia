@@ -1,4 +1,4 @@
-<div class="maia-info-content">
+<div v-if="infoTabOpen" class="maia-content maia-content--info">
     @if ($job->state_id === $states['finished'])
         <div class="maia-status">
             <span class="fa-stack fa-2x" title="Job finished">
