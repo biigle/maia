@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Queue;
 use Biigle\Modules\Maia\MaiaJob;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
@@ -50,6 +51,8 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
         $this->jobParams = $job->params;
         $this->volumeUrl = $job->volume->url;
         $this->images = $job->volume->images()->pluck('filename', 'id');
+        $this->connection = config('maia.request_connection');
+        $this->queue = config('maia.request_queue');
     }
 
     /**
@@ -73,8 +76,6 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
      */
     protected function dispatchResponse($trainingProposals)
     {
-        NoveltyDetectionResponse::dispatch($this->jobId, $trainingProposals)
-            ->onQueue(config('maia.response_queue'))
-            ->onConnection(config('maia.response_connection'));
+        Queue::push(new NoveltyDetectionResponse($this->jobId, $trainingProposals));
     }
 }
