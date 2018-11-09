@@ -18,13 +18,13 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('maia.api.maiaJob', Vue.resource('api/v1/maia{/id}', {}, {
+biigle.$declare('maia.api.maiaJob', Vue.resource('api/v1/maia-jobs{/id}', {}, {
     save: {
         method: 'POST',
-        url: 'api/v1/volumes{/id}/maia',
+        url: 'api/v1/volumes{/id}/maia-jobs',
     },
     getTrainingProposals: {
         method: 'GET',
-        url: 'api/v1/maia{/id}/training-proposals',
+        url: 'api/v1/maia-jobs{/id}/training-proposals',
     },
 }));

@@ -81,7 +81,7 @@ class InitializeMaiaTables extends Migration
             // JSON type cant have a default value so it must be nullable.
             $table->json('points')->nullable();
             $table->float('score');
-            $table->boolean('selected');
+            $table->boolean('selected')->default(false);
 
             $table->integer('image_id')->unsigned()->index();
             $table->foreign('image_id')

@@ -26,13 +26,13 @@ class TrainingProposalControllerTest extends ApiTestCase
             'type_id' => Type::annotationCandidateId(),
         ]);
 
-        $this->doTestApiRoute('GET', "/api/v1/maia/{$id}/training-proposals");
+        $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/training-proposals");
 
         $this->beGuest();
-        $this->getJson("/api/v1/maia/{$id}/training-proposals")->assertStatus(403);
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")->assertStatus(403);
 
         $this->beEditor();
-        $this->getJson("/api/v1/maia/{$id}/training-proposals")
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")
             ->assertStatus(200)
             ->assertJson([[
                 'id' => $annotation->id,

@@ -1,4 +1,4 @@
-<form id="maia-job-form" method="POST" action="{{ url("api/v1/volumes/{$volume->id}/maia") }}">
+<form id="maia-job-form" method="POST" action="{{ url("api/v1/volumes/{$volume->id}/maia-jobs") }}">
     <legend>Create a new MAIA job</legend>
     <div class="form-group{{ $errors->has('clusters') ? ' has-error' : '' }}">
         <label for="clusters">Number of image clusters</label>

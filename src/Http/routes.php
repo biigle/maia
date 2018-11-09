@@ -20,18 +20,22 @@ $router->group([
         'namespace' => 'Api',
         'prefix' => 'api/v1',
     ], function ($router) {
-        $router->resource('volumes/{id}/maia', 'MaiaJobController', [
+        $router->resource('volumes/{id}/maia-jobs', 'MaiaJobController', [
             'only' => ['store'],
             'parameters' => ['volumes' => 'id'],
         ]);
 
-        $router->resource('maia', 'MaiaJobController', [
+        $router->resource('maia-jobs', 'MaiaJobController', [
             'only' => ['destroy'],
-            'parameters' => ['maia' => 'id'],
+            'parameters' => ['maia-jobs' => 'id'],
         ]);
 
-        $router->resource('maia/{id}/training-proposals', 'TrainingProposalController', [
-            'only' => ['index'],
-            'parameters' => ['maia' => 'id'],
+        $router->get('maia-jobs/{id}/training-proposals', 'TrainingProposalController@index');
+
+        $router->get('maia-annotations/{id}/file', 'MaiaAnnotationController@showFile');
+
+        $router->resource('maia-annotations', 'MaiaAnnotationController', [
+            'only' => ['update'],
+            'parameters' => ['maia-annotations' => 'id'],
         ]);
 });

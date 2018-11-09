@@ -5,7 +5,7 @@
  */
 biigle.$component('maia.components.tpImageGridImage', {
     mixins: [biigle.$require('volumes.components.imageGridImage')],
-    template: '<figure class="image-grid__image image-grid__image--dismiss" :class="classObject" :title="title">' +
+    template: '<figure class="image-grid__image image-grid__image--relabel" :class="classObject" :title="title">' +
         '<img @click="toggleSelect" :src="url || emptyUrl">' +
         '<div v-if="showAnnotationLink" class="image-buttons">' +
             '<a :href="showAnnotationLink" target="_blank" class="image-button" title="Show the annotation in the annotation tool">' +
@@ -28,7 +28,7 @@ biigle.$component('maia.components.tpImageGridImage', {
     },
     methods: {
         getBlob: function () {
-            return biigle.$require('maia.api.trainingProposals').get({id: this.image.id});
+            return biigle.$require('maia.api.maiaAnnotation').getFile({id: this.image.id});
         },
     },
 });

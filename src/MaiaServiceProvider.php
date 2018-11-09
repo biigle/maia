@@ -49,6 +49,7 @@ class MaiaServiceProvider extends ServiceProvider
         ]);
 
         Gate::policy(MaiaJob::class, Policies\MaiaJobPolicy::class);
+        Gate::policy(MaiaAnnotation::class, Policies\MaiaAnnotationPolicy::class);
         Event::listen(MaiaJobCreated::class, DispatchNoveltyDetectionRequest::class);
         Event::listen(MaiaJobDeleted::class, DeleteAnnotationPatches::class);
     }

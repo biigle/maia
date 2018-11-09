@@ -16,6 +16,7 @@ class MaiaAnnotationTest extends ModelTestCase
 
     public function testAttributes()
     {
+        $this->model->refresh();
         $this->assertNotNull($this->model->image);
         $this->assertNotNull($this->model->shape);
         $this->assertNotNull($this->model->type);

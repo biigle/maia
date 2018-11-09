@@ -105,10 +105,10 @@ class NoveltyDetectionResponse extends Job implements ShouldQueue
             'job_id' => $this->jobId,
             'points' => json_encode($points),
             'score' => $proposal[3],
-            'selected' => false,
             'image_id' => $imageId,
             'shape_id' => Shape::circleId(),
             'type_id' => Type::trainingProposalId(),
+            // 'selected' is false by default.
         ];
     }
 

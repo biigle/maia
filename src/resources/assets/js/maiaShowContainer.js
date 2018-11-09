@@ -5,6 +5,7 @@ biigle.$viewModel('maia-show-container', function (element) {
     var job = biigle.$require('maia.job');
     var states = biigle.$require('maia.states');
     var maiaJobApi = biigle.$require('maia.api.maiaJob');
+    var maiaAnnotationApi = biigle.$require('maia.api.maiaAnnotation');
 
     new Vue({
         el: element,
@@ -21,6 +22,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             visitedFilterAcTab: false,
             openTab: 'info',
             trainingProposals: [],
+            filterTpOffset: 0,
         },
         computed: {
             shouldVisitTpTab: function () {
@@ -63,6 +65,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             fetchTrainingProposals: function () {
                 this.startLoading();
+                // TODO handle error
                 maiaJobApi.getTrainingProposals({id: job.id})
                     .then(this.setTrainingProposals)
                     .finally(this.finishLoading);
@@ -72,11 +75,22 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             handleSelectedTrainingProposal: function (proposal) {
                 proposal.selected = true;
-                console.log('select', proposal);
+                maiaAnnotationApi.update({id: proposal.id}, {selected: true})
+                    .catch(function () {
+                        // TODO show error message
+                        proposal.selected = false;
+                    });
             },
             handleDeselectedTrainingProposal: function (proposal) {
                 proposal.selected = false;
-                console.log('deselect', proposal);
+                maiaAnnotationApi.update({id: proposal.id}, {selected: false})
+                    .catch(function () {
+                        // TODO show error message
+                        proposal.selected = true;
+                    });
+            },
+            updateFilterTpOffset: function (offset) {
+                this.filterTpOffset = offset;
             },
         },
         watch: {

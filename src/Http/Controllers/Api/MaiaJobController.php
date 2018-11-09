@@ -14,7 +14,7 @@ class MaiaJobController extends Controller
     /**
      * Creates a new MAIA job for the specified volume.
      *
-     * @api {post} volumes/:id/maia Create a new MAIA job
+     * @api {post} volumes/:id/maia-jobs Create a new MAIA job
      * @apiGroup Volumes
      * @apiName StoreVolumeMaiaJob
      * @apiPermission projectEditor
@@ -57,7 +57,7 @@ class MaiaJobController extends Controller
     /**
      * Delete a MAIA job.
      *
-     * @api {delete} maia/:id
+     * @api {delete} maia-jobs/:id
      * @apiGroup Volumes
      * @apiName DestroyVolumesMaiaJob
      * @apiPermission projectEditor

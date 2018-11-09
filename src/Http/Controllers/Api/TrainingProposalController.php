@@ -10,7 +10,7 @@ class TrainingProposalController extends Controller
     /**
      * Get all training proposals of a MAIA job.
      *
-     * @api {get} maia/:id/training-proposals
+     * @api {get} maia-jobs/:id/training-proposals
      * @apiGroup Maia
      * @apiName IndexMaiaTrainingProposals
      * @apiPermission projectEditor
