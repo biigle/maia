@@ -46,6 +46,9 @@ biigle.$viewModel('maia-show-container', function (element) {
             hasNoTrainingProposals: function () {
                 return this.trainingProposals.length === 0;
             },
+            isInTrainingProposalState: function () {
+                return job.state_id === states['training-proposals'];
+            },
         },
         methods: {
             handleSidebarToggle: function () {
@@ -70,20 +73,21 @@ biigle.$viewModel('maia-show-container', function (element) {
                 this.openTab = 'refine-training-proposals';
             },
             handleSelectedTrainingProposal: function (proposal, event) {
-                if (event.shiftKey && this.lastSelectedTp) {
-                    this.selectAllTpBetween(proposal, this.lastSelectedTp);
+                if (proposal.selected) {
+                    proposal.selected = false;
+                    maiaAnnotationApi.update({id: proposal.id}, {selected: false})
+                        .catch(function (response) {
+                            messages.handleErrorResponse(response);
+                            proposal.selected = true;
+                        });
                 } else {
-                    this.lastSelectedTp = proposal;
-                    this.storeSelectTrainingProposal(proposal);
+                    if (event.shiftKey && this.lastSelectedTp) {
+                        this.selectAllTpBetween(proposal, this.lastSelectedTp);
+                    } else {
+                        this.lastSelectedTp = proposal;
+                        this.storeSelectTrainingProposal(proposal);
+                    }
                 }
-            },
-            handleDeselectedTrainingProposal: function (proposal) {
-                proposal.selected = false;
-                maiaAnnotationApi.update({id: proposal.id}, {selected: false})
-                    .catch(function (response) {
-                        messages.handleErrorResponse(response);
-                        proposal.selected = true;
-                    });
             },
             updateFilterTpOffset: function (offset) {
                 this.filterTpOffset = offset;
@@ -108,7 +112,10 @@ biigle.$viewModel('maia-show-container', function (element) {
                         messages.handleErrorResponse(response);
                         proposal.selected = false;
                     });
-                },
+            },
+            startInstanceSegmentation: function () {
+                console.log('start instance segmentation');
+            },
         },
         watch: {
             filterTpTabOpen: function () {

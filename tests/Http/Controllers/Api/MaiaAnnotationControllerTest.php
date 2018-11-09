@@ -66,4 +66,48 @@ class MaiaAnnotationControllerTest extends ApiTestCase
         $this->assertEquals([10, 20, 30], $a->points);
 
     }
+
+    public function testUpdateTrainingProposals()
+    {
+        $job = MaiaJobTest::create([
+            'volume_id' => $this->volume()->id,
+            'state_id' => State::instanceSegmentationId(),
+        ]);
+        $a = MaiaAnnotationTest::create([
+            'job_id' => $job->id,
+            'type_id' => Type::trainingProposalId(),
+        ]);
+        $this->beEditor();
+        // Training proposals cannot be modified after the training proposal state.
+        $this->putJson("/api/v1/maia-annotations/{$a->id}", [
+                'selected' => true,
+                'points' => [10, 20, 30],
+            ])
+            ->assertStatus(422);
+    }
+
+    public function testUpdateAnnotationCandidates()
+    {
+        $job = MaiaJobTest::create([
+            'volume_id' => $this->volume()->id,
+            'state_id' => State::annotationCandidatesId(),
+        ]);
+        $a = MaiaAnnotationTest::create([
+            'job_id' => $job->id,
+            'type_id' => Type::annotationCandidateId(),
+        ]);
+
+        $this->beEditor();
+        $this->putJson("/api/v1/maia-annotations/{$a->id}", [
+                'selected' => true,
+                'points' => [10, 20, 30],
+            ])
+            ->assertStatus(200);
+        // Selected annotation candidates cannot be updated.
+        $this->putJson("/api/v1/maia-annotations/{$a->id}", [
+                'selected' => false,
+                'points' => [10, 20, 30],
+            ])
+            ->assertStatus(422);
+    }
 }
