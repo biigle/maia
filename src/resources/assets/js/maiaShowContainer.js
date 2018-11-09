@@ -24,6 +24,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             openTab: 'info',
             trainingProposals: [],
             filterTpOffset: 0,
+            lastSelectedTp: null,
         },
         computed: {
             shouldVisitTpTab: function () {
@@ -79,13 +80,13 @@ biigle.$viewModel('maia-show-container', function (element) {
             openRefineTpTab: function () {
                 this.openTab = 'refine-training-proposals';
             },
-            handleSelectedTrainingProposal: function (proposal) {
-                proposal.selected = true;
-                maiaAnnotationApi.update({id: proposal.id}, {selected: true})
-                    .catch(function (response) {
-                        messages.handleErrorResponse(response);
-                        proposal.selected = false;
-                    });
+            handleSelectedTrainingProposal: function (proposal, event) {
+                if (event.shiftKey && this.lastSelectedTp) {
+                    this.selectAllTpBetween(proposal, this.lastSelectedTp);
+                } else {
+                    this.lastSelectedTp = proposal;
+                    this.storeSelectTrainingProposal(proposal);
+                }
             },
             handleDeselectedTrainingProposal: function (proposal) {
                 proposal.selected = false;
@@ -98,6 +99,27 @@ biigle.$viewModel('maia-show-container', function (element) {
             updateFilterTpOffset: function (offset) {
                 this.filterTpOffset = offset;
             },
+            selectAllTpBetween: function (first, second) {
+                var index1 = this.trainingProposals.indexOf(first);
+                var index2 = this.trainingProposals.indexOf(second);
+                if (index2 < index1) {
+                    var tmp = index2;
+                    index2 = index1;
+                    index1 = tmp;
+                }
+
+                for (var i = index1 + 1; i <= index2; i++) {
+                    this.storeSelectTrainingProposal(this.trainingProposals[i]);
+                }
+            },
+            storeSelectTrainingProposal: function (proposal) {
+                proposal.selected = true;
+                maiaAnnotationApi.update({id: proposal.id}, {selected: true})
+                    .catch(function (response) {
+                        messages.handleErrorResponse(response);
+                        proposal.selected = false;
+                    });
+                },
         },
         watch: {
             filterTpTabOpen: function () {
