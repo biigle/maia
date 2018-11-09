@@ -6,6 +6,7 @@ biigle.$viewModel('maia-show-container', function (element) {
     var states = biigle.$require('maia.states');
     var maiaJobApi = biigle.$require('maia.api.maiaJob');
     var maiaAnnotationApi = biigle.$require('maia.api.maiaAnnotation');
+    var messages = biigle.$require('messages.store');
 
     new Vue({
         el: element,
@@ -57,6 +58,11 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
         },
         methods: {
+            handleSidebarToggle: function () {
+                this.$nextTick(function () {
+                    this.$refs.imageGrid.$emit('resize');
+                });
+            },
             handleTabOpened: function (tab) {
                 this.openTab = tab;
             },
@@ -65,9 +71,9 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             fetchTrainingProposals: function () {
                 this.startLoading();
-                // TODO handle error
                 maiaJobApi.getTrainingProposals({id: job.id})
                     .then(this.setTrainingProposals)
+                    .catch(messages.handleErrorResponse)
                     .finally(this.finishLoading);
             },
             openRefineTpTab: function () {
@@ -76,16 +82,16 @@ biigle.$viewModel('maia-show-container', function (element) {
             handleSelectedTrainingProposal: function (proposal) {
                 proposal.selected = true;
                 maiaAnnotationApi.update({id: proposal.id}, {selected: true})
-                    .catch(function () {
-                        // TODO show error message
+                    .catch(function (response) {
+                        messages.handleErrorResponse(response);
                         proposal.selected = false;
                     });
             },
             handleDeselectedTrainingProposal: function (proposal) {
                 proposal.selected = false;
                 maiaAnnotationApi.update({id: proposal.id}, {selected: false})
-                    .catch(function () {
-                        // TODO show error message
+                    .catch(function (response) {
+                        messages.handleErrorResponse(response);
                         proposal.selected = true;
                     });
             },

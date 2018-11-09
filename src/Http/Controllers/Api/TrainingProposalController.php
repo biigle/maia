@@ -40,6 +40,7 @@ class TrainingProposalController extends Controller
         return $job->annotations()
             ->trainingProposals()
             ->select('id', 'points', 'score', 'selected', 'image_id')
+            ->orderBy('score', 'desc')
             ->get();
     }
 }

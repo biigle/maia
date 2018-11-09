@@ -32,7 +32,7 @@
         @include('maia::show.info-content')
         @include('maia::show.filter-tp-content')
     </div>
-    <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened">
+    <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened" v-on:toggle="handleSidebarToggle">
         <sidebar-tab name="info" icon="info-circle" title="Job information">
             @include('maia::show.info-tab')
         </sidebar-tab>
