@@ -23,8 +23,6 @@ class MaiaJobState extends Model
         'instanceSegmentation' => 'instance-segmentation',
         // The manual filtering of annotation candidated stage.
         'annotationCandidates' => 'annotation-candidates',
-        // A finished MAIA job.
-        'finished' => 'finished',
     ];
 
     /**

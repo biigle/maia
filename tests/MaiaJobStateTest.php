@@ -38,9 +38,4 @@ class MaiaJobStateTest extends ModelTestCase
     {
         $this->assertNotNull(MaiaJobState::annotationCandidates());
     }
-
-    public function testFinished()
-    {
-        $this->assertNotNull(MaiaJobState::finished());
-    }
 }

@@ -41,7 +41,7 @@ class MaiaJobTest extends ModelTestCase
     public function testIsRunning()
     {
         $this->assertTrue($this->model->isRunning());
-        $this->model->state_id = State::finishedId();
+        $this->model->state_id = State::annotationCandidatesId();
         $this->assertFalse($this->model->isRunning());
     }
 
@@ -53,8 +53,6 @@ class MaiaJobTest extends ModelTestCase
         $this->model->state_id = State::instanceSegmentationId();
         $this->assertFalse($this->model->requiresAction());
         $this->model->state_id = State::annotationCandidatesId();
-        $this->assertTrue($this->model->requiresAction());
-        $this->model->state_id = State::finishedId();
         $this->assertFalse($this->model->requiresAction());
     }
 

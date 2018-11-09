@@ -24,13 +24,13 @@ class InitializeMaiaTables extends Migration
             ['name' => 'training-proposals'],
             ['name' => 'instance-segmentation'],
             ['name' => 'annotation-candidates'],
-            ['name' => 'finished'],
         ]);
 
         /*
         | A MAIA job is created whenever a user wants to perform the MAIA method for a
-        | volume. For each volume there can be only one MAIA job that is not finished.
-        | All project editors, experts or admins can create or edit MAIA jobs.
+        | volume. For each volume there can be only one MAIA job that is not finished
+        | (i.e. in the annotation-candidates stage). All project editors, experts or
+        | admins can create or edit MAIA jobs.
         */
         Schema::create('maia_jobs', function (Blueprint $table) {
             $table->increments('id');

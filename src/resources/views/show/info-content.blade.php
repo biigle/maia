@@ -1,5 +1,5 @@
 <div v-if="infoTabOpen" class="maia-content maia-content--info">
-    @if ($job->state_id === $states['finished'])
+    @if ($job->state_id === $states['annotation-candidates'])
         <div class="maia-status">
             <span class="fa-stack fa-2x" title="Job finished">
                 <i class="fas fa-circle fa-stack-2x"></i>
@@ -7,7 +7,7 @@
             </span>
         </div>
         <p class="text-success">
-            This job has been finished.
+            This job has been finished. You can review the annotation candidates <i class="fas fa-check-square"></i> to create the final annotations.
         </p>
     @else
         <div class="maia-status maia-status--running">
@@ -27,10 +27,6 @@
         @elseif ($job->state_id === $states['instance-segmentation'])
             <p class="text-warning">
                 Instance segmentation in progress. Please come back later.
-            </p>
-        @else
-            <p class="text-warning">
-                Please filter the annotation candidates <i class="fas fa-check-square"></i> to create the final annotations.
             </p>
         @endif
     @endif

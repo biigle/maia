@@ -76,7 +76,7 @@ class MaiaJob extends Model
      */
     public function isRunning()
     {
-        return $this->state_id !== MaiaJobState::finishedId();
+        return $this->state_id !== MaiaJobState::annotationCandidatesId();
     }
 
     /**
@@ -86,9 +86,6 @@ class MaiaJob extends Model
      */
     public function requiresAction()
     {
-        return in_array($this->state_id, [
-            MaiaJobState::trainingProposalsId(),
-            MaiaJobState::annotationCandidatesId(),
-        ]);
+        return $this->state_id === MaiaJobState::trainingProposalsId();
     }
 }

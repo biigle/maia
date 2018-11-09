@@ -16,29 +16,18 @@ biigle.$viewModel('maia-show-container', function (element) {
             sidebarTab: biigle.$require('core.components.sidebarTab'),
             filterTpTab: biigle.$require('maia.components.filterTpTab'),
             tpImageGrid: biigle.$require('maia.components.tpImageGrid'),
+            refineTpTab: biigle.$require('maia.components.refineTpTab'),
         },
         data: {
             visitedFilterTpTab: false,
             visitedRefineTpTab: false,
-            visitedFilterAcTab: false,
+            visitedReviewAcTab: false,
             openTab: 'info',
             trainingProposals: [],
             filterTpOffset: 0,
             lastSelectedTp: null,
         },
         computed: {
-            shouldVisitTpTab: function () {
-                return !this.visitedFilterTpTab && job.state_id === states['training-proposals'];
-            },
-            shouldVisitAcTab: function () {
-                return !this.visitedFilterAcTab && job.state_id === states['annotation-candidates'];
-            },
-            tpTabHighlight: function () {
-                return this.shouldVisitTpTab ? 'warning' : false;
-            },
-            acTabHighlight: function () {
-                return this.shouldVisitAcTab ? 'warning' : false;
-            },
             infoTabOpen: function () {
                 return this.openTab === 'info';
             },
@@ -48,8 +37,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             refineTpTabOpen: function () {
                 return this.openTab === 'refine-training-proposals';
             },
-            filterAcTabOpen: function () {
-                return this.openTab === 'filter-annotation-candidates';
+            reviewAcTabOpen: function () {
+                return this.openTab === 'review-annotation-candidates';
             },
             visitedFilterOrRefineTpTab: function () {
                 return this.visitedFilterTpTab || this.visitedRefineTpTab;
@@ -128,8 +117,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             refineTpTabOpen: function () {
                 this.visitedRefineTpTab = true;
             },
-            filterAcTabOpen: function () {
-                this.visitedFilterAcTab = true;
+            reviewAcTabOpen: function () {
+                this.visitedReviewAcTab = true;
             },
             visitedFilterOrRefineTpTab: function () {
                 this.fetchTrainingProposals();

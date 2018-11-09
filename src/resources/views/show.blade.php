@@ -40,7 +40,7 @@
             <sidebar-tab name="filter-training-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
             <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
         @else
-            <sidebar-tab name="filter-training-proposals" icon="plus-square" title="Filter training proposals" v-bind:highlight="tpTabHighlight">
+            <sidebar-tab name="filter-training-proposals" icon="plus-square" title="Filter training proposals">
                 @include('maia::show.filter-tp-tab')
             </sidebar-tab>
             <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals">
@@ -48,10 +48,10 @@
             </sidebar-tab>
         @endif
         @if ($job->state_id < $states['annotation-candidates'])
-            <sidebar-tab name="filter-annotation-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
+            <sidebar-tab name="review-annotation-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
         @else
-            <sidebar-tab name="filter-annotation-candidates" icon="check-square" title="Filter annotation candidates" v-bind:highlight="acTabHighlight">
-                @include('maia::show.filter-ac-tab')
+            <sidebar-tab name="review-annotation-candidates" icon="check-square" title="Review annotation candidates">
+                @include('maia::show.review-ac-tab')
             </sidebar-tab>
         @endif
     </sidebar>

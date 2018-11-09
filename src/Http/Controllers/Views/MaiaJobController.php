@@ -25,7 +25,7 @@ class MaiaJobController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        $jobRunning = $jobs->where('state_id', '!=', State::finishedId())->count() > 0;
+        $jobRunning = $jobs->where('state_id', '!=', State::annotationCandidatesId())->count() > 0;
 
         return view('maia::index', compact(
             'volume',
@@ -51,7 +51,6 @@ class MaiaJobController extends Controller
             'training-proposals' => State::trainingProposalsId(),
             'instance-segmentation' => State::instanceSegmentationId(),
             'annotation-candidates' => State::annotationCandidatesId(),
-            'finished' => State::finishedId(),
         ]);
 
         return view('maia::show', compact('job', 'volume', 'states'));

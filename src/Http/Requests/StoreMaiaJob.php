@@ -56,7 +56,7 @@ class StoreMaiaJob extends FormRequest
     {
         $validator->after(function ($validator) {
             $hasUnfinishedJob = MaiaJob::where('volume_id', $this->volume->id)
-                ->where('state_id', '!=', State::finishedId())
+                ->where('state_id', '!=', State::annotationCandidatesId())
                 ->exists();
 
             if ($hasUnfinishedJob) {
