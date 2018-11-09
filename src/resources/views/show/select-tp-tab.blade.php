@@ -1,4 +1,4 @@
-<filter-tp-tab v-bind:training-proposals="trainingProposals" v-on:proceed="openRefineTpTab" inline-template>
+<select-tp-tab v-bind:training-proposals="trainingProposals" v-on:proceed="openRefineTpTab" inline-template>
 <div class="sidebar-tab__content">
     @if ($job->state_id === $states['training-proposals'])
         <div class="panel panel-info">
@@ -24,4 +24,4 @@
         </div>
     @endif
 </div>
-</filter-tp-tab>
+</select-tp-tab>

@@ -14,25 +14,25 @@ biigle.$viewModel('maia-show-container', function (element) {
         components: {
             sidebar: biigle.$require('annotations.components.sidebar'),
             sidebarTab: biigle.$require('core.components.sidebarTab'),
-            filterTpTab: biigle.$require('maia.components.filterTpTab'),
+            selectTpTab: biigle.$require('maia.components.selectTpTab'),
             tpImageGrid: biigle.$require('maia.components.tpImageGrid'),
             refineTpTab: biigle.$require('maia.components.refineTpTab'),
         },
         data: {
-            visitedFilterTpTab: false,
+            visitedSelectTpTab: false,
             visitedRefineTpTab: false,
             visitedReviewAcTab: false,
             openTab: 'info',
             trainingProposals: [],
-            filterTpOffset: 0,
+            selectTpOffset: 0,
             lastSelectedTp: null,
         },
         computed: {
             infoTabOpen: function () {
                 return this.openTab === 'info';
             },
-            filterTpTabOpen: function () {
-                return this.openTab === 'filter-training-proposals';
+            selectTpTabOpen: function () {
+                return this.openTab === 'select-training-proposals';
             },
             refineTpTabOpen: function () {
                 return this.openTab === 'refine-training-proposals';
@@ -40,8 +40,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             reviewAcTabOpen: function () {
                 return this.openTab === 'review-annotation-candidates';
             },
-            visitedFilterOrRefineTpTab: function () {
-                return this.visitedFilterTpTab || this.visitedRefineTpTab;
+            visitedSelectOrRefineTpTab: function () {
+                return this.visitedSelectTpTab || this.visitedRefineTpTab;
             },
             hasNoTrainingProposals: function () {
                 return this.trainingProposals.length === 0;
@@ -89,8 +89,8 @@ biigle.$viewModel('maia-show-container', function (element) {
                     }
                 }
             },
-            updateFilterTpOffset: function (offset) {
-                this.filterTpOffset = offset;
+            updateSelectTpOffset: function (offset) {
+                this.selectTpOffset = offset;
             },
             selectAllTpBetween: function (first, second) {
                 var index1 = this.trainingProposals.indexOf(first);
@@ -118,8 +118,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
         },
         watch: {
-            filterTpTabOpen: function () {
-                this.visitedFilterTpTab = true;
+            selectTpTabOpen: function () {
+                this.visitedSelectTpTab = true;
             },
             refineTpTabOpen: function () {
                 this.visitedRefineTpTab = true;
@@ -127,7 +127,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             reviewAcTabOpen: function () {
                 this.visitedReviewAcTab = true;
             },
-            visitedFilterOrRefineTpTab: function () {
+            visitedSelectOrRefineTpTab: function () {
                 this.fetchTrainingProposals();
             },
         },

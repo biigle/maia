@@ -22,7 +22,7 @@
             </p>
         @elseif ($job->state_id === $states['training-proposals'])
             <p class="text-warning">
-                Please filter <i class="fas fa-plus-square"></i> and refine <i class="fas fa-pen-square"></i> the training proposals.
+                Please select <i class="fas fa-plus-square"></i> and refine <i class="fas fa-pen-square"></i> the training proposals.
             </p>
         @elseif ($job->state_id === $states['instance-segmentation'])
             <p class="text-warning">

@@ -1,9 +1,9 @@
 /**
- * The filter training proposals tab
+ * The select training proposals tab
  *
  * @type {Object}
  */
-biigle.$component('maia.components.filterTpTab', {
+biigle.$component('maia.components.selectTpTab', {
     props: {
         trainingProposals: {
             type: Array,

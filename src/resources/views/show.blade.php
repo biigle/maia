@@ -30,18 +30,18 @@
 <div id="maia-show-container" class="sidebar-container" v-cloak>
     <div class="sidebar-container__content">
         @include('maia::show.info-content')
-        @include('maia::show.filter-tp-content')
+        @include('maia::show.select-tp-content')
     </div>
     <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened" v-on:toggle="handleSidebarToggle">
         <sidebar-tab name="info" icon="info-circle" title="Job information">
             @include('maia::show.info-tab')
         </sidebar-tab>
         @if ($job->state_id < $states['training-proposals'])
-            <sidebar-tab name="filter-training-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
+            <sidebar-tab name="select-training-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
             <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
         @else
-            <sidebar-tab name="filter-training-proposals" icon="plus-square" title="Filter training proposals">
-                @include('maia::show.filter-tp-tab')
+            <sidebar-tab name="select-training-proposals" icon="plus-square" title="Select training proposals">
+                @include('maia::show.select-tp-tab')
             </sidebar-tab>
             <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals">
                 @include('maia::show.refine-tp-tab')
