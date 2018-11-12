@@ -52,7 +52,7 @@
             <sidebar-tab name="select-training-proposals" icon="plus-square" title="Select training proposals">
                 @include('maia::show.select-tp-tab')
             </sidebar-tab>
-            <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals">
+            <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals" :disabled="hasNoSelectedTp">
                 @include('maia::show.refine-tp-tab')
             </sidebar-tab>
         @endif

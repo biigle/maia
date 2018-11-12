@@ -20,7 +20,7 @@
 
     @if ($job->state_id === $states['training-proposals'])
         <div class="text-right">
-            <button class="btn btn-default" v-on:click="proceed">Proceed</button>
+            <button class="btn btn-default" v-on:click="proceed" :disabled="hasNoSelectedTp">Proceed</button>
         </div>
     @endif
 </div>

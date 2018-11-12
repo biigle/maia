@@ -27,6 +27,9 @@ biigle.$component('maia.components.selectTpTab', {
         tpCount: function () {
             return this.trainingProposals.length;
         },
+        hasNoSelectedTp: function () {
+            return this.selectedTpCount === 0;
+        },
     },
     methods: {
         proceed: function () {

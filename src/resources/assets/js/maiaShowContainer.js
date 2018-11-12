@@ -86,6 +86,9 @@ biigle.$viewModel('maia-show-container', function (element) {
 
                 return null;
             },
+            hasNoSelectedTp: function () {
+                return this.currentTp === null;
+            },
             currentImageIdsIndex: function () {
                 return this.imageIds.indexOf(this.currentImageId);
             },
@@ -206,15 +209,22 @@ biigle.$viewModel('maia-show-container', function (element) {
                 console.log('start instance segmentation');
             },
             fetchCurrentImage: function () {
-                this.startLoading();
+                if (this.currentImageId !== null) {
+                    if (this.refineTpTabOpen) {
+                        this.startLoading();
+                    }
 
-                return imagesStore.fetchAndDrawImage(this.currentImageId)
-                    .catch(function (message) {
-                        messages.danger(message);
-                    })
-                    .then(this.updateCurrentImage)
-                    .then(this.cacheNextImage)
-                    .finally(this.finishLoading);
+                    var p = imagesStore.fetchAndDrawImage(this.currentImageId)
+                        .catch(function (message) {
+                            messages.danger(message);
+                        })
+                        .then(this.updateCurrentImage)
+                        .then(this.cacheNextImage);
+
+                    if (this.refineTpTabOpen) {
+                        p.finally(this.finishLoading);
+                    }
+                }
             },
             updateCurrentImage: function (image) {
                 this.firstImageLoaded = true;
