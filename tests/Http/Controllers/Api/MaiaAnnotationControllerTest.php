@@ -110,4 +110,9 @@ class MaiaAnnotationControllerTest extends ApiTestCase
             ])
             ->assertStatus(422);
     }
+
+    public function testUpdatePoints()
+    {
+        $this->markTestIncomplete('Update annotation patch if points are updated');
+    }
 }
