@@ -17,11 +17,11 @@ class MaiaJobState extends Model
     const INSTANCES = [
         // The novelty detection stage.
         'noveltyDetection' => 'novelty-detection',
-        // The manual filtering and refinement of training proposals stage.
+        // The manual selection and refinement of training proposals stage.
         'trainingProposals' => 'training-proposals',
         // The instance segmentation stage.
         'instanceSegmentation' => 'instance-segmentation',
-        // The manual filtering of annotation candidated stage.
+        // The manual review of annotation candidates stage.
         'annotationCandidates' => 'annotation-candidates',
     ];
 

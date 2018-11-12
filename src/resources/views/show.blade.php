@@ -23,14 +23,23 @@
 <script type="text/javascript">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
     biigle.$declare('maia.states', {!! $states->toJson() !!});
+    biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/{id}/file') !!}');
 </script>
 @endpush
 
 @section('content')
 <div id="maia-show-container" class="sidebar-container" v-cloak>
     <div class="sidebar-container__content">
-        @include('maia::show.info-content')
-        @include('maia::show.select-tp-content')
+        <div v-show="infoTabOpen" class="maia-content maia-content--info">
+            @include('maia::show.info-content')
+        </div>
+        <div v-show="selectTpTabOpen" v-cloak class="maia-content">
+            @include('maia::show.select-tp-content')
+        </div>
+        <div v-show="refineTpTabOpen" v-cloak class="maia-content">
+            @include('maia::show.refine-tp-content')
+        </div>
+        <loader-block :active="loading"></loader-block>
     </div>
     <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened" v-on:toggle="handleSidebarToggle">
         <sidebar-tab name="info" icon="info-circle" title="Job information">

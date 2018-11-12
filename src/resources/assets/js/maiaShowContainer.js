@@ -7,6 +7,7 @@ biigle.$viewModel('maia-show-container', function (element) {
     var maiaJobApi = biigle.$require('maia.api.maiaJob');
     var maiaAnnotationApi = biigle.$require('maia.api.maiaAnnotation');
     var messages = biigle.$require('messages.store');
+    var imagesStore = biigle.$require('annotations.stores.images');
 
     new Vue({
         el: element,
@@ -17,15 +18,20 @@ biigle.$viewModel('maia-show-container', function (element) {
             selectTpTab: biigle.$require('maia.components.selectTpTab'),
             tpImageGrid: biigle.$require('maia.components.tpImageGrid'),
             refineTpTab: biigle.$require('maia.components.refineTpTab'),
+            refineTpCanvas: biigle.$require('maia.components.refineTpCanvas'),
         },
         data: {
             visitedSelectTpTab: false,
             visitedRefineTpTab: false,
             visitedReviewAcTab: false,
             openTab: 'info',
+            trainingProposalsPromise: null,
             trainingProposals: [],
             selectTpOffset: 0,
             lastSelectedTp: null,
+            firstImageLoaded: false,
+            currentImage: null,
+            currentTpIndex: 0,
         },
         computed: {
             infoTabOpen: function () {
@@ -40,14 +46,89 @@ biigle.$viewModel('maia-show-container', function (element) {
             reviewAcTabOpen: function () {
                 return this.openTab === 'review-annotation-candidates';
             },
-            visitedSelectOrRefineTpTab: function () {
-                return this.visitedSelectTpTab || this.visitedRefineTpTab;
-            },
             hasNoTrainingProposals: function () {
-                return this.trainingProposals.length === 0;
+                return !this.loading && this.trainingProposals.length === 0;
             },
             isInTrainingProposalState: function () {
                 return job.state_id === states['training-proposals'];
+            },
+            imageIds: function () {
+                var tmp = {};
+
+                return this.trainingProposals
+                    .map(function (p) {
+                        return p.image_id;
+                    })
+                    .filter(function (id) {
+                        return tmp.hasOwnProperty(id) ? false : (tmp[id] = true);
+                    });
+            },
+            tpOrderedByImageId: function () {
+                return this.trainingProposals.slice().sort(function (a, b) {
+                    return a.image_id - b.image_id;
+                });
+            },
+            selectedTpOrderedByImageId: function () {
+                return this.tpOrderedByImageId.filter(function (p) {
+                    return p.selected;
+                });
+            },
+            previousTpIndex: function () {
+                return (this.currentTpIndex + this.selectedTpOrderedByImageId.length - 1) % this.selectedTpOrderedByImageId.length;
+            },
+            nextTpIndex: function () {
+                return (this.currentTpIndex + 1) % this.selectedTpOrderedByImageId.length;
+            },
+            currentTp: function () {
+                if (this.selectedTpOrderedByImageId.length > 0) {
+                    return this.selectedTpOrderedByImageId[this.currentTpIndex];
+                }
+
+                return null;
+            },
+            currentImageIdsIndex: function () {
+                return this.imageIds.indexOf(this.currentImageId);
+            },
+            currentImageId: function () {
+                if (this.currentTp) {
+                    return this.currentTp.image_id;
+                }
+
+                return null;
+            },
+            previousImageIdsIndex: function () {
+                return (this.currentImageIdsIndex + this.imageIds.length - 1) % this.imageIds.length;
+            },
+            previousImageId: function () {
+                return this.imageIds[this.nextImageIdsIndex];
+            },
+            nextImageIdsIndex: function () {
+                return (this.currentImageIdsIndex + 1) % this.imageIds.length;
+            },
+            nextImageId: function () {
+                return this.imageIds[this.nextImageIdsIndex];
+            },
+            tpForCurrentImage: function () {
+                // The annotations can only be properly drawn if the image is set.
+                if (this.firstImageLoaded) {
+                    return this.trainingProposals.filter(function (p) {
+                        return p.image_id === this.currentImageId;
+                    }, this);
+                }
+
+                return [];
+            },
+            selectedTpForCurrentImage: function () {
+                return this.tpForCurrentImage.filter(function (p) {
+                    return p.selected;
+                });
+            },
+            currentTpArray: function () {
+                if (this.firstImageLoaded && this.currentTp) {
+                    return [this.currentTp];
+                }
+
+                return [];
             },
         },
         methods: {
@@ -60,14 +141,22 @@ biigle.$viewModel('maia-show-container', function (element) {
                 this.openTab = tab;
             },
             setTrainingProposals: function (response) {
-                this.trainingProposals = response.body;
+                this.trainingProposals = response.body.map(function (p) {
+                    p.shape = 'Circle';
+                    return p;
+                });
             },
             fetchTrainingProposals: function () {
-                this.startLoading();
-                maiaJobApi.getTrainingProposals({id: job.id})
-                    .then(this.setTrainingProposals)
-                    .catch(messages.handleErrorResponse)
-                    .finally(this.finishLoading);
+                if (!this.trainingProposalsPromise) {
+                    this.startLoading();
+                    this.trainingProposalsPromise =
+                        maiaJobApi.getTrainingProposals({id: job.id})
+                            .then(this.setTrainingProposals)
+                            .catch(messages.handleErrorResponse)
+                            .finally(this.finishLoading);
+                }
+
+                return this.trainingProposalsPromise;
             },
             openRefineTpTab: function () {
                 this.openTab = 'refine-training-proposals';
@@ -116,6 +205,37 @@ biigle.$viewModel('maia-show-container', function (element) {
             startInstanceSegmentation: function () {
                 console.log('start instance segmentation');
             },
+            fetchCurrentImage: function () {
+                this.startLoading();
+
+                return imagesStore.fetchAndDrawImage(this.currentImageId)
+                    .catch(function (message) {
+                        messages.danger(message);
+                    })
+                    .then(this.updateCurrentImage)
+                    .then(this.cacheNextImage)
+                    .finally(this.finishLoading);
+            },
+            updateCurrentImage: function (image) {
+                this.firstImageLoaded = true;
+                this.currentImage = image;
+            },
+            cacheNextImage: function () {
+                // Do nothing if there is only one image.
+                if (this.currentImageId !== this.nextImageId) {
+                    imagesStore.fetchImage(this.nextImageId)
+                        // Ignore errors in this case. The application will try to reload
+                        // the data again if the user switches to the respective image
+                        // and display the error message then.
+                        .catch(function () {});
+                }
+            },
+            handleNext: function () {
+                this.currentTpIndex = this.nextTpIndex;
+            },
+            handlePrevious: function () {
+                this.currentTpIndex = this.previousTpIndex;
+            },
         },
         watch: {
             selectTpTabOpen: function () {
@@ -127,8 +247,14 @@ biigle.$viewModel('maia-show-container', function (element) {
             reviewAcTabOpen: function () {
                 this.visitedReviewAcTab = true;
             },
-            visitedSelectOrRefineTpTab: function () {
+            visitedSelectTpTab: function () {
                 this.fetchTrainingProposals();
+            },
+            visitedRefineTpTab: function () {
+                this.fetchTrainingProposals().then(this.fetchCurrentImage);
+            },
+            currentImageId: function () {
+                this.fetchCurrentImage();
             },
         },
     });
