@@ -1,5 +1,5 @@
 <refine-tp-canvas
-    :can-modify="true"
+    :can-modify="@if ($job->state_id === $states['training-proposals']) true @else false @endif"
     :show-minimap="hasCurrentImage"
     :image="currentImage"
     :annotations="selectedTpForCurrentImage"
