@@ -25,12 +25,22 @@ class MaiaJobController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        $jobRunning = $jobs->where('state_id', '!=', State::annotationCandidatesId())->count() > 0;
+        $hasUnfinishedJobs = $jobs
+            ->where('state_id', '!=', State::annotationCandidatesId())
+            ->count() > 0;
+
+        $hasProcessingJobs = $jobs
+            ->whereIn('state_id', [
+                State::noveltyDetectionId(),
+                State::instanceSegmentationId(),
+            ])
+            ->count() > 0;
 
         return view('maia::index', compact(
             'volume',
             'jobs',
-            'jobRunning'
+            'hasUnfinishedJobs',
+            'hasProcessingJobs'
         ));
     }
 

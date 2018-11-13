@@ -12,7 +12,12 @@
     @else
         <div class="maia-status maia-status--running">
             <span class="fa-stack fa-2x" title="Job in progress">
-                <i class="fas fa-circle fa-stack-2x"></i>
+                @if ($job->isRunning())
+                    <i class="fas fa-circle fa-stack-1x"></i>
+                    <i class="fas fa-cog fa-spin fa-stack-2x"></i>
+                @else
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                @endif
                 <i class="fas fa-robot fa-stack-1x fa-inverse"></i>
             </span>
         </div>

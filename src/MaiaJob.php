@@ -70,13 +70,34 @@ class MaiaJob extends Model
     }
 
     /**
-     * Determine if the job is currently running.
+     * The training proposals of this MAIA job.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function trainingProposals()
+    {
+        return $this->annotations()->trainingProposals();
+    }
+
+    /**
+     * The annotation candidates of this MAIA job.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function annotationCandidates()
+    {
+        return $this->annotations()->annotationCandidates();
+    }
+
+    /**
+     * Determine if the job is currently running novelty detection or instance segmentation.
      *
      * @return boolean
      */
     public function isRunning()
     {
-        return $this->state_id !== MaiaJobState::annotationCandidatesId();
+        return $this->state_id === MaiaJobState::noveltyDetectionId()
+            || $this->state_id === MaiaJobState::instanceSegmentationId();
     }
 
     /**

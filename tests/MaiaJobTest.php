@@ -8,6 +8,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleted;
+use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 
 class MaiaJobTest extends ModelTestCase
 {
@@ -31,6 +32,36 @@ class MaiaJobTest extends ModelTestCase
         $this->assertEquals($annotation->id, $this->model->annotations()->first()->id);
     }
 
+    public function testTrainingProposals()
+    {
+        $a = MaiaAnnotationTest::create([
+            'job_id' => $this->model->id,
+            'type_id' => Type::trainingProposalId(),
+        ]);
+
+        MaiaAnnotationTest::create([
+            'job_id' => $this->model->id,
+            'type_id' => Type::annotationCandidateId(),
+        ]);
+
+        $this->assertEquals($a->id, $this->model->trainingProposals()->first()->id);
+    }
+
+    public function testAnnotationCandidates()
+    {
+        $a = MaiaAnnotationTest::create([
+            'job_id' => $this->model->id,
+            'type_id' => Type::annotationCandidateId(),
+        ]);
+
+        MaiaAnnotationTest::create([
+            'job_id' => $this->model->id,
+            'type_id' => Type::trainingProposalId(),
+        ]);
+
+        $this->assertEquals($a->id, $this->model->annotationCandidates()->first()->id);
+    }
+
     public function testCastsParams()
     {
         $this->model->params = ['test'];
@@ -40,6 +71,8 @@ class MaiaJobTest extends ModelTestCase
 
     public function testIsRunning()
     {
+        $this->assertTrue($this->model->isRunning());
+        $this->model->state_id = State::instanceSegmentationId();
         $this->assertTrue($this->model->isRunning());
         $this->model->state_id = State::annotationCandidatesId();
         $this->assertFalse($this->model->isRunning());
