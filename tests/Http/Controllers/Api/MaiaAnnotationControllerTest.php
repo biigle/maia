@@ -2,12 +2,14 @@
 
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
+use Queue;
 use ApiTestCase;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\Modules\Maia\MaiaAnnotationTest;
 use Biigle\Modules\Maia\MaiaAnnotationType as Type;
+use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 
 class MaiaAnnotationControllerTest extends ApiTestCase
 {
@@ -113,6 +115,20 @@ class MaiaAnnotationControllerTest extends ApiTestCase
 
     public function testUpdatePoints()
     {
-        $this->markTestIncomplete('Update annotation patch if points are updated');
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $a = MaiaAnnotationTest::create(['job_id' => $job->id]);
+
+        Queue::fake();
+        $this->beEditor();
+        $this->putJson("/api/v1/maia-annotations/{$a->id}", ['selected' => true])
+            ->assertStatus(200);
+
+        Queue::assertNotPushed(GenerateAnnotationPatch::class);
+
+        $this->putJson("/api/v1/maia-annotations/{$a->id}", ['points' => [10, 20, 30]])
+            ->assertStatus(200);
+
+        Queue::assertPushed(GenerateAnnotationPatch::class);
+
     }
 }

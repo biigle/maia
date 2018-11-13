@@ -4,6 +4,7 @@ namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
 use Biigle\Modules\Maia\MaiaAnnotation;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Http\Requests\UpdateMaiaAnnotation;
 
 class MaiaAnnotationController extends Controller
@@ -50,7 +51,11 @@ class MaiaAnnotationController extends Controller
      */
     public function update(UpdateMaiaAnnotation $request)
     {
-        $request->annotation->points = $request->input('points', $request->annotation->points);
+        if ($request->filled('points')) {
+            $request->annotation->points = $request->input('points');
+            GenerateAnnotationPatch::dispatch($request->annotation, $request->annotation->getPatchPath());
+        }
+
         $request->annotation->selected = $request->input('selected', $request->annotation->selected);
         $request->annotation->save();
     }
