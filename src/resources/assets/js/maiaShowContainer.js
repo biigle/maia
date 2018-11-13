@@ -238,8 +238,12 @@ biigle.$viewModel('maia-show-container', function (element) {
             handlePrevious: function () {
                 this.currentTpIndex = this.previousTpIndex;
             },
-            handleRefineTp: function (p) {
-                console.log('refine', p);
+            handleRefineTp: function (proposals) {
+                Vue.Promise.all(proposals.map(this.updateTpPoints))
+                    .catch(messages.handleErrorResponse);
+            },
+            updateTpPoints: function (proposal) {
+                return maiaAnnotationApi.update({id: proposal.id}, {points: proposal.points});
             },
             focusCurrentTp: function () {
                 this.$refs.refineCanvas.focusAnnotation(this.currentTp, true, false);
