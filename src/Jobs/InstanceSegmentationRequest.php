@@ -60,7 +60,8 @@ class InstanceSegmentationRequest extends Job implements ShouldQueue
         $this->images = $job->volume->images()->pluck('filename', 'id');
         $this->trainingProposals = $job->trainingProposals()
             ->select('image_id', 'points')
-            ->get();
+            ->get()
+            ->toArray();
     }
 
     /**
