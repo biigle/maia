@@ -5,6 +5,9 @@
  */
 biigle.$component('maia.components.refineTpCanvas', {
     mixins: [biigle.$require('annotations.components.annotationCanvas')],
+    computed: {
+        //
+    },
     methods: {
         toggleMarkAsInteresting: function () {
             console.log('toggle');

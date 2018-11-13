@@ -25,11 +25,9 @@ biigle.$viewModel('maia-show-container', function (element) {
             visitedRefineTpTab: false,
             visitedReviewAcTab: false,
             openTab: 'info',
-            trainingProposalsPromise: null,
             trainingProposals: [],
             selectTpOffset: 0,
             lastSelectedTp: null,
-            firstImageLoaded: false,
             currentImage: null,
             currentTpIndex: 0,
         },
@@ -46,8 +44,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             reviewAcTabOpen: function () {
                 return this.openTab === 'review-annotation-candidates';
             },
-            hasNoTrainingProposals: function () {
-                return !this.loading && this.trainingProposals.length === 0;
+            hasTrainingProposals: function () {
+                return this.trainingProposals.length > 0;
             },
             isInTrainingProposalState: function () {
                 return job.state_id === states['training-proposals'];
@@ -80,14 +78,14 @@ biigle.$viewModel('maia-show-container', function (element) {
                 return (this.currentTpIndex + 1) % this.selectedTpOrderedByImageId.length;
             },
             currentTp: function () {
-                if (this.selectedTpOrderedByImageId.length > 0) {
+                if (this.selectedTpOrderedByImageId.length > 0 && this.refineTpTabOpen) {
                     return this.selectedTpOrderedByImageId[this.currentTpIndex];
                 }
 
                 return null;
             },
             hasNoSelectedTp: function () {
-                return this.currentTp === null;
+                return this.selectedTpOrderedByImageId.length === 0;
             },
             currentImageIdsIndex: function () {
                 return this.imageIds.indexOf(this.currentImageId);
@@ -113,7 +111,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             tpForCurrentImage: function () {
                 // The annotations can only be properly drawn if the image is set.
-                if (this.firstImageLoaded) {
+                if (this.hasCurrentImage) {
                     return this.trainingProposals.filter(function (p) {
                         return p.image_id === this.currentImageId;
                     }, this);
@@ -127,11 +125,17 @@ biigle.$viewModel('maia-show-container', function (element) {
                 });
             },
             currentTpArray: function () {
-                if (this.firstImageLoaded && this.currentTp) {
+                if (this.hasCurrentImage && this.currentTp) {
                     return [this.currentTp];
                 }
 
                 return [];
+            },
+            hasCurrentImage: function () {
+                return this.currentImage !== null;
+            },
+            visitedSelectOrRefineTpTab: function () {
+                return this.visitedSelectTpTab || this.visitedRefineTpTab;
             },
         },
         methods: {
@@ -150,16 +154,12 @@ biigle.$viewModel('maia-show-container', function (element) {
                 });
             },
             fetchTrainingProposals: function () {
-                if (!this.trainingProposalsPromise) {
-                    this.startLoading();
-                    this.trainingProposalsPromise =
-                        maiaJobApi.getTrainingProposals({id: job.id})
-                            .then(this.setTrainingProposals)
-                            .catch(messages.handleErrorResponse)
-                            .finally(this.finishLoading);
-                }
+                this.startLoading();
 
-                return this.trainingProposalsPromise;
+                return maiaJobApi.getTrainingProposals({id: job.id})
+                    .then(this.setTrainingProposals)
+                    .catch(messages.handleErrorResponse)
+                    .finally(this.finishLoading);
             },
             openRefineTpTab: function () {
                 this.openTab = 'refine-training-proposals';
@@ -209,25 +209,17 @@ biigle.$viewModel('maia-show-container', function (element) {
                 console.log('start instance segmentation');
             },
             fetchCurrentImage: function () {
-                if (this.currentImageId !== null) {
-                    if (this.refineTpTabOpen) {
-                        this.startLoading();
-                    }
+                this.startLoading();
 
-                    var p = imagesStore.fetchAndDrawImage(this.currentImageId)
-                        .catch(function (message) {
-                            messages.danger(message);
-                        })
-                        .then(this.updateCurrentImage)
-                        .then(this.cacheNextImage);
-
-                    if (this.refineTpTabOpen) {
-                        p.finally(this.finishLoading);
-                    }
-                }
+                return imagesStore.fetchAndDrawImage(this.currentImageId)
+                    .catch(function (message) {
+                        messages.danger(message);
+                    })
+                    .then(this.setCurrentImage)
+                    .then(this.cacheNextImage)
+                    .finally(this.finishLoading);
             },
-            updateCurrentImage: function (image) {
-                this.firstImageLoaded = true;
+            setCurrentImage: function (image) {
                 this.currentImage = image;
             },
             cacheNextImage: function () {
@@ -246,6 +238,12 @@ biigle.$viewModel('maia-show-container', function (element) {
             handlePrevious: function () {
                 this.currentTpIndex = this.previousTpIndex;
             },
+            handleRefineTp: function (p) {
+                console.log('refine', p);
+            },
+            focusCurrentTp: function () {
+                this.$refs.refineCanvas.focusAnnotation(this.currentTp, true, false);
+            },
         },
         watch: {
             selectTpTabOpen: function () {
@@ -257,14 +255,20 @@ biigle.$viewModel('maia-show-container', function (element) {
             reviewAcTabOpen: function () {
                 this.visitedReviewAcTab = true;
             },
-            visitedSelectTpTab: function () {
+            visitedSelectOrRefineTpTab: function () {
                 this.fetchTrainingProposals();
             },
-            visitedRefineTpTab: function () {
-                this.fetchTrainingProposals().then(this.fetchCurrentImage);
+            currentImageId: function (id) {
+                if (id) {
+                    this.fetchCurrentImage().then(this.focusCurrentTp);
+                } else {
+                    this.setCurrentImage(null);
+                }
             },
-            currentImageId: function () {
-                this.fetchCurrentImage();
+            currentTp: function (tp) {
+                if (tp) {
+                    this.focusCurrentTp();
+                }
             },
         },
     });

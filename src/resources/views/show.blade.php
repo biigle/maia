@@ -30,7 +30,7 @@
 @section('content')
 <div id="maia-show-container" class="sidebar-container" v-cloak>
     <div class="sidebar-container__content">
-        <div v-show="infoTabOpen" class="maia-content maia-content--info">
+        <div v-show="infoTabOpen" class="maia-content">
             @include('maia::show.info-content')
         </div>
         <div v-show="selectTpTabOpen" v-cloak class="maia-content">
@@ -52,7 +52,7 @@
             <sidebar-tab name="select-training-proposals" icon="plus-square" title="Select training proposals">
                 @include('maia::show.select-tp-tab')
             </sidebar-tab>
-            <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals" :disabled="hasNoSelectedTp">
+            <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals">
                 @include('maia::show.refine-tp-tab')
             </sidebar-tab>
         @endif

@@ -12,11 +12,18 @@
 
 .maia-content {
     height: 100%;
+    position: relative;
 }
 
-.maia-content--info {
+.maia-content-message {
+    top: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-flow: column;
+    pointer-events: none;
 }
