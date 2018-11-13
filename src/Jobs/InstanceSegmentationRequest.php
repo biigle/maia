@@ -58,6 +58,9 @@ class InstanceSegmentationRequest extends Job implements ShouldQueue
         $this->jobParams = $job->params;
         $this->volumeUrl = $job->volume->url;
         $this->images = $job->volume->images()->pluck('filename', 'id');
+        // Make sure to convert the annotations to arrays because it is more efficient
+        // and the GPU server cannot instantiate MaiaAnnotation objects (as they depend
+        // on biigle/core).
         $this->trainingProposals = $job->trainingProposals()
             ->select('image_id', 'points')
             ->get()
