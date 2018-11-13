@@ -61,6 +61,14 @@ biigle.$viewModel('maia-show-container', function (element) {
                         return tmp.hasOwnProperty(id) ? false : (tmp[id] = true);
                     });
             },
+            tpById: function () {
+                var map = {};
+                this.trainingProposals.forEach(function (p) {
+                    map[p.id] = p;
+                });
+
+                return map;
+            },
             tpOrderedByImageId: function () {
                 return this.trainingProposals.slice().sort(function (a, b) {
                     return a.image_id - b.image_id;
@@ -243,7 +251,13 @@ biigle.$viewModel('maia-show-container', function (element) {
                     .catch(messages.handleErrorResponse);
             },
             updateTpPoints: function (proposal) {
-                return maiaAnnotationApi.update({id: proposal.id}, {points: proposal.points});
+                var self = this;
+
+                return maiaAnnotationApi
+                    .update({id: proposal.id}, {points: proposal.points})
+                    .then(function () {
+                        self.tpById[proposal.id].points = proposal.points;
+                    });
             },
             focusCurrentTp: function () {
                 this.$refs.refineCanvas.focusAnnotation(this.currentTp, true, false);
