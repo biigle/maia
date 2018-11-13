@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleted;
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Listeners\DeleteAnnotationPatches;
 use Illuminate\Database\Eloquent\Factory as EloquentFactory;
 use Biigle\Modules\Maia\Listeners\DispatchNoveltyDetectionRequest;
+use Biigle\Modules\Maia\Listeners\DispatchInstanceSegmentationRequest;
 
 class MaiaServiceProvider extends ServiceProvider
 {
@@ -51,6 +53,7 @@ class MaiaServiceProvider extends ServiceProvider
         Gate::policy(MaiaJob::class, Policies\MaiaJobPolicy::class);
         Gate::policy(MaiaAnnotation::class, Policies\MaiaAnnotationPolicy::class);
         Event::listen(MaiaJobCreated::class, DispatchNoveltyDetectionRequest::class);
+        Event::listen(MaiaJobContinued::class, DispatchInstanceSegmentationRequest::class);
         Event::listen(MaiaJobDeleted::class, DeleteAnnotationPatches::class);
     }
 

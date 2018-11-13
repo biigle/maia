@@ -26,7 +26,7 @@ $router->group([
         ]);
 
         $router->resource('maia-jobs', 'MaiaJobController', [
-            'only' => ['destroy'],
+            'only' => ['update', 'destroy'],
             'parameters' => ['maia-jobs' => 'id'],
         ]);
 

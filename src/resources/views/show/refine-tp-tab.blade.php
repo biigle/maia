@@ -1,4 +1,4 @@
-<refine-tp-tab v-on:proceed="startInstanceSegmentation" v-bind:training-proposals="trainingProposals" inline-template>
+<refine-tp-tab v-bind:training-proposals="trainingProposals" inline-template>
 <div class="sidebar-tab__content">
     @if ($job->state_id === $states['training-proposals'])
         <div class="panel panel-info">
@@ -16,7 +16,11 @@
 
     @if ($job->state_id === $states['training-proposals'])
         <div class="text-right">
-            <button class="btn btn-success" v-on:click="proceed" :disabled="hasNoSelectedTp">Submit training proposals</button>
+            <form action="{{url("api/v1/maia-jobs/{$job->id}")}}" method="POST" onsubmit="return confirm('Once the training proposals have been submitted, you are no longer able to modify them. Continue?')">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="_method" value="PUT">
+                <button type="submit" class="btn btn-success" :disabled="hasNoSelectedTp">Submit training proposals</button>
+            </form>
         </div>
     @endif
 </div>

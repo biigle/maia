@@ -55,6 +55,19 @@ class MaiaJobPolicy extends CachedPolicy
     }
 
     /**
+     * Determine if the given user can update the MAIA job.
+     *
+     * @param User $user
+     * @param MaiaJob $job
+     *
+     * @return bool
+     */
+    public function update(User $user, MaiaJob $job)
+    {
+        return $this->access($user, $job);
+    }
+
+    /**
      * Determine if the given user can destroy the MAIA job.
      *
      * @param User $user

@@ -2,11 +2,14 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
+use Queue;
 use Biigle\Volume;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Http\Requests\StoreMaiaJob;
+use Biigle\Modules\Maia\Http\Requests\UpdateMaiaJob;
 use Biigle\Modules\Maia\Http\Requests\DestroyMaiaJob;
 
 class MaiaJobController extends Controller
@@ -15,8 +18,8 @@ class MaiaJobController extends Controller
      * Creates a new MAIA job for the specified volume.
      *
      * @api {post} volumes/:id/maia-jobs Create a new MAIA job
-     * @apiGroup Volumes
-     * @apiName StoreVolumeMaiaJob
+     * @apiGroup MaiaJobs
+     * @apiName StoreMaiaJob
      * @apiPermission projectEditor
      *
      * @apiParam {Number} id The volume ID.
@@ -55,11 +58,36 @@ class MaiaJobController extends Controller
     }
 
     /**
+     * Continue a MAIA job from training proposal selection and refinement to instance segmentation.
+     *
+     * @api {put} maia-jobs/:id
+     * @apiGroup MaiaJobs
+     * @apiName UpdateMaiaJob
+     * @apiPermission projectEditor
+     * @apiDescription A job can only be continued if it is in training proposal selection and refinement state, and if it has selected training proposals.
+     *
+     * @apiParam {Number} id The job ID.
+     *
+     * @param UpdateMaiaJob $request
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdateMaiaJob $request)
+    {
+        $request->job->state_id = State::instanceSegmentationId();
+        $request->job->save();
+        event(new MaiaJobContinued($request->job));
+
+        if (!$this->isAutomatedRequest()) {
+            return $this->fuzzyRedirect('maia', $request->job->id);
+        }
+    }
+
+    /**
      * Delete a MAIA job.
      *
      * @api {delete} maia-jobs/:id
-     * @apiGroup Volumes
-     * @apiName DestroyVolumesMaiaJob
+     * @apiGroup MaiaJobs
+     * @apiName DestroyMaiaJob
      * @apiPermission projectEditor
      *
      * @apiParam {Number} id The job ID.

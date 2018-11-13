@@ -6,14 +6,14 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 
-class NoveltyDetectionResponse extends JobResponse
+class InstanceSegmentationResponse extends JobResponse
 {
     /**
      * {@inheritdoc}
      */
     protected function getNewAnnotationTypeId()
     {
-        return Type::trainingProposalId();
+        return Type::annotationCandidateId();
     }
 
     /**
@@ -21,7 +21,7 @@ class NoveltyDetectionResponse extends JobResponse
      */
     protected function getCreatedAnnotations(MaiaJob $job)
     {
-        return $job->trainingProposals();
+        return $job->annotationCandidates();
     }
 
     /**
@@ -29,7 +29,7 @@ class NoveltyDetectionResponse extends JobResponse
      */
     protected function updateJobState(MaiaJob $job)
     {
-        $job->state_id = State::trainingProposalsId();
+        $job->state_id = State::annotationCandidatesId();
         $job->save();
     }
 }

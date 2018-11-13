@@ -213,9 +213,6 @@ biigle.$viewModel('maia-show-container', function (element) {
                         proposal.selected = false;
                     });
             },
-            startInstanceSegmentation: function () {
-                console.log('start instance segmentation');
-            },
             fetchCurrentImage: function () {
                 this.startLoading();
 

@@ -8,28 +8,28 @@ use Biigle\Shape;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
 
-class NoveltyDetectionResponseTest extends TestCase
+class InstanceSegmentationResponseTest extends TestCase
 {
     public function testHandle()
     {
-        $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
+        $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
-        $proposals = [$image->id => [[100, 200, 20, 0.9]]];
+        $candidates = [$image->id => [[100, 200, 20, 0]]];
 
-        $response = new NoveltyDetectionResponse($job->id, $proposals);
+        $response = new InstanceSegmentationResponse($job->id, $candidates);
         Queue::fake();
         $response->handle();
 
-        $this->assertEquals(State::trainingProposalsId(), $job->fresh()->state_id);
+        $this->assertEquals(State::annotationCandidatesId(), $job->fresh()->state_id);
 
-        $annotations = $job->trainingProposals()->get();
+        $annotations = $job->annotationCandidates()->get();
         $this->assertEquals(1, $annotations->count());
         $this->assertEquals([100, 200, 20], $annotations[0]->points);
-        $this->assertEquals(0.9, $annotations[0]->score);
+        $this->assertEquals(0, $annotations[0]->score);
         $this->assertFalse($annotations[0]->selected);
         $this->assertEquals($image->id, $annotations[0]->image_id);
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);

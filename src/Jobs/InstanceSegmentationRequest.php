@@ -10,7 +10,7 @@ use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 /**
  * This job is executed on a machine with GPU access.
  */
-class NoveltyDetectionRequest extends Job implements ShouldQueue
+class InstanceSegmentationRequest extends Job implements ShouldQueue
 {
     /**
      * ID of the MAIA job.
@@ -41,6 +41,13 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
     protected $images;
 
     /**
+     * Selected training proposals.
+     *
+     * @var array
+     */
+    protected $trainingProposals;
+
+    /**
      * Create a new instance
      *
      * @param MaiaJob $job
@@ -51,6 +58,9 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
         $this->jobParams = $job->params;
         $this->volumeUrl = $job->volume->url;
         $this->images = $job->volume->images()->pluck('filename', 'id');
+        $this->trainingProposals = $job->trainingProposals()
+            ->select('image_id', 'points')
+            ->get();
     }
 
     /**
@@ -58,14 +68,14 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
      */
     public function handle()
     {
-        // TODO Run actual novelty detection here.
+        // TODO Run actual instance segmentation here.
         if ($this->images->isNotEmpty()) {
             $id = $this->images->keys()->first();
             $this->dispatchResponse([$id => [
-                [200, 200, 100, 0.5],
-                [400, 400, 100, 0.7],
-                [200, 400, 100, 0.1],
-                [400, 200, 100, 1.0],
+                [200, 200, 100, 0],
+                [400, 400, 100, 0],
+                [200, 400, 100, 0],
+                [400, 200, 100, 0],
             ]]);
         } else {
             $this->dispatchResponse([]);
@@ -73,13 +83,13 @@ class NoveltyDetectionRequest extends Job implements ShouldQueue
     }
 
     /**
-     * Dispatch the job to store the novelty detection results.
+     * Dispatch the job to store the instance segmentation results.
      *
      * @param array $annotations
      */
     protected function dispatchResponse($annotations)
     {
-        $response = new NoveltyDetectionResponse($this->jobId, $annotations);
+        $response = new InstanceSegmentationResponse($this->jobId, $annotations);
         Queue::connection(config('maia.response_connection'))
             ->pushOn(config('maia.response_queue'), $response);
     }

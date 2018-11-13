@@ -37,8 +37,7 @@ class TrainingProposalController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
 
-        return $job->annotations()
-            ->trainingProposals()
+        return $job->trainingProposals()
             ->select('id', 'points', 'score', 'selected', 'image_id')
             ->orderBy('score', 'desc')
             ->get();

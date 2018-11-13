@@ -23,9 +23,7 @@ biigle.$component('maia.components.refineTpTab', {
         },
     },
     methods: {
-        proceed: function () {
-            this.$emit('proceed');
-        },
+        //
     },
     created: function () {
         //

@@ -1,0 +1,156 @@
+<?php
+
+namespace Biigle\Modules\Maia\Jobs;
+
+use Biigle\Shape;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaAnnotation;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+
+/**
+ * This job is executed on the machine running BIIGLE to store the results of novelty
+ * detection or instance segmentation.
+ */
+class JobResponse extends Job implements ShouldQueue
+{
+    /**
+     * ID of the MAIA job.
+     *
+     * @var int
+     */
+    protected $jobId;
+
+    /**
+     * Center points, radii and scores of annotations to create, indexed by image
+     * ID. Example:
+     * [
+     *     image_id => [
+     *         [center_x, center_y, radius, score],
+     *         [center_x, center_y, radius, score],
+     *         ...
+     *     ],
+     *     ...
+     * ]
+     *
+     * @var array
+     */
+    protected $annotations;
+
+    /**
+     * Create a new instance
+     *
+     * @param int $jobId
+     * @param array $annotations
+     */
+    public function __construct($jobId, $annotations)
+    {
+        $this->jobId = $jobId;
+        $this->annotations = $annotations;
+    }
+
+    /**
+     * Execute the job
+     */
+    public function handle()
+    {
+        // TODO handle failure with database transaction. Move job params to "attrs".
+        // Use attrs for novelty detection params, instance segmentation params and
+        // failure error message. Add job state "failed".
+        $job = MaiaJob::find($this->jobId);
+        $this->createMaiaAnnotations();
+        $this->dispatchAnnotationPatchJobs($job);
+        $this->updateJobState($job);
+    }
+
+    /**
+     * Create MAIA annotations from the training proposals.
+     */
+    protected function createMaiaAnnotations()
+    {
+        $maiaAnnotations = collect([]);
+
+        foreach ($this->annotations as $imageId => $proposals) {
+            foreach ($proposals as $proposal) {
+                $maiaAnnotations->push($this->createMaiaAnnotation($imageId, $proposal));
+            }
+        }
+
+        $maiaAnnotations->chunk(9000)->each(function ($chunk) {
+            // Chunk the insert because PDO's maximum number of query parameters is
+            // 65535. Each annotation has 7 parameters so we can store roughly 9000
+            // annotations in one call.
+            MaiaAnnotation::insert($chunk->toArray());
+        });
+    }
+
+    /**
+     * Create an insert array for a MAIA annotation.
+     *
+     * @param int $imageId
+     * @param array $annotation
+     *
+     * @return array
+     */
+    protected function createMaiaAnnotation($imageId, $annotation)
+    {
+        $points = array_map(function ($coordinate) {
+            return round($coordinate, 2);
+        }, [$annotation[0], $annotation[1], $annotation[2]]);
+
+        return [
+            'job_id' => $this->jobId,
+            'points' => json_encode($points),
+            'score' => $annotation[3],
+            'image_id' => $imageId,
+            'shape_id' => Shape::circleId(),
+            'type_id' => $this->getNewAnnotationTypeId(),
+            // 'selected' is false by default.
+        ];
+    }
+
+    /**
+     * Get the type ID that the newly created annotations should have.
+     *
+     * @return int
+     */
+    protected function getNewAnnotationType()
+    {
+        return null;
+    }
+
+    /**
+     * Dispatches the jobs to generate annotation patches for the MAIA annotations.
+     *
+     * @param MaiaJob $job
+     */
+    protected function dispatchAnnotationPatchJobs(MaiaJob $job)
+    {
+        $this->getCreatedAnnotations($job)->chunk(1000, function ($chunk) {
+            foreach ($chunk as $annotation) {
+                GenerateAnnotationPatch::dispatch($annotation, $annotation->getPatchPath());
+            }
+        });
+    }
+
+    /**
+     * Get a query for the annotations that have been created by this job.
+     *
+     * @param MaiaJob $job
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    protected function getCreatedAnnotations(MaiaJob $job)
+    {
+        return $job->annotations();
+    }
+
+    /**
+     * Update the state of the MAIA job after processing the response.
+     *
+     * @param MaiaJob $job
+     */
+    protected function updateJobState(MaiaJob $job)
+    {
+        //
+    }
+}
