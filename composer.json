@@ -12,7 +12,8 @@
         "biigle/volumes": "^2.7",
         "biigle/label-trees": "^1.19",
         "biigle/largo": "^2.4",
-        "biigle/annotations": "^3.9"
+        "biigle/annotations": "^3.9",
+        "biigle/laravel-image-cache": "^1.1"
     },
     "autoload": {
         "psr-4": {
