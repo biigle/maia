@@ -10,6 +10,10 @@
     color: $brand-warning;
 }
 
+.maia-status--failed {
+    color: $brand-danger;
+}
+
 .maia-content {
     height: 100%;
     position: relative;

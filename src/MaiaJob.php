@@ -4,19 +4,22 @@ namespace Biigle\Modules\Maia;
 
 use Biigle\User;
 use Biigle\Volume;
+use biigle\Traits\HasJsonAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleted;
 
 class MaiaJob extends Model
 {
+    use HasJsonAttributes;
+
     /**
      * The attributes that should be casted to native types.
      *
      * @var array
      */
     protected $casts = [
-        'params' => 'array',
+        'attrs' => 'array',
     ];
 
     /**
@@ -101,6 +104,17 @@ class MaiaJob extends Model
     }
 
     /**
+     * Determine if the job failed during novelty detection or instance segmentation.
+     *
+     * @return boolean
+     */
+    public function hasFailed()
+    {
+        return $this->state_id === MaiaJobState::failedNoveltyDetectionId()
+            || $this->state_id === MaiaJobState::failedInstanceSegmentationId();
+    }
+
+    /**
      * Determine if the job requires a user action to continue
      *
      * @return boolean
@@ -108,5 +122,45 @@ class MaiaJob extends Model
     public function requiresAction()
     {
         return $this->state_id === MaiaJobState::trainingProposalsId();
+    }
+
+    /**
+     * Get the configured parameters of this job.
+     *
+     * @return array
+     */
+    public function getParamsAttribute()
+    {
+        return $this->getJsonAttr('params');
+    }
+
+    /**
+     * Set the configured parameters of this job.
+     *
+     * @param array $params
+     */
+    public function setParamsAttribute(array $params)
+    {
+        return $this->setJsonAttr('params', $params);
+    }
+
+    /**
+     * Get the error information on this job (if any).
+     *
+     * @return array
+     */
+    public function getErrorAttribute()
+    {
+        return $this->getJsonAttr('error');
+    }
+
+    /**
+     * Set the error information for this job.
+     *
+     * @param array $error
+     */
+    public function setErrorAttribute(array $error)
+    {
+        return $this->setJsonAttr('error', $error);
     }
 }

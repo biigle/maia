@@ -13,15 +13,22 @@
 @section('content')
 <div class="container">
     <div class="col-sm-8 col-sm-offset-2 col-lg-6 col-lg-offset-3">
-        @if ($hasUnfinishedJobs)
+        @if ($hasJobsInProgress)
             <div class="maia-status maia-status--running">
                 <span class="fa-stack fa-2x" title="Job running for {{ $volume->name }}">
-                    @if ($hasProcessingJobs)
+                    @if ($hasRunningJobs)
                         <i class="fas fa-circle fa-stack-1x"></i>
                         <i class="fas fa-cog fa-spin fa-stack-2x"></i>
                     @else
                         <i class="fas fa-circle fa-stack-2x"></i>
                     @endif
+                    <i class="fas fa-robot fa-stack-1x fa-inverse"></i>
+                </span>
+            </div>
+        @elseif ($newestJobHasFailed)
+            <div class="maia-status maia-status--failed">
+                <span class="fa-stack fa-2x" title="The most recent job failed for {{ $volume->name }}">
+                    <i class="fas fa-circle fa-stack-2x"></i>
                     <i class="fas fa-robot fa-stack-1x fa-inverse"></i>
                 </span>
             </div>
@@ -34,7 +41,7 @@
             </div>
         @endif
         @include('maia::index.job-list')
-        @if ($hasUnfinishedJobs)
+        @if ($hasJobsInProgress)
             <p class="text-muted">New jobs cannot be created while there are unfinished other jobs.</p>
         @else
             @include('maia::index.job-form')

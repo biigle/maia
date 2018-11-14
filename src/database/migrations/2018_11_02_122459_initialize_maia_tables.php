@@ -21,8 +21,10 @@ class InitializeMaiaTables extends Migration
         // Create all the possible job states.
         DB::table('maia_job_states')->insert([
             ['name' => 'novelty-detection'],
+            ['name' => 'failed-novelty-detection'],
             ['name' => 'training-proposals'],
             ['name' => 'instance-segmentation'],
+            ['name' => 'failed-instance-segmentation'],
             ['name' => 'annotation-candidates'],
         ]);
 
@@ -55,8 +57,9 @@ class InitializeMaiaTables extends Migration
                   ->on('maia_job_states')
                   ->onDelete('restrict');
 
-            // Parameters for novelty detection and training of Mask R-CNN
-            $table->json('params')->nullable();
+            // Stores parameters for novelty detection and training of Mask R-CNN,
+            // as well as any error messages.
+            $table->json('attrs')->nullable();
         });
 
         Schema::create('maia_annotation_types', function (Blueprint $table) {

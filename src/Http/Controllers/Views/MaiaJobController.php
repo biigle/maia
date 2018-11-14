@@ -25,22 +25,29 @@ class MaiaJobController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        $hasUnfinishedJobs = $jobs
-            ->where('state_id', '!=', State::annotationCandidatesId())
+        $hasJobsInProgress = $jobs
+            ->whereIn('state_id', [
+                State::noveltyDetectionId(),
+                State::trainingProposalsId(),
+                State::instanceSegmentationId(),
+            ])
             ->count() > 0;
 
-        $hasProcessingJobs = $jobs
+        $hasJobsRunning = $jobs
             ->whereIn('state_id', [
                 State::noveltyDetectionId(),
                 State::instanceSegmentationId(),
             ])
             ->count() > 0;
 
+        $newestJobHasFailed = $jobs->isNotEmpty() ? $jobs[0]->hasFailed() : false;
+
         return view('maia::index', compact(
             'volume',
             'jobs',
-            'hasUnfinishedJobs',
-            'hasProcessingJobs'
+            'hasJobsInProgress',
+            'hasJobsRunning',
+            'newestJobHasFailed'
         ));
     }
 
@@ -56,12 +63,7 @@ class MaiaJobController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
         $volume = $job->volume;
-        $states = collect([
-            'novelty-detection' => State::noveltyDetectionId(),
-            'training-proposals' => State::trainingProposalsId(),
-            'instance-segmentation' => State::instanceSegmentationId(),
-            'annotation-candidates' => State::annotationCandidatesId(),
-        ]);
+        $states = State::pluck('id', 'name');
 
         return view('maia::show', compact('job', 'volume', 'states'));
     }

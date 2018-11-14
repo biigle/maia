@@ -69,6 +69,13 @@ class MaiaJobTest extends ModelTestCase
         $this->assertEquals(['test'], $this->model->fresh()->params);
     }
 
+    public function testCastsError()
+    {
+        $this->model->error = ['message' => 'test'];
+        $this->model->save();
+        $this->assertEquals(['message' => 'test'], $this->model->fresh()->error);
+    }
+
     public function testIsRunning()
     {
         $this->assertTrue($this->model->isRunning());
@@ -76,6 +83,15 @@ class MaiaJobTest extends ModelTestCase
         $this->assertTrue($this->model->isRunning());
         $this->model->state_id = State::annotationCandidatesId();
         $this->assertFalse($this->model->isRunning());
+    }
+
+    public function testIsFailed()
+    {
+        $this->assertFalse($this->model->hasFailed());
+        $this->model->state_id = State::failedNoveltyDetectionId();
+        $this->assertTrue($this->model->hasFailed());
+        $this->model->state_id = State::failedInstanceSegmentationId();
+        $this->assertTrue($this->model->hasFailed());
     }
 
     public function testRequiresAction()

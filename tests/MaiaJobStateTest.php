@@ -24,6 +24,11 @@ class MaiaJobStateTest extends ModelTestCase
         $this->assertNotNull(MaiaJobState::noveltyDetection());
     }
 
+    public function testFailedNoveltyDetection()
+    {
+        $this->assertNotNull(MaiaJobState::failedNoveltyDetection());
+    }
+
     public function testTrainingProposals()
     {
         $this->assertNotNull(MaiaJobState::trainingProposals());
@@ -32,6 +37,11 @@ class MaiaJobStateTest extends ModelTestCase
     public function testInstanceSegmentation()
     {
         $this->assertNotNull(MaiaJobState::instanceSegmentation());
+    }
+
+    public function testFailedInstanceSegmentation()
+    {
+        $this->assertNotNull(MaiaJobState::failedInstanceSegmentation());
     }
 
     public function testAnnotationCandidates()
