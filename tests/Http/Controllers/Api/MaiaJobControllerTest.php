@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use Event;
 use ApiTestCase;
+use Biigle\Tests\ImageTest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
@@ -55,6 +56,25 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->assertEquals($params, $job->params);
 
         // only one running job at a time
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)->assertStatus(422);
+    }
+
+    public function testStoreTiledImages()
+    {
+        $id = $this->volume()->id;
+        ImageTest::create(['volume_id' => $id, 'tiled' => true]);
+
+        $this->beEditor();
+        $params = [
+            'clusters' => 5,
+            'patch_size' => 39,
+            'threshold' => 99,
+            'latent_size' => 0.1,
+            'trainset_size' => 10000,
+            'epochs' => 100,
+        ];
+
+        // MAIA is not available for volumes with tiled images.
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)->assertStatus(422);
     }
 

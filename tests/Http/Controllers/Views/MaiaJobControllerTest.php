@@ -3,6 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Views;
 
 use ApiTestCase;
+use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 
 class MaiaJobControllerTest extends ApiTestCase
@@ -24,6 +25,14 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->get("volumes/{$id}/maia")->assertStatus(200);
+    }
+
+    public function testIndexTiledImage()
+    {
+        $id = $this->volume()->id;
+        ImageTest::create(['volume_id' => $id, 'tiled' => true]);
+        $this->beEditor();
+        $this->get("volumes/{$id}/maia")->assertStatus(404);
     }
 
     public function testShow()

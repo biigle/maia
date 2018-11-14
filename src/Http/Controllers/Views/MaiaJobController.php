@@ -21,6 +21,10 @@ class MaiaJobController extends Controller
         $volume = Volume::findOrFail($id);
         $this->authorize('edit-in', $volume);
 
+        if ($volume->hasTiledImages()) {
+            abort(404);
+        }
+
         $jobs = MaiaJob::where('volume_id', $id)
             ->orderBy('id', 'desc')
             ->get();

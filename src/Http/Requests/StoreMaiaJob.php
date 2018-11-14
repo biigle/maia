@@ -62,6 +62,10 @@ class StoreMaiaJob extends FormRequest
             if ($hasUnfinishedJob) {
                 $validator->errors()->add('clusters', 'A new MAIA job can only be sumbitted if there are no other unfinished jobs for the same volume.');
             }
+
+            if ($this->volume->hasTiledImages()) {
+                $validator->errors()->add('volume', 'New MAIA jobs cannot be created for volumes with very large images.');
+            }
         });
     }
 }
