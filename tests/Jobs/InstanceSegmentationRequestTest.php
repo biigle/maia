@@ -4,8 +4,10 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Queue;
 use TestCase;
+use Exception;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
+use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
 
 class InstanceSegmentationRequestTest extends TestCase
@@ -21,8 +23,14 @@ class InstanceSegmentationRequestTest extends TestCase
         $this->markTestIncomplete();
     }
 
-    public function testHandleFailure()
+    public function testFailed()
     {
-        $this->markTestIncomplete();
+        $job = MaiaJobTest::create();
+        $request = new InstanceSegmentationRequest($job);
+        $e = new Exception;
+
+        Queue::fake();
+        $request->failed($e);
+        Queue::assertPushed(InstanceSegmentationFailure::class);
     }
 }

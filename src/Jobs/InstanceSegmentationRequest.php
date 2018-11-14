@@ -2,44 +2,11 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Queue;
+use Exception;
 use Biigle\Modules\Maia\MaiaJob;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 
-/**
- * This job is executed on a machine with GPU access.
- */
-class InstanceSegmentationRequest extends Job implements ShouldQueue
+class InstanceSegmentationRequest extends JobRequest
 {
-    /**
-     * ID of the MAIA job.
-     *
-     * @var int
-     */
-    protected $jobId;
-
-    /**
-     * Parameters of the MAIA job.
-     *
-     * @var array
-     */
-    protected $jobParams;
-
-    /**
-     * URL of the volume associated with the job.
-     *
-     * @var string
-     */
-    protected $volumeUrl;
-
-    /**
-     * Filenames of the images associated with the job, indexed by their IDs.
-     *
-     * @var array
-     */
-    protected $images;
-
     /**
      * Selected training proposals.
      *
@@ -54,10 +21,7 @@ class InstanceSegmentationRequest extends Job implements ShouldQueue
      */
     public function __construct(MaiaJob $job)
     {
-        $this->jobId = $job->id;
-        $this->jobParams = $job->params;
-        $this->volumeUrl = $job->volume->url;
-        $this->images = $job->volume->images()->pluck('filename', 'id');
+        parent::__construct($job);
         // Make sure to convert the annotations to arrays because it is more efficient
         // and the GPU server cannot instantiate MaiaAnnotation objects (as they depend
         // on biigle/core).
@@ -93,8 +57,22 @@ class InstanceSegmentationRequest extends Job implements ShouldQueue
      */
     protected function dispatchResponse($annotations)
     {
-        $response = new InstanceSegmentationResponse($this->jobId, $annotations);
-        Queue::connection(config('maia.response_connection'))
-            ->pushOn(config('maia.response_queue'), $response);
+        $this->dispatch(new InstanceSegmentationResponse($this->jobId, $annotations));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function cleanup()
+    {
+        //
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function dispatchFailure(Exception $e)
+    {
+        $this->dispatch(new InstanceSegmentationFailure($this->jobId, $e));
     }
 }

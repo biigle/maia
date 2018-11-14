@@ -4,8 +4,10 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Queue;
 use TestCase;
+use Exception;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 
 class NoveltyDetectionRequestTest extends TestCase
@@ -21,8 +23,14 @@ class NoveltyDetectionRequestTest extends TestCase
         $this->markTestIncomplete();
     }
 
-    public function testHandleFailure()
+    public function testFailed()
     {
-        $this->markTestIncomplete();
+        $job = MaiaJobTest::create();
+        $request = new NoveltyDetectionRequest($job);
+        $e = new Exception;
+
+        Queue::fake();
+        $request->failed($e);
+        Queue::assertPushed(NoveltyDetectionFailure::class);
     }
 }
