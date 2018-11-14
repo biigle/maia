@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use DB;
 use Biigle\Shape;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaAnnotation;
@@ -54,13 +55,13 @@ class JobResponse extends Job implements ShouldQueue
      */
     public function handle()
     {
-        // TODO handle failure with database transaction. Move job params to "attrs".
-        // Use attrs for novelty detection params, instance segmentation params and
-        // failure error message. Add job state "failed".
-        $job = MaiaJob::find($this->jobId);
-        $this->createMaiaAnnotations();
-        $this->dispatchAnnotationPatchJobs($job);
-        $this->updateJobState($job);
+        // Make sure to roll back any DB modifications if an error occurs.
+        DB::transaction(function () {
+            $job = MaiaJob::find($this->jobId);
+            $this->createMaiaAnnotations();
+            $this->dispatchAnnotationPatchJobs($job);
+            $this->updateJobState($job);
+        });
     }
 
     /**
@@ -114,7 +115,7 @@ class JobResponse extends Job implements ShouldQueue
      *
      * @return int
      */
-    protected function getNewAnnotationType()
+    protected function getNewAnnotationTypeId()
     {
         return null;
     }

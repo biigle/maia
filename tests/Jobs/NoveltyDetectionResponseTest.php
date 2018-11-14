@@ -4,10 +4,13 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Queue;
 use TestCase;
+use Exception;
 use Biigle\Shape;
 use Biigle\Tests\ImageTest;
+use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 
@@ -37,8 +40,41 @@ class NoveltyDetectionResponseTest extends TestCase
         Queue::assertPushed(GenerateAnnotationPatch::class);
     }
 
-    public function testHandleFailure()
+    public function testHandleRollback()
     {
-        $this->markTestIncomplete();
+        $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+
+        $proposals = [$image->id => [[100, 200, 20, 0.9]]];
+
+        $response = new NoveltyDetectionResponseStub($job->id, $proposals);
+        try {
+            $response->handle();
+            $this->assertFalse(true);
+        } catch (Exception $e) {
+            //
+        }
+
+        $this->assertFalse($job->annotations()->exists());
+        $this->assertEquals(State::noveltyDetectionId(), $job->fresh()->state_id);
+    }
+
+    public function testFailed()
+    {
+        $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
+        $proposals = [1 => [[100, 200, 20, 0.9]]];
+
+        $response = new NoveltyDetectionResponse($job->id, $proposals);
+        Queue::fake();
+        $response->failed(new Exception);
+        Queue::assertPushed(NoveltyDetectionFailure::class);
+    }
+}
+
+class NoveltyDetectionResponseStub extends NoveltyDetectionResponse
+{
+    protected function updateJobState(MaiaJob $job)
+    {
+        throw new Exception('Something went wrong!');
     }
 }

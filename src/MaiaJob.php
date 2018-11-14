@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia;
 
 use Biigle\User;
 use Biigle\Volume;
-use biigle\Traits\HasJsonAttributes;
+use Biigle\Traits\HasJsonAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleted;

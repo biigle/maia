@@ -2,12 +2,25 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Queue;
+use Exception;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 
 class InstanceSegmentationResponse extends JobResponse
 {
+    /**
+     * The job failed to process.
+     *
+     * @param  Exception  $exception
+     * @return void
+     */
+    public function failed(Exception $exception)
+    {
+        Queue::push(new InstanceSegmentationFailure($this->jobId, $exception));
+    }
+
     /**
      * {@inheritdoc}
      */

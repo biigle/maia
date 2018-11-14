@@ -4,11 +4,14 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Queue;
 use TestCase;
+use Exception;
 use Biigle\Shape;
 use Biigle\Tests\ImageTest;
+use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
 
 class InstanceSegmentationResponseTest extends TestCase
@@ -37,8 +40,41 @@ class InstanceSegmentationResponseTest extends TestCase
         Queue::assertPushed(GenerateAnnotationPatch::class);
     }
 
-    public function testHandleFailure()
+    public function testHandleRollback()
     {
-        $this->markTestIncomplete();
+        $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+
+        $proposals = [$image->id => [[100, 200, 20, 0.9]]];
+
+        $response = new InstanceSegmentationResponseStub($job->id, $proposals);
+        try {
+            $response->handle();
+            $this->assertFalse(true);
+        } catch (Exception $e) {
+            //
+        }
+
+        $this->assertFalse($job->annotations()->exists());
+        $this->assertEquals(State::instanceSegmentationId(), $job->fresh()->state_id);
+    }
+
+    public function testFailed()
+    {
+        $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
+        $proposals = [1 => [[100, 200, 20, 0.9]]];
+
+        $response = new InstanceSegmentationResponse($job->id, $proposals);
+        Queue::fake();
+        $response->failed(new Exception);
+        Queue::assertPushed(InstanceSegmentationFailure::class);
+    }
+}
+
+class InstanceSegmentationResponseStub extends InstanceSegmentationResponse
+{
+    protected function updateJobState(MaiaJob $job)
+    {
+        throw new Exception('Something went wrong!');
     }
 }
