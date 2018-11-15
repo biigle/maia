@@ -11,6 +11,8 @@ composer config repositories.maia vcs https://github.com/biigle/maia
 composer require biigle/maia
 ```
 
+Take a look at the [`requirements.txt`](requirements.txt) for the Python dependencies of this module. Install the requirements with `pip install -r requirements.txt`.
+
 ### In your BIIGLE application instance
 
 1. Add `Biigle\Modules\Maia\MaiaServiceProvider::class` to the `providers` array in `config/app.php`.
