@@ -16,7 +16,7 @@
         @if ($hasJobsInProgress)
             <div class="maia-status maia-status--running">
                 <span class="fa-stack fa-2x" title="Job running for {{ $volume->name }}">
-                    @if ($hasRunningJobs)
+                    @if ($hasJobsRunning)
                         <i class="fas fa-circle fa-stack-1x"></i>
                         <i class="fas fa-cog fa-spin fa-stack-2x"></i>
                     @else
