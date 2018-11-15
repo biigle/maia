@@ -13,20 +13,16 @@ def extract_image_features(image):
 
 class ImageCollection(object):
     def __init__(self, items):
-        self.images = list(map(self._create_image, enumerate(items)))
+        if type(items) == dict:
+            self.images = [Image(id, path) for id, path in items.items()]
+        else:
+            self.images = items
 
     def __getitem__(self, key):
         return self.images[key]
 
     def __len__(self):
         return len(self.images)
-
-    def _create_image(self, args):
-        i, item = args
-        if type(item) == Image:
-            return item
-        else:
-            return Image(item, id=i)
 
     def random_patches(self, number=10000, size=29, vectorize=True):
         per_image = int(np.ceil(float(number) / len(self.images)))

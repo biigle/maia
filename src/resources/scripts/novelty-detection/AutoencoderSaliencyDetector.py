@@ -15,7 +15,6 @@ class AutoencoderSaliencyDetector(object):
         self.padding = int(np.floor(self.patch_size / 2.0))
 
         self.autoencoder = Autoencoder([self.n_input, n_hidden])
-        # self.autoencoder = Autoencoder(self.n_input, n_hidden)
 
         # Load the image file.
         self.x = tf.placeholder(tf.string)

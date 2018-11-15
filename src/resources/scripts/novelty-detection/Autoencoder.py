@@ -1,4 +1,5 @@
 # See https://github.com/tensorflow/models/blob/628b970a3d7c59a3b65220e24972f9987e879bca/research/autoencoder/autoencoder_models/Autoencoder.py
+# (with some adjustments)
 import numpy as np
 import tensorflow as tf
 

@@ -6,13 +6,9 @@ from skimage.filters.rank import entropy
 from skimage.morphology import disk
 
 class Image(object):
-    current_id = 0
 
-    def __init__(self, path, id=None):
+    def __init__(self, id, path):
         self.id = id
-        if self.id == None:
-            self.id = Image.current_id
-            Image.current_id += 1
         self.path = path
 
     def random_patch(self, size, vectorize=True):

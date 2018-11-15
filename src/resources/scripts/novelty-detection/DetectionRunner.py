@@ -24,7 +24,7 @@ class DetectionRunner(object):
         # Number of training epochs for the autoencoder.
         self.epochs = params['epochs']
 
-        # Array of file paths to the images to process.
+        # Dict of image IDs and file paths to the images to process.
         self.images = params['images']
         # Path to the directory to store temporary files.
         self.tmp_dir = params['tmp_dir']
@@ -33,9 +33,6 @@ class DetectionRunner(object):
         self.detector_stride = 2
 
     def run(self):
-        # The images get IDs based on their position in the array. These are used to name
-        # the JSON output files and are important to know which file belongs to which
-        # image of self.images.
         images = ImageCollection(self.images);
         if self.clusters > 1:
             clusters = images.make_clusters(number=self.clusters)
