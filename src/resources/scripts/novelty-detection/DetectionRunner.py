@@ -3,7 +3,7 @@ import os
 import json
 import cv2
 import numpy as np
-from scipy.misc import imsave
+# from scipy.misc import imsave
 from ImageCollection import ImageCollection
 from AutoencoderSaliencyDetector import AutoencoderSaliencyDetector
 
@@ -33,6 +33,9 @@ class DetectionRunner(object):
         self.detector_stride = 2
 
     def run(self):
+        # The images get IDs based on their position in the array. These are used to name
+        # the JSON output files and are important to know which file belongs to which
+        # image of self.images.
         images = ImageCollection(self.images);
         if self.clusters > 1:
             clusters = images.make_clusters(number=self.clusters)
@@ -44,7 +47,7 @@ class DetectionRunner(object):
         for i, cluster in enumerate(clusters):
             print("Cluster {}".format(i + 1))
             threshold = self.process_cluster(detector, cluster)
-            self.postprocess_map(cluster, threshold)
+            self.postprocess_maps(cluster, threshold)
 
     def process_cluster(self, detector, cluster):
         print("  Training")
@@ -56,20 +59,34 @@ class DetectionRunner(object):
         for i, image in enumerate(cluster):
             print("  Image {} of {}".format(i + 1, total_images))
             saliency_map = detector.apply(image.path)
-            cv2.filter2D(saliency_map, -1, self.region_vote_mask)
+            saliency_map = cv2.filter2D(saliency_map, -1, self.region_vote_mask)
             saliency_map = saliency_map.astype(np.float32)
             thresholds.append(np.percentile(saliency_map, self.threshold))
             np.save(self.image_path(image, 'npy'), saliency_map)
 
         return np.mean(thresholds)
 
-    def postprocess_map(self, cluster, threshold):
+    def postprocess_maps(self, cluster, threshold):
         for image in cluster:
-            saliency_map = np.load(self.image_path(image, 'npy'))
-            saliency_map = np.where(saliency_map > threshold, 255, 0)
-            imsave(self.image_path(image, 'png'), saliency_map)
-            # TODO store bounding circles in a JSON file
-            os.remove(self.image_path(image, 'npy'))
+            self.postprocess_map(image, threshold)
+
+    def postprocess_map(self, image, threshold):
+        saliency_map = np.load(self.image_path(image, 'npy'))
+        binary_map = np.where(saliency_map > threshold, 255, 0).astype(np.uint8)
+        # imsave(self.image_path(image, 'png'), binary_map)
+        mask = np.zeros_like(binary_map)
+        _, contours, _ = cv2.findContours(binary_map, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        points = []
+        for c in contours:
+            mask *= 0 # reset mask
+            cv2.drawContours(mask, [c], -1, 1, -1)
+            saliency = float(np.sum(saliency_map * mask))
+            x, y, w, h = cv2.boundingRect(c)
+            points.append([x, y, max(w, h), saliency])
+        with open(self.image_path(image, 'json'), 'w') as outfile:
+            json.dump(points, outfile)
+        os.remove(self.image_path(image, 'npy'))
+
 
     def image_path(self, image, suffix):
         return '{}/{}.{}'.format(self.tmp_dir, image.id, suffix)
