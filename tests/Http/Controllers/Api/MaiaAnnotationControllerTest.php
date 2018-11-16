@@ -3,6 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use Queue;
+use Response;
 use ApiTestCase;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
@@ -24,6 +25,7 @@ class MaiaAnnotationControllerTest extends ApiTestCase
         $this->getJson("/api/v1/maia-annotations/{$a->id}/file")->assertStatus(403);
 
         $this->beEditor();
+        Response::shouldReceive('download')->once();
         $this->getJson("/api/v1/maia-annotations/{$a->id}/file")->assertStatus(200);
     }
 
