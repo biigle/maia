@@ -36,9 +36,11 @@ class InstanceSegmentationRequest extends JobRequest
      */
     public function handle()
     {
+        $this->ensureTmpDir();
+
         // TODO Run actual instance segmentation here.
-        if ($this->images->isNotEmpty()) {
-            $id = $this->images->keys()->first();
+        if (!empty($this->images)) {
+            $id = array_keys($this->images)[0];
             $this->dispatchResponse([$id => [
                 [200, 200, 100, 0],
                 [400, 400, 100, 0],
@@ -48,6 +50,8 @@ class InstanceSegmentationRequest extends JobRequest
         } else {
             $this->dispatchResponse([]);
         }
+
+        $this->cleanup();
     }
 
     /**
@@ -58,14 +62,6 @@ class InstanceSegmentationRequest extends JobRequest
     protected function dispatchResponse($annotations)
     {
         $this->dispatch(new InstanceSegmentationResponse($this->jobId, $annotations));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function cleanup()
-    {
-        //
     }
 
     /**

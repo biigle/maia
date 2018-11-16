@@ -2,9 +2,11 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use File;
 use Queue;
 use Exception;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\GenericImage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
@@ -41,6 +43,13 @@ class JobRequest extends Job implements ShouldQueue
     protected $images;
 
     /**
+     * Temporary directory for files of this job.
+     *
+     * @var string
+     */
+    protected $tmpDir;
+
+    /**
      * Create a new instance
      *
      * @param MaiaJob $job
@@ -50,7 +59,8 @@ class JobRequest extends Job implements ShouldQueue
         $this->jobId = $job->id;
         $this->jobParams = $job->params;
         $this->volumeUrl = $job->volume->url;
-        $this->images = $job->volume->images()->pluck('filename', 'id');
+        $this->images = $job->volume->images()->pluck('filename', 'id')->toArray();
+        $this->tmpDir = config('maia.tmp_dir')."/maia-{$job->id}";
     }
 
     /**
@@ -66,11 +76,23 @@ class JobRequest extends Job implements ShouldQueue
     }
 
     /**
+     * Create GenericImage instances for the images of this job.
+     *
+     * @return array
+     */
+    protected function getGenericImages()
+    {
+        return array_map(function ($id, $filename) {
+            return new GenericImage($id, "{$this->volumeUrl}/{$filename}");
+        }, array_keys($this->images), $this->images);
+    }
+
+    /**
      * Clean up temporary data produced by this job.
      */
     protected function cleanup()
     {
-        //
+        File::deleteDirectory($this->tmpDir);
     }
 
     /**
@@ -84,6 +106,14 @@ class JobRequest extends Job implements ShouldQueue
     }
 
     /**
+     * Make sure the temporary directory for this request exists.
+     */
+    protected function ensureTmpDir()
+    {
+        $ret = File::makeDirectory($this->tmpDir, 0700, true, true);
+    }
+
+    /**
      * Dispatch a response (success or failure) to the BIIGLE instance.
      *
      * @param Job $job The job to be sent to the BIIGLE instance.
@@ -92,5 +122,29 @@ class JobRequest extends Job implements ShouldQueue
     {
         Queue::connection(config('maia.response_connection'))
             ->pushOn(config('maia.response_queue'), $job);
+    }
+
+    /**
+     * Execute a Python command and return the printed lines.
+     *
+     * @param string $command
+     * @throws Exception On a non-zero exit code.
+     *
+     * @return array
+     */
+    protected function python($command)
+    {
+        $code = 0;
+        $lines = [];
+        $python = config('maia.python');
+        exec("{$python} {$command}", $lines, $code);
+
+        if ($code !== 0) {
+            $lines = implode("\n", $lines);
+            throw new Exception("Error while executing python command '{$command}':\n{$lines}", $code);
+
+        }
+
+        return $lines;
     }
 }

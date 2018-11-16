@@ -20,7 +20,7 @@ class JobResponse extends Job implements ShouldQueue
      *
      * @var int
      */
-    protected $jobId;
+    public $jobId;
 
     /**
      * Center points, radii and scores of annotations to create, indexed by image
@@ -36,7 +36,7 @@ class JobResponse extends Job implements ShouldQueue
      *
      * @var array
      */
-    protected $annotations;
+    public $annotations;
 
     /**
      * Create a new instance

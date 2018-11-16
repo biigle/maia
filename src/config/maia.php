@@ -25,4 +25,20 @@ return [
     | Directory where the annotation patch images will be stored
     */
     'patch_storage' => storage_path('maia_patches'),
+
+    /*
+    | Directory where the temporary files of novelty detection or instance segmentation
+    | should be stored.
+    */
+    'tmp_dir' => sys_get_temp_dir(),
+
+    /*
+    | Path to the Python executable.
+    */
+    'python' => '/usr/bin/python3',
+
+    /*
+    | Path to the novelty detection script.
+    */
+    'novelty_detection_script' => __DIR__.'/../resources/scripts/novelty-detection/DetectionRunner.py',
 ];
