@@ -79,7 +79,9 @@ class DetectionRunner(object):
             cv2.drawContours(mask, [c], -1, 1, -1)
             saliency = float(np.sum(saliency_map * mask))
             x, y, w, h = cv2.boundingRect(c)
-            points.append([x, y, max(w, h), saliency])
+            cx = x + round(w / 2)
+            cy = y + round(h / 2)
+            points.append([cx, cy, max(w, h), saliency])
         with open(self.image_path(image, 'json'), 'w') as outfile:
             json.dump(points, outfile)
         os.remove(self.image_path(image, 'npy'))
