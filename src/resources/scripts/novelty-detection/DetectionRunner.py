@@ -12,17 +12,17 @@ class DetectionRunner(object):
 
     def __init__(self, params):
         # Number of image clusters to use
-        self.clusters = params['clusters']
+        self.clusters = int(params['clusters'])
         # Size of the input image patches for the autoencoder.
-        self.patch_size = params['patch_size']
+        self.patch_size = int(params['patch_size'])
         # Percentile to use to determine the dynamic threshold.
-        self.threshold = params['threshold']
+        self.threshold = int(params['threshold'])
         # Size of the latent layer of the autoencoder relative to the input size.
-        self.latent_size = params['latent_size']
+        self.latent_size = float(params['latent_size'])
         # Size of the training dataset of patches for the autoencoder.
-        self.trainset_size = params['trainset_size']
+        self.trainset_size = int(params['trainset_size'])
         # Number of training epochs for the autoencoder.
-        self.epochs = params['epochs']
+        self.epochs = int(params['epochs'])
 
         # Dict of image IDs and file paths to the images to process.
         self.images = params['images']

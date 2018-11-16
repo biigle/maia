@@ -43,9 +43,6 @@ class JobFailure extends Job implements ShouldQueue
      */
     public function handle()
     {
-        // TODO handle failure with database transaction. Move job params to "attrs".
-        // Use attrs for novelty detection params, instance segmentation params and
-        // failure error message. Add job state "failed".
         $job = MaiaJob::find($this->jobId);
         $job->error = ['message' => $this->message];
         $this->updateJobState($job);
