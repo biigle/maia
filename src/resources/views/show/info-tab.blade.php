@@ -38,7 +38,7 @@
             </tr>
         </tbody>
     </table>
-    <form class="text-right" action="{{ url("api/v1/maia/{$job->id}") }}" method="POST">
+    <form class="text-right" action="{{ url("api/v1/maia-jobs/{$job->id}") }}" method="POST">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <input type="hidden" name="_method" value="DELETE">
         @if ($job->state_id === $states['novelty-detection'])
