@@ -58,6 +58,10 @@ class JobResponse extends Job implements ShouldQueue
         // Make sure to roll back any DB modifications if an error occurs.
         DB::transaction(function () {
             $job = MaiaJob::find($this->jobId);
+            if ($job === null) {
+                // Ignore the results if the job no longer exists for some reason.
+                return;
+            }
             $this->createMaiaAnnotations();
             $this->dispatchAnnotationPatchJobs($job);
             $this->updateJobState($job);
