@@ -5,12 +5,11 @@
     :annotations="selectedTpForCurrentImage"
     :unselected-annotations="unSelectedTpForCurrentImage"
     :selected-annotations="currentTpArray"
-    {{-- :last-created-annotation="lastCreatedAnnotation" --}}
     v-on:previous="handlePrevious"
     v-on:next="handleNext"
-    {{-- v-on:select="handleSelectAnnotations" --}}
     v-on:update="handleRefineTp"
-    {{-- v-on:delete="handleDeleteAnnotations" --}}
+    v-on:select-tp="handleSelectTp"
+    v-on:unselect-tp="handleUnselectTp"
     ref="refineCanvas"
     inline-template>
     <div class="annotation-canvas">
@@ -22,9 +21,11 @@
                 <control-button icon="fa-step-backward" title="Previous training proposal 𝗟𝗲𝗳𝘁 𝗮𝗿𝗿𝗼𝘄" v-on:click="handlePrevious"></control-button>
                 <control-button icon="fa-step-forward" title="Next training proposal 𝗥𝗶𝗴𝗵𝘁 𝗮𝗿𝗿𝗼𝘄/𝗦𝗽𝗮𝗰𝗲" v-on:click="handleNext"></control-button>
             </div>
-            {{-- <div class="btn-group drawing-controls">
-                <control-button icon="fa-plus" title="Toggle marking of a training proposal as interesting" :active="false" v-on:click="toggleMarkAsInteresting" disabled></control-button>
-            </div> --}}
+            @if ($job->state_id === $states['training-proposals'])
+                <div class="btn-group drawing-controls">
+                    <control-button icon="fa-plus" title="Mark a training proposal as interesting" :active="selectingTp" v-on:click="toggleMarkAsInteresting"></control-button>
+                </div>
+            @endif
         </div>
     </div>
 </refine-tp-canvas>

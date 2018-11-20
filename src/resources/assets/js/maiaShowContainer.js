@@ -180,22 +180,18 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             handleSelectedTrainingProposal: function (proposal, event) {
                 if (proposal.selected) {
-                    proposal.selected = false;
-                    maiaAnnotationApi.update({id: proposal.id}, {selected: false})
-                        .catch(function (response) {
-                            messages.handleErrorResponse(response);
-                            proposal.selected = true;
-                        });
+                    this.updateSelectTrainingProposal(proposal, false);
                 } else {
                     if (event.shiftKey && this.lastSelectedTp) {
                         this.selectAllTpBetween(proposal, this.lastSelectedTp);
                     } else {
                         this.lastSelectedTp = proposal;
-                        this.storeSelectTrainingProposal(proposal);
+                        this.updateSelectTrainingProposal(proposal, true);
                     }
                 }
             },
             updateSelectTpOffset: function (offset) {
+                // TODO this updates on keyboard events of the refine view, too!
                 this.selectTpOffset = offset;
             },
             selectAllTpBetween: function (first, second) {
@@ -208,15 +204,15 @@ biigle.$viewModel('maia-show-container', function (element) {
                 }
 
                 for (var i = index1 + 1; i <= index2; i++) {
-                    this.storeSelectTrainingProposal(this.trainingProposals[i]);
+                    this.updateSelectTrainingProposal(this.trainingProposals[i], true);
                 }
             },
-            storeSelectTrainingProposal: function (proposal) {
-                proposal.selected = true;
-                maiaAnnotationApi.update({id: proposal.id}, {selected: true})
+            updateSelectTrainingProposal: function (proposal, selected) {
+                proposal.selected = selected;
+                maiaAnnotationApi.update({id: proposal.id}, {selected: selected})
                     .catch(function (response) {
                         messages.handleErrorResponse(response);
-                        proposal.selected = false;
+                        proposal.selected = !selected;
                     });
             },
             fetchCurrentImage: function () {
@@ -264,6 +260,12 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             focusCurrentTp: function () {
                 this.$refs.refineCanvas.focusAnnotation(this.currentTp, true, false);
+            },
+            handleSelectTp: function (proposal) {
+                this.updateSelectTrainingProposal(proposal, true);
+            },
+            handleUnselectTp: function (proposal) {
+                this.updateSelectTrainingProposal(proposal, false);
             },
         },
         watch: {
