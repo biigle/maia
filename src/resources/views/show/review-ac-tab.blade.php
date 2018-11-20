@@ -1,3 +1,5 @@
+<review-ac-tab inline-template>
 <div class="sidebar-tab__content">
-    review ac
+
 </div>
+</review-ac-tab>

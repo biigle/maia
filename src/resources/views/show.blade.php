@@ -33,12 +33,19 @@
         <div v-show="infoTabOpen" class="maia-content">
             @include('maia::show.info-content')
         </div>
-        <div v-show="selectTpTabOpen" v-cloak class="maia-content">
-            @include('maia::show.select-tp-content')
-        </div>
-        <div v-show="refineTpTabOpen" v-cloak class="maia-content">
-            @include('maia::show.refine-tp-content')
-        </div>
+        @if ($job->state_id >= $states['training-proposals'])
+            <div v-show="selectTpTabOpen" v-cloak class="maia-content">
+                @include('maia::show.select-tp-content')
+            </div>
+            <div v-show="refineTpTabOpen" v-cloak class="maia-content">
+                @include('maia::show.refine-tp-content')
+            </div>
+        @endif
+        @if ($job->state_id >= $states['annotation-candidates'])
+            <div v-show="reviewAcTabOpen" v-cloak class="maia-content">
+                @include('maia::show.review-ac-content')
+            </div>
+        @endif
         <loader-block :active="loading"></loader-block>
     </div>
     <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened" v-on:toggle="handleSidebarToggle">

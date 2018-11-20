@@ -19,6 +19,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             tpImageGrid: biigle.$require('maia.components.tpImageGrid'),
             refineTpTab: biigle.$require('maia.components.refineTpTab'),
             refineTpCanvas: biigle.$require('maia.components.refineTpCanvas'),
+            reviewAcTab: biigle.$require('maia.components.reviewAcTab'),
+            acImageGrid: biigle.$require('maia.components.acImageGrid'),
         },
         data: {
             visitedSelectTpTab: false,
@@ -30,6 +32,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             lastSelectedTp: null,
             currentImage: null,
             currentTpIndex: 0,
+            annotationCandidates: [],
+            reviewAcOffset: 0,
         },
         computed: {
             infoTabOpen: function () {
@@ -47,8 +51,14 @@ biigle.$viewModel('maia-show-container', function (element) {
             hasTrainingProposals: function () {
                 return this.trainingProposals.length > 0;
             },
+            hasAnnotationCandidates: function () {
+                return this.annotationCandidates.length > 0;
+            },
             isInTrainingProposalState: function () {
                 return job.state_id === states['training-proposals'];
+            },
+            isInAnnotationCandidateState: function () {
+                return job.state_id === states['annotation-candidates'];
             },
             imageIds: function () {
                 var tmp = {};
@@ -200,6 +210,10 @@ biigle.$viewModel('maia-show-container', function (element) {
                 // TODO this updates on keyboard events of the refine view, too!
                 this.selectTpOffset = offset;
             },
+            updateReviewAcOffset: function (offset) {
+                // TODO this updates on keyboard events of the refine view, too!
+                this.reviewAcOffset = offset;
+            },
             selectAllTpBetween: function (first, second) {
                 var index1 = this.trainingProposals.indexOf(first);
                 var index2 = this.trainingProposals.indexOf(second);
@@ -281,6 +295,23 @@ biigle.$viewModel('maia-show-container', function (element) {
             handleUnselectTp: function (proposal) {
                 this.updateSelectTrainingProposal(proposal, false);
             },
+            setAnnotationCandidates: function (response) {
+                this.annotationCandidates = response.body.map(function (c) {
+                    c.shape = 'Circle';
+                    return c;
+                });
+            },
+            fetchAnnotationCandidates: function () {
+                this.startLoading();
+
+                return maiaJobApi.getAnnotationCandidates({id: job.id})
+                    .then(this.setAnnotationCandidates)
+                    .catch(messages.handleErrorResponse)
+                    .finally(this.finishLoading);
+            },
+            handleSelectedAnnotationCandidate: function (candidate) {
+                console.log('select', candidate);
+            },
         },
         watch: {
             selectTpTabOpen: function () {
@@ -294,6 +325,9 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             visitedSelectOrRefineTpTab: function () {
                 this.fetchTrainingProposals();
+            },
+            visitedReviewAcTab: function () {
+                this.fetchAnnotationCandidates();
             },
             currentImageId: function (id) {
                 if (id) {
