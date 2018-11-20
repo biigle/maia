@@ -5,7 +5,11 @@
  */
 biigle.$component('maia.components.refineTpTab', {
     props: {
-        trainingProposals: {
+        selectedTrainingProposals: {
+            type: Array,
+            required: true,
+        },
+        seenTrainingProposals: {
             type: Array,
             required: true,
         },
@@ -16,10 +20,23 @@ biigle.$component('maia.components.refineTpTab', {
         };
     },
     computed: {
+        numberSelectedTps: function () {
+            return this.selectedTrainingProposals.length;
+        },
+        numberSeenTps: function () {
+            return this.seenTrainingProposals.length;
+        },
         hasNoSelectedTp: function () {
-            return !this.trainingProposals.reduce(function (carry, current) {
-                return carry || current.selected;
-            }, false);
+            return this.numberSelectedTps === 0;
+        },
+        hasSeenAllSelectedTps: function () {
+            return this.numberSelectedTps > 0 && this.numberSelectedTps === this.numberSeenTps;
+        },
+        textClass: function () {
+            return this.hasSeenAllSelectedTps ? 'text-success' : '';
+        },
+        buttonClass: function () {
+            return this.hasSeenAllSelectedTps ? 'btn-success' : 'btn-default';
         },
     },
     methods: {

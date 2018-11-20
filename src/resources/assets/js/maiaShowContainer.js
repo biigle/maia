@@ -151,6 +151,11 @@ biigle.$viewModel('maia-show-container', function (element) {
             visitedSelectOrRefineTpTab: function () {
                 return this.visitedSelectTpTab || this.visitedRefineTpTab;
             },
+            selectedAndSeenTps: function () {
+                return this.selectedTpOrderedByImageId.filter(function (p) {
+                    return p.seen;
+                });
+            },
         },
         methods: {
             handleSidebarToggle: function () {
@@ -164,6 +169,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             setTrainingProposals: function (response) {
                 this.trainingProposals = response.body.map(function (p) {
                     p.shape = 'Circle';
+                    p.seen = false;
                     return p;
                 });
             },
@@ -240,9 +246,17 @@ biigle.$viewModel('maia-show-container', function (element) {
                 }
             },
             handleNext: function () {
+                if (this.currentTp) {
+                    this.currentTp.seen = true;
+                }
+
                 this.currentTpIndex = this.nextTpIndex;
             },
             handlePrevious: function () {
+                if (this.currentTp) {
+                    this.currentTp.seen = true;
+                }
+
                 this.currentTpIndex = this.previousTpIndex;
             },
             handleRefineTp: function (proposals) {
