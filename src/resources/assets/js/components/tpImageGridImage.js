@@ -26,7 +26,9 @@ biigle.$component('maia.components.tpImageGridImage', {
             return this.image.selected;
         },
         title: function () {
-            return this.selected ? 'Undo marking as interesting' : 'Mark as interesting';
+            if (this.selectable) {
+                return this.selected ? 'Undo marking as interesting' : 'Mark as interesting';
+            }
         },
     },
     methods: {
