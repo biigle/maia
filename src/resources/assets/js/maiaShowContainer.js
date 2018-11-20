@@ -132,6 +132,12 @@ biigle.$viewModel('maia-show-container', function (element) {
                     return p.selected;
                 });
             },
+            unSelectedTpForCurrentImage: function () {
+                return this.tpForCurrentImage.filter(function (p) {
+                    return !p.selected;
+                });
+            },
+            // The currently selected training proposal that should be highlighted.
             currentTpArray: function () {
                 if (this.hasCurrentImage && this.currentTp) {
                     return [this.currentTp];

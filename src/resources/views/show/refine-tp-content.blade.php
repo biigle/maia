@@ -3,6 +3,7 @@
     :show-minimap="hasCurrentImage"
     :image="currentImage"
     :annotations="selectedTpForCurrentImage"
+    :unselected-annotations="unSelectedTpForCurrentImage"
     :selected-annotations="currentTpArray"
     {{-- :last-created-annotation="lastCreatedAnnotation" --}}
     v-on:previous="handlePrevious"
