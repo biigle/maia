@@ -14,27 +14,27 @@
         <tbody>
             <tr>
                 <td>Clusters</td>
-                <td class="text-right"><code>{{$job->params['clusters']}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'clusters')}}</code></td>
             </tr>
             <tr>
                 <td>Patch size</td>
-                <td class="text-right"><code>{{$job->params['patch_size']}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'patch_size')}}</code></td>
             </tr>
             <tr>
                 <td>Threshold</td>
-                <td class="text-right"><code>{{$job->params['threshold']}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'threshold')}}</code></td>
             </tr>
             <tr>
                 <td>Latent size</td>
-                <td class="text-right"><code>{{$job->params['latent_size']}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'latent_size')}}</code></td>
             </tr>
             <tr>
                 <td>Training size</td>
-                <td class="text-right"><code>{{$job->params['trainset_size']}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'trainset_size')}}</code></td>
             </tr>
             <tr>
                 <td>Training epochs</td>
-                <td class="text-right"><code>{{$job->params['epochs']}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'epochs')}}</code></td>
             </tr>
         </tbody>
     </table>

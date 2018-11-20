@@ -131,7 +131,7 @@ class MaiaJob extends Model
      */
     public function getParamsAttribute()
     {
-        return $this->getJsonAttr('params');
+        return $this->getJsonAttr('params', []);
     }
 
     /**
@@ -151,7 +151,7 @@ class MaiaJob extends Model
      */
     public function getErrorAttribute()
     {
-        return $this->getJsonAttr('error');
+        return $this->getJsonAttr('error', []);
     }
 
     /**
