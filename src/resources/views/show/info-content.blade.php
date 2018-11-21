@@ -23,6 +23,9 @@
                 The job has failed during instance segmentation.
             @endif
         </p>
+        @if (config('app.debug') && array_key_exists('message', $job->error))
+            <pre style="max-width: 90%;max-height: 50%">{{$job->error['message']}}</pre>
+        @endif
     @else
         <div class="maia-status maia-status--running">
             <span class="fa-stack fa-2x" title="Job in progress">

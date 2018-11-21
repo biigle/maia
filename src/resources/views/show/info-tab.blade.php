@@ -5,11 +5,6 @@
     <p>
         @include('maia::mixins.job-state', ['job' => $job])
     </p>
-    @if ($job->hasFailed() && array_key_exists('message', $job->error))
-        <div class="panel panel-danger">
-            <div class="panel-body text-danger">{{$job->error['message']}}</div>
-        </div>
-    @endif
     <table class="table">
         <tbody>
             <tr>
