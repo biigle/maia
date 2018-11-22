@@ -23,7 +23,7 @@
                 The job has failed during instance segmentation.
             @endif
         </p>
-        @if (config('app.debug') && array_key_exists('message', $job->error))
+        @if (($user->can('sudo') || config('app.debug')) && array_key_exists('message', $job->error))
             <pre style="max-width: 90%;max-height: 50%">{{$job->error['message']}}</pre>
         @endif
     @else
