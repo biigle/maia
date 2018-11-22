@@ -28,6 +28,8 @@ class DetectionRunner(object):
         self.images = params['images']
         # Path to the directory to store temporary files.
         self.tmp_dir = params['tmp_dir']
+        # Estimated available GPU memory in bytes.
+        self.available_bytes = params['available_bytes']
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
         self.detector_stride = 2
@@ -55,7 +57,7 @@ class DetectionRunner(object):
 
         for i, image in enumerate(cluster):
             print("  Image {} of {}".format(i + 1, total_images))
-            saliency_map = detector.apply(image.path)
+            saliency_map = detector.apply(image.path, available_bytes=self.available_bytes)
             saliency_map = cv2.filter2D(saliency_map, -1, self.region_vote_mask)
             saliency_map = saliency_map.astype(np.float32)
             thresholds.append(np.percentile(saliency_map, self.threshold))

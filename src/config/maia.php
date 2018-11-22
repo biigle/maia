@@ -33,6 +33,14 @@ return [
     'tmp_dir' => sys_get_temp_dir(),
 
     /*
+    | Estimated available GPU memory in bytes. The Python scripts use this to determine
+    | their memory load to get the best performance (or work at all in low memory cases).
+    |
+    | Default is 8 GB.
+    */
+    'available_bytes' => env('MAIA_AVAILABLE_BYTES', 8E+9),
+
+    /*
     | Path to the Python executable.
     */
     'python' => '/usr/bin/python3',

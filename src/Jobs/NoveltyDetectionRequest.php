@@ -63,6 +63,7 @@ class NoveltyDetectionRequest extends JobRequest
             'epochs' => $this->jobParams['epochs'],
             'images' => $imagesMap,
             'tmp_dir' => $this->tmpDir,
+            'available_bytes' => config('maia.available_bytes'),
         ];
 
         File::put($path, json_encode($content));
