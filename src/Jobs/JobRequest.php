@@ -125,26 +125,27 @@ class JobRequest extends Job implements ShouldQueue
     }
 
     /**
-     * Execute a Python command and return the printed lines.
+     * Execute a Python command and return the path to a file containing the output.
      *
      * @param string $command
      * @throws Exception On a non-zero exit code.
      *
-     * @return array
+     * @return string
      */
     protected function python($command)
     {
         $code = 0;
         $lines = [];
         $python = config('maia.python');
-        exec("{$python} {$command} 2>&1", $lines, $code);
+        $logFile = "{$this->tmpDir}/log.txt"
+        exec("{$python} {$command} 2>&1 >{$logFile}", $lines, $code);
 
         if ($code !== 0) {
-            $lines = implode("\n", $lines);
+            $lines = File::get($logFile);
             throw new Exception("Error while executing python command '{$command}':\n{$lines}", $code);
 
         }
 
-        return $lines;
+        return $logFile;
     }
 }
