@@ -66,7 +66,7 @@ class NoveltyDetectionRequest extends JobRequest
             'available_bytes' => config('maia.available_bytes'),
         ];
 
-        File::put($path, json_encode($content));
+        File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
 
         return $path;
     }
