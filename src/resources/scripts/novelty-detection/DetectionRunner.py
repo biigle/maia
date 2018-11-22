@@ -29,7 +29,7 @@ class DetectionRunner(object):
         # Path to the directory to store temporary files.
         self.tmp_dir = params['tmp_dir']
         # Estimated available GPU memory in bytes.
-        self.available_bytes = params['available_bytes']
+        self.available_bytes = int(params['available_bytes'])
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
         self.detector_stride = 2
