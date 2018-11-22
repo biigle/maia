@@ -138,7 +138,7 @@ class JobRequest extends Job implements ShouldQueue
         $lines = [];
         $python = config('maia.python');
         $logFile = "{$this->tmpDir}/log.txt";
-        exec("{$python} {$command} >{$logFile} 2>&1", $lines, $code);
+        exec("{$python} -u {$command} >{$logFile} 2>&1", $lines, $code);
 
         if ($code !== 0) {
             $lines = File::get($logFile);
