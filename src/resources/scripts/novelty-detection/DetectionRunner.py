@@ -12,24 +12,24 @@ class DetectionRunner(object):
 
     def __init__(self, params):
         # Number of image clusters to use
-        self.clusters = int(params['clusters'])
+        self.clusters = params['clusters']
         # Size of the input image patches for the autoencoder.
-        self.patch_size = int(params['patch_size'])
+        self.patch_size = params['patch_size']
         # Percentile to use to determine the dynamic threshold.
-        self.threshold = int(params['threshold'])
+        self.threshold = params['threshold']
         # Size of the latent layer of the autoencoder relative to the input size.
-        self.latent_size = float(params['latent_size'])
+        self.latent_size = params['latent_size']
         # Size of the training dataset of patches for the autoencoder.
-        self.trainset_size = int(params['trainset_size'])
+        self.trainset_size = params['trainset_size']
         # Number of training epochs for the autoencoder.
-        self.epochs = int(params['epochs'])
+        self.epochs = params['epochs']
 
         # Dict of image IDs and file paths to the images to process.
         self.images = params['images']
         # Path to the directory to store temporary files.
         self.tmp_dir = params['tmp_dir']
         # Estimated available GPU memory in bytes.
-        self.available_bytes = int(params['available_bytes'])
+        self.available_bytes = params['available_bytes']
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
         self.detector_stride = 2

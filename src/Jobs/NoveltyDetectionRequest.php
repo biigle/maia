@@ -55,15 +55,15 @@ class NoveltyDetectionRequest extends JobRequest
         }
 
         $content = [
-            'clusters' => $this->jobParams['clusters'],
-            'patch_size' => $this->jobParams['patch_size'],
-            'threshold' => $this->jobParams['threshold'],
-            'latent_size' => $this->jobParams['latent_size'],
-            'trainset_size' => $this->jobParams['trainset_size'],
-            'epochs' => $this->jobParams['epochs'],
+            'clusters' => intval($this->jobParams['clusters']),
+            'patch_size' => intval($this->jobParams['patch_size']),
+            'threshold' => intval($this->jobParams['threshold']),
+            'latent_size' => floatval($this->jobParams['latent_size']),
+            'trainset_size' => intval($this->jobParams['trainset_size']),
+            'epochs' => intval($this->jobParams['epochs']),
             'images' => $imagesMap,
             'tmp_dir' => $this->tmpDir,
-            'available_bytes' => config('maia.available_bytes'),
+            'available_bytes' => intval(config('maia.available_bytes')),
         ];
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
