@@ -76,7 +76,7 @@ biigle.$component('maia.components.refineTpCanvas', {
         if (this.canModify) {
             this.createSelectTpInteraction(this.unselectedAnnotationFeatures);
             this.map.addInteraction(this.selectTpInteraction);
-            biigle.$require('keyboard').on('Delete', this.handleUnselectTp);
+            biigle.$require('keyboard').on('Delete', this.handleUnselectTp, 0, this.listenerSet);
         }
     },
 });

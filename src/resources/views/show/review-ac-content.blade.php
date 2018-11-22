@@ -7,6 +7,7 @@
     :initial-offset="reviewAcOffset"
     :selectable="isInAnnotationCandidateState"
     selected-icon="check"
+    listener-set="review-ac"
     v-on:select="handleSelectedAnnotationCandidate"
     v-on:scroll="updateReviewAcOffset"></ac-image-grid>
 <div v-if="!loading && !hasAnnotationCandidates" class="maia-content-message">

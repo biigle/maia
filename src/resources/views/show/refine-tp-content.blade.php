@@ -10,6 +10,7 @@
     v-on:update="handleRefineTp"
     v-on:select-tp="handleSelectTp"
     v-on:unselect-tp="handleUnselectTp"
+    listener-set="refine-tp"
     ref="refineCanvas"
     inline-template>
     <div class="annotation-canvas">

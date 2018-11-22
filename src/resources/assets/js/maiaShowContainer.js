@@ -314,14 +314,23 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
         },
         watch: {
-            selectTpTabOpen: function () {
+            selectTpTabOpen: function (open) {
                 this.visitedSelectTpTab = true;
+                if (open) {
+                    biigle.$require('keyboard').setActiveSet('select-tp');
+                }
             },
-            refineTpTabOpen: function () {
+            refineTpTabOpen: function (open) {
                 this.visitedRefineTpTab = true;
+                if (open) {
+                    biigle.$require('keyboard').setActiveSet('refine-tp');
+                }
             },
-            reviewAcTabOpen: function () {
+            reviewAcTabOpen: function (opens) {
                 this.visitedReviewAcTab = true;
+                if (open) {
+                    biigle.$require('keyboard').setActiveSet('review-ac');
+                }
             },
             visitedSelectOrRefineTpTab: function () {
                 this.fetchTrainingProposals();

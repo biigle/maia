@@ -7,6 +7,7 @@
     :initial-offset="selectTpOffset"
     :selectable="isInTrainingProposalState"
     selected-icon="plus"
+    listener-set="select-tp"
     v-on:select="handleSelectedTrainingProposal"
     v-on:scroll="updateSelectTpOffset"
     ref="imageGrid"></tp-image-grid>
