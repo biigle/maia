@@ -5,7 +5,7 @@ import tensorflow as tf
 
 class Autoencoder(object):
 
-    def __init__(self, n_layers, transfer_function=tf.nn.softplus, optimizer=tf.train.AdamOptimizer()):
+    def __init__(self, n_layers, transfer_function=tf.nn.softplus, optimizer=tf.train.AdamOptimizer(), allow_growth=True):
         self.n_layers = n_layers
         self.transfer = transfer_function
 
@@ -20,7 +20,9 @@ class Autoencoder(object):
         self.cost = tf.losses.mean_squared_error(self.reconstruction, self.x)
         self.optimizer = optimizer.minimize(self.cost)
 
-        self.sess = tf.Session()
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = allow_growth
+        self.sess = tf.Session(config=config)
         self._initialize()
 
     def _initialize_weights(self):
