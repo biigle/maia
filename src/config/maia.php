@@ -30,7 +30,7 @@ return [
     | Directory where the temporary files of novelty detection or instance segmentation
     | should be stored.
     */
-    'tmp_dir' => sys_get_temp_dir(),
+    'tmp_dir' => env('MAIA_TMP_DIR', sys_get_temp_dir()),
 
     /*
     | Estimated available GPU memory in bytes. The Python scripts use this to determine

@@ -60,7 +60,6 @@ class JobRequest extends Job implements ShouldQueue
         $this->jobParams = $job->params;
         $this->volumeUrl = $job->volume->url;
         $this->images = $job->volume->images()->pluck('filename', 'id')->toArray();
-        $this->tmpDir = config('maia.tmp_dir')."/maia-{$job->id}";
     }
 
     /**
@@ -110,7 +109,12 @@ class JobRequest extends Job implements ShouldQueue
      */
     protected function ensureTmpDir()
     {
-        $ret = File::makeDirectory($this->tmpDir, 0700, true, true);
+        if (!isset($this->tmpDir)) {
+            // Do not set this in the constructor because else the config of the
+            // requesting instance would be used and not the config of the GPU instance.
+            $this->tmpDir = config('maia.tmp_dir')."/maia-{$this->jobId}";
+            File::makeDirectory($this->tmpDir, 0700, true, true);
+        }
     }
 
     /**
