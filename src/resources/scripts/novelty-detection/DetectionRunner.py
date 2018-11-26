@@ -37,7 +37,7 @@ class DetectionRunner(object):
         self.detector_stride = 2
 
     def run(self):
-        images = ImageCollection(self.images);
+        images = ImageCollection(self.images, executor=self.executor);
         if self.clusters > 1:
             clusters = images.make_clusters(number=self.clusters)
         else:
