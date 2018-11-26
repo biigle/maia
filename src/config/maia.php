@@ -46,6 +46,12 @@ return [
     'python' => '/usr/bin/python3',
 
     /*
+    | Number of worker threads to use during novelty detection or instance segmentation.
+    | Set this to the number of available CPU cores.
+    */
+    'max_workers' => env('MAIA_MAX_WORKERS', 2),
+
+    /*
     | Path to the novelty detection script.
     */
     'novelty_detection_script' => __DIR__.'/../resources/scripts/novelty-detection/DetectionRunner.py',

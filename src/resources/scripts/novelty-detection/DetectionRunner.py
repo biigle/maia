@@ -3,10 +3,9 @@ import os
 import json
 import cv2
 import numpy as np
-# from scipy.misc import imsave
+import concurrent.futures
 from ImageCollection import ImageCollection
 from AutoencoderSaliencyDetector import AutoencoderSaliencyDetector
-
 
 class DetectionRunner(object):
 
@@ -31,6 +30,9 @@ class DetectionRunner(object):
         # Estimated available GPU memory in bytes.
         self.available_bytes = params['available_bytes']
 
+        self.max_workers = params['max_workers']
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers)
+
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
         self.detector_stride = 2
 
@@ -43,10 +45,14 @@ class DetectionRunner(object):
 
         detector = AutoencoderSaliencyDetector(self.patch_size, stride=self.detector_stride, hidden=self.latent_size)
 
+        jobs = []
+
         for i, cluster in enumerate(clusters):
-            print("Cluster {}".format(i + 1))
+            print("Cluster {} of {}".format(i + 1, self.clusters))
             threshold = self.process_cluster(detector, cluster)
-            self.postprocess_maps(cluster, threshold)
+            jobs.extend([self.executor.submit(self.postprocess_map, image, threshold) for image in cluster])
+
+        concurrent.futures.wait(jobs)
 
     def process_cluster(self, detector, cluster):
         print("  Training")
@@ -64,10 +70,6 @@ class DetectionRunner(object):
             np.save(self.image_path(image, 'npy'), saliency_map)
 
         return np.mean(thresholds)
-
-    def postprocess_maps(self, cluster, threshold):
-        for image in cluster:
-            self.postprocess_map(image, threshold)
 
     def postprocess_map(self, image, threshold):
         saliency_map = np.load(self.image_path(image, 'npy'))

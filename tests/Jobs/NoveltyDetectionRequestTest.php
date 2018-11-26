@@ -28,6 +28,7 @@ class NoveltyDetectionRequestTest extends TestCase
             'trainset_size' => 10000,
             'epochs' => 100,
             'available_bytes' => 8E+9,
+            'max_workers' => 2,
         ];
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);

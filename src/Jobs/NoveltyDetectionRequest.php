@@ -64,6 +64,7 @@ class NoveltyDetectionRequest extends JobRequest
             'images' => $imagesMap,
             'tmp_dir' => $this->tmpDir,
             'available_bytes' => intval(config('maia.available_bytes')),
+            'max_workers' => intval(config('maia.max_workers')),
         ];
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
