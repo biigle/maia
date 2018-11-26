@@ -59,6 +59,44 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)->assertStatus(422);
     }
 
+    public function testStoreFailedNoveltyDetection()
+    {
+        $id = $this->volume()->id;
+        $job = MaiaJobTest::create([
+            'state_id' => State::failedNoveltyDetectionId(),
+            'volume_id' => $this->volume()->id,
+        ]);
+
+        $this->beEditor();
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", [
+            'clusters' => 5,
+            'patch_size' => 39,
+            'threshold' => 99,
+            'latent_size' => 0.1,
+            'trainset_size' => 10000,
+            'epochs' => 100,
+        ])->assertStatus(200);
+    }
+
+    public function testStoreFailedInstanceSegmentation()
+    {
+        $id = $this->volume()->id;
+        $job = MaiaJobTest::create([
+            'state_id' => State::failedInstanceSegmentationId(),
+            'volume_id' => $this->volume()->id,
+        ]);
+
+        $this->beEditor();
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", [
+            'clusters' => 5,
+            'patch_size' => 39,
+            'threshold' => 99,
+            'latent_size' => 0.1,
+            'trainset_size' => 10000,
+            'epochs' => 100,
+        ])->assertStatus(200);
+    }
+
     public function testStoreTiledImages()
     {
         $id = $this->volume()->id;

@@ -55,12 +55,16 @@ class StoreMaiaJob extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $hasUnfinishedJob = MaiaJob::where('volume_id', $this->volume->id)
-                ->where('state_id', '!=', State::annotationCandidatesId())
+            $hasJobInProgress = MaiaJob::where('volume_id', $this->volume->id)
+                ->whereIn('state_id', [
+                    State::noveltyDetectionId(),
+                    State::trainingProposalsId(),
+                    State::instanceSegmentationId(),
+                ])
                 ->exists();
 
-            if ($hasUnfinishedJob) {
-                $validator->errors()->add('clusters', 'A new MAIA job can only be sumbitted if there are no other unfinished jobs for the same volume.');
+            if ($hasJobInProgress) {
+                $validator->errors()->add('clusters', 'A new MAIA job can only be sumbitted if there are no other jobs in progress for the same volume.');
             }
 
             if ($this->volume->hasTiledImages()) {
