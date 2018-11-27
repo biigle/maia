@@ -50,6 +50,10 @@ class MaiaServiceProvider extends ServiceProvider
             // ],
         ]);
 
+        if (config('maia.notifications.allow_user_settings')) {
+            $modules->registerViewMixin('maia', 'settings.notifications');
+        }
+
         Gate::policy(MaiaJob::class, Policies\MaiaJobPolicy::class);
         Gate::policy(MaiaAnnotation::class, Policies\MaiaAnnotationPolicy::class);
         Event::listen(MaiaJobCreated::class, DispatchNoveltyDetectionRequest::class);

@@ -9,10 +9,12 @@ use Biigle\Shape;
 use Biigle\Tests\ImageTest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Illuminate\Support\Facades\Notification;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 
 class NoveltyDetectionResponseTest extends TestCase
 {
@@ -25,6 +27,7 @@ class NoveltyDetectionResponseTest extends TestCase
 
         $response = new NoveltyDetectionResponse($job->id, $proposals);
         Queue::fake();
+        Notification::fake();
         $response->handle();
 
         $this->assertEquals(State::trainingProposalsId(), $job->fresh()->state_id);
@@ -38,6 +41,7 @@ class NoveltyDetectionResponseTest extends TestCase
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
         Queue::assertPushed(GenerateAnnotationPatch::class);
+        Notification::assertSentTo($job->user, NoveltyDetectionComplete::class);
     }
 
     public function testHandleWrongState()

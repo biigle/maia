@@ -7,6 +7,7 @@ use Exception;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\MaiaAnnotationType as Type;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 
 class NoveltyDetectionResponse extends JobResponse
 {
@@ -52,5 +53,13 @@ class NoveltyDetectionResponse extends JobResponse
     {
         $job->state_id = State::trainingProposalsId();
         $job->save();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function sendNotification(MaiaJob $job)
+    {
+        $job->user->notify(new NoveltyDetectionComplete($job));
     }
 }

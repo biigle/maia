@@ -9,10 +9,12 @@ use Biigle\Shape;
 use Biigle\Tests\ImageTest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Illuminate\Support\Facades\Notification;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
+use Biigle\Modules\Maia\Notifications\InstanceSegmentationComplete;
 
 class InstanceSegmentationResponseTest extends TestCase
 {
@@ -25,6 +27,7 @@ class InstanceSegmentationResponseTest extends TestCase
 
         $response = new InstanceSegmentationResponse($job->id, $candidates);
         Queue::fake();
+        Notification::fake();
         $response->handle();
 
         $this->assertEquals(State::annotationCandidatesId(), $job->fresh()->state_id);
@@ -38,6 +41,7 @@ class InstanceSegmentationResponseTest extends TestCase
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
         Queue::assertPushed(GenerateAnnotationPatch::class);
+        Notification::assertSentTo($job->user, InstanceSegmentationComplete::class);
     }
 
     public function testHandleWrongState()

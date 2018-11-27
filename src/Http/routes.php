@@ -39,4 +39,8 @@ $router->group([
             'only' => ['update'],
             'parameters' => ['maia-annotations' => 'id'],
         ]);
+
+        $router->post('users/my/settings/maia', [
+            'uses' => 'SettingsController@store',
+        ]);
 });

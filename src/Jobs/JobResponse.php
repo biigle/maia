@@ -55,17 +55,21 @@ class JobResponse extends Job implements ShouldQueue
      */
     public function handle()
     {
+        $job = MaiaJob::where('state_id', $this->getExpectedJobStateId())
+            ->find($this->jobId);
+        if ($job === null) {
+            // Ignore the results if the job no longer exists for some reason.
+            return;
+        }
+
         // Make sure to roll back any DB modifications if an error occurs.
-        DB::transaction(function () {
-            $job = MaiaJob::where('state_id', $this->getExpectedJobStateId())->find($this->jobId);
-            if ($job === null) {
-                // Ignore the results if the job no longer exists for some reason.
-                return;
-            }
+        DB::transaction(function () use ($job) {
             $this->createMaiaAnnotations();
             $this->dispatchAnnotationPatchJobs($job);
             $this->updateJobState($job);
         });
+
+        $this->sendNotification($job);
     }
 
     /**
@@ -165,6 +169,16 @@ class JobResponse extends Job implements ShouldQueue
      * @param MaiaJob $job
      */
     protected function updateJobState(MaiaJob $job)
+    {
+        //
+    }
+
+    /**
+     * Send the notification about the completion to the creator of the job.
+     *
+     * @param MaiaJob $job
+     */
+    protected function sendNotification(MaiaJob $job)
     {
         //
     }

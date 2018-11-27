@@ -7,6 +7,7 @@ use Exception;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\MaiaAnnotationType as Type;
+use Biigle\Modules\Maia\Notifications\InstanceSegmentationComplete;
 
 class InstanceSegmentationResponse extends JobResponse
 {
@@ -52,5 +53,13 @@ class InstanceSegmentationResponse extends JobResponse
     {
         $job->state_id = State::annotationCandidatesId();
         $job->save();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function sendNotification(MaiaJob $job)
+    {
+        $job->user->notify(new InstanceSegmentationComplete($job));
     }
 }

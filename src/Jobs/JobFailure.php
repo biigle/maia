@@ -47,6 +47,7 @@ class JobFailure extends Job implements ShouldQueue
         $job->error = ['message' => $this->message];
         $this->updateJobState($job);
         $job->save();
+        $this->sendNotification($job);
     }
 
     /**
@@ -55,6 +56,16 @@ class JobFailure extends Job implements ShouldQueue
      * @param MaiaJob $job
      */
     protected function updateJobState(MaiaJob $job)
+    {
+        //
+    }
+
+    /**
+     * Send the notification about the failure to the creator of the job.
+     *
+     * @param MaiaJob $job
+     */
+    protected function sendNotification(MaiaJob $job)
     {
         //
     }
