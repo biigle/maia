@@ -40,6 +40,23 @@ class NoveltyDetectionResponseTest extends TestCase
         Queue::assertPushed(GenerateAnnotationPatch::class);
     }
 
+    public function testHandleWrongState()
+    {
+        $job = MaiaJobTest::create(['state_id' => State::failedNoveltyDetectionId()]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+
+        $proposals = [$image->id => [[100, 200, 20, 0]]];
+
+        $response = new NoveltyDetectionResponse($job->id, $proposals);
+        Queue::fake();
+        $response->handle();
+
+        $this->assertEquals(State::failedNoveltyDetectionId(), $job->fresh()->state_id);
+
+        $this->assertFalse($job->trainingProposals()->exists());
+        Queue::assertNotPushed(GenerateAnnotationPatch::class);
+    }
+
     public function testHandleRollback()
     {
         $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);

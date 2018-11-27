@@ -40,6 +40,23 @@ class InstanceSegmentationResponseTest extends TestCase
         Queue::assertPushed(GenerateAnnotationPatch::class);
     }
 
+    public function testHandleWrongState()
+    {
+        $job = MaiaJobTest::create(['state_id' => State::failedInstanceSegmentationId()]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+
+        $candidates = [$image->id => [[100, 200, 20, 0]]];
+
+        $response = new InstanceSegmentationResponse($job->id, $candidates);
+        Queue::fake();
+        $response->handle();
+
+        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+
+        $this->assertFalse($job->annotationCandidates()->exists());
+        Queue::assertNotPushed(GenerateAnnotationPatch::class);
+    }
+
     public function testHandleRollback()
     {
         $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);

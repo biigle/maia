@@ -11,6 +11,14 @@ use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 class NoveltyDetectionResponse extends JobResponse
 {
     /**
+     * {@inheritdoc}
+     */
+    protected function getExpectedJobStateId()
+    {
+        return State::noveltyDetectionId();
+    }
+
+    /**
      * The job failed to process.
      *
      * @param  Exception  $exception

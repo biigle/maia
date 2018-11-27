@@ -11,6 +11,14 @@ use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 class InstanceSegmentationResponse extends JobResponse
 {
     /**
+     * {@inheritdoc}
+     */
+    protected function getExpectedJobStateId()
+    {
+        return State::instanceSegmentationId();
+    }
+
+    /**
      * The job failed to process.
      *
      * @param  Exception  $exception

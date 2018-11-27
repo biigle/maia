@@ -57,7 +57,7 @@ class JobResponse extends Job implements ShouldQueue
     {
         // Make sure to roll back any DB modifications if an error occurs.
         DB::transaction(function () {
-            $job = MaiaJob::find($this->jobId);
+            $job = MaiaJob::where('state_id', $this->getExpectedJobStateId())->find($this->jobId);
             if ($job === null) {
                 // Ignore the results if the job no longer exists for some reason.
                 return;
@@ -87,6 +87,16 @@ class JobResponse extends Job implements ShouldQueue
             // annotations in one call.
             MaiaAnnotation::insert($chunk->toArray());
         });
+    }
+
+    /**
+     * Get the job state ID that the job is required to have to be modified.
+     *
+     * @return int
+     */
+    protected function getExpectedJobStateId()
+    {
+        return null;
     }
 
     /**
