@@ -24,7 +24,7 @@
             @endif
         </p>
         @if (($user->can('sudo') || config('app.debug')) && array_key_exists('message', $job->error))
-            <pre style="max-width: 90%;max-height: 50%">{{$job->error['message']}}</pre>
+            <pre style="max-width: 90%;max-height: 50%" v-pre>{{$job->error['message']}}</pre>
         @endif
     @else
         <div class="maia-status maia-status--running">
