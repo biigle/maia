@@ -34,7 +34,7 @@ class DetectionRunner(object):
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers)
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
-        self.detector_stride = 2
+        self.detector_stride = params['stride']
 
     def run(self):
         images = ImageCollection(self.images, executor=self.executor);

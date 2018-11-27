@@ -48,6 +48,7 @@ class MaiaJobController extends Controller
             'latent_size',
             'trainset_size',
             'epochs',
+            'stride',
         ]);
         $job->save();
 

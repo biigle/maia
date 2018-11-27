@@ -35,6 +35,7 @@ class MaiaJobControllerTest extends ApiTestCase
             'latent_size' => 0.1,
             'trainset_size' => 10000,
             'epochs' => 100,
+            'stride' => 2,
         ])->assertStatus(422);
 
         $params = [
@@ -44,6 +45,7 @@ class MaiaJobControllerTest extends ApiTestCase
             'latent_size' => 0.1,
             'trainset_size' => 10000,
             'epochs' => 100,
+            'stride' => 2,
         ];
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)->assertStatus(200);
@@ -75,6 +77,7 @@ class MaiaJobControllerTest extends ApiTestCase
             'latent_size' => 0.1,
             'trainset_size' => 10000,
             'epochs' => 100,
+            'stride' => 2,
         ])->assertStatus(200);
     }
 
@@ -94,6 +97,7 @@ class MaiaJobControllerTest extends ApiTestCase
             'latent_size' => 0.1,
             'trainset_size' => 10000,
             'epochs' => 100,
+            'stride' => 2,
         ])->assertStatus(200);
     }
 

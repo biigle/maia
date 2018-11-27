@@ -43,6 +43,7 @@ class StoreMaiaJob extends FormRequest
             'latent_size' => 'required|numeric|min:0.05|max:0.75',
             'trainset_size' => 'required|integer|min:1000|max:100000',
             'epochs' => 'required|integer|min:50|max:1000',
+            'stride' => 'required|integer|min:1|max:10',
         ];
     }
 

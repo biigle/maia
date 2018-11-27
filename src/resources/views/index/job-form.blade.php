@@ -72,6 +72,18 @@
                 </span>
             @endif
         </div>
+
+        <div class="form-group{{ $errors->has('stride') ? ' has-error' : '' }}">
+            <label for="stride">Stride</label>
+            <input type="number" class="form-control" name="stride" id="stride" value="{{ old('stride', 2) }}" required min="1" max="10" step="1">
+            @if($errors->has('stride'))
+               <span class="help-block">{{ $errors->first('stride') }}</span>
+            @else
+                <span class="help-block">
+                    A higher stride increases the speed of the novelty detection but reduces the sensitivity to small regions or objects.
+                </span>
+            @endif
+        </div>
     </fieldset>
 
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
