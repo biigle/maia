@@ -6,6 +6,7 @@ use Biigle\Modules\Maia\MaiaAnnotation;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Http\Requests\UpdateMaiaAnnotation;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class MaiaAnnotationController extends Controller
 {
