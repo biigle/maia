@@ -3,7 +3,7 @@ import os
 import json
 import cv2
 import numpy as np
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, wait
 from ImageCollection import ImageCollection
 from AutoencoderSaliencyDetector import AutoencoderSaliencyDetector
 
@@ -31,14 +31,26 @@ class DetectionRunner(object):
         self.available_bytes = params['available_bytes']
 
         self.max_workers = params['max_workers']
-        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers)
+        # Percentage of worker threads to use for training data preparation. The rest is
+        # used for post processing.
+        self.train_workers_ratio = 0.75
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
         self.detector_stride = params['stride']
         self.ignore_radius = params['ignore_radius']
 
     def run(self):
-        images = ImageCollection(self.images, executor=self.executor);
+        # Split available worker threads between training data preparation and post
+        # processing (if possible).
+        if self.max_workers > 1:
+            workers = min(self.max_workers - 1, round(self.max_workers * self.train_workers_ratio))
+            train_executor = ThreadPoolExecutor(max_workers=workers)
+            post_executor = ThreadPoolExecutor(max_workers=self.max_workers - workers)
+        else:
+            train_executor = ThreadPoolExecutor(max_workers=self.max_workers)
+            post_executor = train_executor
+
+        images = ImageCollection(self.images, executor=train_executor);
         if self.clusters > 1:
             clusters = images.make_clusters(number=self.clusters)
         else:
@@ -51,9 +63,9 @@ class DetectionRunner(object):
         for i, cluster in enumerate(clusters):
             print("Cluster {} of {}".format(i + 1, self.clusters))
             threshold = self.process_cluster(detector, cluster)
-            jobs.extend([self.executor.submit(self.postprocess_map, image, threshold) for image in cluster])
+            jobs.extend([post_executor.submit(self.postprocess_map, image, threshold) for image in cluster])
 
-        concurrent.futures.wait(jobs)
+        wait(jobs)
 
     def process_cluster(self, detector, cluster):
         print("  Training")
