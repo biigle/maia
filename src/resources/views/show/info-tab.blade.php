@@ -31,6 +31,14 @@
                 <td>Training epochs</td>
                 <td class="text-right"><code>{{array_get($job->params, 'epochs')}}</code></td>
             </tr>
+            <tr>
+                <td>Stride</td>
+                <td class="text-right"><code>{{array_get($job->params, 'stride')}}</code></td>
+            </tr>
+            <tr>
+                <td>Ignore radius</td>
+                <td class="text-right"><code>{{array_get($job->params, 'ignore_radius')}}</code></td>
+            </tr>
         </tbody>
     </table>
     <form class="text-right" action="{{ url("api/v1/maia-jobs/{$job->id}") }}" method="POST" onsubmit="return confirm('Are you sure that you want to delete this job?')">
