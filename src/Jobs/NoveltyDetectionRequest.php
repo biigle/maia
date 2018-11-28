@@ -66,6 +66,7 @@ class NoveltyDetectionRequest extends JobRequest
             'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),
             'stride' => intval($this->jobParams['stride']),
+            'ignore_radius' => intval($this->jobParams['ignore_radius']),
         ];
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));

@@ -35,6 +35,7 @@ class DetectionRunner(object):
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
         self.detector_stride = params['stride']
+        self.ignore_radius = params['ignore_radius']
 
     def run(self):
         images = ImageCollection(self.images, executor=self.executor);
@@ -79,13 +80,15 @@ class DetectionRunner(object):
         _, contours, _ = cv2.findContours(binary_map, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         points = []
         for c in contours:
-            mask *= 0 # reset mask
-            cv2.drawContours(mask, [c], -1, 1, -1)
-            saliency = float(np.sum(saliency_map * mask))
             x, y, w, h = cv2.boundingRect(c)
-            cx = x + round(w / 2)
-            cy = y + round(h / 2)
-            points.append([cx, cy, max(w, h), saliency])
+            rx = round(w / 2)
+            ry = round(h / 2)
+            r = max(rx, ry)
+            if r > self.ignore_radius:
+                mask *= 0 # reset mask
+                cv2.drawContours(mask, [c], -1, 1, -1)
+                saliency = float(np.sum(saliency_map * mask))
+                points.append([x + rx, y + ry, r, saliency])
         with open(self.image_path(image, 'json'), 'w') as outfile:
             json.dump(points, outfile)
         os.remove(self.image_path(image, 'npy'))

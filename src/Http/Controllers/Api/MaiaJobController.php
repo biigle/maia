@@ -31,6 +31,8 @@ class MaiaJobController extends Controller
      * @apiParam (Required attributes) {number} latent_size Learning capability used to determine training proposals. Increase this number to ignore more complex objects and patterns.
      * @apiParam (Required attributes) {number} trainset_size Number of training image patches used to determine training proposals. You can increase this number for a large volume but it will take longer to compute.
      * @apiParam (Required attributes) {number} epochs Time spent on training when determining the training proposals.
+     * @apiParam (Required attributes) {number} stride A higher stride increases the speed of the novelty detection but reduces the sensitivity to small regions or objects.
+     * @apiParam (Required attributes) {number} ignore_radius Ignore training proposals or annotation candidates which have a radius smaller or equal than this value in pixels.
      *
      * @param StoreMaiaJob $request
      * @return \Illuminate\Http\Response
@@ -49,6 +51,7 @@ class MaiaJobController extends Controller
             'trainset_size',
             'epochs',
             'stride',
+            'ignore_radius',
         ]);
         $job->save();
 

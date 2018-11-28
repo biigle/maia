@@ -84,6 +84,18 @@
                 </span>
             @endif
         </div>
+
+        <div class="form-group{{ $errors->has('ignore_radius') ? ' has-error' : '' }}">
+            <label for="ignore_radius">Ignore Radius</label>
+            <input type="number" class="form-control" name="ignore_radius" id="ignore_radius" value="{{ old('ignore_radius', 5) }}" required min="0" step="1">
+            @if($errors->has('ignore_radius'))
+               <span class="help-block">{{ $errors->first('ignore_radius') }}</span>
+            @else
+                <span class="help-block">
+                    Ignore training proposals or annotation candidates which have a radius smaller or equal than this value in pixels.
+                </span>
+            @endif
+        </div>
     </fieldset>
 
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
