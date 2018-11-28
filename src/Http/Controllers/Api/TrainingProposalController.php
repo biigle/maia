@@ -14,7 +14,7 @@ class TrainingProposalController extends Controller
      * @apiGroup Maia
      * @apiName IndexMaiaTrainingProposals
      * @apiPermission projectEditor
-     * @apiDescription All training proposals are assumed to have a circular shape.
+     * @apiDescription The training proposals are ordered by descending score.
      *
      * @apiParam {Number} id The job ID.
      *

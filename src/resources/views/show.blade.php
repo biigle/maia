@@ -24,6 +24,11 @@
     biigle.$declare('maia.job', {!! $job->toJson() !!});
     biigle.$declare('maia.states', {!! $states->toJson() !!});
     biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/{id}/file') !!}');
+    @if ($job->state_id < $states['training-proposals'])
+        biigle.$declare('maia.imageIds', []);
+    @else
+        biigle.$declare('maia.imageIds', {!! $job->volume->images()->pluck('id') !!});
+    @endif
 </script>
 @endpush
 
@@ -38,7 +43,7 @@
                 @include('maia::show.select-tp-content')
             </div>
             <div v-show="refineTpTabOpen" v-cloak class="maia-content">
-                {{-- @include('maia::show.refine-tp-content') --}}
+                @include('maia::show.refine-tp-content')
             </div>
         @endif
         @if ($job->state_id >= $states['annotation-candidates'])
@@ -60,7 +65,7 @@
                 @include('maia::show.select-tp-tab')
             </sidebar-tab>
             <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals">
-                {{-- @include('maia::show.refine-tp-tab') --}}
+                @include('maia::show.refine-tp-tab')
             </sidebar-tab>
         @endif
         @if ($job->state_id < $states['annotation-candidates'])

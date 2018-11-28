@@ -8,6 +8,7 @@ biigle.$viewModel('maia-show-container', function (element) {
     var maiaAnnotationApi = biigle.$require('maia.api.maiaAnnotation');
     var messages = biigle.$require('messages.store');
     var imagesStore = biigle.$require('annotations.stores.images');
+    var imageIds = biigle.$require('maia.imageIds');
 
     // We have to take very great care from preventing Vue to make the training proposals
     // fully reactive. This can be a huge array and Vue is not fast enough to ensure a
@@ -33,13 +34,15 @@ biigle.$viewModel('maia-show-container', function (element) {
             visitedRefineTpTab: false,
             visitedReviewAcTab: false,
             openTab: 'info',
+            fetchTrainingProposalPromise: null,
             hasTrainingProposals: false,
             // Track these manually and not via a computed property because the number of
             // training proposals can be huge.
             selectedTrainingProposalIds: {},
             lastSelectedTp: null,
             currentImage: null,
-            currentTpIndex: 0,
+            currentImageIndex: null,
+            currentTrainingProposals: [],
             annotationCandidates: [],
         },
         computed: {
@@ -74,14 +77,32 @@ biigle.$viewModel('maia-show-container', function (element) {
                         return trainingProposalsById[id];
                     });
             },
+            currentImageId: function () {
+                return imageIds[this.currentImageIndex];
+            },
+            nextImageIndex: function () {
+                return (this.currentImageIndex + 1) % imageIds.length;
+            },
+            nextImageId: function () {
+                return imageIds[this.nextImageIndex];
+            },
+            previousImageIndex: function () {
+              return (this.currentImageIndex - 1 + imageIds.length) % imageIds.length;
+            },
+            previousImageId: function () {
+                return imageIds[this.previousImageIndex];
+            },
+            hasCurrentImage: function () {
+                return this.currentImage !== null;
+            },
+            selectedAndSeenTrainingProposals: function () {
+                return [];
+            },
             // hasAnnotationCandidates: function () {
             //     return this.annotationCandidates.length > 0;
             // },
             hasNoSelectedTp: function () {
                 return this.selectedTrainingProposals.length === 0;
-            },
-            visitedSelectOrRefineTpTab: function () {
-                return this.visitedSelectTpTab || this.visitedRefineTpTab;
             },
         },
         methods: {
@@ -94,22 +115,27 @@ biigle.$viewModel('maia-show-container', function (element) {
                 this.openTab = tab;
             },
             setTrainingProposals: function (response) {
-                var self = this;
                 trainingProposals = response.body;
+
                 trainingProposals.forEach(function (p) {
                     trainingProposalsById[p.id] = p;
-                    self.setSelectedTrainingProposalId(p);
-                });
+                    this.setSelectedTrainingProposalId(p);
+                }, this);
 
                 this.hasTrainingProposals = trainingProposals.length > 0;
             },
             fetchTrainingProposals: function () {
-                this.startLoading();
+                if (!this.fetchTrainingProposalPromise) {
+                    this.startLoading();
 
-                return maiaJobApi.getTrainingProposals({id: job.id})
-                    .then(this.setTrainingProposals)
-                    .catch(messages.handleErrorResponse)
-                    .finally(this.finishLoading);
+                    this.fetchTrainingProposalPromise = maiaJobApi.getTrainingProposals({id: job.id});
+
+                    this.fetchTrainingProposalPromise.then(this.setTrainingProposals)
+                        .catch(messages.handleErrorResponse)
+                        .finally(this.finishLoading);
+                }
+
+                return this.fetchTrainingProposalPromise;
             },
             openRefineTpTab: function () {
                 this.openTab = 'refine-training-proposals';
@@ -156,19 +182,34 @@ biigle.$viewModel('maia-show-container', function (element) {
                     Vue.delete(this.selectedTrainingProposalIds, p.id);
                 }
             },
-            fetchCurrentImage: function () {
+            fetchImage: function (id) {
                 this.startLoading();
 
-                return imagesStore.fetchAndDrawImage(this.currentImageId)
-                    .catch(function (message) {
+                var promise = imagesStore.fetchAndDrawImage(id);
+
+                promise.catch(function (message) {
                         messages.danger(message);
                     })
-                    .then(this.setCurrentImage)
                     .then(this.cacheNextImage)
                     .finally(this.finishLoading);
+
+                return promise;
             },
-            setCurrentImage: function (image) {
-                this.currentImage = image;
+            fetchTpAnnotations: function (id) {
+                return maiaJobApi.getTrainingProposalPoints({jobId: job.id, imageId: id});
+            },
+            setCurrentImageAndTpAnnotations: function (args) {
+                this.currentImage = args[0];
+                var ids = Object.keys(args[1].body);
+                // TODO handle caching and updating of TPs.
+                this.currentTrainingProposals = ids.map(function (id) {
+                    return {
+                        id: id,
+                        shape: 'Circle',
+                        points: args[1].body[id],
+                    };
+                });
+                console.log(this.currentTrainingProposals);
             },
             cacheNextImage: function () {
                 // Do nothing if there is only one image.
@@ -181,18 +222,22 @@ biigle.$viewModel('maia-show-container', function (element) {
                 }
             },
             handleNext: function () {
-                if (this.currentTp) {
-                    this.currentTp.seen = true;
-                }
+                console.log('next');
+                this.currentImageIndex = this.nextImageIndex;
+                // if (this.currentTp) {
+                //     this.currentTp.seen = true;
+                // }
 
-                this.currentTpIndex = this.nextTpIndex;
+                // this.currentTpIndex = this.nextTpIndex;
             },
             handlePrevious: function () {
-                if (this.currentTp) {
-                    this.currentTp.seen = true;
-                }
+                console.log('prev');
+                this.currentImageIndex = this.previousImageIndex;
+                // if (this.currentTp) {
+                //     this.currentTp.seen = true;
+                // }
 
-                this.currentTpIndex = this.previousTpIndex;
+                // this.currentTpIndex = this.previousTpIndex;
             },
             handleRefineTp: function (proposals) {
                 Vue.Promise.all(proposals.map(this.updateTpPoints))
@@ -208,7 +253,8 @@ biigle.$viewModel('maia-show-container', function (element) {
                     });
             },
             focusCurrentTp: function () {
-                this.$refs.refineCanvas.focusAnnotation(this.currentTp, true, false);
+                console.log('focus');
+                // this.$refs.refineCanvas.focusAnnotation(this.currentTp, true, false);
             },
             handleSelectTp: function (proposal) {
                 this.updateSelectTrainingProposal(proposal, true);
@@ -253,17 +299,27 @@ biigle.$viewModel('maia-show-container', function (element) {
                     biigle.$require('keyboard').setActiveSet('review-ac');
                 }
             },
-            visitedSelectOrRefineTpTab: function () {
+            visitedSelectTpTab: function () {
                 this.fetchTrainingProposals();
+            },
+            visitedRefineTpTab: function () {
+                this.fetchTrainingProposals();
+                this.currentImageIndex = 0;
             },
             visitedReviewAcTab: function () {
                 this.fetchAnnotationCandidates();
             },
             currentImageId: function (id) {
                 if (id) {
-                    this.fetchCurrentImage().then(this.focusCurrentTp);
+                    Vue.Promise.all([
+                            this.fetchImage(id),
+                            this.fetchTpAnnotations(id),
+                            this.fetchTrainingProposalPromise,
+                        ])
+                        .then(this.setCurrentImageAndTpAnnotations)
+                        .then(this.focusCurrentTp);
                 } else {
-                    this.setCurrentImage(null);
+                    this.setCurrentImageAndTpAnnotations([null, null]);
                 }
             },
             currentTp: function (tp) {

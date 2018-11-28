@@ -2,9 +2,9 @@
     :can-modify="@if ($job->state_id === $states['training-proposals']) true @else false @endif"
     :show-minimap="hasCurrentImage"
     :image="currentImage"
-    :annotations="selectedTpForCurrentImage"
-    :unselected-annotations="unSelectedTpForCurrentImage"
-    :selected-annotations="currentTpArray"
+    {{-- :annotations="currentTrainingProposals" --}}
+    :unselected-annotations="currentTrainingProposals"
+    {{-- :selected-annotations="currentTpArray" --}}
     v-on:previous="handlePrevious"
     v-on:next="handleNext"
     v-on:update="handleRefineTp"
@@ -30,8 +30,3 @@
         </div>
     </div>
 </refine-tp-canvas>
-<div v-if="!loading && hasNoSelectedTp" class="maia-content-message">
-    <div class="text-warning">
-        Please select <i class="fas fa-plus-square"></i> training proposals.
-    </div>
-</div>

@@ -1,13 +1,18 @@
-<refine-tp-tab v-bind:selected-training-proposals="selectedTpOrderedByImageId" v-bind:seen-training-proposals="selectedAndSeenTps" inline-template>
+<refine-tp-tab v-bind:selected-training-proposals="selectedTrainingProposals" v-bind:seen-training-proposals="selectedAndSeenTrainingProposals" inline-template>
 <div class="sidebar-tab__content">
     @if ($job->state_id === $states['training-proposals'])
-        <div class="panel panel-info">
+        <div v-if="hasNoSelectedTp" class="panel panel-warning">
+            <div class="panel-body text-warning">
+                Please select <i class="fas fa-plus-square"></i> training proposals.
+            </div>
+        </div>
+        <div v-else v-cloak class="panel panel-info">
             <div class="panel-body text-info">
                 Please modify each training proposal that was marked as interesting, so that it fully encloses the interesting object or region of the image. Then submit the training proposals to continue with MAIA.
             </div>
         </div>
         <p :class="textClass">
-            Seen <span v-text="numberSeenTps">0</span> of <span v-text="numberSelectedTps">0</span> training proposals.
+            Seen <span v-text="numberSeenTps">0</span> of <span v-text="numberSelectedTps">0</span> selected training proposals.
         </p>
     @else
         <div class="panel panel-default">
