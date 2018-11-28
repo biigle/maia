@@ -9,6 +9,12 @@ biigle.$viewModel('maia-show-container', function (element) {
     var messages = biigle.$require('messages.store');
     var imagesStore = biigle.$require('annotations.stores.images');
 
+    // We have to take very great care from preventing Vue to make the training proposals
+    // fully reactive. This can be a huge array and Vue is not fast enough to ensure a
+    // fluid UX if it is fully reactive.
+    var trainingProposals = [];
+    var trainingProposalsById = {};
+
     new Vue({
         el: element,
         mixins: [biigle.$require('core.mixins.loader')],
@@ -27,13 +33,14 @@ biigle.$viewModel('maia-show-container', function (element) {
             visitedRefineTpTab: false,
             visitedReviewAcTab: false,
             openTab: 'info',
-            trainingProposals: [],
-            selectTpOffset: 0,
+            hasTrainingProposals: false,
+            // Track these manually and not via a computed property because the number of
+            // training proposals can be huge.
+            selectedTrainingProposalIds: {},
             lastSelectedTp: null,
             currentImage: null,
             currentTpIndex: 0,
             annotationCandidates: [],
-            reviewAcOffset: 0,
         },
         computed: {
             infoTabOpen: function () {
@@ -48,123 +55,33 @@ biigle.$viewModel('maia-show-container', function (element) {
             reviewAcTabOpen: function () {
                 return this.openTab === 'review-annotation-candidates';
             },
-            hasTrainingProposals: function () {
-                return this.trainingProposals.length > 0;
-            },
-            hasAnnotationCandidates: function () {
-                return this.annotationCandidates.length > 0;
-            },
             isInTrainingProposalState: function () {
                 return job.state_id === states['training-proposals'];
             },
             isInAnnotationCandidateState: function () {
                 return job.state_id === states['annotation-candidates'];
             },
-            imageIds: function () {
-                var tmp = {};
+            trainingProposals: function () {
+                if (this.hasTrainingProposals) {
+                    return trainingProposals;
+                }
 
-                return this.trainingProposals
-                    .map(function (p) {
-                        return p.image_id;
-                    })
-                    .filter(function (id) {
-                        return tmp.hasOwnProperty(id) ? false : (tmp[id] = true);
+                return [];
+            },
+            selectedTrainingProposals: function () {
+                return Object.keys(this.selectedTrainingProposalIds)
+                    .map(function (id) {
+                        return trainingProposalsById[id];
                     });
             },
-            tpById: function () {
-                var map = {};
-                this.trainingProposals.forEach(function (p) {
-                    map[p.id] = p;
-                });
-
-                return map;
-            },
-            tpOrderedByImageId: function () {
-                return this.trainingProposals.slice().sort(function (a, b) {
-                    return a.image_id - b.image_id;
-                });
-            },
-            selectedTpOrderedByImageId: function () {
-                return this.tpOrderedByImageId.filter(function (p) {
-                    return p.selected;
-                });
-            },
-            previousTpIndex: function () {
-                return (this.currentTpIndex + this.selectedTpOrderedByImageId.length - 1) % this.selectedTpOrderedByImageId.length;
-            },
-            nextTpIndex: function () {
-                return (this.currentTpIndex + 1) % this.selectedTpOrderedByImageId.length;
-            },
-            currentTp: function () {
-                if (this.selectedTpOrderedByImageId.length > 0 && this.refineTpTabOpen) {
-                    return this.selectedTpOrderedByImageId[this.currentTpIndex];
-                }
-
-                return null;
-            },
+            // hasAnnotationCandidates: function () {
+            //     return this.annotationCandidates.length > 0;
+            // },
             hasNoSelectedTp: function () {
-                return this.selectedTpOrderedByImageId.length === 0;
-            },
-            currentImageIdsIndex: function () {
-                return this.imageIds.indexOf(this.currentImageId);
-            },
-            currentImageId: function () {
-                if (this.currentTp) {
-                    return this.currentTp.image_id;
-                }
-
-                return null;
-            },
-            previousImageIdsIndex: function () {
-                return (this.currentImageIdsIndex + this.imageIds.length - 1) % this.imageIds.length;
-            },
-            previousImageId: function () {
-                return this.imageIds[this.nextImageIdsIndex];
-            },
-            nextImageIdsIndex: function () {
-                return (this.currentImageIdsIndex + 1) % this.imageIds.length;
-            },
-            nextImageId: function () {
-                return this.imageIds[this.nextImageIdsIndex];
-            },
-            tpForCurrentImage: function () {
-                // The annotations can only be properly drawn if the image is set.
-                if (this.hasCurrentImage) {
-                    return this.trainingProposals.filter(function (p) {
-                        return p.image_id === this.currentImageId;
-                    }, this);
-                }
-
-                return [];
-            },
-            selectedTpForCurrentImage: function () {
-                return this.tpForCurrentImage.filter(function (p) {
-                    return p.selected;
-                });
-            },
-            unSelectedTpForCurrentImage: function () {
-                return this.tpForCurrentImage.filter(function (p) {
-                    return !p.selected;
-                });
-            },
-            // The currently selected training proposal that should be highlighted.
-            currentTpArray: function () {
-                if (this.hasCurrentImage && this.currentTp) {
-                    return [this.currentTp];
-                }
-
-                return [];
-            },
-            hasCurrentImage: function () {
-                return this.currentImage !== null;
+                return this.selectedTrainingProposals.length === 0;
             },
             visitedSelectOrRefineTpTab: function () {
                 return this.visitedSelectTpTab || this.visitedRefineTpTab;
-            },
-            selectedAndSeenTps: function () {
-                return this.selectedTpOrderedByImageId.filter(function (p) {
-                    return p.seen;
-                });
             },
         },
         methods: {
@@ -177,11 +94,14 @@ biigle.$viewModel('maia-show-container', function (element) {
                 this.openTab = tab;
             },
             setTrainingProposals: function (response) {
-                this.trainingProposals = response.body.map(function (p) {
-                    p.shape = 'Circle';
-                    p.seen = false;
-                    return p;
+                var self = this;
+                trainingProposals = response.body;
+                trainingProposals.forEach(function (p) {
+                    trainingProposalsById[p.id] = p;
+                    self.setSelectedTrainingProposalId(p);
                 });
+
+                this.hasTrainingProposals = trainingProposals.length > 0;
             },
             fetchTrainingProposals: function () {
                 this.startLoading();
@@ -206,14 +126,6 @@ biigle.$viewModel('maia-show-container', function (element) {
                     }
                 }
             },
-            updateSelectTpOffset: function (offset) {
-                // TODO this updates on keyboard events of the refine view, too!
-                this.selectTpOffset = offset;
-            },
-            updateReviewAcOffset: function (offset) {
-                // TODO this updates on keyboard events of the refine view, too!
-                this.reviewAcOffset = offset;
-            },
             selectAllTpBetween: function (first, second) {
                 var index1 = this.trainingProposals.indexOf(first);
                 var index2 = this.trainingProposals.indexOf(second);
@@ -229,11 +141,20 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             updateSelectTrainingProposal: function (proposal, selected) {
                 proposal.selected = selected;
+                this.setSelectedTrainingProposalId(proposal);
                 maiaAnnotationApi.update({id: proposal.id}, {selected: selected})
                     .catch(function (response) {
                         messages.handleErrorResponse(response);
                         proposal.selected = !selected;
+                        this.setSelectedTrainingProposalId(proposal);
                     });
+            },
+            setSelectedTrainingProposalId: function (p) {
+                if (p.selected) {
+                    Vue.set(this.selectedTrainingProposalIds, p.id, true);
+                } else {
+                    Vue.delete(this.selectedTrainingProposalIds, p.id);
+                }
             },
             fetchCurrentImage: function () {
                 this.startLoading();
@@ -295,23 +216,23 @@ biigle.$viewModel('maia-show-container', function (element) {
             handleUnselectTp: function (proposal) {
                 this.updateSelectTrainingProposal(proposal, false);
             },
-            setAnnotationCandidates: function (response) {
-                this.annotationCandidates = response.body.map(function (c) {
-                    c.shape = 'Circle';
-                    return c;
-                });
-            },
-            fetchAnnotationCandidates: function () {
-                this.startLoading();
+            // setAnnotationCandidates: function (response) {
+            //     this.annotationCandidates = response.body.map(function (c) {
+            //         c.shape = 'Circle';
+            //         return c;
+            //     });
+            // },
+            // fetchAnnotationCandidates: function () {
+            //     this.startLoading();
 
-                return maiaJobApi.getAnnotationCandidates({id: job.id})
-                    .then(this.setAnnotationCandidates)
-                    .catch(messages.handleErrorResponse)
-                    .finally(this.finishLoading);
-            },
-            handleSelectedAnnotationCandidate: function (candidate) {
-                console.log('select', candidate);
-            },
+            //     return maiaJobApi.getAnnotationCandidates({id: job.id})
+            //         .then(this.setAnnotationCandidates)
+            //         .catch(messages.handleErrorResponse)
+            //         .finally(this.finishLoading);
+            // },
+            // handleSelectedAnnotationCandidate: function (candidate) {
+            //     console.log('select', candidate);
+            // },
         },
         watch: {
             selectTpTabOpen: function (open) {

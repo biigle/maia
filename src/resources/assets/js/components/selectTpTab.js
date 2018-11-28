@@ -9,6 +9,10 @@ biigle.$component('maia.components.selectTpTab', {
             type: Array,
             required: true,
         },
+        selectedTrainingProposals: {
+            type: Array,
+            required: true,
+        },
     },
     data: function () {
         return {
@@ -16,13 +20,8 @@ biigle.$component('maia.components.selectTpTab', {
         };
     },
     computed: {
-        selectedTp: function () {
-            return this.trainingProposals.filter(function (annotation) {
-                return annotation.selected;
-            });
-        },
         selectedTpCount: function () {
-            return this.selectedTp.length;
+            return this.selectedTrainingProposals.length;
         },
         tpCount: function () {
             return this.trainingProposals.length;

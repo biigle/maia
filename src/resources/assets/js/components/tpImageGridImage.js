@@ -21,7 +21,7 @@ biigle.$component('maia.components.tpImageGridImage', {
             return false;
         },
         selected: function () {
-            return this.image.selected;
+            return this.$parent.selectedTpIds.hasOwnProperty(this.image.id);
         },
         title: function () {
             if (this.selectable) {

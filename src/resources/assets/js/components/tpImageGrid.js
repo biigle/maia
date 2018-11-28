@@ -8,4 +8,10 @@ biigle.$component('maia.components.tpImageGrid', {
     components: {
         imageGridImage: biigle.$require('maia.components.tpImageGridImage'),
     },
+    props: {
+        selectedTpIds: {
+            type: Object,
+            required: true,
+        },
+    },
 });

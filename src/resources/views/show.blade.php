@@ -38,12 +38,12 @@
                 @include('maia::show.select-tp-content')
             </div>
             <div v-show="refineTpTabOpen" v-cloak class="maia-content">
-                @include('maia::show.refine-tp-content')
+                {{-- @include('maia::show.refine-tp-content') --}}
             </div>
         @endif
         @if ($job->state_id >= $states['annotation-candidates'])
             <div v-show="reviewAcTabOpen" v-cloak class="maia-content">
-                @include('maia::show.review-ac-content')
+                {{-- @include('maia::show.review-ac-content') --}}
             </div>
         @endif
         <loader-block :active="loading"></loader-block>
@@ -60,14 +60,14 @@
                 @include('maia::show.select-tp-tab')
             </sidebar-tab>
             <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals">
-                @include('maia::show.refine-tp-tab')
+                {{-- @include('maia::show.refine-tp-tab') --}}
             </sidebar-tab>
         @endif
         @if ($job->state_id < $states['annotation-candidates'])
             <sidebar-tab name="review-annotation-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
         @else
             <sidebar-tab name="review-annotation-candidates" icon="check-square" title="Review annotation candidates">
-                @include('maia::show.review-ac-tab')
+                {{-- @include('maia::show.review-ac-tab') --}}
             </sidebar-tab>
         @endif
     </sidebar>
