@@ -33,7 +33,7 @@ class DetectionRunner(object):
         self.max_workers = params['max_workers']
         # Percentage of worker threads to use for training data preparation. The rest is
         # used for post processing.
-        self.train_workers_ratio = 0.75
+        self.train_workers_ratio = 0.25
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
         self.detector_stride = params['stride']
