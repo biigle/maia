@@ -38,6 +38,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             // Track these manually and not via a computed property because the number of
             // training proposals can be huge.
             selectedTrainingProposalIds: {},
+            seenTrainingProposalIds: {},
             lastSelectedTrainingProposal: null,
             currentImage: null,
             currentImageIndex: null,
@@ -157,7 +158,9 @@ biigle.$viewModel('maia-show-container', function (element) {
                 return [];
             },
             selectedAndSeenTrainingProposals: function () {
-                return [];
+                return this.selectedTrainingProposals.filter(function (p) {
+                    return this.seenTrainingProposalIds.hasOwnProperty(p.id);
+                }, this);
             },
             // hasAnnotationCandidates: function () {
             //     return this.annotationCandidates.length > 0;
@@ -221,6 +224,9 @@ biigle.$viewModel('maia-show-container', function (element) {
                 } else {
                     Vue.delete(this.selectedTrainingProposalIds, p.id);
                 }
+            },
+            setSeenTrainingProposalId: function (p) {
+                Vue.set(this.seenTrainingProposalIds, p.id, true);
             },
             fetchTpAnnotations: function (id) {
                 if (!this.tpAnnotationCache.hasOwnProperty(id)) {
@@ -432,6 +438,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             focussedTrainingProposalToShow: function (p) {
                 if (p) {
                     this.currentImageIndex = this.imageIds.indexOf(p.image_id);
+                    this.setSeenTrainingProposalId(p);
                 }
             },
         },
