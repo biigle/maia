@@ -33,7 +33,7 @@ class DetectionRunner(object):
         self.max_workers = params['max_workers']
         # Percentage of worker threads to use for training data preparation. The rest is
         # used for post processing.
-        self.train_workers_ratio = 0.25
+        self.train_workers_ratio = 0.5
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
         self.detector_stride = params['stride']
@@ -78,7 +78,7 @@ class DetectionRunner(object):
         thresholds = []
 
         for i, image in enumerate(cluster):
-            print("  Image {} of {}".format(i + 1, total_images))
+            print("  Image {} of {} (#{})".format(i + 1, total_images, image.id))
             saliency_map = detector.apply(image.path, available_bytes=self.available_bytes)
             saliency_map = cv2.filter2D(saliency_map, -1, self.region_vote_mask)
             saliency_map = saliency_map.astype(np.float32)
