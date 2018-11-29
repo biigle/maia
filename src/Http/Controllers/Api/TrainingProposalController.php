@@ -23,6 +23,7 @@ class TrainingProposalController extends Controller
      *     {
      *         "id": 1,
      *         "selected": false,
+     *         "image_id", 123
      *     }
      * ]
      *
@@ -35,7 +36,7 @@ class TrainingProposalController extends Controller
         $this->authorize('access', $job);
 
         return $job->trainingProposals()
-            ->select('id', 'selected')
+            ->select('id', 'selected', 'image_id')
             ->orderBy('score', 'desc')
             ->get()
             ->toArray();

@@ -24,11 +24,6 @@
     biigle.$declare('maia.job', {!! $job->toJson() !!});
     biigle.$declare('maia.states', {!! $states->toJson() !!});
     biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/{id}/file') !!}');
-    @if ($job->state_id < $states['training-proposals'])
-        biigle.$declare('maia.imageIds', []);
-    @else
-        biigle.$declare('maia.imageIds', {!! $job->volume->images()->pluck('id') !!});
-    @endif
 </script>
 @endpush
 

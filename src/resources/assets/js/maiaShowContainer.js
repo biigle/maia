@@ -8,7 +8,6 @@ biigle.$viewModel('maia-show-container', function (element) {
     var maiaAnnotationApi = biigle.$require('maia.api.maiaAnnotation');
     var messages = biigle.$require('messages.store');
     var imagesStore = biigle.$require('annotations.stores.images');
-    var imageIds = biigle.$require('maia.imageIds');
 
     // We have to take very great care from preventing Vue to make the training proposals
     // fully reactive. This can be a huge array and Vue is not fast enough to ensure a
@@ -39,10 +38,13 @@ biigle.$viewModel('maia-show-container', function (element) {
             // Track these manually and not via a computed property because the number of
             // training proposals can be huge.
             selectedTrainingProposalIds: {},
-            lastSelectedTp: null,
+            lastSelectedTrainingProposal: null,
             currentImage: null,
             currentImageIndex: null,
             currentTrainingProposals: [],
+            currentTrainingProposalsById: {},
+            focussedTrainingProposal: null,
+            tpAnnotationCache: {},
             annotationCandidates: [],
         },
         computed: {
@@ -77,23 +79,82 @@ biigle.$viewModel('maia-show-container', function (element) {
                         return trainingProposalsById[id];
                     });
             },
+            hasSelectedTrainingProposals: function () {
+                return this.selectedTrainingProposals.length > 0;
+            },
+            imageIds: function () {
+                var tmp = {};
+                this.trainingProposals.forEach(function (p) {
+                    tmp[p.image_id] = undefined;
+                });
+
+                return Object.keys(tmp).map(function (id) {
+                    return parseInt(id, 10);
+                });
+            },
             currentImageId: function () {
-                return imageIds[this.currentImageIndex];
+                return this.imageIds[this.currentImageIndex];
             },
             nextImageIndex: function () {
-                return (this.currentImageIndex + 1) % imageIds.length;
+                return (this.currentImageIndex + 1) % this.imageIds.length;
             },
             nextImageId: function () {
-                return imageIds[this.nextImageIndex];
+                return this.imageIds[this.nextImageIndex];
+            },
+            nextFocussedImageId: function () {
+                if (this.nextFocussedTrainingProposal) {
+                    return this.nextFocussedTrainingProposal.image_id;
+                }
+
+                return this.nextImageId;
             },
             previousImageIndex: function () {
-              return (this.currentImageIndex - 1 + imageIds.length) % imageIds.length;
+              return (this.currentImageIndex - 1 + this.imageIds.length) % this.imageIds.length;
             },
             previousImageId: function () {
-                return imageIds[this.previousImageIndex];
+                return this.imageIds[this.previousImageIndex];
             },
             hasCurrentImage: function () {
                 return this.currentImage !== null;
+            },
+            currentSelectedTrainingProposals: function () {
+                return this.currentTrainingProposals.filter(function (p) {
+                    return this.selectedTrainingProposalIds.hasOwnProperty(p.id);
+                }, this);
+            },
+            currentUnselectedTrainingProposals: function () {
+                return this.currentTrainingProposals.filter(function (p) {
+                    return !this.selectedTrainingProposalIds.hasOwnProperty(p.id);
+                }, this);
+            },
+            previousFocussedTrainingProposal: function () {
+                var index = (this.selectedTrainingProposals.indexOf(this.focussedTrainingProposal) - 1 + this.selectedTrainingProposals.length) % this.selectedTrainingProposals.length;
+
+                return this.selectedTrainingProposals[index];
+            },
+            nextFocussedTrainingProposal: function () {
+                var index = (this.selectedTrainingProposals.indexOf(this.focussedTrainingProposal) + 1) % this.selectedTrainingProposals.length;
+
+                return this.selectedTrainingProposals[index];
+            },
+            // The focussed training proposal might change while the refine tab tool is
+            // closed but it should be updated only when it it opened again. Else the
+            // canvas would not update correctly.
+            focussedTrainingProposalToShow: function () {
+                if (this.refineTpTabOpen) {
+                    return this.focussedTrainingProposal;
+                }
+
+                return null;
+            },
+            focussedTrainingProposalArray: function () {
+                if (this.focussedTrainingProposalToShow) {
+                    return this.currentSelectedTrainingProposals.filter(function (p) {
+                        return p.id === this.focussedTrainingProposalToShow.id;
+                    }, this);
+                }
+
+                return [];
             },
             selectedAndSeenTrainingProposals: function () {
                 return [];
@@ -101,9 +162,6 @@ biigle.$viewModel('maia-show-container', function (element) {
             // hasAnnotationCandidates: function () {
             //     return this.annotationCandidates.length > 0;
             // },
-            hasNoSelectedTp: function () {
-                return this.selectedTrainingProposals.length === 0;
-            },
         },
         methods: {
             handleSidebarToggle: function () {
@@ -140,15 +198,121 @@ biigle.$viewModel('maia-show-container', function (element) {
             openRefineTpTab: function () {
                 this.openTab = 'refine-training-proposals';
             },
+            updateSelectTrainingProposal: function (proposal, selected) {
+                proposal.selected = selected;
+                this.setSelectedTrainingProposalId(proposal);
+                var promise = maiaAnnotationApi
+                    .update({id: proposal.id}, {selected: selected})
+                    .then(function () {
+                        return proposal;
+                    });
+
+                promise.catch(function (response) {
+                    messages.handleErrorResponse(response);
+                    proposal.selected = !selected;
+                    this.setSelectedTrainingProposalId(proposal);
+                });
+
+                return promise;
+            },
+            setSelectedTrainingProposalId: function (p) {
+                if (p.selected) {
+                    Vue.set(this.selectedTrainingProposalIds, p.id, true);
+                } else {
+                    Vue.delete(this.selectedTrainingProposalIds, p.id);
+                }
+            },
+            fetchTpAnnotations: function (id) {
+                if (!this.tpAnnotationCache.hasOwnProperty(id)) {
+                    this.tpAnnotationCache[id] = maiaJobApi
+                        .getTrainingProposalPoints({jobId: job.id, imageId: id})
+                        .then(this.parseTpAnnotations);
+                }
+
+                return this.tpAnnotationCache[id];
+            },
+            parseTpAnnotations: function (response) {
+                return Object.keys(response.body).map(function (id) {
+                    return {
+                        id: parseInt(id, 10),
+                        shape: 'Circle',
+                        points: response.body[id],
+                    };
+                });
+            },
+            setCurrentImageAndTpAnnotations: function (args) {
+                this.currentImage = args[0];
+                this.currentTrainingProposals = args[1];
+                this.currentTrainingProposalsById = {};
+                this.currentTrainingProposals.forEach(function (p) {
+                    this.currentTrainingProposalsById[p.id] = p;
+                }, this);
+            },
+            cacheNextImage: function () {
+                // Do nothing if there is only one image.
+                if (this.currentImageId !== this.nextFocussedImageId) {
+                    imagesStore.fetchImage(this.nextFocussedImageId)
+                        // Ignore errors in this case. The application will try to reload
+                        // the data again if the user switches to the respective image
+                        // and display the error message then.
+                        .catch(function () {});
+                }
+            },
+            cacheNextTpAnnotations: function () {
+                // Do nothing if there is only one image.
+                if (this.currentImageId !== this.nextFocussedImageId) {
+                    this.fetchTpAnnotations(this.nextFocussedImageId)
+                        // Ignore errors in this case. The application will try to reload
+                        // the data again if the user switches to the respective image
+                        // and display the error message then.
+                        .catch(function () {});
+                }
+            },
+            handlePreviousImage: function () {
+                this.currentImageIndex = this.previousImageIndex;
+            },
+            handlePrevious: function () {
+                if (this.previousFocussedTrainingProposal) {
+                    this.focussedTrainingProposal = this.previousFocussedTrainingProposal;
+                }
+            },
+            handleNextImage: function () {
+                this.currentImageIndex = this.nextImageIndex;
+            },
+            handleNext: function () {
+                if (this.nextFocussedTrainingProposal) {
+                    this.focussedTrainingProposal = this.nextFocussedTrainingProposal;
+                }
+            },
+            handleRefineTp: function (proposals) {
+                Vue.Promise.all(proposals.map(this.updateTpPoints))
+                    .catch(messages.handleErrorResponse);
+            },
+            updateTpPoints: function (proposal) {
+                var toUpdate = this.currentTrainingProposalsById[proposal.id];
+                return maiaAnnotationApi
+                    .update({id: proposal.id}, {points: proposal.points})
+                    .then(function () {
+                        toUpdate.points = proposal.points;
+                    });
+            },
+            focusTrainingProposalToShow: function () {
+                if (this.focussedTrainingProposalToShow) {
+                    var p = this.currentTrainingProposalsById[this.focussedTrainingProposalToShow.id];
+                    if (p) {
+                        this.$refs.refineCanvas.focusAnnotation(p, true, false);
+                    }
+                }
+            },
             handleSelectedTrainingProposal: function (proposal, event) {
                 if (proposal.selected) {
-                    this.updateSelectTrainingProposal(proposal, false);
+                    this.unselectTrainingProposal(proposal);
                 } else {
-                    if (event.shiftKey && this.lastSelectedTp) {
-                        this.selectAllTpBetween(proposal, this.lastSelectedTp);
+                    if (event.shiftKey && this.lastSelectedTrainingProposal) {
+                        this.selectAllTpBetween(proposal, this.lastSelectedTrainingProposal);
                     } else {
-                        this.lastSelectedTp = proposal;
-                        this.updateSelectTrainingProposal(proposal, true);
+                        this.lastSelectedTrainingProposal = proposal;
+                        this.selectTrainingProposal(proposal);
                     }
                 }
             },
@@ -162,105 +326,38 @@ biigle.$viewModel('maia-show-container', function (element) {
                 }
 
                 for (var i = index1 + 1; i <= index2; i++) {
-                    this.updateSelectTrainingProposal(this.trainingProposals[i], true);
+                    this.selectTrainingProposal(this.trainingProposals[i]);
                 }
             },
-            updateSelectTrainingProposal: function (proposal, selected) {
-                proposal.selected = selected;
-                this.setSelectedTrainingProposalId(proposal);
-                maiaAnnotationApi.update({id: proposal.id}, {selected: selected})
-                    .catch(function (response) {
-                        messages.handleErrorResponse(response);
-                        proposal.selected = !selected;
-                        this.setSelectedTrainingProposalId(proposal);
-                    });
+            selectTrainingProposal: function (proposal) {
+                this.updateSelectTrainingProposal(proposal, true)
+                    .then(this.maybeInitFocussedTrainingProposal);
             },
-            setSelectedTrainingProposalId: function (p) {
-                if (p.selected) {
-                    Vue.set(this.selectedTrainingProposalIds, p.id, true);
-                } else {
-                    Vue.delete(this.selectedTrainingProposalIds, p.id);
+            unselectTrainingProposal: function (proposal) {
+                this.updateSelectTrainingProposal(proposal, false)
+                    .then(this.maybeUnsetFocussedTrainingProposal);
+            },
+            maybeInitFocussedTrainingProposal: function () {
+                if (!this.focussedTrainingProposal && this.hasSelectedTrainingProposals) {
+                    this.focussedTrainingProposal = this.selectedTrainingProposals[0];
                 }
             },
-            fetchImage: function (id) {
-                this.startLoading();
-
-                var promise = imagesStore.fetchAndDrawImage(id);
-
-                promise.catch(function (message) {
-                        messages.danger(message);
-                    })
-                    .then(this.cacheNextImage)
-                    .finally(this.finishLoading);
-
-                return promise;
-            },
-            fetchTpAnnotations: function (id) {
-                return maiaJobApi.getTrainingProposalPoints({jobId: job.id, imageId: id});
-            },
-            setCurrentImageAndTpAnnotations: function (args) {
-                this.currentImage = args[0];
-                var ids = Object.keys(args[1].body);
-                // TODO handle caching and updating of TPs.
-                this.currentTrainingProposals = ids.map(function (id) {
-                    return {
-                        id: id,
-                        shape: 'Circle',
-                        points: args[1].body[id],
-                    };
-                });
-                console.log(this.currentTrainingProposals);
-            },
-            cacheNextImage: function () {
-                // Do nothing if there is only one image.
-                if (this.currentImageId !== this.nextImageId) {
-                    imagesStore.fetchImage(this.nextImageId)
-                        // Ignore errors in this case. The application will try to reload
-                        // the data again if the user switches to the respective image
-                        // and display the error message then.
-                        .catch(function () {});
+            maybeUnsetFocussedTrainingProposal: function (p) {
+                if (this.focussedTrainingProposal && this.focussedTrainingProposal.id === p.id) {
+                    if (this.nextFocussedTrainingProposal && this.nextFocussedTrainingProposal.id !== p.id) {
+                        this.focussedTrainingProposal = this.nextFocussedTrainingProposal;
+                    } else {
+                        this.focussedTrainingProposal = null;
+                    }
                 }
             },
-            handleNext: function () {
-                console.log('next');
-                this.currentImageIndex = this.nextImageIndex;
-                // if (this.currentTp) {
-                //     this.currentTp.seen = true;
-                // }
-
-                // this.currentTpIndex = this.nextTpIndex;
+            maybeInitCurrentImage: function () {
+                if (this.currentImageIndex === null) {
+                    this.currentImageIndex = 0;
+                }
             },
-            handlePrevious: function () {
-                console.log('prev');
-                this.currentImageIndex = this.previousImageIndex;
-                // if (this.currentTp) {
-                //     this.currentTp.seen = true;
-                // }
-
-                // this.currentTpIndex = this.previousTpIndex;
-            },
-            handleRefineTp: function (proposals) {
-                Vue.Promise.all(proposals.map(this.updateTpPoints))
-                    .catch(messages.handleErrorResponse);
-            },
-            updateTpPoints: function (proposal) {
-                var self = this;
-
-                return maiaAnnotationApi
-                    .update({id: proposal.id}, {points: proposal.points})
-                    .then(function () {
-                        self.tpById[proposal.id].points = proposal.points;
-                    });
-            },
-            focusCurrentTp: function () {
-                console.log('focus');
-                // this.$refs.refineCanvas.focusAnnotation(this.currentTp, true, false);
-            },
-            handleSelectTp: function (proposal) {
-                this.updateSelectTrainingProposal(proposal, true);
-            },
-            handleUnselectTp: function (proposal) {
-                this.updateSelectTrainingProposal(proposal, false);
+            handleLoadingError: function (message) {
+                messages.danger(message);
             },
             // setAnnotationCandidates: function (response) {
             //     this.annotationCandidates = response.body.map(function (c) {
@@ -291,9 +388,10 @@ biigle.$viewModel('maia-show-container', function (element) {
                 this.visitedRefineTpTab = true;
                 if (open) {
                     biigle.$require('keyboard').setActiveSet('refine-tp');
+                    this.maybeInitFocussedTrainingProposal();
                 }
             },
-            reviewAcTabOpen: function (opens) {
+            reviewAcTabOpen: function (open) {
                 this.visitedReviewAcTab = true;
                 if (open) {
                     biigle.$require('keyboard').setActiveSet('review-ac');
@@ -303,28 +401,37 @@ biigle.$viewModel('maia-show-container', function (element) {
                 this.fetchTrainingProposals();
             },
             visitedRefineTpTab: function () {
-                this.fetchTrainingProposals();
-                this.currentImageIndex = 0;
+                this.fetchTrainingProposals()
+                    .then(this.maybeInitFocussedTrainingProposal)
+                    .then(this.maybeInitCurrentImage);
             },
             visitedReviewAcTab: function () {
                 this.fetchAnnotationCandidates();
             },
             currentImageId: function (id) {
                 if (id) {
+                    this.startLoading();
                     Vue.Promise.all([
-                            this.fetchImage(id),
+                            imagesStore.fetchAndDrawImage(id),
                             this.fetchTpAnnotations(id),
+                            // This promise is created when the refine tab is first
+                            // opened and needs to be resolved so we know which TP are
+                            // selected and which not.
                             this.fetchTrainingProposalPromise,
                         ])
                         .then(this.setCurrentImageAndTpAnnotations)
-                        .then(this.focusCurrentTp);
+                        .then(this.focusTrainingProposalToShow)
+                        .then(this.cacheNextImage)
+                        .then(this.cacheNextTpAnnotations)
+                        .catch(this.handleLoadingError)
+                        .finally(this.finishLoading);
                 } else {
                     this.setCurrentImageAndTpAnnotations([null, null]);
                 }
             },
-            currentTp: function (tp) {
-                if (tp) {
-                    this.focusCurrentTp();
+            focussedTrainingProposalToShow: function (p) {
+                if (p) {
+                    this.currentImageIndex = this.imageIds.indexOf(p.image_id);
                 }
             },
         },

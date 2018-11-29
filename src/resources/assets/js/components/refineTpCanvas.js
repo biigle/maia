@@ -19,9 +19,17 @@ biigle.$component('maia.components.refineTpCanvas', {
         };
     },
     computed: {
-        //
+        hasAnnotations: function () {
+            return this.annotations.length > 0;
+        },
     },
     methods: {
+        handlePreviousImage: function (e) {
+            this.$emit('previous-image');
+        },
+        handleNextImage: function (e) {
+            this.$emit('next-image');
+        },
         toggleMarkAsInteresting: function () {
             this.selectingTp = !this.selectingTp;
         },

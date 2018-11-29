@@ -37,6 +37,7 @@ class TrainingProposalControllerTest extends ApiTestCase
             ->assertJson([[
                 'id' => $annotation->id,
                 'selected' => $annotation->selected,
+                'image_id' => $annotation->image_id,
             ]]);
     }
 }
