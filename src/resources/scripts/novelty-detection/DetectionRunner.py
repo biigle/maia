@@ -40,6 +40,8 @@ class DetectionRunner(object):
         self.ignore_radius = params['ignore_radius']
 
     def run(self):
+        full_executor = ThreadPoolExecutor(max_workers=self.max_workers)
+
         # Split available worker threads between training data preparation and post
         # processing (if possible).
         if self.max_workers > 1:
@@ -47,10 +49,10 @@ class DetectionRunner(object):
             train_executor = ThreadPoolExecutor(max_workers=workers)
             post_executor = ThreadPoolExecutor(max_workers=self.max_workers - workers)
         else:
-            train_executor = ThreadPoolExecutor(max_workers=self.max_workers)
-            post_executor = train_executor
+            train_executor = full_executor
+            post_executor = full_executor
 
-        images = ImageCollection(self.images, executor=train_executor);
+        images = ImageCollection(self.images, executor=full_executor);
         if self.clusters > 1:
             clusters = images.make_clusters(number=self.clusters)
         else:
@@ -61,6 +63,7 @@ class DetectionRunner(object):
         jobs = []
 
         for i, cluster in enumerate(clusters):
+            cluster.set_executor(train_executor)
             print("Cluster {} of {}".format(i + 1, self.clusters))
             threshold = self.process_cluster(detector, cluster)
             jobs.extend([post_executor.submit(self.postprocess_map, image, threshold) for image in cluster])

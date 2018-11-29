@@ -30,6 +30,9 @@ class ImageCollection(object):
     def __len__(self):
         return len(self.images)
 
+    def set_executor(self, executor):
+        self.executor = executor
+
     def random_patches(self, number=10000, size=29, vectorize=True):
         per_image = int(np.ceil(float(number) / len(self.images)))
 
