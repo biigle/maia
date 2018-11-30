@@ -34,7 +34,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'job_id' => $job->id,
             'image_id' => $image->id,
             'type_id' => MaiaAnnotationType::trainingProposalId(),
-            'points' => [10, 20, 30],
+            'points' => [10.5, 20.4, 30],
             'selected' => true,
         ]);
         // Not selected and should not be included.
@@ -53,7 +53,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
-            'training_proposals' => [$image->id => [[10, 20, 30]]],
+            'training_proposals' => [$image->id => [[11, 20, 30]]],
             'output_path' => "{$tmpDir}/output-dataset.json",
         ];
 

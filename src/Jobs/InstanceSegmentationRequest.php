@@ -27,15 +27,7 @@ class InstanceSegmentationRequest extends JobRequest
         // Make sure to convert the annotations to arrays because it is more efficient
         // and the GPU server cannot instantiate MaiaAnnotation objects (as they depend
         // on biigle/core).
-        $this->trainingProposals = $job->trainingProposals()
-            ->selected()
-            ->select('image_id', 'points')
-            ->get()
-            ->groupBy('image_id')
-            ->map(function ($proposals) {
-                return $proposals->pluck('points');
-            })
-            ->toArray();
+        $this->trainingProposals = $this->bundleTrainingProposals($job);
     }
 
     /**
@@ -54,6 +46,34 @@ class InstanceSegmentationRequest extends JobRequest
         // $this->dispatchResponse($annotations);
 
         $this->cleanup();
+    }
+
+    /**
+     * Bundle the training proposals to be sent to the GPU server.
+     *
+     * @param MaiaJob $job
+     *
+     * @return array
+     */
+    protected function bundleTrainingProposals(MaiaJob $job)
+    {
+        return $job->trainingProposals()
+            ->selected()
+            ->select('image_id', 'points')
+            ->get()
+            ->groupBy('image_id')
+            ->map(function ($proposals) {
+                return $proposals->pluck('points')->map(function ($proposal) {
+                    // The circles of the proposals are drawn by OpenCV and this expects
+                    // integers. As we can shave off a few bytes of job payload this
+                    // way, we parse the coordinates here instead of in the Python
+                    // script.
+                    return array_map(function ($value) {
+                        return intval(round($value));
+                    }, $proposal);
+                });
+            })
+            ->toArray();
     }
 
     /**
