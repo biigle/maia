@@ -276,6 +276,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             handlePrevious: function () {
                 if (this.previousFocussedTrainingProposal) {
                     this.focussedTrainingProposal = this.previousFocussedTrainingProposal;
+                } else {
+                    this.handlePreviousImage();
                 }
             },
             handleNextImage: function () {
@@ -284,6 +286,8 @@ biigle.$viewModel('maia-show-container', function (element) {
             handleNext: function () {
                 if (this.nextFocussedTrainingProposal) {
                     this.focussedTrainingProposal = this.nextFocussedTrainingProposal;
+                } else {
+                    this.handleNextImage();
                 }
             },
             handleRefineTp: function (proposals) {
