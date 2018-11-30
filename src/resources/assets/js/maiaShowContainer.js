@@ -435,10 +435,14 @@ biigle.$viewModel('maia-show-container', function (element) {
                     this.setCurrentImageAndTpAnnotations([null, null]);
                 }
             },
-            focussedTrainingProposalToShow: function (p) {
-                if (p) {
-                    this.currentImageIndex = this.imageIds.indexOf(p.image_id);
-                    this.setSeenTrainingProposalId(p);
+            focussedTrainingProposalToShow: function (proposal, old) {
+                if (proposal) {
+                    if (old && old.image_id === proposal.image_id) {
+                        this.focusTrainingProposalToShow();
+                    } else {
+                        this.currentImageIndex = this.imageIds.indexOf(proposal.image_id);
+                    }
+                    this.setSeenTrainingProposalId(proposal);
                 }
             },
         },
