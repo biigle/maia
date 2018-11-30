@@ -56,6 +56,21 @@ return [
     */
     'novelty_detection_script' => __DIR__.'/../resources/scripts/novelty-detection/DetectionRunner.py',
 
+    /*
+    | Path to the script that generates the training dataset for Mask R-CNN.
+    */
+    'mrcnn_dataset_script' => __DIR__.'/../resources/scripts/instance-segmentation/DatasetGenerator.py',
+
+    /*
+    | Path to the script that trains Mask R-CNN.
+    */
+    'mrcnn_training_script' => __DIR__.'/../resources/scripts/instance-segmentation/TrainingRunner.py',
+
+    /*
+    | Path to the script that performs inference with the trained Mask R-CNN.
+    */
+    'mrcnn_inference_script' => __DIR__.'/../resources/scripts/instance-segmentation/InferenceRunner.py',
+
     'notifications' => [
         /*
         | Set the way notifications for MAIA job state changes are sent by default.

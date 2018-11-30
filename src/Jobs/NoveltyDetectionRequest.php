@@ -135,4 +135,12 @@ class NoveltyDetectionRequest extends JobRequest
     {
         $this->dispatch(new NoveltyDetectionFailure($this->jobId, $e));
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getTmpDirPath()
+    {
+        return parent::getTmpDirPath()."-novelty-detection";
+    }
 }

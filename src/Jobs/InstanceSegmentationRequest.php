@@ -2,7 +2,9 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use File;
 use Exception;
+use ImageCache;
 use Biigle\Modules\Maia\MaiaJob;
 
 class InstanceSegmentationRequest extends JobRequest
@@ -26,8 +28,13 @@ class InstanceSegmentationRequest extends JobRequest
         // and the GPU server cannot instantiate MaiaAnnotation objects (as they depend
         // on biigle/core).
         $this->trainingProposals = $job->trainingProposals()
+            ->selected()
             ->select('image_id', 'points')
             ->get()
+            ->groupBy('image_id')
+            ->map(function ($proposals) {
+                return $proposals->pluck('points');
+            })
             ->toArray();
     }
 
@@ -37,21 +44,166 @@ class InstanceSegmentationRequest extends JobRequest
     public function handle()
     {
         $this->ensureTmpDir();
+        $images = $this->getGenericImages();
 
-        // TODO Run actual instance segmentation here.
-        if (!empty($this->images)) {
-            $id = array_keys($this->images)[0];
-            $this->dispatchResponse([$id => [
-                [200, 200, 100, 0],
-                [400, 400, 100, 0],
-                [200, 400, 100, 0],
-                [400, 200, 100, 0],
-            ]]);
-        } else {
-            $this->dispatchResponse([]);
-        }
+        $datasetOutput = $this->generateDataset($images);
+        $trainingOutput = $this->performTraining($datasetOutput);
+        $this->performInference($images, $trainingOutput);
+
+        // $annotations = $this->parseAnnotations($images);
+        // $this->dispatchResponse($annotations);
 
         $this->cleanup();
+    }
+
+    /**
+     * Generate the training dataset for Mask R-CNN.
+     *
+     * @param array $images GenericImage instances.
+     *
+     * @return array Output of the dataset generation script.
+     */
+    protected function generateDataset($images)
+    {
+        $outputPath = "{$this->tmpDir}/output-dataset.json";
+
+        // All images that contain selected training proposals.
+        $relevantImages = array_filter($images, function ($image) {
+            return array_key_exists($image->getId(), $this->trainingProposals);
+        });
+
+        ImageCache::batch($relevantImages, function ($images, $paths) use ($outputPath) {
+            $imagesMap = $this->buildImagesMap($images, $paths);
+            $inputPath = $this->createDatasetJson($imagesMap, $outputPath);
+            $script = config('maia.mrcnn_dataset_script');
+            $this->python("{$script} {$inputPath}", 'dataset-log.txt');
+        });
+
+        return json_decode(File::get($outputPath), true);
+    }
+
+    /**
+     * Create the JSON file that is the input to the dataset generation script.
+     *
+     * @param array $imagesMap Map from image IDs to cached file paths.
+     * @param string $outputJsonPath Path to the output file of the script.
+     *
+     * @return string Input JSON file path.
+     */
+    protected function createDatasetJson($imagesMap, $outputJsonPath)
+    {
+        $path = "{$this->tmpDir}/input-dataset.json";
+        $content = [
+            'images' => $imagesMap,
+            'tmp_dir' => $this->tmpDir,
+            'available_bytes' => intval(config('maia.available_bytes')),
+            'max_workers' => intval(config('maia.max_workers')),
+            'training_proposals' => $this->trainingProposals,
+            'output_path' => $outputJsonPath,
+        ];
+
+        File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
+
+        return $path;
+    }
+
+    /**
+     * Perform training of Mask R-CNN.
+     *
+     * @param array $params Output of the dataset generation script.
+     *
+     * @return array Output of the training script.
+     */
+    protected function performTraining($params)
+    {
+        $outputPath = "{$this->tmpDir}/output-training.json";
+        $inputPath = $this->createTrainingJson($outputPath, $params);
+        $script = config('maia.mrcnn_training_script');
+        $this->python("{$script} {$inputPath}", 'training-log.txt');
+
+        return json_decode(File::get($outputPath), true);
+    }
+
+    /**
+     * Create the JSON file that is the input to the training script.
+     *
+     * @param string $outputJsonPath Path to the output file of the script.
+     * @param array $params Output of the dataset generation script.
+     *
+     * @return string Input JSON file path.
+     */
+    protected function createTrainingJson($outputJsonPath, $params)
+    {
+        $path = "{$this->tmpDir}/input-training.json";
+        $content = [
+            'tmp_dir' => $this->tmpDir,
+            'available_bytes' => intval(config('maia.available_bytes')),
+            'max_workers' => intval(config('maia.max_workers')),
+            'output_path' => $outputJsonPath,
+            // ...
+        ];
+
+        File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
+
+        return $path;
+    }
+
+    /**
+     * Perform inference with the trained Mask R-CNN.
+     *
+     * @param array $images GenericImage instances.
+     * @param array $params Output of the training script.
+     */
+    protected function performInference($images, $params)
+    {
+        ImageCache::batch($images, function ($images, $paths) use ($params) {
+            $imagesMap = $this->buildImagesMap($images, $paths);
+            $inputPath = $this->createInferenceJson($imagesMap, $params);
+            $script = config('maia.mrcnn_inference_script');
+            $this->python("{$script} {$inputPath}", 'inference-log.txt');
+        });
+    }
+
+    /**
+     * Create the JSON file that is the input to the inference script.
+     *
+     * @param array $imagesMap Map from image IDs to cached file paths.
+     * @param array $params Output of the training script.
+     *
+     * @return string Input JSON file path.
+     */
+    protected function createInferenceJson($imagesMap, $params)
+    {
+        $path = "{$this->tmpDir}/input-inference.json";
+        $content = [
+            'images' => $imagesMap,
+            'tmp_dir' => $this->tmpDir,
+            'available_bytes' => intval(config('maia.available_bytes')),
+            'max_workers' => intval(config('maia.max_workers')),
+            // ...
+        ];
+
+        File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
+
+        return $path;
+    }
+
+    /**
+     * Build the map from image ID to path of the cached image file.
+     *
+     * @param array $images GenericImage instances.
+     * @param array $paths Cached image file paths.
+     *
+     * @return array
+     */
+    protected function buildImagesMap($images, $paths)
+    {
+        $imagesMap = [];
+        foreach ($images as $index => $image) {
+            $imagesMap[$image->getId()] = $paths[$index];
+        }
+
+        return $imagesMap;
     }
 
     /**
@@ -70,5 +222,13 @@ class InstanceSegmentationRequest extends JobRequest
     protected function dispatchFailure(Exception $e)
     {
         $this->dispatch(new InstanceSegmentationFailure($this->jobId, $e));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getTmpDirPath()
+    {
+        return parent::getTmpDirPath()."-instance-segmentation";
     }
 }

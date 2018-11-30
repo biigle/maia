@@ -81,9 +81,12 @@ class JobRequest extends Job implements ShouldQueue
      */
     protected function getGenericImages()
     {
-        return array_map(function ($id, $filename) {
-            return new GenericImage($id, "{$this->volumeUrl}/{$filename}");
-        }, array_keys($this->images), $this->images);
+        $images = [];
+        foreach ($this->images as $id => $filename) {
+            $images[$id] = new GenericImage($id, "{$this->volumeUrl}/{$filename}");
+        }
+
+        return $images;
     }
 
     /**
@@ -112,9 +115,19 @@ class JobRequest extends Job implements ShouldQueue
         if (!isset($this->tmpDir)) {
             // Do not set this in the constructor because else the config of the
             // requesting instance would be used and not the config of the GPU instance.
-            $this->tmpDir = config('maia.tmp_dir')."/maia-{$this->jobId}";
+            $this->tmpDir = $this->getTmpDirPath();
             File::makeDirectory($this->tmpDir, 0700, true, true);
         }
+    }
+
+    /**
+     * Get the path to the temporary directory.
+     *
+     * @return string
+     */
+    protected function getTmpDirPath()
+    {
+        return config('maia.tmp_dir')."/maia-{$this->jobId}";
     }
 
     /**
@@ -132,16 +145,17 @@ class JobRequest extends Job implements ShouldQueue
      * Execute a Python command and return the path to a file containing the output.
      *
      * @param string $command
+     * @param string $log Name of the log file to write any output to.
      * @throws Exception On a non-zero exit code.
      *
      * @return string
      */
-    protected function python($command)
+    protected function python($command, $log = 'log.txt')
     {
         $code = 0;
         $lines = [];
         $python = config('maia.python');
-        $logFile = "{$this->tmpDir}/log.txt";
+        $logFile = "{$this->tmpDir}/{$log}";
         exec("{$python} -u {$command} >{$logFile} 2>&1", $lines, $code);
 
         if ($code !== 0) {

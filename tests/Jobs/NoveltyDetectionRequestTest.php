@@ -34,13 +34,12 @@ class NoveltyDetectionRequestTest extends TestCase
         ];
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
-        $tmpDir = config('maia.tmp_dir')."/maia-{$job->id}";
+        $tmpDir = config('maia.tmp_dir')."/maia-{$job->id}-novelty-detection";
         $inputJsonPath = "{$tmpDir}/input.json";
-
         $expectJson = array_merge($params, ['tmp_dir' => $tmpDir]);
 
         try {
-            $request = new JobStub($job);
+            $request = new NdJobStub($job);
             $request->handle();
 
             $this->assertTrue(File::isDirectory($tmpDir));
@@ -67,22 +66,21 @@ class NoveltyDetectionRequestTest extends TestCase
     public function testFailed()
     {
         $job = MaiaJobTest::create();
-        $request = new JobStub($job);
-        $e = new Exception;
+        $request = new NdJobStub($job);
 
         Queue::fake();
-        $request->failed($e);
+        $request->failed(new Exception);
         Queue::assertPushed(NoveltyDetectionFailure::class);
         $this->assertTrue($request->cleanup);
     }
 }
 
-class JobStub extends NoveltyDetectionRequest
+class NdJobStub extends NoveltyDetectionRequest
 {
     public $command = '';
     public $cleanup = false;
 
-    protected function python($command)
+    protected function python($command, $log = 'log.txt')
     {
         $this->command = $command;
         $imageId = array_keys($this->images)[0];
