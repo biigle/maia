@@ -204,11 +204,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             updateSelectTrainingProposal: function (proposal, selected) {
                 proposal.selected = selected;
                 this.setSelectedTrainingProposalId(proposal);
-                var promise = maiaAnnotationApi
-                    .update({id: proposal.id}, {selected: selected})
-                    .then(function () {
-                        return proposal;
-                    });
+                var promise = maiaAnnotationApi.update({id: proposal.id}, {selected: selected});
 
                 promise.catch(function (response) {
                     messages.handleErrorResponse(response);
@@ -340,18 +336,22 @@ biigle.$viewModel('maia-show-container', function (element) {
                     .then(this.maybeInitFocussedTrainingProposal);
             },
             unselectTrainingProposal: function (proposal) {
+                var next = this.nextFocussedTrainingProposal;
                 this.updateSelectTrainingProposal(proposal, false)
-                    .then(this.maybeUnsetFocussedTrainingProposal);
+                    .bind(this)
+                    .then(function () {
+                        this.maybeUnsetFocussedTrainingProposal(proposal, next);
+                    });
             },
             maybeInitFocussedTrainingProposal: function () {
                 if (!this.focussedTrainingProposal && this.hasSelectedTrainingProposals) {
                     this.focussedTrainingProposal = this.selectedTrainingProposals[0];
                 }
             },
-            maybeUnsetFocussedTrainingProposal: function (p) {
-                if (this.focussedTrainingProposal && this.focussedTrainingProposal.id === p.id) {
-                    if (this.nextFocussedTrainingProposal && this.nextFocussedTrainingProposal.id !== p.id) {
-                        this.focussedTrainingProposal = this.nextFocussedTrainingProposal;
+            maybeUnsetFocussedTrainingProposal: function (proposal, next) {
+                if (this.focussedTrainingProposal && this.focussedTrainingProposal.id === proposal.id) {
+                    if (next && next.id !== proposal.id) {
+                        this.focussedTrainingProposal = next;
                     } else {
                         this.focussedTrainingProposal = null;
                     }
