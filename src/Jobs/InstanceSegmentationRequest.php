@@ -39,13 +39,13 @@ class InstanceSegmentationRequest extends JobRequest
         $images = $this->getGenericImages();
 
         $datasetOutput = $this->generateDataset($images);
-        $trainingOutput = $this->performTraining($datasetOutput);
-        $this->performInference($images, $trainingOutput);
+        // $trainingOutput = $this->performTraining($datasetOutput);
+        // $this->performInference($images, $trainingOutput);
 
         // $annotations = $this->parseAnnotations($images);
         // $this->dispatchResponse($annotations);
 
-        $this->cleanup();
+        // $this->cleanup();
     }
 
     /**
