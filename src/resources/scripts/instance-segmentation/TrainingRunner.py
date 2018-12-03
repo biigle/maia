@@ -8,6 +8,10 @@ import mrcnn.model as modellib
 class TrainingRunner(object):
 
     def __init__(self, params, trainset):
+        # Number of epochs to train head layers.
+        self.epochs_head = params['is_epochs_head']
+        # Number of epochs to train all layers.
+        self.epochs_all = params['is_epochs_all']
         # Path to the directory to store temporary files.
         self.tmp_dir = params['tmp_dir']
         # Estimated available GPU memory in bytes.
@@ -47,7 +51,7 @@ class TrainingRunner(object):
                     learning_rate=self.config.LEARNING_RATE,
                     augmentation=self.config.AUGMENTATION,
                     workers=self.max_workers,
-                    epochs=20,
+                    epochs=self.epochs_head,
                     layers='heads')
 
         # Fine tune all layers
@@ -58,7 +62,7 @@ class TrainingRunner(object):
                     learning_rate=self.config.LEARNING_RATE / 10,
                     augmentation=self.config.AUGMENTATION,
                     workers=self.max_workers,
-                    epochs=30,
+                    epochs=self.epochs_head + self.epochs_all,
                     layers='all')
 
         model_path = os.path.join(self.model_dir, "mask_rcnn_final.h5")

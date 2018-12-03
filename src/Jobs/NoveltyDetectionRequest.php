@@ -55,18 +55,18 @@ class NoveltyDetectionRequest extends JobRequest
         }
 
         $content = [
-            'clusters' => intval($this->jobParams['clusters']),
-            'patch_size' => intval($this->jobParams['patch_size']),
-            'threshold' => intval($this->jobParams['threshold']),
-            'latent_size' => floatval($this->jobParams['latent_size']),
-            'trainset_size' => intval($this->jobParams['trainset_size']),
-            'epochs' => intval($this->jobParams['epochs']),
+            'nd_clusters' => intval($this->jobParams['nd_clusters']),
+            'nd_patch_size' => intval($this->jobParams['nd_patch_size']),
+            'nd_threshold' => intval($this->jobParams['nd_threshold']),
+            'nd_latent_size' => floatval($this->jobParams['nd_latent_size']),
+            'nd_trainset_size' => intval($this->jobParams['nd_trainset_size']),
+            'nd_epochs' => intval($this->jobParams['nd_epochs']),
+            'nd_stride' => intval($this->jobParams['nd_stride']),
+            'nd_ignore_radius' => intval($this->jobParams['nd_ignore_radius']),
             'images' => $imagesMap,
             'tmp_dir' => $this->tmpDir,
             'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),
-            'stride' => intval($this->jobParams['stride']),
-            'ignore_radius' => intval($this->jobParams['ignore_radius']),
         ];
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));

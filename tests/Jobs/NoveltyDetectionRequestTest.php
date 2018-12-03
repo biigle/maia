@@ -21,16 +21,16 @@ class NoveltyDetectionRequestTest extends TestCase
         ImageCache::fake();
 
         $params = [
-            'clusters' => 5,
-            'patch_size' => 39,
-            'threshold' => 99,
-            'latent_size' => 0.1,
-            'trainset_size' => 10000,
-            'epochs' => 100,
+            'nd_clusters' => 5,
+            'nd_patch_size' => 39,
+            'nd_threshold' => 99,
+            'nd_latent_size' => 0.1,
+            'nd_trainset_size' => 10000,
+            'nd_epochs' => 100,
+            'nd_stride' => 2,
+            'nd_ignore_radius' => 5,
             'available_bytes' => 8E+9,
             'max_workers' => 2,
-            'stride' => 2,
-            'ignore_radius' => 5,
         ];
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);

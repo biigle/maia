@@ -23,6 +23,8 @@ class InstanceSegmentationRequestTest extends TestCase
         ImageCache::fake();
 
         $params = [
+            'is_epochs_head' => 20,
+            'is_epochs_all' => 10,
             'available_bytes' => 8E+9,
             'max_workers' => 2,
         ];
@@ -60,6 +62,8 @@ class InstanceSegmentationRequestTest extends TestCase
         ];
 
         $expectTrainingJson = [
+            'is_epochs_head' => 20,
+            'is_epochs_all' => 10,
             'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,

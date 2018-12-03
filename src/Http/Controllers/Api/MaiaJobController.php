@@ -25,14 +25,16 @@ class MaiaJobController extends Controller
      *
      * @apiParam {Number} id The volume ID.
      *
-     * @apiParam (Required attributes) {Number} clusters Number of different kinds of images to expect. Images are of the same kind if they have similar lighting conditions or show similar patterns (e.g. sea floor, habitat types). Increase this number if you expect many different kinds of images. Lower the number to 1 if you have very few images and/or the content is largely uniform.
-     * @apiParam (Required attributes) {number} patch_size Size in pixels of the image patches used determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
-     * @apiParam (Required attributes) {number} threshold Percentile of pixel saliency values used to determine the saliency threshold. Lower this value to get more training proposals. The default value should be fine for most cases.
-     * @apiParam (Required attributes) {number} latent_size Learning capability used to determine training proposals. Increase this number to ignore more complex objects and patterns.
-     * @apiParam (Required attributes) {number} trainset_size Number of training image patches used to determine training proposals. You can increase this number for a large volume but it will take longer to compute.
-     * @apiParam (Required attributes) {number} epochs Time spent on training when determining the training proposals.
-     * @apiParam (Required attributes) {number} stride A higher stride increases the speed of the novelty detection but reduces the sensitivity to small regions or objects.
-     * @apiParam (Required attributes) {number} ignore_radius Ignore training proposals or annotation candidates which have a radius smaller or equal than this value in pixels.
+     * @apiParam (Required attributes) {number} nd_clusters Number of different kinds of images to expect. Images are of the same kind if they have similar lighting conditions or show similar patterns (e.g. sea floor, habitat types). Increase this number if you expect many different kinds of images. Lower the number to 1 if you have very few images and/or the content is largely uniform.
+     * @apiParam (Required attributes) {number} nd_patch_size Size in pixels of the image patches used determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
+     * @apiParam (Required attributes) {number} nd_threshold Percentile of pixel saliency values used to determine the saliency threshold. Lower this value to get more training proposals. The default value should be fine for most cases.
+     * @apiParam (Required attributes) {number} nd_latent_size Learning capability used to determine training proposals. Increase this number to ignore more complex objects and patterns.
+     * @apiParam (Required attributes) {number} nd_trainset_size Number of training image patches used to determine training proposals. You can increase this number for a large volume but it will take longer to compute.
+     * @apiParam (Required attributes) {number} nd_epochs Time spent on training when determining the training proposals.
+     * @apiParam (Required attributes) {number} nd_stride A higher stride increases the speed of the novelty detection but reduces the sensitivity to small regions or objects.
+     * @apiParam (Required attributes) {number} nd_ignore_radius Ignore training proposals or annotation candidates which have a radius smaller or equal than this value in pixels.
+     * @apiParam (Required attributes) {number} is_epochs_head Time spent on training only the head layers of Mask R-CNN for instance segmentation.
+     * @apiParam (Required attributes) {number} is_epochs_all Time spent on training  all layers of Mask R-CNN for instance segmentation.
      *
      * @param StoreMaiaJob $request
      * @return \Illuminate\Http\Response
@@ -44,14 +46,17 @@ class MaiaJobController extends Controller
         $job->user_id = $request->user()->id;
         $job->state_id = State::noveltyDetectionId();
         $job->params = $request->only([
-            'clusters',
-            'patch_size',
-            'threshold',
-            'latent_size',
-            'trainset_size',
-            'epochs',
-            'stride',
-            'ignore_radius',
+            // nd_* are parameters for novelty detection, is_* for instance segmentation.
+            'nd_clusters',
+            'nd_patch_size',
+            'nd_threshold',
+            'nd_latent_size',
+            'nd_trainset_size',
+            'nd_epochs',
+            'nd_stride',
+            'nd_ignore_radius',
+            'is_epochs_head',
+            'is_epochs_all',
         ]);
         $job->save();
 

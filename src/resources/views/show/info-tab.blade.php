@@ -6,38 +6,60 @@
         @include('maia::mixins.job-state', ['job' => $job])
     </p>
     <table class="table">
+        <thead>
+            <tr colspan="2">
+                <th>Novelty Detection</th>
+            </tr>
+        </thead>
         <tbody>
             <tr>
                 <td>Clusters</td>
-                <td class="text-right"><code>{{array_get($job->params, 'clusters')}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'nd_clusters')}}</code></td>
             </tr>
             <tr>
                 <td>Patch size</td>
-                <td class="text-right"><code>{{array_get($job->params, 'patch_size')}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'nd_patch_size')}}</code></td>
             </tr>
             <tr>
                 <td>Threshold</td>
-                <td class="text-right"><code>{{array_get($job->params, 'threshold')}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'nd_threshold')}}</code></td>
             </tr>
             <tr>
                 <td>Latent size</td>
-                <td class="text-right"><code>{{array_get($job->params, 'latent_size')}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'nd_latent_size')}}</code></td>
             </tr>
             <tr>
                 <td>Training size</td>
-                <td class="text-right"><code>{{array_get($job->params, 'trainset_size')}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'nd_trainset_size')}}</code></td>
             </tr>
             <tr>
                 <td>Training epochs</td>
-                <td class="text-right"><code>{{array_get($job->params, 'epochs')}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'nd_epochs')}}</code></td>
             </tr>
             <tr>
                 <td>Stride</td>
-                <td class="text-right"><code>{{array_get($job->params, 'stride')}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'nd_stride')}}</code></td>
             </tr>
             <tr>
                 <td>Ignore radius</td>
-                <td class="text-right"><code>{{array_get($job->params, 'ignore_radius')}}</code></td>
+                <td class="text-right"><code>{{array_get($job->params, 'nd_ignore_radius')}}</code></td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table">
+        <thead>
+            <tr colspan="2">
+                <th>Instance Segmentation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Training epochs (head)</td>
+                <td class="text-right"><code>{{array_get($job->params, 'is_epochs_head')}}</code></td>
+            </tr>
+            <tr>
+                <td>Training epochs (all)</td>
+                <td class="text-right"><code>{{array_get($job->params, 'is_epochs_all')}}</code></td>
             </tr>
         </tbody>
     </table>

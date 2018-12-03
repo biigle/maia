@@ -11,17 +11,17 @@ class DetectionRunner(object):
 
     def __init__(self, params):
         # Number of image clusters to use
-        self.clusters = params['clusters']
+        self.clusters = params['nd_clusters']
         # Size of the input image patches for the autoencoder.
-        self.patch_size = params['patch_size']
+        self.patch_size = params['nd_patch_size']
         # Percentile to use to determine the dynamic threshold.
-        self.threshold = params['threshold']
+        self.threshold = params['nd_threshold']
         # Size of the latent layer of the autoencoder relative to the input size.
-        self.latent_size = params['latent_size']
+        self.latent_size = params['nd_latent_size']
         # Size of the training dataset of patches for the autoencoder.
-        self.trainset_size = params['trainset_size']
+        self.trainset_size = params['nd_trainset_size']
         # Number of training epochs for the autoencoder.
-        self.epochs = params['epochs']
+        self.epochs = params['nd_epochs']
 
         # Dict of image IDs and file paths to the images to process.
         self.images = params['images']
@@ -36,8 +36,8 @@ class DetectionRunner(object):
         self.train_workers_ratio = 0.5
 
         self.region_vote_mask = np.ones((self.patch_size, self.patch_size))
-        self.detector_stride = params['stride']
-        self.ignore_radius = params['ignore_radius']
+        self.detector_stride = params['nd_stride']
+        self.ignore_radius = params['nd_ignore_radius']
 
     def run(self):
         full_executor = ThreadPoolExecutor(max_workers=self.max_workers)

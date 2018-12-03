@@ -21,14 +21,16 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         parent::setUp();
         $this->defaultParams = [
-            'clusters' => 5,
-            'patch_size' => 39,
-            'threshold' => 99,
-            'latent_size' => 0.1,
-            'trainset_size' => 10000,
-            'epochs' => 100,
-            'stride' => 2,
-            'ignore_radius' => 5,
+            'nd_clusters' => 5,
+            'nd_patch_size' => 39,
+            'nd_threshold' => 99,
+            'nd_latent_size' => 0.1,
+            'nd_trainset_size' => 10000,
+            'nd_epochs' => 100,
+            'nd_stride' => 2,
+            'nd_ignore_radius' => 5,
+            'is_epochs_head' => 20,
+            'is_epochs_all' => 10,
         ];
     }
 
@@ -46,14 +48,16 @@ class MaiaJobControllerTest extends ApiTestCase
 
         // patch size must be an odd number
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", [
-            'clusters' => 5,
-            'patch_size' => 40,
-            'threshold' => 99,
-            'latent_size' => 0.1,
-            'trainset_size' => 10000,
-            'epochs' => 100,
-            'stride' => 2,
-            'ignore_radius' => 5,
+            'nd_clusters' => 5,
+            'nd_patch_size' => 40,
+            'nd_threshold' => 99,
+            'nd_latent_size' => 0.1,
+            'nd_trainset_size' => 10000,
+            'nd_epochs' => 100,
+            'nd_stride' => 2,
+            'nd_ignore_radius' => 5,
+            'is_epochs_head' => 20,
+            'is_epochs_all' => 10,
         ])->assertStatus(422);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)

@@ -37,13 +37,15 @@ class StoreMaiaJob extends FormRequest
     public function rules()
     {
         return [
-            'clusters' => 'required|integer|min:1|max:100',
-            'patch_size' => ['required', 'integer', 'min:3', 'max:99', new OddNumber],
-            'threshold' => 'required|integer|min:0|max:99',
-            'latent_size' => 'required|numeric|min:0.05|max:0.75',
-            'trainset_size' => 'required|integer|min:1000|max:100000',
-            'epochs' => 'required|integer|min:50|max:1000',
-            'stride' => 'required|integer|min:1|max:10',
+            'nd_clusters' => 'required|integer|min:1|max:100',
+            'nd_patch_size' => ['required', 'integer', 'min:3', 'max:99', new OddNumber],
+            'nd_threshold' => 'required|integer|min:0|max:99',
+            'nd_latent_size' => 'required|numeric|min:0.05|max:0.75',
+            'nd_trainset_size' => 'required|integer|min:1000|max:100000',
+            'nd_epochs' => 'required|integer|min:50|max:1000',
+            'nd_stride' => 'required|integer|min:1|max:10',
+            'is_epochs_head' => 'required|integer|min:1',
+            'is_epochs_all' => 'required|integer|min:1',
         ];
     }
 
