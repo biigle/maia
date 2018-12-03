@@ -5,3 +5,4 @@
 /.php_cs.cache
 
 *.sublime-*
+*__pycache__
