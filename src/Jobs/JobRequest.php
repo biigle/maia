@@ -108,15 +108,27 @@ class JobRequest extends Job implements ShouldQueue
     }
 
     /**
-     * Make sure the temporary directory for this request exists.
+     * Create the temporary directory for this request.
      */
-    protected function ensureTmpDir()
+    protected function createTmpDir()
     {
         if (!isset($this->tmpDir)) {
             // Do not set this in the constructor because else the config of the
             // requesting instance would be used and not the config of the GPU instance.
             $this->tmpDir = $this->getTmpDirPath();
-            File::makeDirectory($this->tmpDir, 0700, true, true);
+            $this->ensureDirectory($this->tmpDir);
+        }
+    }
+
+    /**
+     * Creates the specified directory if it does not exist.
+     *
+     * @param string $path
+     */
+    protected function ensureDirectory($path)
+    {
+        if (!File::exists($path)) {
+            File::makeDirectory($path, 0700, true, true);
         }
     }
 

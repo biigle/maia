@@ -35,11 +35,11 @@ class InstanceSegmentationRequest extends JobRequest
      */
     public function handle()
     {
-        $this->ensureTmpDir();
+        $this->createTmpDir();
         $images = $this->getGenericImages();
 
-        $datasetOutput = $this->generateDataset($images);
-        // $trainingOutput = $this->performTraining($datasetOutput);
+        $datasetOutputPath = $this->generateDataset($images);
+        $trainingOutputPath = $this->performTraining($datasetOutputPath);
         // $this->performInference($images, $trainingOutput);
 
         // $annotations = $this->parseAnnotations($images);
@@ -81,7 +81,7 @@ class InstanceSegmentationRequest extends JobRequest
      *
      * @param array $images GenericImage instances.
      *
-     * @return array Output of the dataset generation script.
+     * @return string Path to the JSON output file.
      */
     protected function generateDataset($images)
     {
@@ -99,7 +99,7 @@ class InstanceSegmentationRequest extends JobRequest
             $this->python("{$script} {$inputPath}", 'dataset-log.txt');
         });
 
-        return json_decode(File::get($outputPath), true);
+        return $outputPath;
     }
 
     /**
@@ -130,29 +130,46 @@ class InstanceSegmentationRequest extends JobRequest
     /**
      * Perform training of Mask R-CNN.
      *
-     * @param array $params Output of the dataset generation script.
+     * @param string $datasetOutputPath Path to the JSON output of the dataset generator.
      *
-     * @return array Output of the training script.
+     * @return string Path to the JSON output file of the training script.
      */
-    protected function performTraining($params)
+    protected function performTraining($datasetOutputPath)
     {
         $outputPath = "{$this->tmpDir}/output-training.json";
-        $inputPath = $this->createTrainingJson($outputPath, $params);
+        $this->maybeDownloadCocoModel();
+        $inputPath = $this->createTrainingJson($outputPath);
         $script = config('maia.mrcnn_training_script');
-        $this->python("{$script} {$inputPath}", 'training-log.txt');
+        $this->python("{$script} {$inputPath} {$datasetOutputPath}", 'training-log.txt');
 
-        return json_decode(File::get($outputPath), true);
+        return $outputPath;
+    }
+
+    /**
+     * Downloads the Mask R-CNN COCO pretrained weights if they weren't downloaded yet.
+     */
+    protected function maybeDownloadCocoModel()
+    {
+        $path = config('maia.coco_model_path');
+        if (!File::exists($path)) {
+            $this->ensureDirectory(dirname($path));
+            $url = config('maia.coco_model_url');
+            $success = @copy($url, $path);
+
+            if (!$success) {
+                throw new Exception("Failed to download Mask R-CNN weights from '{$url}'.");
+            }
+        }
     }
 
     /**
      * Create the JSON file that is the input to the training script.
      *
      * @param string $outputJsonPath Path to the output file of the script.
-     * @param array $params Output of the dataset generation script.
      *
      * @return string Input JSON file path.
      */
-    protected function createTrainingJson($outputJsonPath, $params)
+    protected function createTrainingJson($outputJsonPath)
     {
         $path = "{$this->tmpDir}/input-training.json";
         $content = [
@@ -160,7 +177,7 @@ class InstanceSegmentationRequest extends JobRequest
             'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),
             'output_path' => $outputJsonPath,
-            // ...
+            'coco_model_path' => config('maia.coco_model_path'),
         ];
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));

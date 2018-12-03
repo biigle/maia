@@ -71,6 +71,16 @@ return [
     */
     'mrcnn_inference_script' => __DIR__.'/../resources/scripts/instance-segmentation/InferenceRunner.py',
 
+    /*
+    | URL from which to download the latest COCO trained weights for Mask R-CNN.
+    */
+    'coco_model_url' => 'https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rcnn_coco.h5',
+
+    /*
+    | Path to the file to store the COCO trained weights to.
+    */
+    'coco_model_path' => storage_path('maia_jobs').'/mask_rcnn_coco.h5',
+
     'notifications' => [
         /*
         | Set the way notifications for MAIA job state changes are sent by default.

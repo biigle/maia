@@ -25,7 +25,7 @@ class NoveltyDetectionRequest extends JobRequest
      */
     public function handle()
     {
-        $this->ensureTmpDir();
+        $this->createTmpDir();
         $images = $this->getGenericImages();
 
         ImageCache::batch($images, function ($images, $paths) {

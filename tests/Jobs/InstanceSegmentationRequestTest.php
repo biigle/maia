@@ -46,7 +46,9 @@ class InstanceSegmentationRequestTest extends TestCase
         ]);
         $tmpDir = config('maia.tmp_dir')."/maia-{$job->id}-instance-segmentation";
         $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
+        $datasetOutputJsonPath = "{$tmpDir}/output-dataset.json";
         $trainingInputJsonPath = "{$tmpDir}/input-training.json";
+        $trainingOutputJsonPath = "{$tmpDir}/output-training.json";
         $inferenceInputJsonPath = "{$tmpDir}/input-inference.json";
 
         $expectDatasetJson = [
@@ -62,7 +64,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
             'output_path' => "{$tmpDir}/output-training.json",
-            // ...
+            'coco_model_path' => config('maia.coco_model_path'),
         ];
 
         $expectInferenceJson = [
@@ -90,8 +92,9 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertTrue(File::exists($trainingInputJsonPath));
             $inputJson = json_decode(File::get($trainingInputJsonPath), true);
             $this->assertEquals($expectTrainingJson, $inputJson);
-            $this->assertContains("TrainingRunner.py {$trainingInputJsonPath}", $request->commands[1]);
+            $this->assertContains("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
 
+            $this->markTestIncomplete();
             $this->assertTrue(File::exists($inferenceInputJsonPath));
             $inputJson = json_decode(File::get($inferenceInputJsonPath), true);
             $this->assertArrayHasKey('images', $inputJson);
@@ -102,7 +105,6 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertContains("InferenceRunner.py {$inferenceInputJsonPath}", $request->commands[2]);
 
 
-            $this->markTestIncomplete();
             Queue::assertPushed(InstanceSegmentationResponse::class);
         } finally {
             File::deleteDirectory($tmpDir);
@@ -125,6 +127,11 @@ class IsJobStub extends InstanceSegmentationRequest
 {
     public $commands = [];
     public $cleanup = false;
+
+    protected function maybeDownloadCocoModel()
+    {
+        // do nothing
+    }
 
     protected function python($command, $log = 'log.txt')
     {

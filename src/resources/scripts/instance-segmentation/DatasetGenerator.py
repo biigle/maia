@@ -19,9 +19,8 @@ class DatasetGenerator(object):
 
         self.max_workers = params['max_workers']
 
-
-        self.image_crop_path = '{}/image_crops'.format(self.tmp_dir)
-        self.mask_crop_path = '{}/mask_crops'.format(self.tmp_dir)
+        self.training_images_path = '{}/training_images'.format(self.tmp_dir)
+        self.training_masks_path = '{}/training_masks'.format(self.tmp_dir)
         self.crop_dimension = 500
 
     def generate(self):
@@ -32,23 +31,34 @@ class DatasetGenerator(object):
         for imageId, proposals in self.training_proposals.items():
             jobs.append(executor.submit(self.process_image, imageId, proposals))
 
-        crops = []
+        images = []
+        masks = []
+        mean_pixels = []
 
         for job in as_completed(jobs):
-            crops.extend(job.result())
+            i, m, p = job.result()
+            images.extend(i)
+            masks.extend(m)
+            mean_pixels.extend(p)
+
+        mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()
 
         return {
-            'image_crop_path': self.image_crop_path,
-            'mask_crop_path': self.mask_crop_path,
-            'crops': crops,
+            'training_images_path': self.training_images_path,
+            'training_masks_path': self.training_masks_path,
+            'training_images': images,
+            'training_masks': masks,
+            'mean_pixel': mean_pixel,
+            'crop_dimension': self.crop_dimension,
+            'name': os.path.basename(self.tmp_dir),
         }
 
     def ensure_train_masks_dirs(self):
-        if not os.path.exists(self.image_crop_path):
-           os.makedirs(self.image_crop_path)
+        if not os.path.exists(self.training_images_path):
+           os.makedirs(self.training_images_path)
 
-        if not os.path.exists(self.mask_crop_path):
-           os.makedirs(self.mask_crop_path)
+        if not os.path.exists(self.training_masks_path):
+           os.makedirs(self.training_masks_path)
 
     def process_image(self, imageId, proposals):
         image = Image.open(self.images[imageId])
@@ -57,17 +67,21 @@ class DatasetGenerator(object):
             cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], 1, -1)
 
         mask = Image.fromarray(mask)
-        crops = []
+        images = []
+        masks = []
+        mean_pixels = []
 
         for i, proposal in enumerate(proposals):
             image_file = '{}_{}.jpg'.format(imageId, i)
             mask_file = '{}.png'.format(image_file)
             image_crop, mask_crop = self.generate_crop(image, mask, proposal)
-            image_crop.save('{}/{}'.format(self.image_crop_path, image_file))
-            mask_crop.save('{}/{}'.format(self.mask_crop_path, mask_file))
-            crops.append([image_file, mask_file])
+            image_crop.save('{}/{}'.format(self.training_images_path, image_file))
+            mask_crop.save('{}/{}'.format(self.training_masks_path, mask_file))
+            images.append(image_file)
+            masks.append(mask_file)
+            mean_pixels.append(np.array(image_crop).reshape((-1, 3)).mean(axis = 0))
 
-        return crops
+        return images, masks, mean_pixels
 
     def generate_crop(self, image, mask, proposal):
         width, height = image.size
