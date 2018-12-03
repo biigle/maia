@@ -55,11 +55,11 @@ class TrainingDataset(Dataset):
         images = self.join_paths(trainset['training_images_path'], trainset['training_images'])
         masks = self.join_paths(trainset['training_masks_path'], trainset['training_masks'])
         classes = {int(k): v for k, v in trainset['classes'].items()}
-        super().__init__(images=images, masks=masks, classes=classes, name='MAIA Generic Training Dataset')
+        super().__init__(images=images, masks=masks, classes=classes, name='maia_generic_training')
 
     def join_paths(self, prefix, suffixes):
         return [os.path.join(prefix, s) for s in suffixes]
 
 class InferenceDataset(Dataset):
     def __init__(self, images):
-        super().__init__(images=images, name='MAIA Generic Inference Dataset')
+        super().__init__(images=images, name='maia_generic_inference')

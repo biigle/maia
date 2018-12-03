@@ -416,7 +416,7 @@ biigle.$viewModel('maia-show-container', function (element) {
                     .then(this.maybeInitCurrentImage);
             },
             visitedReviewAcTab: function () {
-                this.fetchAnnotationCandidates();
+                // this.fetchAnnotationCandidates();
             },
             currentImageId: function (id) {
                 if (id) {

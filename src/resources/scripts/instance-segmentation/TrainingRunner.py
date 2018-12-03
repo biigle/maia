@@ -37,7 +37,7 @@ class TrainingRunner(object):
             "mrcnn_class_logits",
             "mrcnn_bbox_fc",
             "mrcnn_bbox",
-            "mrcnn_mask"
+            "mrcnn_mask",
         ])
 
         # Train the head branches
@@ -53,7 +53,8 @@ class TrainingRunner(object):
         # Fine tune all layers
         # The epochs *include* those of the previous training. So set 20 if you want to
         # train for 10 epochs and already trained for 10 epochs.
-        model.train(self.dataset, dataset_val,
+        model.train(self.dataset,
+                    val_dataset=None,
                     learning_rate=self.config.LEARNING_RATE / 10,
                     augmentation=self.config.AUGMENTATION,
                     workers=self.max_workers,

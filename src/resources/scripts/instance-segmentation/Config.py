@@ -30,11 +30,11 @@ class TrainingConfig(Config):
         factor = 1024**2 / 6 # 1024px²/6GB
         self.IMAGES_PER_GPU = math.floor((params['available_bytes'] / 1e+9) * (factor / trainset['crop_dimension']**2))
 
-        super().__init__(trainset, name = 'MAIA Training Config')
+        super().__init__(trainset, name = 'maia_training')
 
 class InferenceConfig(Config):
     def __init__(self, name, params, trainset):
         self.IMAGES_PER_GPU = 1
         self.IMAGE_MIN_DIM = 64
         self.IMAGE_RESIZE_MODE = "pad64"
-        super().__init__(trainset, name = 'MAIA Inference Config')
+        super().__init__(trainset, name = 'maia_inference')
