@@ -2275,7 +2275,7 @@ class MaskRCNN():
             "*epoch*", "{epoch:04d}")
 
     def train(self, train_dataset, val_dataset, learning_rate, epochs, layers,
-              augmentation=None, custom_callbacks=None, no_augmentation_sources=None):
+              augmentation=None, custom_callbacks=None, no_augmentation_sources=None, workers=multiprocessing.cpu_count()):
         """Train the model.
         train_dataset, val_dataset: Training and validation Dataset objects.
         learning_rate: The learning rate to train with
@@ -2329,8 +2329,12 @@ class MaskRCNN():
                                          augmentation=augmentation,
                                          batch_size=self.config.BATCH_SIZE,
                                          no_augmentation_sources=no_augmentation_sources)
-        val_generator = data_generator(val_dataset, self.config, shuffle=True,
+
+        if val_dataset != None and self.config.VALIDATION_STEPS > 0:
+            val_generator = data_generator(val_dataset, self.config, shuffle=True,
                                        batch_size=self.config.BATCH_SIZE)
+        else:
+            val_generator = None
 
         # Create log_dir if it does not exist
         if not os.path.exists(self.log_dir):
@@ -2359,8 +2363,6 @@ class MaskRCNN():
         # https://github.com/matterport/Mask_RCNN/issues/13#issuecomment-353124009
         if os.name is 'nt':
             workers = 0
-        else:
-            workers = multiprocessing.cpu_count()
 
         self.keras_model.fit_generator(
             train_generator,
