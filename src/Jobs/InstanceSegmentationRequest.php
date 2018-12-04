@@ -42,10 +42,10 @@ class InstanceSegmentationRequest extends JobRequest
         $trainingOutputPath = $this->performTraining($datasetOutputPath);
         $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
 
-        // $annotations = $this->parseAnnotations($images);
-        // $this->dispatchResponse($annotations);
+        $annotations = $this->parseAnnotations($images);
+        $this->dispatchResponse($annotations);
 
-        // $this->cleanup();
+        $this->cleanup();
     }
 
     /**

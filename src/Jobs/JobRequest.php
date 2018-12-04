@@ -178,4 +178,50 @@ class JobRequest extends Job implements ShouldQueue
 
         return $logFile;
     }
+
+
+    /**
+     * Parse the output JSON files to get the array of annotations for each image.
+     *
+     * @param array $images GenericImage instances.
+     *
+     * @return array
+     */
+    protected function parseAnnotations($images)
+    {
+        $annotations = [];
+        $isNull = 0;
+
+        foreach ($images as $image) {
+            $annotations[$image->getId()] = $this->parseAnnotationsFile($image);
+            if (is_null($annotations[$image->getId()])) {
+                $isNull += 1;
+            }
+        }
+
+        // For many images (as it is common) it might be not too bad if novelty detection
+        // failed for some of them. We still get enough training proposals and don't want
+        // to execute the long running novelty detection again. But if too many images
+        // failed, abort.
+        if (($isNull / count($images)) > 0.1) {
+            throw new Exception('Unable to parse more than 10 % of the output JSON files.');
+        }
+
+        return $annotations;
+    }
+
+    /**
+     * Parse the output JSON file of a single image.
+     *
+     * @param GenericImage $image
+     *
+     * @return array
+     */
+    protected function parseAnnotationsFile($image)
+    {
+        $id = $image->getId();
+
+        return json_decode(File::get("{$this->tmpDir}/{$id}.json"), true);
+    }
+
 }

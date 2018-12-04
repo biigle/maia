@@ -46,7 +46,8 @@ class InstanceSegmentationRequestTest extends TestCase
             'type_id' => MaiaAnnotationType::trainingProposalId(),
             'selected' => false,
         ]);
-        $tmpDir = config('maia.tmp_dir')."/maia-{$job->id}-instance-segmentation";
+        config(['maia.tmp_dir' => '/tmp']);
+        $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
         $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
         $datasetOutputJsonPath = "{$tmpDir}/output-dataset.json";
         $trainingInputJsonPath = "{$tmpDir}/input-training.json";
@@ -106,8 +107,13 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertEquals($expectInferenceJson, $inputJson);
             $this->assertContains("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-            $this->markTestIncomplete();
-            Queue::assertPushed(InstanceSegmentationResponse::class);
+            Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $image) {
+
+                return $response->jobId === $job->id
+                    && $response->annotations[$image->id] === [[10, 20, 30, 123]];
+            });
+
+            $this->assertTrue($request->cleanup);
         } finally {
             File::deleteDirectory($tmpDir);
         }
@@ -144,8 +150,9 @@ class IsJobStub extends InstanceSegmentationRequest
         } elseif (str_contains($command, 'TrainingRunner')) {
             File::put("{$this->tmpDir}/output-training.json", '{}');
         } elseif (str_contains($command, 'InferenceRunner')) {
-            $imageId = array_keys($this->images)[0];
-            File::put("{$this->tmpDir}/{$imageId}.json", "[[30, 20, 10]]");
+            foreach ($this->images as $id => $image) {
+                File::put("{$this->tmpDir}/{$id}.json", "[[10, 20, 30, 123]]");
+            }
         }
     }
 
