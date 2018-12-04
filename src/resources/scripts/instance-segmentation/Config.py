@@ -38,7 +38,7 @@ class TrainingConfig(Config):
         super().__init__(trainset, name = 'maia_training')
 
 class InferenceConfig(Config):
-    def __init__(self, name, params, trainset):
+    def __init__(self, params, trainset):
         self.IMAGES_PER_GPU = 1
         self.IMAGE_MIN_DIM = 64
         self.IMAGE_RESIZE_MODE = "pad64"

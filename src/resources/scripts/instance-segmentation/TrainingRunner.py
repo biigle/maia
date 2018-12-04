@@ -19,7 +19,7 @@ class TrainingRunner(object):
         # Path to the COCO pretrained weights for Mask R-CNN
         self.coco_model_path = params['coco_model_path']
         # Path to store the trained Mask R-CNN model to.
-        self.model_dir = '{}/models'.format(self.tmp_dir)
+        self.model_dir = os.path.join(self.tmp_dir, 'models')
 
         self.max_workers = params['max_workers']
         self.config = TrainingConfig(params, trainset)
@@ -69,6 +69,7 @@ class TrainingRunner(object):
         model.keras_model.save_weights(model_path)
 
         return {
+            'model_dir': self.model_dir,
             'model_path': model_path,
         }
 

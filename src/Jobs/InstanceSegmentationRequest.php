@@ -40,7 +40,7 @@ class InstanceSegmentationRequest extends JobRequest
 
         $datasetOutputPath = $this->generateDataset($images);
         $trainingOutputPath = $this->performTraining($datasetOutputPath);
-        // $this->performInference($images, $trainingOutput);
+        $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
 
         // $annotations = $this->parseAnnotations($images);
         // $this->dispatchResponse($annotations);
@@ -191,15 +191,16 @@ class InstanceSegmentationRequest extends JobRequest
      * Perform inference with the trained Mask R-CNN.
      *
      * @param array $images GenericImage instances.
-     * @param array $params Output of the training script.
+     * @param string $datasetOutputPath Path to the JSON output of the dataset generator.
+     * @param string $trainingOutputPath Path to the JSON output of the training script.
      */
-    protected function performInference($images, $params)
+    protected function performInference($images, $datasetOutputPath, $trainingOutputPath)
     {
-        ImageCache::batch($images, function ($images, $paths) use ($params) {
+        ImageCache::batch($images, function ($images, $paths) use ($datasetOutputPath, $trainingOutputPath) {
             $imagesMap = $this->buildImagesMap($images, $paths);
-            $inputPath = $this->createInferenceJson($imagesMap, $params);
+            $inputPath = $this->createInferenceJson($imagesMap);
             $script = config('maia.mrcnn_inference_script');
-            $this->python("{$script} {$inputPath}", 'inference-log.txt');
+            $this->python("{$script} {$inputPath} {$datasetOutputPath} {$trainingOutputPath}", 'inference-log.txt');
         });
     }
 
@@ -207,11 +208,10 @@ class InstanceSegmentationRequest extends JobRequest
      * Create the JSON file that is the input to the inference script.
      *
      * @param array $imagesMap Map from image IDs to cached file paths.
-     * @param array $params Output of the training script.
      *
      * @return string Input JSON file path.
      */
-    protected function createInferenceJson($imagesMap, $params)
+    protected function createInferenceJson($imagesMap)
     {
         $path = "{$this->tmpDir}/input-inference.json";
         $content = [
@@ -219,7 +219,6 @@ class InstanceSegmentationRequest extends JobRequest
             'tmp_dir' => $this->tmpDir,
             'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),
-            // ...
         ];
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));

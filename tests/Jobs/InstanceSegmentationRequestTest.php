@@ -75,7 +75,6 @@ class InstanceSegmentationRequestTest extends TestCase
             'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
-            // ...
         ];
 
         try {
@@ -98,7 +97,6 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertEquals($expectTrainingJson, $inputJson);
             $this->assertContains("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
 
-            $this->markTestIncomplete();
             $this->assertTrue(File::exists($inferenceInputJsonPath));
             $inputJson = json_decode(File::get($inferenceInputJsonPath), true);
             $this->assertArrayHasKey('images', $inputJson);
@@ -106,9 +104,9 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertArrayHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertEquals($expectInferenceJson, $inputJson);
-            $this->assertContains("InferenceRunner.py {$inferenceInputJsonPath}", $request->commands[2]);
+            $this->assertContains("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-
+            $this->markTestIncomplete();
             Queue::assertPushed(InstanceSegmentationResponse::class);
         } finally {
             File::deleteDirectory($tmpDir);

@@ -18,8 +18,8 @@ class Dataset(mrcnn.utils.Dataset):
         for class_id, class_name in self.classes.items():
             self.add_class(self.name, class_id, class_name)
 
-        for i, file in enumerate(self.images):
-            self.add_image(self.name, i, file)
+        for image_id, image_file in self.images.items():
+            self.add_image(self.name, image_id, image_file)
 
         super().prepare()
 
@@ -53,6 +53,8 @@ class Dataset(mrcnn.utils.Dataset):
 class TrainingDataset(Dataset):
     def __init__(self, trainset):
         images = self.join_paths(trainset['training_images_path'], trainset['training_images'])
+        # Convert to the required dict with image IDs.
+        images = {k: v for k, v in enumerate(images)}
         masks = self.join_paths(trainset['training_masks_path'], trainset['training_masks'])
         classes = {int(k): v for k, v in trainset['classes'].items()}
         super().__init__(images=images, masks=masks, classes=classes, name='maia_generic_training')
