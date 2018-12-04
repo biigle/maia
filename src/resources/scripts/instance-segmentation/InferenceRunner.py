@@ -42,7 +42,7 @@ class InferenceRunner(object):
             print('Image {} of {} (#{})'.format(i + 1, total_images, info['id']))
             image = self.dataset.load_image(i)
             results = model.detect([image])
-            jobs.append(executor.submit(self.process_results, info['id'], results[0]))
+            jobs.append(executor.submit(self.process_result, info['id'], results[0]))
 
         wait(jobs)
 
