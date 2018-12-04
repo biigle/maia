@@ -31,6 +31,10 @@ class TrainingConfig(Config):
         factor = 1024**2 / 12 # 1024px²/12GB
         self.IMAGES_PER_GPU = math.floor((params['available_bytes'] / 1e+9) * (factor / trainset['crop_dimension']**2))
 
+        # In total, we want to train with about 2000 images per epoch. So we adjust the
+        # number of steps according to the batch size determined above.
+        self.STEPS_PER_EPOCH = round(2000 / self.IMAGES_PER_GPU)
+
         super().__init__(trainset, name = 'maia_training')
 
 class InferenceConfig(Config):
