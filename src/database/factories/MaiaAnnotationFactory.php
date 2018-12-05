@@ -13,5 +13,6 @@ $factory->define(Biigle\Modules\Maia\MaiaAnnotation::class, function ($faker) {
             return factory(Biigle\Modules\Maia\MaiaJob::class)->create()->id;
         },
         'score' => $faker->randomNumber(),
+        'selected' => false,
     ];
 });
