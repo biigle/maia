@@ -78,10 +78,11 @@ class InferenceRunner(object):
     def process_result(self, image_id, result):
         points = []
         for roi, score in zip(result['rois'], result['scores']):
-            x = min(roi[0], roi[2])
-            y = min(roi[1], roi[3])
-            w = abs(roi[0] - roi[2])
-            h = abs(roi[1] - roi[3])
+            # ROIs are stored as (y1, x1, y2, x2).
+            y = min(roi[0], roi[2])
+            x = min(roi[1], roi[3])
+            h = abs(roi[0] - roi[2])
+            w = abs(roi[1] - roi[3])
             rx = round(w / 2)
             ry = round(h / 2)
             r = max(rx, ry)
