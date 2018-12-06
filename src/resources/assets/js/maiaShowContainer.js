@@ -100,6 +100,16 @@ biigle.$viewModel('maia-show-container', function (element) {
                         return proposalsById[id];
                     });
             },
+            // The thumbnails of unselected proposals are deleted when the job advances
+            // to instance segmentation so we only want to show the selected proposals
+            // when this happened.
+            proposalsForSelectView: function () {
+                if (this.isInTrainingProposalState) {
+                    return this.proposals;
+                } else {
+                    return this.selectedProposals;
+                }
+            },
             hasSelectedProposals: function () {
                 return this.selectedProposals.length > 0;
             },

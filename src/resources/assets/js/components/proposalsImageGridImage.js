@@ -7,7 +7,7 @@ biigle.$component('maia.components.proposalsImageGridImage', {
     mixins: [biigle.$require('volumes.components.imageGridImage')],
     template: '<figure class="image-grid__image" :class="classObject" :title="title">' +
         '<div v-if="showIcon" class="image-icon">' +
-            '<i class="fas fa-3x" :class="iconClass"></i>' +
+            '<i class="fas" :class="iconClass"></i>' +
         '</div>' +
         '<img @click="toggleSelect" :src="url || emptyUrl">' +
         '<div v-if="showAnnotationLink" class="image-buttons">' +
@@ -27,6 +27,15 @@ biigle.$component('maia.components.proposalsImageGridImage', {
             if (this.selectable) {
                 return this.selected ? 'Unselect as interesting' : 'Select as interesting';
             }
+        },
+        // Show the small icon when the job is no longer in training proposal state.
+        smallIcon: function () {
+            return !this.selectable;
+        },
+        // Do not fade selected images when the job is no longer in training proposal
+        // state.
+        selectedFade: function () {
+            return this.selectable;
         },
     },
     methods: {

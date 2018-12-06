@@ -1,6 +1,6 @@
 <proposals-image-grid
     v-show="hasProposals"
-    :images="proposals"
+    :images="proposalsForSelectView"
     :selected-proposal-ids="selectedProposalIds"
     empty-url="{{ asset(config('thumbnails.empty_url')) }}"
     :width="{{config('thumbnails.width')}}"

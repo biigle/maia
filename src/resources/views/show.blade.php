@@ -70,10 +70,10 @@
             <sidebar-tab name="select-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
             <sidebar-tab name="refine-candidates" icon="pen-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
         @else
-            <sidebar-tab name="select-candidates" icon="check-square" title="Review annotation candidates">
+            <sidebar-tab name="select-candidates" icon="check-square" title="Select annotation candidates">
                 @include('maia::show.select-candidates-tab')
             </sidebar-tab>
-            <sidebar-tab name="refine-candidates" icon="pen-square" title="Review annotation candidates">
+            <sidebar-tab name="refine-candidates" icon="pen-square" title="Refine annotation candidates">
                 @include('maia::show.refine-candidates-tab')
             </sidebar-tab>
         @endif

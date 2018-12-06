@@ -7,7 +7,7 @@ biigle.$component('maia.components.candidatesImageGridImage', {
     mixins: [biigle.$require('volumes.components.imageGridImage')],
     template: '<figure class="image-grid__image" :class="classObject" :title="title">' +
         '<div v-if="showIcon" class="image-icon">' +
-            '<i class="fas fa-3x" :class="iconClass"></i>' +
+            '<i class="fas" :class="iconClass"></i>' +
         '</div>' +
         '<img @click="toggleSelect" :src="url || emptyUrl">' +
         '<div v-if="showAnnotationLink" class="image-buttons">' +
