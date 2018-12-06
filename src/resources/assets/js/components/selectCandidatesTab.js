@@ -1,9 +1,9 @@
 /**
- * The review annotation candidates tab
+ * The select annotation candidates tab
  *
  * @type {Object}
  */
-biigle.$component('maia.components.reviewAcTab', {
+biigle.$component('maia.components.selectCandidatesTab', {
     props: {
         //
     },

@@ -3,13 +3,13 @@
  *
  * @type {Object}
  */
-biigle.$component('maia.components.selectTpTab', {
+biigle.$component('maia.components.selectProposalsTab', {
     props: {
-        trainingProposals: {
+        proposals: {
             type: Array,
             required: true,
         },
-        selectedTrainingProposals: {
+        selectedProposals: {
             type: Array,
             required: true,
         },
@@ -20,11 +20,11 @@ biigle.$component('maia.components.selectTpTab', {
         };
     },
     computed: {
-        selectedTpCount: function () {
-            return this.selectedTrainingProposals.length;
+        selectedProposalsCount: function () {
+            return this.selectedProposals.length;
         },
-        tpCount: function () {
-            return this.trainingProposals.length;
+        proposalsCount: function () {
+            return this.proposals.length;
         },
     },
     methods: {

@@ -1,19 +1,19 @@
-<refine-tp-canvas
+<refine-proposals-canvas
     :can-modify="@if ($job->state_id === $states['training-proposals']) true @else false @endif"
-    :show-minimap="hasCurrentImage"
-    :image="currentImage"
-    :annotations="currentSelectedTrainingProposals"
-    :unselected-annotations="currentUnselectedTrainingProposals"
-    :selected-annotations="focussedTrainingProposalArray"
-    v-on:previous-image="handlePreviousImage"
-    v-on:previous="handlePrevious"
-    v-on:next="handleNext"
-    v-on:next-image="handleNextImage"
-    v-on:update="handleRefineTp"
-    v-on:select-tp="selectTrainingProposal"
-    v-on:unselect-tp="unselectTrainingProposal"
-    listener-set="refine-tp"
-    ref="refineCanvas"
+    :show-minimap="hasCurrentProposalImage"
+    :image="currentProposalImage"
+    :annotations="currentSelectedProposals"
+    :unselected-annotations="currentUnselectedProposals"
+    :selected-annotations="focussedProposalArray"
+    v-on:previous-image="handlePreviousProposalImage"
+    v-on:previous="handlePreviousProposal"
+    v-on:next="handleNextProposal"
+    v-on:next-image="handleNextProposalImage"
+    v-on:update="handleRefineProposal"
+    v-on:select="selectProposal"
+    v-on:unselect="unselectProposal"
+    listener-set="refine-proposals"
+    ref="refineProposalsCanvas"
     inline-template>
     <div class="annotation-canvas">
         <minimap v-show="showMinimap" :extent="extent" :projection="projection" inline-template>
@@ -30,9 +30,9 @@
             </div>
             @if ($job->state_id === $states['training-proposals'])
                 <div class="btn-group drawing-controls">
-                    <control-button icon="fa-plus" title="Mark a training proposal as interesting" :active="selectingTp" v-on:click="toggleMarkAsInteresting"></control-button>
+                    <control-button icon="fa-plus" title="Mark a training proposal as interesting" :active="selectingProposal" v-on:click="toggleMarkAsInteresting"></control-button>
                 </div>
             @endif
         </div>
     </div>
-</refine-tp-canvas>
+</refine-proposals-canvas>

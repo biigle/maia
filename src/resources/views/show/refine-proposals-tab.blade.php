@@ -1,7 +1,7 @@
-<refine-tp-tab v-bind:selected-training-proposals="selectedTrainingProposals" v-bind:seen-training-proposals="selectedAndSeenTrainingProposals" inline-template>
+<refine-proposals-tab v-bind:selected-proposals="selectedProposals" v-bind:seen-proposals="selectedAndSeenProposals" inline-template>
 <div class="sidebar-tab__content">
     @if ($job->state_id === $states['training-proposals'])
-        <div v-if="hasNoSelectedTp" class="panel panel-warning">
+        <div v-if="hasNoSelectedProposals" class="panel panel-warning">
             <div class="panel-body text-warning">
                 Please select <i class="fas fa-plus-square"></i> training proposals.
             </div>
@@ -12,7 +12,7 @@
             </div>
         </div>
         <p :class="textClass">
-            Seen <span v-text="numberSeenTps">0</span> of <span v-text="numberSelectedTps">0</span> selected training proposals.
+            Seen <span v-text="numberSeenProposals">0</span> of <span v-text="numberSelectedProposals">0</span> selected training proposals.
         </p>
     @else
         <div class="panel panel-default">
@@ -27,9 +27,9 @@
             <form action="{{url("api/v1/maia-jobs/{$job->id}")}}" method="POST" onsubmit="return confirm('Once the training proposals have been submitted, you are no longer able to modify them. Continue?')">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="_method" value="PUT">
-                <button type="submit" class="btn btn-block" :class="buttonClass" :disabled="hasNoSelectedTp">Submit training proposals</button>
+                <button type="submit" class="btn btn-block" :class="buttonClass" :disabled="hasNoSelectedProposals">Submit training proposals</button>
             </form>
         </div>
     @endif
 </div>
-</refine-tp-tab>
+</refine-proposals-tab>

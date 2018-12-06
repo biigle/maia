@@ -32,6 +32,7 @@ $router->group([
 
         $router->get('maia-jobs/{id}/training-proposals', 'TrainingProposalController@index');
         $router->get('maia-jobs/{id}/images/{id2}/training-proposals', 'MaiaJobImagesController@indexTrainingProposals');
+        $router->get('maia-jobs/{id}/images/{id2}/annotation-candidates', 'MaiaJobImagesController@indexAnnotationCandidates');
 
         $router->get('maia-jobs/{id}/annotation-candidates', 'AnnotationCandidateController@index');
 

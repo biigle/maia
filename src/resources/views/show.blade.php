@@ -34,16 +34,19 @@
             @include('maia::show.info-content')
         </div>
         @if ($job->state_id >= $states['training-proposals'])
-            <div v-show="selectTpTabOpen" v-cloak class="maia-content">
-                @include('maia::show.select-tp-content')
+            <div v-show="selectProposalsTabOpen" v-cloak class="maia-content">
+                @include('maia::show.select-proposals-content')
             </div>
-            <div v-show="refineTpTabOpen" v-cloak class="maia-content">
-                @include('maia::show.refine-tp-content')
+            <div v-show="refineProposalsTabOpen" v-cloak class="maia-content">
+                @include('maia::show.refine-proposals-content')
             </div>
         @endif
         @if ($job->state_id >= $states['annotation-candidates'])
-            <div v-show="reviewAcTabOpen" v-cloak class="maia-content">
-                {{-- @include('maia::show.review-ac-content') --}}
+            <div v-show="selectCandidatesTabOpen" v-cloak class="maia-content">
+                @include('maia::show.select-candidates-content')
+            </div>
+            <div v-show="refineCandidatesTabOpen" v-cloak class="maia-content">
+                @include('maia::show.refine-candidates-content')
             </div>
         @endif
         <loader-block :active="loading"></loader-block>
@@ -53,21 +56,25 @@
             @include('maia::show.info-tab')
         </sidebar-tab>
         @if ($job->state_id < $states['training-proposals'])
-            <sidebar-tab name="select-training-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
-            <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
+            <sidebar-tab name="select-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
+            <sidebar-tab name="refine-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
         @else
-            <sidebar-tab name="select-training-proposals" icon="plus-square" title="Select training proposals">
-                @include('maia::show.select-tp-tab')
+            <sidebar-tab name="select-proposals" icon="plus-square" title="Select training proposals">
+                @include('maia::show.select-proposals-tab')
             </sidebar-tab>
-            <sidebar-tab name="refine-training-proposals" icon="pen-square" title="Refine training proposals">
-                @include('maia::show.refine-tp-tab')
+            <sidebar-tab name="refine-proposals" icon="pen-square" title="Refine training proposals">
+                @include('maia::show.refine-proposals-tab')
             </sidebar-tab>
         @endif
         @if ($job->state_id < $states['annotation-candidates'])
-            <sidebar-tab name="review-annotation-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
+            <sidebar-tab name="select-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
+            <sidebar-tab name="refine-candidates" icon="pen-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
         @else
-            <sidebar-tab name="review-annotation-candidates" icon="check-square" title="Review annotation candidates">
-                {{-- @include('maia::show.review-ac-tab') --}}
+            <sidebar-tab name="select-candidates" icon="check-square" title="Review annotation candidates">
+                @include('maia::show.select-candidates-tab')
+            </sidebar-tab>
+            <sidebar-tab name="refine-candidates" icon="pen-square" title="Review annotation candidates">
+                @include('maia::show.refine-candidates-tab')
             </sidebar-tab>
         @endif
     </sidebar>

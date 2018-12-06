@@ -9,11 +9,16 @@ biigle.$viewModel('maia-show-container', function (element) {
     var messages = biigle.$require('messages.store');
     var imagesStore = biigle.$require('annotations.stores.images');
 
+    // Proposals = Training Proposals
+    // Candidates = Annotation Candidates
+
     // We have to take very great care from preventing Vue to make the training proposals
-    // fully reactive. This can be a huge array and Vue is not fast enough to ensure a
-    // fluid UX if it is fully reactive.
-    var trainingProposals = [];
-    var trainingProposalsById = {};
+    // and annotation candidates fully reactive. These can be huge arrays and Vue is not
+    // fast enough to ensure a fluid UX if they are fully reactive.
+    var proposals = [];
+    var proposalsById = {};
+    var candidates = [];
+    var candidatesById = {};
 
     new Vue({
         el: element,
@@ -21,45 +26,59 @@ biigle.$viewModel('maia-show-container', function (element) {
         components: {
             sidebar: biigle.$require('annotations.components.sidebar'),
             sidebarTab: biigle.$require('core.components.sidebarTab'),
-            selectTpTab: biigle.$require('maia.components.selectTpTab'),
-            tpImageGrid: biigle.$require('maia.components.tpImageGrid'),
-            refineTpTab: biigle.$require('maia.components.refineTpTab'),
-            refineTpCanvas: biigle.$require('maia.components.refineTpCanvas'),
-            reviewAcTab: biigle.$require('maia.components.reviewAcTab'),
-            acImageGrid: biigle.$require('maia.components.acImageGrid'),
+            selectProposalsTab: biigle.$require('maia.components.selectProposalsTab'),
+            proposalsImageGrid: biigle.$require('maia.components.proposalsImageGrid'),
+            refineProposalsTab: biigle.$require('maia.components.refineProposalsTab'),
+            refineProposalsCanvas: biigle.$require('maia.components.refineProposalsCanvas'),
+            selectCandidatesTab: biigle.$require('maia.components.selectCandidatesTab'),
+            candidatesImageGrid: biigle.$require('maia.components.candidatesImageGrid'),
+            refineCandidatesTab: biigle.$require('maia.components.refineCandidatesTab'),
         },
         data: {
-            visitedSelectTpTab: false,
-            visitedRefineTpTab: false,
-            visitedReviewAcTab: false,
+            visitedSelectProposalsTab: false,
+            visitedRefineProposalsTab: false,
+            visitedSelectCandidatesTab: false,
+            visitedRefineCandidatesTab: false,
             openTab: 'info',
-            fetchTrainingProposalPromise: null,
-            hasTrainingProposals: false,
+
+            fetchProposalsPromise: null,
+            hasProposals: false,
             // Track these manually and not via a computed property because the number of
             // training proposals can be huge.
-            selectedTrainingProposalIds: {},
-            seenTrainingProposalIds: {},
-            lastSelectedTrainingProposal: null,
-            currentImage: null,
-            currentImageIndex: null,
-            currentTrainingProposals: [],
-            currentTrainingProposalsById: {},
-            focussedTrainingProposal: null,
-            tpAnnotationCache: {},
-            annotationCandidates: [],
+            selectedProposalIds: {},
+            seenProposalIds: {},
+            lastSelectedProposal: null,
+            currentProposalImage: null,
+            currentProposalImageIndex: null,
+            currentProposals: [],
+            currentProposalsById: {},
+            focussedProposal: null,
+            proposalAnnotationCache: {},
+
+            fetchCandidatesPromise: null,
+            hasCandidates: false,
+            selectedCandidateIds: {},
+            currentCandidateImage: null,
+            currentCandidateImageIndex: null,
+            currentCandidates: [],
+            currentCandidatesById: {},
+            candidateAnnotationCache: {},
         },
         computed: {
             infoTabOpen: function () {
                 return this.openTab === 'info';
             },
-            selectTpTabOpen: function () {
-                return this.openTab === 'select-training-proposals';
+            selectProposalsTabOpen: function () {
+                return this.openTab === 'select-proposals';
             },
-            refineTpTabOpen: function () {
-                return this.openTab === 'refine-training-proposals';
+            refineProposalsTabOpen: function () {
+                return this.openTab === 'refine-proposals';
             },
-            reviewAcTabOpen: function () {
-                return this.openTab === 'review-annotation-candidates';
+            selectCandidatesTabOpen: function () {
+                return this.openTab === 'select-candidates';
+            },
+            refineCandidatesTabOpen: function () {
+                return this.openTab === 'refine-candidates';
             },
             isInTrainingProposalState: function () {
                 return job.state_id === states['training-proposals'];
@@ -67,25 +86,26 @@ biigle.$viewModel('maia-show-container', function (element) {
             isInAnnotationCandidateState: function () {
                 return job.state_id === states['annotation-candidates'];
             },
-            trainingProposals: function () {
-                if (this.hasTrainingProposals) {
-                    return trainingProposals;
+
+            proposals: function () {
+                if (this.hasProposals) {
+                    return proposals;
                 }
 
                 return [];
             },
-            selectedTrainingProposals: function () {
-                return Object.keys(this.selectedTrainingProposalIds)
+            selectedProposals: function () {
+                return Object.keys(this.selectedProposalIds)
                     .map(function (id) {
-                        return trainingProposalsById[id];
+                        return proposalsById[id];
                     });
             },
-            hasSelectedTrainingProposals: function () {
-                return this.selectedTrainingProposals.length > 0;
+            hasSelectedProposals: function () {
+                return this.selectedProposals.length > 0;
             },
-            imageIds: function () {
+            proposalImageIds: function () {
                 var tmp = {};
-                this.trainingProposals.forEach(function (p) {
+                this.proposals.forEach(function (p) {
                     tmp[p.image_id] = undefined;
                 });
 
@@ -93,147 +113,203 @@ biigle.$viewModel('maia-show-container', function (element) {
                     return parseInt(id, 10);
                 });
             },
-            currentImageId: function () {
-                return this.imageIds[this.currentImageIndex];
+            currentProposalImageId: function () {
+                return this.proposalImageIds[this.currentProposalImageIndex];
             },
-            nextImageIndex: function () {
-                return (this.currentImageIndex + 1) % this.imageIds.length;
+            nextProposalImageIndex: function () {
+                return (this.currentProposalImageIndex + 1) % this.proposalImageIds.length;
             },
-            nextImageId: function () {
-                return this.imageIds[this.nextImageIndex];
+            nextProposalImageId: function () {
+                return this.proposalImageIds[this.nextProposalImageIndex];
             },
-            nextFocussedImageId: function () {
-                if (this.nextFocussedTrainingProposal) {
-                    return this.nextFocussedTrainingProposal.image_id;
+            nextFocussedProposalImageId: function () {
+                if (this.nextFocussedProposal) {
+                    return this.nextFocussedProposal.image_id;
                 }
 
-                return this.nextImageId;
+                return this.nextProposalImageId;
             },
-            previousImageIndex: function () {
-              return (this.currentImageIndex - 1 + this.imageIds.length) % this.imageIds.length;
+            previousProposalImageIndex: function () {
+              return (this.currentProposalImageIndex - 1 + this.proposalImageIds.length) % this.proposalImageIds.length;
             },
-            previousImageId: function () {
-                return this.imageIds[this.previousImageIndex];
+            previousProposalImageId: function () {
+                return this.proposalImageIds[this.previousProposalImageIndex];
             },
-            hasCurrentImage: function () {
-                return this.currentImage !== null;
+            hasCurrentProposalImage: function () {
+                return this.currentProposalImage !== null;
             },
-            currentSelectedTrainingProposals: function () {
-                return this.currentTrainingProposals.filter(function (p) {
-                    return this.selectedTrainingProposalIds.hasOwnProperty(p.id);
+            currentSelectedProposals: function () {
+                return this.currentProposals.filter(function (p) {
+                    return this.selectedProposalIds.hasOwnProperty(p.id);
                 }, this);
             },
-            currentUnselectedTrainingProposals: function () {
-                return this.currentTrainingProposals.filter(function (p) {
-                    return !this.selectedTrainingProposalIds.hasOwnProperty(p.id);
+            currentUnselectedProposals: function () {
+                return this.currentProposals.filter(function (p) {
+                    return !this.selectedProposalIds.hasOwnProperty(p.id);
                 }, this);
             },
-            previousFocussedTrainingProposal: function () {
-                var index = (this.selectedTrainingProposals.indexOf(this.focussedTrainingProposal) - 1 + this.selectedTrainingProposals.length) % this.selectedTrainingProposals.length;
+            previousFocussedProposal: function () {
+                var index = (this.selectedProposals.indexOf(this.focussedProposal) - 1 + this.selectedProposals.length) % this.selectedProposals.length;
 
-                return this.selectedTrainingProposals[index];
+                return this.selectedProposals[index];
             },
-            nextFocussedTrainingProposal: function () {
-                var index = (this.selectedTrainingProposals.indexOf(this.focussedTrainingProposal) + 1) % this.selectedTrainingProposals.length;
+            nextFocussedProposal: function () {
+                var index = (this.selectedProposals.indexOf(this.focussedProposal) + 1) % this.selectedProposals.length;
 
-                return this.selectedTrainingProposals[index];
+                return this.selectedProposals[index];
             },
             // The focussed training proposal might change while the refine tab tool is
             // closed but it should be updated only when it it opened again. Else the
             // canvas would not update correctly.
-            focussedTrainingProposalToShow: function () {
-                if (this.refineTpTabOpen) {
-                    return this.focussedTrainingProposal;
+            focussedProposalToShow: function () {
+                if (this.refineProposalsTabOpen) {
+                    return this.focussedProposal;
                 }
 
                 return null;
             },
-            focussedTrainingProposalArray: function () {
-                if (this.focussedTrainingProposalToShow) {
-                    return this.currentSelectedTrainingProposals.filter(function (p) {
-                        return p.id === this.focussedTrainingProposalToShow.id;
+            focussedProposalArray: function () {
+                if (this.focussedProposalToShow) {
+                    return this.currentSelectedProposals.filter(function (p) {
+                        return p.id === this.focussedProposalToShow.id;
                     }, this);
                 }
 
                 return [];
             },
-            selectedAndSeenTrainingProposals: function () {
-                return this.selectedTrainingProposals.filter(function (p) {
-                    return this.seenTrainingProposalIds.hasOwnProperty(p.id);
+            selectedAndSeenProposals: function () {
+                return this.selectedProposals.filter(function (p) {
+                    return this.seenProposalIds.hasOwnProperty(p.id);
                 }, this);
             },
-            // hasAnnotationCandidates: function () {
-            //     return this.annotationCandidates.length > 0;
+
+            candidates: function () {
+                if (this.hasCandidates) {
+                    return candidates;
+                }
+
+                return [];
+            },
+            selectedCandidates: function () {
+                return Object.keys(this.selectedCandidateIds)
+                    .map(function (id) {
+                        return candidatesById[id];
+                    });
+            },
+            hasSelectedCandidates: function () {
+                return this.selectedCandidates.length > 0;
+            },
+            candidateImageIds: function () {
+                var tmp = {};
+                this.candidates.forEach(function (p) {
+                    tmp[p.image_id] = undefined;
+                });
+
+                return Object.keys(tmp).map(function (id) {
+                    return parseInt(id, 10);
+                });
+            },
+            currentCandidateImageId: function () {
+                return this.candidateImageIds[this.currentCandidateImageIndex];
+            },
+            nextCandidateImageIndex: function () {
+                return (this.currentCandidateImageIndex + 1) % this.candidateImageIds.length;
+            },
+            nextCandidateImageId: function () {
+                return this.candidateImageIds[this.nextCandidateImageIndex];
+            },
+            // nextFocussedCandidateImageId: function () {
+            //     if (this.nextFocussedCandidate) {
+            //         return this.nextFocussedCandidate.image_id;
+            //     }
+
+            //     return this.nextCandidateImageId;
             // },
+            previousCandidateImageIndex: function () {
+              return (this.currentCandidateImageIndex - 1 + this.candidateImageIds.length) % this.candidateImageIds.length;
+            },
+            previousCandidateImageId: function () {
+                return this.candidateImageIds[this.previousCandidateImageIndex];
+            },
+            hasCurrentCandidateImage: function () {
+                return this.currentCandidateImage !== null;
+            },
+            currentSelectedCandidates: function () {
+                return this.currentCandidates.filter(function (p) {
+                    return this.selectedCandidateIds.hasOwnProperty(p.id);
+                }, this);
+            },
+            currentUnselectedCandidates: function () {
+                return this.currentCandidates.filter(function (p) {
+                    return !this.selectedCandidateIds.hasOwnProperty(p.id);
+                }, this);
+            },
         },
         methods: {
             handleSidebarToggle: function () {
                 this.$nextTick(function () {
-                    this.$refs.imageGrid.$emit('resize');
+                    this.$refs.proposalsImageGrid.$emit('resize');
+                    this.$refs.candidatesImageGrid.$emit('resize');
                 });
             },
             handleTabOpened: function (tab) {
                 this.openTab = tab;
             },
-            setTrainingProposals: function (response) {
-                trainingProposals = response.body;
+            setProposals: function (response) {
+                proposals = response.body;
 
-                trainingProposals.forEach(function (p) {
-                    trainingProposalsById[p.id] = p;
-                    this.setSelectedTrainingProposalId(p);
+                proposals.forEach(function (p) {
+                    proposalsById[p.id] = p;
+                    this.setSelectedProposalId(p);
                 }, this);
 
-                this.hasTrainingProposals = trainingProposals.length > 0;
+                this.hasProposals = proposals.length > 0;
             },
-            fetchTrainingProposals: function () {
-                if (!this.fetchTrainingProposalPromise) {
+            fetchProposals: function () {
+                if (!this.fetchProposalsPromise) {
                     this.startLoading();
 
-                    this.fetchTrainingProposalPromise = maiaJobApi.getTrainingProposals({id: job.id});
+                    this.fetchProposalsPromise = maiaJobApi.getTrainingProposals({id: job.id});
 
-                    this.fetchTrainingProposalPromise.then(this.setTrainingProposals)
+                    this.fetchProposalsPromise.then(this.setProposals)
                         .catch(messages.handleErrorResponse)
                         .finally(this.finishLoading);
                 }
 
-                return this.fetchTrainingProposalPromise;
+                return this.fetchProposalsPromise;
             },
-            openRefineTpTab: function () {
-                this.openTab = 'refine-training-proposals';
+            openRefineProposalsTab: function () {
+                this.openTab = 'refine-proposals';
             },
-            updateSelectTrainingProposal: function (proposal, selected) {
+            updateSelectProposal: function (proposal, selected) {
                 proposal.selected = selected;
-                this.setSelectedTrainingProposalId(proposal);
+                this.setSelectedProposalId(proposal);
                 var promise = maiaAnnotationApi.update({id: proposal.id}, {selected: selected});
 
                 promise.catch(function (response) {
                     messages.handleErrorResponse(response);
                     proposal.selected = !selected;
-                    this.setSelectedTrainingProposalId(proposal);
+                    this.setSelectedProposalId(proposal);
                 });
 
                 return promise;
             },
-            setSelectedTrainingProposalId: function (p) {
-                if (p.selected) {
-                    Vue.set(this.selectedTrainingProposalIds, p.id, true);
-                } else {
-                    Vue.delete(this.selectedTrainingProposalIds, p.id);
-                }
+            setSelectedProposalId: function (p) {
+                this.setSelectedAnnotation(p, this.selectedProposalIds);
             },
-            setSeenTrainingProposalId: function (p) {
-                Vue.set(this.seenTrainingProposalIds, p.id, true);
+            setSeenProposalId: function (p) {
+                Vue.set(this.seenProposalIds, p.id, true);
             },
-            fetchTpAnnotations: function (id) {
-                if (!this.tpAnnotationCache.hasOwnProperty(id)) {
-                    this.tpAnnotationCache[id] = maiaJobApi
+            fetchProposalAnnotations: function (id) {
+                if (!this.proposalAnnotationCache.hasOwnProperty(id)) {
+                    this.proposalAnnotationCache[id] = maiaJobApi
                         .getTrainingProposalPoints({jobId: job.id, imageId: id})
-                        .then(this.parseTpAnnotations);
+                        .then(this.parseAnnotations);
                 }
 
-                return this.tpAnnotationCache[id];
+                return this.proposalAnnotationCache[id];
             },
-            parseTpAnnotations: function (response) {
+            parseAnnotations: function (response) {
                 return Object.keys(response.body).map(function (id) {
                     return {
                         id: parseInt(id, 10),
@@ -242,89 +318,89 @@ biigle.$viewModel('maia-show-container', function (element) {
                     };
                 });
             },
-            setCurrentImageAndTpAnnotations: function (args) {
-                this.currentImage = args[0];
-                this.currentTrainingProposals = args[1];
-                this.currentTrainingProposalsById = {};
-                this.currentTrainingProposals.forEach(function (p) {
-                    this.currentTrainingProposalsById[p.id] = p;
+            setCurrentProposalImageAndAnnotations: function (args) {
+                this.currentProposalImage = args[0];
+                this.currentProposals = args[1];
+                this.currentProposalsById = {};
+                this.currentProposals.forEach(function (p) {
+                    this.currentProposalsById[p.id] = p;
                 }, this);
             },
-            cacheNextImage: function () {
+            cacheNextProposalImage: function () {
                 // Do nothing if there is only one image.
-                if (this.currentImageId !== this.nextFocussedImageId) {
-                    imagesStore.fetchImage(this.nextFocussedImageId)
+                if (this.currentProposalImageId !== this.nextFocussedProposalImageId) {
+                    imagesStore.fetchImage(this.nextFocussedProposalImageId)
                         // Ignore errors in this case. The application will try to reload
                         // the data again if the user switches to the respective image
                         // and display the error message then.
                         .catch(function () {});
                 }
             },
-            cacheNextTpAnnotations: function () {
+            cacheNextProposalAnnotations: function () {
                 // Do nothing if there is only one image.
-                if (this.currentImageId !== this.nextFocussedImageId) {
-                    this.fetchTpAnnotations(this.nextFocussedImageId)
+                if (this.currentProposalImageId !== this.nextFocussedProposalImageId) {
+                    this.fetchProposalAnnotations(this.nextFocussedProposalImageId)
                         // Ignore errors in this case. The application will try to reload
                         // the data again if the user switches to the respective image
                         // and display the error message then.
                         .catch(function () {});
                 }
             },
-            handlePreviousImage: function () {
-                this.currentImageIndex = this.previousImageIndex;
+            handlePreviousProposalImage: function () {
+                this.currentProposalImageIndex = this.previousProposalImageIndex;
             },
-            handlePrevious: function () {
-                if (this.previousFocussedTrainingProposal) {
-                    this.focussedTrainingProposal = this.previousFocussedTrainingProposal;
+            handlePreviousProposal: function () {
+                if (this.previousFocussedProposal) {
+                    this.focussedProposal = this.previousFocussedProposal;
                 } else {
-                    this.handlePreviousImage();
+                    this.handlePreviousProposalImage();
                 }
             },
-            handleNextImage: function () {
-                this.currentImageIndex = this.nextImageIndex;
+            handleNextProposalImage: function () {
+                this.currentProposalImageIndex = this.nextProposalImageIndex;
             },
-            handleNext: function () {
-                if (this.nextFocussedTrainingProposal) {
-                    this.focussedTrainingProposal = this.nextFocussedTrainingProposal;
+            handleNextProposal: function () {
+                if (this.nextFocussedProposal) {
+                    this.focussedProposal = this.nextFocussedProposal;
                 } else {
-                    this.handleNextImage();
+                    this.handleNextProposalImage();
                 }
             },
-            handleRefineTp: function (proposals) {
-                Vue.Promise.all(proposals.map(this.updateTpPoints))
+            handleRefineProposal: function (proposals) {
+                Vue.Promise.all(proposals.map(this.updateProposalPoints))
                     .catch(messages.handleErrorResponse);
             },
-            updateTpPoints: function (proposal) {
-                var toUpdate = this.currentTrainingProposalsById[proposal.id];
+            updateProposalPoints: function (proposal) {
+                var toUpdate = this.currentProposalsById[proposal.id];
                 return maiaAnnotationApi
                     .update({id: proposal.id}, {points: proposal.points})
                     .then(function () {
                         toUpdate.points = proposal.points;
                     });
             },
-            focusTrainingProposalToShow: function () {
-                if (this.focussedTrainingProposalToShow) {
-                    var p = this.currentTrainingProposalsById[this.focussedTrainingProposalToShow.id];
+            focusProposalToShow: function () {
+                if (this.focussedProposalToShow) {
+                    var p = this.currentProposalsById[this.focussedProposalToShow.id];
                     if (p) {
-                        this.$refs.refineCanvas.focusAnnotation(p, true, false);
+                        this.$refs.refineProposalsCanvas.focusAnnotation(p, true, false);
                     }
                 }
             },
-            handleSelectedTrainingProposal: function (proposal, event) {
+            handleSelectedProposal: function (proposal, event) {
                 if (proposal.selected) {
-                    this.unselectTrainingProposal(proposal);
+                    this.unselectProposal(proposal);
                 } else {
-                    if (event.shiftKey && this.lastSelectedTrainingProposal) {
-                        this.selectAllTpBetween(proposal, this.lastSelectedTrainingProposal);
+                    if (event.shiftKey && this.lastSelectedProposal) {
+                        this.selectAllProposalsBetween(proposal, this.lastSelectedProposal);
                     } else {
-                        this.lastSelectedTrainingProposal = proposal;
-                        this.selectTrainingProposal(proposal);
+                        this.lastSelectedProposal = proposal;
+                        this.selectProposal(proposal);
                     }
                 }
             },
-            selectAllTpBetween: function (first, second) {
-                var index1 = this.trainingProposals.indexOf(first);
-                var index2 = this.trainingProposals.indexOf(second);
+            selectAllProposalsBetween: function (first, second) {
+                var index1 = this.proposals.indexOf(first);
+                var index2 = this.proposals.indexOf(second);
                 if (index2 < index1) {
                     var tmp = index2;
                     index2 = index1;
@@ -332,121 +408,200 @@ biigle.$viewModel('maia-show-container', function (element) {
                 }
 
                 for (var i = index1 + 1; i <= index2; i++) {
-                    this.selectTrainingProposal(this.trainingProposals[i]);
+                    this.selectProposal(this.proposals[i]);
                 }
             },
-            selectTrainingProposal: function (proposal) {
-                this.updateSelectTrainingProposal(proposal, true)
-                    .then(this.maybeInitFocussedTrainingProposal);
+            selectProposal: function (proposal) {
+                this.updateSelectProposal(proposal, true)
+                    .then(this.maybeInitFocussedProposal);
             },
-            unselectTrainingProposal: function (proposal) {
-                var next = this.nextFocussedTrainingProposal;
-                this.updateSelectTrainingProposal(proposal, false)
+            unselectProposal: function (proposal) {
+                var next = this.nextFocussedProposal;
+                this.updateSelectProposal(proposal, false)
                     .bind(this)
                     .then(function () {
-                        this.maybeUnsetFocussedTrainingProposal(proposal, next);
+                        this.maybeUnsetFocussedProposal(proposal, next);
                     });
             },
-            maybeInitFocussedTrainingProposal: function () {
-                if (!this.focussedTrainingProposal && this.hasSelectedTrainingProposals) {
-                    this.focussedTrainingProposal = this.selectedTrainingProposals[0];
+            maybeInitFocussedProposal: function () {
+                if (!this.focussedProposal && this.hasSelectedProposals) {
+                    this.focussedProposal = this.selectedProposals[0];
                 }
             },
-            maybeUnsetFocussedTrainingProposal: function (proposal, next) {
-                if (this.focussedTrainingProposal && this.focussedTrainingProposal.id === proposal.id) {
+            maybeUnsetFocussedProposal: function (proposal, next) {
+                if (this.focussedProposal && this.focussedProposal.id === proposal.id) {
                     if (next && next.id !== proposal.id) {
-                        this.focussedTrainingProposal = next;
+                        this.focussedProposal = next;
                     } else {
-                        this.focussedTrainingProposal = null;
+                        this.focussedProposal = null;
                     }
                 }
             },
-            maybeInitCurrentImage: function () {
-                if (this.currentImageIndex === null) {
-                    this.currentImageIndex = 0;
+            maybeInitCurrentProposalImage: function () {
+                if (this.currentProposalImageIndex === null) {
+                    this.currentProposalImageIndex = 0;
+                }
+            },
+            maybeInitCurrentCandidateImage: function () {
+                if (this.currentCandidateImageIndex === null) {
+                    this.currentCandidateImageIndex = 0;
                 }
             },
             handleLoadingError: function (message) {
                 messages.danger(message);
             },
-            // setAnnotationCandidates: function (response) {
-            //     this.annotationCandidates = response.body.map(function (c) {
-            //         c.shape = 'Circle';
-            //         return c;
-            //     });
-            // },
-            // fetchAnnotationCandidates: function () {
-            //     this.startLoading();
+            setSelectedCandidateId: function (a) {
+                this.setSelectedAnnotation(a, this.selectedCandidateIds);
+            },
+            setCandidates: function (response) {
+                candidates = response.body;
 
-            //     return maiaJobApi.getAnnotationCandidates({id: job.id})
-            //         .then(this.setAnnotationCandidates)
-            //         .catch(messages.handleErrorResponse)
-            //         .finally(this.finishLoading);
-            // },
-            // handleSelectedAnnotationCandidate: function (candidate) {
-            //     console.log('select', candidate);
-            // },
+                candidates.forEach(function (p) {
+                    candidatesById[p.id] = p;
+                    this.setSelectedCandidateId(p);
+                }, this);
+
+                this.hasCandidates = candidates.length > 0;
+            },
+            fetchCandidates: function () {
+                if (!this.fetchCandidatesPromise) {
+                    this.startLoading();
+
+                    this.fetchCandidatesPromise = maiaJobApi.getAnnotationCandidates({id: job.id});
+
+                    this.fetchCandidatesPromise.then(this.setCandidates)
+                        .catch(messages.handleErrorResponse)
+                        .finally(this.finishLoading);
+                }
+
+                return this.fetchCandidatesPromise;
+            },
+            handleSelectedCandidate: function (candidate) {
+                console.log('select', candidate);
+            },
+            setSelectedAnnotation: function (annotation, map) {
+                if (annotation.selected) {
+                    Vue.set(map, annotation.id, true);
+                } else {
+                    Vue.delete(map, annotation.id);
+                }
+            },
+            fetchCandidateAnnotations: function (id) {
+                if (!this.candidateAnnotationCache.hasOwnProperty(id)) {
+                    this.candidateAnnotationCache[id] = maiaJobApi
+                        .getAnnotationCandidatePoints({jobId: job.id, imageId: id})
+                        .then(this.parseAnnotations);
+                }
+
+                return this.candidateAnnotationCache[id];
+            },
+            setCurrentCandidateImageAndAnnotations: function (args) {
+                this.currentCandidateImage = args[0];
+                this.currentCandidates = args[1];
+                this.currentCandidatesById = {};
+                this.currentCandidates.forEach(function (p) {
+                    this.currentCandidatesById[p.id] = p;
+                }, this);
+            },
+            handlePreviousCandidateImage: function () {
+                this.currentCandidateImageIndex = this.previousCandidateImageIndex;
+            },
+            handleNextCandidateImage: function () {
+                this.currentCandidateImageIndex = this.nextCandidateImageIndex;
+            },
         },
         watch: {
-            selectTpTabOpen: function (open) {
-                this.visitedSelectTpTab = true;
+            selectProposalsTabOpen: function (open) {
+                this.visitedSelectProposalsTab = true;
                 if (open) {
-                    biigle.$require('keyboard').setActiveSet('select-tp');
+                    biigle.$require('keyboard').setActiveSet('select-proposals');
                 }
             },
-            refineTpTabOpen: function (open) {
-                this.visitedRefineTpTab = true;
+            refineProposalsTabOpen: function (open) {
+                this.visitedRefineProposalsTab = true;
                 if (open) {
-                    biigle.$require('keyboard').setActiveSet('refine-tp');
-                    this.maybeInitFocussedTrainingProposal();
+                    biigle.$require('keyboard').setActiveSet('refine-proposals');
+                    this.maybeInitFocussedProposal();
                 }
             },
-            reviewAcTabOpen: function (open) {
-                this.visitedReviewAcTab = true;
+            selectCandidatesTabOpen: function (open) {
+                this.visitedSelectCandidatesTab = true;
                 if (open) {
-                    biigle.$require('keyboard').setActiveSet('review-ac');
+                    biigle.$require('keyboard').setActiveSet('select-candidates');
                 }
             },
-            visitedSelectTpTab: function () {
-                this.fetchTrainingProposals();
+            refineCandidatesTabOpen: function (open) {
+                this.visitedRefineCandidatesTab = true;
+                if (open) {
+                    biigle.$require('keyboard').setActiveSet('refine-candidates');
+                }
             },
-            visitedRefineTpTab: function () {
-                this.fetchTrainingProposals()
-                    .then(this.maybeInitFocussedTrainingProposal)
-                    .then(this.maybeInitCurrentImage);
+            visitedSelectProposalsTab: function () {
+                this.fetchProposals();
             },
-            visitedReviewAcTab: function () {
-                // this.fetchAnnotationCandidates();
+            visitedRefineProposalsTab: function () {
+                this.fetchProposals()
+                    .then(this.maybeInitFocussedProposal)
+                    .then(this.maybeInitCurrentProposalImage);
             },
-            currentImageId: function (id) {
+            visitedSelectCandidatesTab: function () {
+                this.fetchCandidates();
+            },
+            visitedRefineCandidatesTab: function () {
+                this.fetchCandidates()
+                    // .then(this.maybeInitFocussedProposal)
+                    .then(this.maybeInitCurrentCandidateImage);
+            },
+            currentProposalImageId: function (id) {
                 if (id) {
                     this.startLoading();
                     Vue.Promise.all([
                             imagesStore.fetchAndDrawImage(id),
-                            this.fetchTpAnnotations(id),
+                            this.fetchProposalAnnotations(id),
                             // This promise is created when the refine tab is first
                             // opened and needs to be resolved so we know which TP are
                             // selected and which not.
-                            this.fetchTrainingProposalPromise,
+                            this.fetchProposalsPromise,
                         ])
-                        .then(this.setCurrentImageAndTpAnnotations)
-                        .then(this.focusTrainingProposalToShow)
-                        .then(this.cacheNextImage)
-                        .then(this.cacheNextTpAnnotations)
+                        .then(this.setCurrentProposalImageAndAnnotations)
+                        .then(this.focusProposalToShow)
+                        .then(this.cacheNextProposalImage)
+                        .then(this.cacheNextProposalAnnotations)
                         .catch(this.handleLoadingError)
                         .finally(this.finishLoading);
                 } else {
-                    this.setCurrentImageAndTpAnnotations([null, null]);
+                    this.setCurrentProposalImageAndAnnotations([null, null]);
                 }
             },
-            focussedTrainingProposalToShow: function (proposal, old) {
+            focussedProposalToShow: function (proposal, old) {
                 if (proposal) {
                     if (old && old.image_id === proposal.image_id) {
-                        this.focusTrainingProposalToShow();
+                        this.focusProposalToShow();
                     } else {
-                        this.currentImageIndex = this.imageIds.indexOf(proposal.image_id);
+                        this.currentProposalImageIndex = this.proposalImageIds.indexOf(proposal.image_id);
                     }
-                    this.setSeenTrainingProposalId(proposal);
+                    this.setSeenProposalId(proposal);
+                }
+            },
+            currentCandidateImageId: function (id) {
+                if (id) {
+                    this.startLoading();
+                    Vue.Promise.all([
+                            imagesStore.fetchAndDrawImage(id),
+                            this.fetchCandidateAnnotations(id),
+                            // This promise is created when the refine tab is first
+                            // opened and needs to be resolved so we know which TP are
+                            // selected and which not.
+                            this.fetchCandidatesPromise,
+                        ])
+                        .then(this.setCurrentCandidateImageAndAnnotations)
+                        // .then(this.focusProposalToShow)
+                        // .then(this.cacheNextProposalImage)
+                        // .then(this.cacheNextProposalAnnotations)
+                        .catch(this.handleLoadingError)
+                        .finally(this.finishLoading);
+                } else {
+                    this.setCurrentCandidateImageAndAnnotations([null, null]);
                 }
             },
         },

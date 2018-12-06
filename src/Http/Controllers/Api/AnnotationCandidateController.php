@@ -14,7 +14,7 @@ class AnnotationCandidateController extends Controller
      * @apiGroup Maia
      * @apiName IndexMaiaAnnotationCandidates
      * @apiPermission projectEditor
-     * @apiDescription All annotation candidates are assumed to have a circular shape.
+     * @apiDescription The annotation candidates are ordered by descending score.
      *
      * @apiParam {Number} id The job ID.
      *
@@ -22,8 +22,6 @@ class AnnotationCandidateController extends Controller
      * [
      *     {
      *         "id": 1,
-     *         "points": [100, 200, 50],
-     *         "score": 123,
      *         "selected": false,
      *         "image_id": 20
      *     }
@@ -38,8 +36,9 @@ class AnnotationCandidateController extends Controller
         $this->authorize('access', $job);
 
         return $job->annotationCandidates()
-            ->select('id', 'points', 'score', 'selected', 'image_id')
+            ->select('id', 'selected', 'image_id')
             ->orderBy('score', 'desc')
-            ->get();
+            ->get()
+            ->toArray();
     }
 }

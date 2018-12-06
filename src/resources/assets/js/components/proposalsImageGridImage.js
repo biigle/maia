@@ -1,9 +1,9 @@
 /**
- * A variant of the image grid image used for the selection of MAIA annotation candidates.
+ * A variant of the image grid image used for the selection of MAIA training proposals.
  *
  * @type {Object}
  */
-biigle.$component('maia.components.acImageGridImage', {
+biigle.$component('maia.components.proposalsImageGridImage', {
     mixins: [biigle.$require('volumes.components.imageGridImage')],
     template: '<figure class="image-grid__image" :class="classObject" :title="title">' +
         '<div v-if="showIcon" class="image-icon">' +
@@ -21,10 +21,12 @@ biigle.$component('maia.components.acImageGridImage', {
             return false;
         },
         selected: function () {
-            return this.image.selected;
+            return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);
         },
         title: function () {
-            return this.selected ? 'Remove selected label' : 'Assign selected label';
+            if (this.selectable) {
+                return this.selected ? 'Unselect as interesting' : 'Select as interesting';
+            }
         },
     },
     methods: {

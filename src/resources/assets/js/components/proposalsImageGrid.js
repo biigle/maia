@@ -3,13 +3,13 @@
  *
  * @type {Object}
  */
-biigle.$component('maia.components.tpImageGrid', {
+biigle.$component('maia.components.proposalsImageGrid', {
     mixins: [biigle.$require('volumes.components.imageGrid')],
     components: {
-        imageGridImage: biigle.$require('maia.components.tpImageGridImage'),
+        imageGridImage: biigle.$require('maia.components.proposalsImageGridImage'),
     },
     props: {
-        selectedTpIds: {
+        selectedProposalIds: {
             type: Object,
             required: true,
         },

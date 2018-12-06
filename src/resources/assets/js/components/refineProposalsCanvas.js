@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.$component('maia.components.refineTpCanvas', {
+biigle.$component('maia.components.refineProposalsCanvas', {
     mixins: [biigle.$require('annotations.components.annotationCanvas')],
     props: {
         unselectedAnnotations: {
@@ -15,7 +15,7 @@ biigle.$component('maia.components.refineTpCanvas', {
     },
     data: function () {
         return {
-            selectingTp: false,
+            selectingProposal: false,
         };
     },
     computed: {
@@ -31,7 +31,7 @@ biigle.$component('maia.components.refineTpCanvas', {
             this.$emit('next-image');
         },
         toggleMarkAsInteresting: function () {
-            this.selectingTp = !this.selectingTp;
+            this.selectingProposal = !this.selectingProposal;
         },
         createUnselectedAnnotationsLayer: function () {
             this.unselectedAnnotationFeatures = new ol.Collection();
@@ -48,21 +48,21 @@ biigle.$component('maia.components.refineTpCanvas', {
                 opacity: 0.5,
             });
         },
-        createSelectTpInteraction: function (features) {
+        createSelectProposalInteraction: function (features) {
             var Interaction = biigle.$require('annotations.ol.AttachLabelInteraction');
-            this.selectTpInteraction = new Interaction({
+            this.selectProposalInteraction = new Interaction({
                 map: this.map,
                 features: features
             });
-            this.selectTpInteraction.setActive(false);
-            this.selectTpInteraction.on('attach', this.handleSelectTp);
+            this.selectProposalInteraction.setActive(false);
+            this.selectProposalInteraction.on('attach', this.handleSelectProposal);
         },
-        handleSelectTp: function (e) {
-            this.$emit('select-tp', e.feature.get('annotation'));
+        handleSelectProposal: function (e) {
+            this.$emit('select', e.feature.get('annotation'));
         },
-        handleUnselectTp: function () {
+        handleUnselectProposal: function () {
             if (this.selectedAnnotations.length > 0) {
-                this.$emit('unselect-tp', this.selectedAnnotations[0]);
+                this.$emit('unselect', this.selectedAnnotations[0]);
             }
         },
     },
@@ -70,8 +70,8 @@ biigle.$component('maia.components.refineTpCanvas', {
         unselectedAnnotations: function (annotations) {
             this.refreshAnnotationSource(annotations, this.unselectedAnnotationSource);
         },
-        selectingTp: function (selecting) {
-            this.selectTpInteraction.setActive(selecting);
+        selectingProposal: function (selecting) {
+            this.selectProposalInteraction.setActive(selecting);
         },
     },
     created: function () {
@@ -82,9 +82,9 @@ biigle.$component('maia.components.refineTpCanvas', {
         this.selectInteraction.setActive(false);
 
         if (this.canModify) {
-            this.createSelectTpInteraction(this.unselectedAnnotationFeatures);
-            this.map.addInteraction(this.selectTpInteraction);
-            biigle.$require('keyboard').on('Delete', this.handleUnselectTp, 0, this.listenerSet);
+            this.createSelectProposalInteraction(this.unselectedAnnotationFeatures);
+            this.map.addInteraction(this.selectProposalInteraction);
+            biigle.$require('keyboard').on('Delete', this.handleUnselectProposal, 0, this.listenerSet);
         }
     },
 });
