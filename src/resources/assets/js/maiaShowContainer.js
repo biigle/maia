@@ -15,10 +15,10 @@ biigle.$viewModel('maia-show-container', function (element) {
     // We have to take very great care from preventing Vue to make the training proposals
     // and annotation candidates fully reactive. These can be huge arrays and Vue is not
     // fast enough to ensure a fluid UX if they are fully reactive.
-    var proposals = [];
-    var proposalsById = {};
-    var candidates = [];
-    var candidatesById = {};
+    var PROPOSALS = [];
+    var PROPOSALS_BY_ID = {};
+    var CANDIDATES = [];
+    var CANDIDATES_BY_ID = {};
 
     new Vue({
         el: element,
@@ -89,7 +89,7 @@ biigle.$viewModel('maia-show-container', function (element) {
 
             proposals: function () {
                 if (this.hasProposals) {
-                    return proposals;
+                    return PROPOSALS;
                 }
 
                 return [];
@@ -97,7 +97,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             selectedProposals: function () {
                 return Object.keys(this.selectedProposalIds)
                     .map(function (id) {
-                        return proposalsById[id];
+                        return PROPOSALS_BY_ID[id];
                     });
             },
             // The thumbnails of unselected proposals are deleted when the job advances
@@ -195,7 +195,7 @@ biigle.$viewModel('maia-show-container', function (element) {
 
             candidates: function () {
                 if (this.hasCandidates) {
-                    return candidates;
+                    return CANDIDATES;
                 }
 
                 return [];
@@ -203,7 +203,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             selectedCandidates: function () {
                 return Object.keys(this.selectedCandidateIds)
                     .map(function (id) {
-                        return candidatesById[id];
+                        return CANDIDATES_BY_ID[id];
                     });
             },
             hasSelectedCandidates: function () {
@@ -266,14 +266,14 @@ biigle.$viewModel('maia-show-container', function (element) {
                 this.openTab = tab;
             },
             setProposals: function (response) {
-                proposals = response.body;
+                PROPOSALS = response.body;
 
-                proposals.forEach(function (p) {
-                    proposalsById[p.id] = p;
+                PROPOSALS.forEach(function (p) {
+                    PROPOSALS_BY_ID[p.id] = p;
                     this.setSelectedProposalId(p);
                 }, this);
 
-                this.hasProposals = proposals.length > 0;
+                this.hasProposals = PROPOSALS.length > 0;
             },
             fetchProposals: function () {
                 if (!this.fetchProposalsPromise) {
@@ -464,14 +464,14 @@ biigle.$viewModel('maia-show-container', function (element) {
                 this.setSelectedAnnotation(a, this.selectedCandidateIds);
             },
             setCandidates: function (response) {
-                candidates = response.body;
+                CANDIDATES = response.body;
 
-                candidates.forEach(function (p) {
-                    candidatesById[p.id] = p;
+                CANDIDATES.forEach(function (p) {
+                    CANDIDATES_BY_ID[p.id] = p;
                     this.setSelectedCandidateId(p);
                 }, this);
 
-                this.hasCandidates = candidates.length > 0;
+                this.hasCandidates = CANDIDATES.length > 0;
             },
             fetchCandidates: function () {
                 if (!this.fetchCandidatesPromise) {
