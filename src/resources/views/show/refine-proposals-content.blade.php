@@ -1,5 +1,5 @@
 <refine-proposals-canvas
-    :can-modify="@if ($job->state_id === $states['training-proposals']) true @else false @endif"
+    :can-modify="isInTrainingProposalState"
     :show-minimap="hasCurrentProposalImage"
     :image="currentProposalImage"
     :annotations="currentSelectedProposals"

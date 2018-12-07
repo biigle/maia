@@ -258,8 +258,12 @@ biigle.$viewModel('maia-show-container', function (element) {
         methods: {
             handleSidebarToggle: function () {
                 this.$nextTick(function () {
-                    this.$refs.proposalsImageGrid.$emit('resize');
-                    this.$refs.candidatesImageGrid.$emit('resize');
+                    if (this.$refs.proposalsImageGrid) {
+                        this.$refs.proposalsImageGrid.$emit('resize');
+                    }
+                    if (this.$refs.candidatesImageGrid) {
+                        this.$refs.candidatesImageGrid.$emit('resize');
+                    }
                 });
             },
             handleTabOpened: function (tab) {
@@ -559,7 +563,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             visitedRefineCandidatesTab: function () {
                 this.fetchCandidates()
-                    // .then(this.maybeInitFocussedProposal)
+                    .then(this.maybeInitFocussedProposal)
                     .then(this.maybeInitCurrentCandidateImage);
             },
             currentProposalImageId: function (id) {
@@ -568,10 +572,7 @@ biigle.$viewModel('maia-show-container', function (element) {
                     Vue.Promise.all([
                             imagesStore.fetchAndDrawImage(id),
                             this.fetchProposalAnnotations(id),
-                            // This promise is created when the refine tab is first
-                            // opened and needs to be resolved so we know which TP are
-                            // selected and which not.
-                            this.fetchProposalsPromise,
+                            this.fetchProposals(),
                         ])
                         .then(this.setCurrentProposalImageAndAnnotations)
                         .then(this.focusProposalToShow)
@@ -599,10 +600,7 @@ biigle.$viewModel('maia-show-container', function (element) {
                     Vue.Promise.all([
                             imagesStore.fetchAndDrawImage(id),
                             this.fetchCandidateAnnotations(id),
-                            // This promise is created when the refine tab is first
-                            // opened and needs to be resolved so we know which TP are
-                            // selected and which not.
-                            this.fetchCandidatesPromise,
+                            this.fetchCandidates(),
                         ])
                         .then(this.setCurrentCandidateImageAndAnnotations)
                         // .then(this.focusProposalToShow)

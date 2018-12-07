@@ -21,7 +21,7 @@ biigle.$component('maia.components.refineProposalsTab', {
         numberSeenProposals: function () {
             return this.seenProposals.length;
         },
-        hasNoSelectedTp: function () {
+        hasNoSelectedProposals: function () {
             return this.numberSelectedProposals === 0;
         },
         hasSeenAllSelectedProposals: function () {
