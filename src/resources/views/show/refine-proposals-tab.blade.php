@@ -8,7 +8,7 @@
         </div>
         <div v-else v-cloak class="panel panel-info">
             <div class="panel-body text-info">
-                Please modify each training proposal that was marked as interesting, so that it fully encloses the interesting object or region of the image. Then submit the training proposals to continue with MAIA.
+                Modify each training proposal that was marked as interesting, so that it fully encloses the interesting object or region of the image. Then submit the training proposals to continue with MAIA.
             </div>
         </div>
         <p :class="textClass">
