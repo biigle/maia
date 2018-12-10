@@ -3,6 +3,7 @@
 @section('full-navbar', true)
 
 @push('styles')
+<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
 <link href="{{ cachebust_asset('vendor/volumes/styles/main.css') }}" rel="stylesheet">
 <link href="{{ cachebust_asset('vendor/largo/styles/main.css') }}" rel="stylesheet">
 <link href="{{ cachebust_asset('vendor/annotations/styles/ol.css') }}" rel="stylesheet">
@@ -11,6 +12,7 @@
 @endpush
 
 @push('scripts')
+<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/volumes/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/largo/scripts/main.js') }}"></script>
 @if (app()->environment('local'))
@@ -23,6 +25,7 @@
 <script type="text/javascript">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
     biigle.$declare('maia.states', {!! $states->toJson() !!});
+    biigle.$declare('maia.labelTrees', {!! $trees->toJson() !!});
     biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/{id}/file') !!}');
 </script>
 @endpush

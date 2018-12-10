@@ -4,6 +4,7 @@
 biigle.$viewModel('maia-show-container', function (element) {
     var job = biigle.$require('maia.job');
     var states = biigle.$require('maia.states');
+    var labelTrees = biigle.$require('maia.labelTrees');
     var maiaJobApi = biigle.$require('maia.api.maiaJob');
     var maiaAnnotationApi = biigle.$require('maia.api.maiaAnnotation');
     var messages = biigle.$require('messages.store');
@@ -40,6 +41,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             visitedSelectCandidatesTab: false,
             visitedRefineCandidatesTab: false,
             openTab: 'info',
+            labelTrees: labelTrees,
 
             fetchProposalsPromise: null,
             hasProposals: false,
@@ -294,6 +296,9 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             openRefineProposalsTab: function () {
                 this.openTab = 'refine-proposals';
+            },
+            openRefineCandidatesTab: function () {
+                this.openTab = 'refine-candidates';
             },
             updateSelectProposal: function (proposal, selected) {
                 proposal.selected = selected;
