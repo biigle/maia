@@ -9,8 +9,7 @@ use Exception;
 use ImageCache;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Biigle\Modules\Maia\MaiaAnnotationType;
-use Biigle\Tests\Modules\Maia\MaiaAnnotationTest;
+use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
@@ -32,18 +31,16 @@ class InstanceSegmentationRequestTest extends TestCase
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $image2 = ImageTest::create(['volume_id' => $job->volume_id, 'filename' => 'a']);
-        $trainingProposal = MaiaAnnotationTest::create([
+        $trainingProposal = TrainingProposalTest::create([
             'job_id' => $job->id,
             'image_id' => $image->id,
-            'type_id' => MaiaAnnotationType::trainingProposalId(),
             'points' => [10.5, 20.4, 30],
             'selected' => true,
         ]);
         // Not selected and should not be included.
-        MaiaAnnotationTest::create([
+        TrainingProposalTest::create([
             'job_id' => $job->id,
             'image_id' => $image->id,
-            'type_id' => MaiaAnnotationType::trainingProposalId(),
             'selected' => false,
         ]);
         config(['maia.tmp_dir' => '/tmp']);

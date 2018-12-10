@@ -8,7 +8,7 @@ use Biigle\Traits\HasPointsAttribute;
 use Illuminate\Database\Eloquent\Model;
 use Biigle\Contracts\Annotation as AnnotationContract;
 
-class MaiaAnnotation extends Model implements AnnotationContract
+abstract class MaiaAnnotation extends Model implements AnnotationContract
 {
     use HasPointsAttribute;
 
@@ -26,57 +26,8 @@ class MaiaAnnotation extends Model implements AnnotationContract
      */
     protected $casts = [
         'points' => 'array',
-        'selected' => 'boolean',
         'score' => 'float',
     ];
-
-    /**
-     * Scope the query to all training proposals.
-     *
-     * @param Illuminate\Database\Query\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeTrainingProposals($query)
-    {
-        return $query->where('maia_annotations.type_id', MaiaAnnotationType::trainingProposalId());
-    }
-
-    /**
-     * Scope the query to all annotation candidates.
-     *
-     * @param Illuminate\Database\Query\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeAnnotationCandidates($query)
-    {
-        return $query->where('maia_annotations.type_id', MaiaAnnotationType::annotationCandidateId());
-    }
-
-    /**
-     * Scope the query to all selected annotations
-     *
-     * @param Illuminate\Database\Query\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSelected($query)
-    {
-        return $query->where('maia_annotations.selected', true);
-    }
-
-    /**
-     * Scope the query to all unselected annotations
-     *
-     * @param Illuminate\Database\Query\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeUnselected($query)
-    {
-        return $query->where('maia_annotations.selected', false);
-    }
 
     /**
      * The image, this MAIA annotation belongs to.
@@ -96,16 +47,6 @@ class MaiaAnnotation extends Model implements AnnotationContract
     public function shape()
     {
         return $this->belongsTo(Shape::class);
-    }
-
-    /**
-     * The type of this MAIA annotation.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function type()
-    {
-        return $this->belongsTo(MaiaAnnotationType::class);
     }
 
     /**
@@ -151,7 +92,15 @@ class MaiaAnnotation extends Model implements AnnotationContract
     {
         $prefix = config('maia.patch_storage');
         $format = config('largo.patch_format');
+        $name = $this->getPatchFilename();
 
-        return "{$prefix}/{$this->job_id}/{$this->id}.{$format}";
+        return "{$prefix}/{$this->job_id}/{$name}.{$format}";
     }
+
+    /**
+     * Get the file name (without extension) of the annotation patch file.
+     *
+     * @return string
+     */
+    abstract protected function getPatchFilename(): string;
 }

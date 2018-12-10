@@ -3,7 +3,11 @@
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Http\Requests\UpdateTrainingProposal;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class TrainingProposalController extends Controller
 {
@@ -40,5 +44,56 @@ class TrainingProposalController extends Controller
             ->orderBy('score', 'desc')
             ->get()
             ->toArray();
+    }
+
+    /**
+     * Update a training proposal.
+     *
+     * @api {put} maia/training-proposals/:id
+     * @apiGroup Maia
+     * @apiName UpdateTrainingProposal
+     * @apiPermission projectEditor
+     *
+     * @apiParam {Number} id The training proposal ID.
+     * @apiParam (Attributes that can be updated) {Boolean} selected Determine whether the proposal has been selected by the user or not.
+     * @apiParam (Attributes that can be updated) {Number[]} points Array containing three numbers representing the x- and y-coordinates as well as the radius of the training proposal circle.
+     *
+     * @param UpdateTrainingProposal $request
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdateTrainingProposal $request)
+    {
+        if ($request->filled('points')) {
+            $request->proposal->points = $request->input('points');
+            GenerateAnnotationPatch::dispatch($request->proposal, $request->proposal->getPatchPath());
+        }
+
+        $request->proposal->selected = $request->input('selected', $request->proposal->selected);
+        $request->proposal->save();
+    }
+
+    /**
+     * Get the image patch file of a training proposal.
+     *
+     * @api {get} maia/training-proposals/:id/file
+     * @apiGroup Maia
+     * @apiName ShowTrainingProposalFile
+     * @apiPermission projectEditor
+     *
+     * @apiParam {Number} id The training proposal ID.
+     *
+     * @param int $id Training proposal ID
+     * @return \Illuminate\Http\Response
+     */
+    public function showFile($id)
+    {
+        $a = TrainingProposal::findOrFail($id);
+        $this->authorize('access', $a);
+
+        try {
+            return response()->download($a->getPatchPath());
+        } catch (FileNotFoundException $e) {
+            abort(404, $e->getMessage());
+        }
     }
 }

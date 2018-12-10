@@ -5,8 +5,8 @@ namespace Biigle\Modules\Maia\Jobs;
 use Queue;
 use Exception;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 
 class NoveltyDetectionResponse extends JobResponse
@@ -33,9 +33,9 @@ class NoveltyDetectionResponse extends JobResponse
     /**
      * {@inheritdoc}
      */
-    protected function getNewAnnotationTypeId()
+    protected function insertAnnotationChunk(array $chunk)
     {
-        return Type::trainingProposalId();
+        TrainingProposal::insert($chunk);
     }
 
     /**

@@ -6,7 +6,7 @@ biigle.$viewModel('maia-show-container', function (element) {
     var states = biigle.$require('maia.states');
     var labelTrees = biigle.$require('maia.labelTrees');
     var maiaJobApi = biigle.$require('maia.api.maiaJob');
-    var maiaAnnotationApi = biigle.$require('maia.api.maiaAnnotation');
+    var trainingProposalApi = biigle.$require('maia.api.trainingProposal');
     var messages = biigle.$require('messages.store');
     var imagesStore = biigle.$require('annotations.stores.images');
 
@@ -303,7 +303,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             updateSelectProposal: function (proposal, selected) {
                 proposal.selected = selected;
                 this.setSelectedProposalId(proposal);
-                var promise = maiaAnnotationApi.update({id: proposal.id}, {selected: selected});
+                var promise = trainingProposalApi.update({id: proposal.id}, {trainingProposald: selected});
 
                 promise.catch(function (response) {
                     messages.handleErrorResponse(response);
@@ -391,7 +391,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             updateProposalPoints: function (proposal) {
                 var toUpdate = this.currentProposalsById[proposal.id];
-                return maiaAnnotationApi
+                return trainingProposalApi
                     .update({id: proposal.id}, {points: proposal.points})
                     .then(function () {
                         toUpdate.points = proposal.points;

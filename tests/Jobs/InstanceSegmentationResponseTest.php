@@ -36,7 +36,8 @@ class InstanceSegmentationResponseTest extends TestCase
         $this->assertEquals(1, $annotations->count());
         $this->assertEquals([100, 200, 20], $annotations[0]->points);
         $this->assertEquals(0, $annotations[0]->score);
-        $this->assertFalse($annotations[0]->selected);
+        $this->assertNull($annotations[0]->label_id);
+        $this->assertNull($annotations[0]->annotation_id);
         $this->assertEquals($image->id, $annotations[0]->image_id);
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
@@ -76,7 +77,7 @@ class InstanceSegmentationResponseTest extends TestCase
             //
         }
 
-        $this->assertFalse($job->annotations()->exists());
+        $this->assertFalse($job->annotationCandidates()->exists());
         $this->assertEquals(State::instanceSegmentationId(), $job->fresh()->state_id);
     }
 

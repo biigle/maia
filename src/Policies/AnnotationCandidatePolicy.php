@@ -6,11 +6,11 @@ use DB;
 use Cache;
 use Biigle\Role;
 use Biigle\User;
-use Biigle\Modules\Maia\MaiaAnnotation;
 use Biigle\Policies\CachedPolicy;
+use Biigle\Modules\Maia\AnnotationCandidate;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class MaiaAnnotationPolicy extends CachedPolicy
+class AnnotationCandidatePolicy extends CachedPolicy
 {
     use HandlesAuthorization;
 
@@ -29,24 +29,24 @@ class MaiaAnnotationPolicy extends CachedPolicy
     }
 
     /**
-     * Determine if the given annotation can be accessed by the user.
+     * Determine if the given annotation candidate can be accessed by the user.
      *
      * @param  User  $user
-     * @param  MaiaAnnotation  $annotation
+     * @param  AnnotationCandidate  $candidate
      * @return bool
      */
-    public function access(User $user, MaiaAnnotation $annotation)
+    public function access(User $user, AnnotationCandidate $candidate)
     {
-        // Put this to persistent cache for rapid querying of annotation patches.
-        return Cache::remember("maia-annotation-can-access-{$user->id}-{$annotation->job_id}", 0.5,function () use ($user, $annotation) {
-            // check if user is editor, expert or admin of one of the projects, the annotation belongs to
+        // Put this to persistent cache for rapid querying of candidate patches.
+        return Cache::remember("maia-candidate-can-access-{$user->id}-{$candidate->job_id}", 0.5, function () use ($user, $candidate) {
+            // Check if user is editor, expert or admin of one of the projects, the candidate belongs to.
             return DB::table('project_user')
                 ->where('user_id', $user->id)
-                ->whereIn('project_id', function ($query) use ($annotation) {
+                ->whereIn('project_id', function ($query) use ($candidate) {
                     $query->select('project_id')
                         ->from('project_volume')
                         ->join('maia_jobs', 'project_volume.volume_id', '=', 'maia_jobs.volume_id')
-                        ->where('maia_jobs.id', $annotation->job_id);
+                        ->where('maia_jobs.id', $candidate->job_id);
                 })
                 ->whereIn('project_role_id', [
                     Role::editorId(),
@@ -58,15 +58,15 @@ class MaiaAnnotationPolicy extends CachedPolicy
     }
 
     /**
-     * Determine if the given user can update the MAIA annotation.
+     * Determine if the given user can update the annotation candidate.
      *
      * @param User $user
-     * @param MaiaAnnotation $annotation
+     * @param AnnotationCandidate $candidate
      *
      * @return bool
      */
-    public function update(User $user, MaiaAnnotation $annotation)
+    public function update(User $user, AnnotationCandidate $candidate)
     {
-        return $this->access($user, $annotation);
+        return $this->access($user, $candidate);
     }
 }

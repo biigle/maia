@@ -63,23 +63,13 @@ class MaiaJob extends Model
     }
 
     /**
-     * The annotations belonging to this MAIA job.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function annotations()
-    {
-        return $this->hasMany(MaiaAnnotation::class, 'job_id');
-    }
-
-    /**
      * The training proposals of this MAIA job.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function trainingProposals()
     {
-        return $this->annotations()->trainingProposals();
+        return $this->hasMany(TrainingProposal::class, 'job_id');
     }
 
     /**
@@ -89,7 +79,7 @@ class MaiaJob extends Model
      */
     public function annotationCandidates()
     {
-        return $this->annotations()->annotationCandidates();
+        return $this->hasMany(AnnotationCandidate::class, 'job_id');
     }
 
     /**

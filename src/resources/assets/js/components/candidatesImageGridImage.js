@@ -31,7 +31,7 @@ biigle.$component('maia.components.candidatesImageGridImage', {
     },
     methods: {
         getBlob: function () {
-            return biigle.$require('maia.api.maiaAnnotation').getFile({id: this.image.id});
+            return biigle.$require('maia.api.annotationCandidate').getFile({id: this.image.id});
         },
     },
 });

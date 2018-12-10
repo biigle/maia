@@ -4,22 +4,20 @@ namespace Biigle\Tests\Modules\Maia;
 
 use Biigle\Shape;
 use ModelTestCase;
-use Biigle\Modules\Maia\MaiaAnnotationType as Type;
-use Biigle\Modules\Maia\MaiaAnnotation as Annotation;
+use Biigle\Modules\Maia\TrainingProposal;
 
-class MaiaAnnotationTest extends ModelTestCase
+class TrainingProposalTest extends ModelTestCase
 {
     /**
      * The model class this class will test.
      */
-    protected static $modelClass = Annotation::class;
+    protected static $modelClass = TrainingProposal::class;
 
     public function testAttributes()
     {
         $this->model->refresh();
         $this->assertNotNull($this->model->image);
         $this->assertNotNull($this->model->shape);
-        $this->assertNotNull($this->model->type);
         $this->assertNotNull($this->model->job);
         $this->assertNotNull($this->model->score);
         $this->assertNotNull($this->model->selected);
@@ -33,27 +31,11 @@ class MaiaAnnotationTest extends ModelTestCase
         $this->assertEquals([1, 2, 3, 4], $annotation->fresh()->points);
     }
 
-    public function testScopeTrainingProposals()
-    {
-        $proposal = self::create(['type_id' => Type::trainingProposalId()]);
-        $candidate = self::create(['type_id' => Type::annotationCandidateId()]);
-        $ids = Annotation::trainingProposals()->pluck('id')->all();
-        $this->assertEquals([$proposal->id], $ids);
-    }
-
-    public function testScopeAnnotationCandidates()
-    {
-        $proposal = self::create(['type_id' => Type::trainingProposalId()]);
-        $candidate = self::create(['type_id' => Type::annotationCandidateId()]);
-        $ids = Annotation::annotationCandidates()->pluck('id')->all();
-        $this->assertEquals([$candidate->id], $ids);
-    }
-
     public function testScopeSelected()
     {
         $unselected = $this->model;
         $selected = self::create(['selected' => true]);
-        $ids = Annotation::selected()->pluck('id')->all();
+        $ids = TrainingProposal::selected()->pluck('id')->all();
         $this->assertEquals([$selected->id], $ids);
     }
 
@@ -61,7 +43,7 @@ class MaiaAnnotationTest extends ModelTestCase
     {
         $unselected = $this->model;
         $selected = self::create(['selected' => true]);
-        $ids = Annotation::unselected()->pluck('id')->all();
+        $ids = TrainingProposal::unselected()->pluck('id')->all();
         $this->assertEquals([$unselected->id], $ids);
     }
 
@@ -84,6 +66,6 @@ class MaiaAnnotationTest extends ModelTestCase
     public function testGetPatchPath()
     {
         config(['maia.patch_storage' => 'testpath']);
-        $this->assertEquals("testpath/{$this->model->job_id}/{$this->model->id}.jpg", $this->model->getPatchPath());
+        $this->assertEquals("testpath/{$this->model->job_id}/p-{$this->model->id}.jpg", $this->model->getPatchPath());
     }
 }

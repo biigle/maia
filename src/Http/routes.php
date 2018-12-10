@@ -31,17 +31,15 @@ $router->group([
         ]);
 
         $router->get('maia-jobs/{id}/training-proposals', 'TrainingProposalController@index');
-        $router->get('maia-jobs/{id}/images/{id2}/training-proposals', 'MaiaJobImagesController@indexTrainingProposals');
-        $router->get('maia-jobs/{id}/images/{id2}/annotation-candidates', 'MaiaJobImagesController@indexAnnotationCandidates');
+        $router->put('maia/training-proposals/{id}', 'TrainingProposalController@update');
+        $router->get('maia/training-proposals/{id}/file', 'TrainingProposalController@showFile');
 
         $router->get('maia-jobs/{id}/annotation-candidates', 'AnnotationCandidateController@index');
+        $router->put('maia/annotation-candidates/{id}', 'AnnotationCandidateController@update');
+        $router->get('maia/annotation-candidates/{id}/file', 'AnnotationCandidateController@showFile');
 
-        $router->get('maia-annotations/{id}/file', 'MaiaAnnotationController@showFile');
-
-        $router->resource('maia-annotations', 'MaiaAnnotationController', [
-            'only' => ['update'],
-            'parameters' => ['maia-annotations' => 'id'],
-        ]);
+        $router->get('maia-jobs/{id}/images/{id2}/training-proposals', 'MaiaJobImagesController@indexTrainingProposals');
+        $router->get('maia-jobs/{id}/images/{id2}/annotation-candidates', 'MaiaJobImagesController@indexAnnotationCandidates');
 
         $router->post('users/my/settings/maia', [
             'uses' => 'SettingsController@store',

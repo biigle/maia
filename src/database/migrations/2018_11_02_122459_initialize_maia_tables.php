@@ -62,24 +62,15 @@ class InitializeMaiaTables extends Migration
             $table->json('attrs')->nullable();
         });
 
-        Schema::create('maia_annotation_types', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name', 64);
-        });
-
-        // Create all the possible annotation types.
-        DB::table('maia_annotation_types')->insert([
-            ['name' => 'training-proposal'],
-            ['name' => 'annotation-candidate'],
-        ]);
-
         /*
-        | In contrast to regular annotations, MAIA annotations are automatically created
-        | by the method and should not be displayed in the regular annotation tool. Other
-        | than that, they store exactly the same information than regular annotations.
-        | There can be easily tens of thousands of MAIA annotations per MAIA job.
+        | In contrast to regular annotations, MAIA training proposals and annotation
+        | candidates are automatically created by the method and should not be displayed
+        | in the regular annotation tool. Other than that, they store almost the same
+        | information than regular annotations. There can be easily tens of thousands of
+        | MAIA annotations per MAIA job.
         */
-        Schema::create('maia_annotations', function (Blueprint $table) {
+
+        Schema::create('maia_training_proposals', function (Blueprint $table) {
             $table->increments('id');
             // JSON type cant have a default value so it must be nullable.
             $table->json('points')->nullable();
@@ -98,10 +89,29 @@ class InitializeMaiaTables extends Migration
                   ->on('shapes')
                   ->onDelete('restrict');
 
-            $table->integer('type_id')->unsigned();
-            $table->foreign('type_id')
+            $table->integer('job_id')->unsigned();
+            $table->foreign('job_id')
                   ->references('id')
-                  ->on('maia_annotation_types')
+                  ->on('maia_jobs')
+                  ->onDelete('cascade');
+        });
+
+        Schema::create('maia_annotation_candidates', function (Blueprint $table) {
+            $table->increments('id');
+            // JSON type cant have a default value so it must be nullable.
+            $table->json('points')->nullable();
+            $table->float('score');
+
+            $table->integer('image_id')->unsigned()->index();
+            $table->foreign('image_id')
+                  ->references('id')
+                  ->on('images')
+                  ->onDelete('cascade');
+
+            $table->integer('shape_id')->unsigned();
+            $table->foreign('shape_id')
+                  ->references('id')
+                  ->on('shapes')
                   ->onDelete('restrict');
 
             $table->integer('job_id')->unsigned();
@@ -110,7 +120,22 @@ class InitializeMaiaTables extends Migration
                   ->on('maia_jobs')
                   ->onDelete('cascade');
 
-            $table->index(['job_id', 'type_id']);
+            $table->integer('label_id')->unsigned()->nullable();
+            $table->foreign('label_id')
+                  ->references('id')
+                  ->on('labels')
+                  ->onDelete('set null');
+
+            // Once the annotation candidate has an assigned label and has beend
+            // confirmed by the user, it is converted to a real annotation. This stores
+            // a reference to the annotation that has been created from the annotation
+            // candidate. If this is not null, the annotation candidate can no longer be
+            // modified.
+            $table->integer('annotation_id')->unsigned()->nullable();
+            $table->foreign('annotation_id')
+                  ->references('id')
+                  ->on('annotations')
+                  ->onDelete('set null');
         });
     }
 
@@ -121,8 +146,8 @@ class InitializeMaiaTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('maia_annotations');
-        Schema::dropIfExists('maia_annotation_types');
+        Schema::dropIfExists('maia_annotation_candidates');
+        Schema::dropIfExists('maia_training_proposals');
         Schema::dropIfExists('maia_jobs');
         Schema::dropIfExists('maia_job_states');
     }

@@ -5,8 +5,8 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 use ApiTestCase;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Biigle\Tests\Modules\Maia\MaiaAnnotationTest;
-use Biigle\Modules\Maia\MaiaAnnotationType as Type;
+use Biigle\Tests\Modules\Maia\TrainingProposalTest;
+use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 
 class MaiaJobImagesControllerTest extends ApiTestCase
 {
@@ -15,23 +15,15 @@ class MaiaJobImagesControllerTest extends ApiTestCase
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
         $id = $job->id;
 
-        $annotation = MaiaAnnotationTest::create([
+        $annotation = TrainingProposalTest::create([
             'job_id' => $id,
-            'type_id' => Type::trainingProposalId(),
             'points' => [10, 20, 30],
         ]);
 
         $imageId = $annotation->image_id;
 
-        MaiaAnnotationTest::create([
-            'job_id' => $id,
-            'type_id' => Type::trainingProposalId(),
-        ]);
-
-        MaiaAnnotationTest::create([
-            'job_id' => $id,
-            'type_id' => Type::annotationCandidateId(),
-        ]);
+        TrainingProposalTest::create(['job_id' => $id]);
+        AnnotationCandidateTest::create(['job_id' => $id]);
 
         $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/images/{$imageId}/training-proposals");
 
@@ -50,23 +42,15 @@ class MaiaJobImagesControllerTest extends ApiTestCase
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
         $id = $job->id;
 
-        $annotation = MaiaAnnotationTest::create([
+        $annotation = AnnotationCandidateTest::create([
             'job_id' => $id,
-            'type_id' => Type::annotationCandidateId(),
             'points' => [10, 20, 30],
         ]);
 
         $imageId = $annotation->image_id;
 
-        MaiaAnnotationTest::create([
-            'job_id' => $id,
-            'type_id' => Type::annotationCandidateId(),
-        ]);
-
-        MaiaAnnotationTest::create([
-            'job_id' => $id,
-            'type_id' => Type::trainingProposalId(),
-        ]);
+        AnnotationCandidateTest::create(['job_id' => $id]);
+        TrainingProposalTest::create(['job_id' => $id]);
 
         $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/images/{$imageId}/annotation-candidates");
 

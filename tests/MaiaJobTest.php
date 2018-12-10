@@ -8,7 +8,6 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleted;
-use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 
 class MaiaJobTest extends ModelTestCase
 {
@@ -26,39 +25,15 @@ class MaiaJobTest extends ModelTestCase
         $this->assertNotNull($this->model->state);
     }
 
-    public function testAnnotations()
-    {
-        $annotation = MaiaAnnotationTest::create(['job_id' => $this->model->id]);
-        $this->assertEquals($annotation->id, $this->model->annotations()->first()->id);
-    }
-
     public function testTrainingProposals()
     {
-        $a = MaiaAnnotationTest::create([
-            'job_id' => $this->model->id,
-            'type_id' => Type::trainingProposalId(),
-        ]);
-
-        MaiaAnnotationTest::create([
-            'job_id' => $this->model->id,
-            'type_id' => Type::annotationCandidateId(),
-        ]);
-
+        $a = TrainingProposalTest::create(['job_id' => $this->model->id]);
         $this->assertEquals($a->id, $this->model->trainingProposals()->first()->id);
     }
 
     public function testAnnotationCandidates()
     {
-        $a = MaiaAnnotationTest::create([
-            'job_id' => $this->model->id,
-            'type_id' => Type::annotationCandidateId(),
-        ]);
-
-        MaiaAnnotationTest::create([
-            'job_id' => $this->model->id,
-            'type_id' => Type::trainingProposalId(),
-        ]);
-
+        $a = AnnotationCandidateTest::create(['job_id' => $this->model->id]);
         $this->assertEquals($a->id, $this->model->annotationCandidates()->first()->id);
     }
 

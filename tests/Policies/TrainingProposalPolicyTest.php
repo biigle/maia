@@ -4,15 +4,15 @@ namespace Biigle\Tests\Modules\Maia\Policies;
 
 use ApiTestCase;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Biigle\Tests\Modules\Maia\MaiaAnnotationTest;
+use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 
-class MaiaAnnotationPolicyTest extends ApiTestCase
+class TrainingProposalPolicyTest extends ApiTestCase
 {
     public function setUp()
     {
         parent::setUp();
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
-        $this->annotation = MaiaAnnotationTest::create(['job_id' => $job->id]);
+        $this->annotation = TrainingProposalTest::create(['job_id' => $job->id]);
     }
 
     public function testAccess()

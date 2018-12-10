@@ -40,7 +40,7 @@ biigle.$component('maia.components.proposalsImageGridImage', {
     },
     methods: {
         getBlob: function () {
-            return biigle.$require('maia.api.maiaAnnotation').getFile({id: this.image.id});
+            return biigle.$require('maia.api.trainingProposal').getFile({id: this.image.id});
         },
     },
 });

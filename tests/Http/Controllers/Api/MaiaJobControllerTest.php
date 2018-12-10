@@ -9,8 +9,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Tests\Modules\Maia\MaiaAnnotationTest;
-use Biigle\Modules\Maia\MaiaAnnotationType as Type;
+use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 
 class MaiaJobControllerTest extends ApiTestCase
@@ -133,10 +132,9 @@ class MaiaJobControllerTest extends ApiTestCase
         // The job cannot continue if it has no selected training proposals.
         $this->putJson("/api/v1/maia-jobs/{$job->id}")->assertStatus(422);
 
-        MaiaAnnotationTest::create([
+        TrainingProposalTest::create([
             'job_id' => $job->id,
             'selected' => true,
-            'type_id' => Type::trainingProposalId(),
         ]);
 
         Event::fake();

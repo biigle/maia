@@ -5,8 +5,8 @@ namespace Biigle\Modules\Maia\Jobs;
 use Queue;
 use Exception;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\MaiaAnnotationType as Type;
 use Biigle\Modules\Maia\Notifications\InstanceSegmentationComplete;
 
 class InstanceSegmentationResponse extends JobResponse
@@ -33,9 +33,9 @@ class InstanceSegmentationResponse extends JobResponse
     /**
      * {@inheritdoc}
      */
-    protected function getNewAnnotationTypeId()
+    protected function insertAnnotationChunk(array $chunk)
     {
-        return Type::annotationCandidateId();
+        AnnotationCandidate::insert($chunk);
     }
 
     /**

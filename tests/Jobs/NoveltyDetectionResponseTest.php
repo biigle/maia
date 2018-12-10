@@ -76,7 +76,7 @@ class NoveltyDetectionResponseTest extends TestCase
             //
         }
 
-        $this->assertFalse($job->annotations()->exists());
+        $this->assertFalse($job->trainingProposals()->exists());
         $this->assertEquals(State::noveltyDetectionId(), $job->fresh()->state_id);
     }
 

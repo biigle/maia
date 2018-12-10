@@ -89,7 +89,7 @@ class JobResponse extends Job implements ShouldQueue
             // Chunk the insert because PDO's maximum number of query parameters is
             // 65535. Each annotation has 7 parameters so we can store roughly 9000
             // annotations in one call.
-            MaiaAnnotation::insert($chunk->toArray());
+            $this->insertAnnotationChunk($chunk->toArray());
         });
     }
 
@@ -123,19 +123,18 @@ class JobResponse extends Job implements ShouldQueue
             'score' => $annotation[3],
             'image_id' => $imageId,
             'shape_id' => Shape::circleId(),
-            'type_id' => $this->getNewAnnotationTypeId(),
             // 'selected' is false by default.
         ];
     }
 
     /**
-     * Get the type ID that the newly created annotations should have.
+     * Insert one chunk of the MAIA annotations that should be created into the database.
      *
-     * @return int
+     * @param array $chunk
      */
-    protected function getNewAnnotationTypeId()
+    protected function insertAnnotationChunk(array $chunk)
     {
-        return null;
+        //
     }
 
     /**
