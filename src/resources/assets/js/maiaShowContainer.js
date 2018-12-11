@@ -527,9 +527,7 @@ biigle.$viewModel('maia-show-container', function (element) {
                 if (candidate.label) {
                     this.unselectCandidate(candidate);
                 } else {
-                    if (!this.selectedLabel) {
-                        messages.info('Please select a label first.');
-                    } else if (event.shiftKey && this.lastSelectedCandidate) {
+                    if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
                         this.doForEachBetween(this.candidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
                     } else {
                         this.lastSelectedCandidate = candidate;
@@ -538,8 +536,12 @@ biigle.$viewModel('maia-show-container', function (element) {
                 }
             },
             selectCandidate: function (candidate) {
-                this.updateSelectCandidate(candidate, this.selectedLabel)
-                    .then(this.maybeInitFocussedCandidate);
+                if (this.selectedLabel) {
+                    this.updateSelectCandidate(candidate, this.selectedLabel)
+                        .then(this.maybeInitFocussedCandidate);
+                } else {
+                    messages.info('Please select a label first.');
+                }
             },
             unselectCandidate: function (candidate) {
                 var next = this.nextFocussedCandidate;

@@ -16,7 +16,7 @@ biigle.$component('maia.components.refineCanvas', {
     },
     data: function () {
         return {
-            selectingAnnotation: false,
+            selectingMaiaAnnotation: false,
         };
     },
     computed: {
@@ -31,8 +31,8 @@ biigle.$component('maia.components.refineCanvas', {
         handleNextImage: function (e) {
             this.$emit('next-image');
         },
-        toggleMarkAsInteresting: function () {
-            this.selectingAnnotation = !this.selectingAnnotation;
+        toggleSelectingMaiaAnnotation: function () {
+            this.selectingMaiaAnnotation = !this.selectingMaiaAnnotation;
         },
         createUnselectedAnnotationsLayer: function () {
             this.unselectedAnnotationFeatures = new ol.Collection();
@@ -71,7 +71,7 @@ biigle.$component('maia.components.refineCanvas', {
         unselectedAnnotations: function (annotations) {
             this.refreshAnnotationSource(annotations, this.unselectedAnnotationSource);
         },
-        selectingAnnotation: function (selecting) {
+        selectingMaiaAnnotation: function (selecting) {
             this.selectMaiaAnnotationInteraction.setActive(selecting);
         },
     },

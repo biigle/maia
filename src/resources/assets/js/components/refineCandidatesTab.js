@@ -4,8 +4,18 @@
  * @type {Object}
  */
 biigle.$component('maia.components.refineCandidatesTab', {
+    components: {
+        labelTrees: biigle.$require('labelTrees.components.labelTrees'),
+    },
     props: {
-        //
+        selectedCandidates: {
+            type: Array,
+            required: true,
+        },
+        labelTrees: {
+            type: Array,
+            required: true,
+        },
     },
     data: function () {
         return {
@@ -13,10 +23,17 @@ biigle.$component('maia.components.refineCandidatesTab', {
         };
     },
     computed: {
-        //
+        hasNoSelectedCandidates: function () {
+            return this.selectedCandidates.length === 0;
+        },
     },
     methods: {
-        //
+        handleSelectedLabel: function (label) {
+            this.$emit('select', label);
+        },
+        handleDeselectedLabel: function (label) {
+            this.$emit('select', null);
+        },
     },
     created: function () {
         //

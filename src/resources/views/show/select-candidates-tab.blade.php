@@ -13,7 +13,7 @@
     <div class="maia-tab-content__bottom">
         <div class="panel panel-info">
             <div class="panel-body text-info">
-                Assign a label to each annotation candidate that you want to convert to a real annotation. Then proceed to the refinement of the annotation candidates.
+                Attach a label to each annotation candidate that you want to convert to a real annotation. Then proceed to the refinement of the annotation candidates.
             </div>
         </div>
         <button class="btn btn-default btn-block" v-on:click="proceed">Proceed</button>
