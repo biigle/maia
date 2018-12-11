@@ -47,9 +47,6 @@ class MaiaServiceProvider extends ServiceProvider
                 'volumesSidebar',
             ],
             'apidoc' => [__DIR__.'/Http/Controllers/Api/'],
-            // 'controllerMixins' => [
-            //     //
-            // ],
         ]);
 
         if (config('maia.notifications.allow_user_settings')) {

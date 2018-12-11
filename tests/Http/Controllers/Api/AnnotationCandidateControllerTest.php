@@ -5,6 +5,7 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 use Queue;
 use Response;
 use ApiTestCase;
+use Biigle\Tests\LabelTest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
@@ -47,10 +48,6 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}")->assertStatus(403);
 
         $this->beEditor();
-        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [])
-            // Must not be empty.
-            ->assertStatus(422);
-
         $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
                 // Must be points of a circle.
                 'points' => [10, 20],
@@ -64,8 +61,41 @@ class AnnotationCandidateControllerTest extends ApiTestCase
 
         $a->refresh();
         $this->assertEquals([10, 20, 30], $a->points);
+    }
 
-        $this->markTestIncomplete('set label');
+    public function testUpdateLabel()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $a = AnnotationCandidateTest::create(['job_id' => $job->id]);
+
+        $label = LabelTest::create();
+
+        $this->beEditor();
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $label->id,
+            ])
+            // Label does not belong to the volume.
+            ->assertStatus(403);
+
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => 9999,
+            ])
+            // Label does not exist.
+            ->assertStatus(422);
+
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $this->labelRoot()->id,
+            ])
+            ->assertStatus(200);
+
+        $this->assertEquals($this->labelRoot()->id, $a->fresh()->label_id);
+
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => null,
+            ])
+            ->assertStatus(200);
+
+        $this->assertNull($a->fresh()->label_id);
     }
 
     public function testUpdateConverted()

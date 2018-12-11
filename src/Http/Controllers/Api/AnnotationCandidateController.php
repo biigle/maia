@@ -56,6 +56,7 @@ class AnnotationCandidateController extends Controller
      *
      * @apiParam {Number} id The annotation candidate ID.
      * @apiParam (Attributes that can be updated) {Number[]} points Array containing three numbers representing the x- and y-coordinates as well as the radius of the annotation candidate circle.
+     * @apiParam (Attributes that can be updated) {Number} label_id ID of the label to attach to the annotation candidate. Set to null to detach the label again. This label will be attached to the annotation when the annotation candidate is converted.
      *
      * @param UpdateAnnotationCandidate $request
      * @return \Illuminate\Http\Response
@@ -67,7 +68,10 @@ class AnnotationCandidateController extends Controller
             GenerateAnnotationPatch::dispatch($request->candidate, $request->candidate->getPatchPath());
         }
 
-        // TODO set label
+        if ($request->has('label_id')) {
+            $request->candidate->label_id = $request->input('label_id');
+        }
+
         $request->candidate->save();
     }
 

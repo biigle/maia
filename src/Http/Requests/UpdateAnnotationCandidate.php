@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Maia\Http\Requests;
 
 use Exception;
+use Biigle\Label;
 use Illuminate\Foundation\Http\FormRequest;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\MaiaJobState as State;
@@ -25,6 +26,16 @@ class UpdateAnnotationCandidate extends FormRequest
     {
         $this->candidate = AnnotationCandidate::findOrFail($this->route('id'));
 
+        if ($this->filled('label_id')) {
+            $label = Label::find($this->input('label_id'));
+
+            if (!is_null($label)) {
+                return $this->user()->can('update', $this->candidate)
+                    && $this->user()->can('attach-label', [$this->candidate, $label]);
+            }
+        }
+
+
         return $this->user()->can('update', $this->candidate);
     }
 
@@ -36,7 +47,8 @@ class UpdateAnnotationCandidate extends FormRequest
     public function rules()
     {
         return [
-            'points' => 'required_without:selected|array',
+            'label_id' => 'nullable|exists:labels,id',
+            'points' => 'array',
         ];
     }
 
