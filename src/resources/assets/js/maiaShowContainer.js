@@ -631,13 +631,18 @@ biigle.$viewModel('maia-show-container', function (element) {
             doForEachBetween: function (all, first, second, callback) {
                 var index1 = all.indexOf(first);
                 var index2 = all.indexOf(second);
+                // The second element is exclusive so shift the lower index one up if
+                // second is before first or the upper index down if second is after
+                // first.
                 if (index2 < index1) {
                     var tmp = index2;
                     index2 = index1;
-                    index1 = tmp;
+                    index1 = tmp + 1;
+                } else {
+                    index2 -= 1;
                 }
 
-                for (var i = index1 + 1; i <= index2; i++) {
+                for (var i = index1; i <= index2; i++) {
                     callback(all[i]);
                 }
             },
