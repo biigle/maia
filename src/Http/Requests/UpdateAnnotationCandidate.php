@@ -89,6 +89,12 @@ class UpdateAnnotationCandidate extends FormRequest
      */
     protected function maybeRestrictUpdating($validator)
     {
-        // TODO candidates that have been converted cannot be updated
+        if (!is_null($this->candidate->annotation_id)) {
+            if ($this->has('points')) {
+                $validator->errors()->add('points', 'A converted annotation candidate can no longer be updated');
+            } else {
+                $validator->errors()->add('label_id', 'A converted annotation candidate can no longer be updated');
+            }
+        }
     }
 }

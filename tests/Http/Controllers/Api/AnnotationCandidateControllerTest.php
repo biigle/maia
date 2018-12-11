@@ -6,6 +6,7 @@ use Queue;
 use Response;
 use ApiTestCase;
 use Biigle\Tests\LabelTest;
+use Biigle\Tests\AnnotationTest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
@@ -100,25 +101,19 @@ class AnnotationCandidateControllerTest extends ApiTestCase
 
     public function testUpdateConverted()
     {
-        // $job = MaiaJobTest::create([
-        //     'volume_id' => $this->volume()->id,
-        //     'state_id' => State::annotationCandidatesId(),
-        // ]);
-        // $a = AnnotationCandidateTest::create(['job_id' => $job->id]);
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $annotation = AnnotationTest::create();
+        $a = AnnotationCandidateTest::create([
+            'job_id' => $job->id,
+            'annotation_id' => $annotation->id,
+        ]);
 
-        // $this->beEditor();
-        // $this->putJson("/api/v1/maia-annotations/{$a->id}", [
-        //         'selected' => true,
-        //         'points' => [10, 20, 30],
-        //     ])
-        //     ->assertStatus(200);
-        // // Selected annotation candidates cannot be updated.
-        // $this->putJson("/api/v1/maia-annotations/{$a->id}", [
-        //         'selected' => false,
-        //         'points' => [10, 20, 30],
-        //     ])
-        //     ->assertStatus(422);
-        $this->markTestIncomplete();
+        $this->beEditor();
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'points' => [10, 20, 30],
+            ])
+            // Cannot be updated because it is already converted.
+            ->assertStatus(422);
     }
 
     public function testUpdatePoints()
