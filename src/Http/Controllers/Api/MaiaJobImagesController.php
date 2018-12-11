@@ -10,7 +10,7 @@ class MaiaJobImagesController extends Controller
     /**
      * Get training proposal coordinates for an image.
      *
-     * @api {get} maia-jobs/:jid/images/:iid/training-proposals
+     * @api {get} maia-jobs/:jid/images/:iid/training-proposals Get training proposal coordinates
      * @apiGroup Maia
      * @apiName IndexMaiaImageTrainingProposals
      * @apiPermission projectEditor
@@ -41,7 +41,7 @@ class MaiaJobImagesController extends Controller
     /**
      * Get annotationcandidate coordinates for an image.
      *
-     * @api {get} maia-jobs/:jid/images/:iid/annotation-candidates
+     * @api {get} maia-jobs/:jid/images/:iid/annotation-candidates Get annotation candidate coordinates
      * @apiGroup Maia
      * @apiName IndexMaiaImageAnnotationCandidates
      * @apiPermission projectEditor

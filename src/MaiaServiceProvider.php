@@ -46,6 +46,7 @@ class MaiaServiceProvider extends ServiceProvider
             'viewMixins' => [
                 'volumesSidebar',
             ],
+            'apidoc' => [__DIR__.'/Http/Controllers/Api/'],
             // 'controllerMixins' => [
             //     //
             // ],

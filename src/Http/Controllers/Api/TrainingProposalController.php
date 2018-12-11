@@ -14,7 +14,7 @@ class TrainingProposalController extends Controller
     /**
      * Get all training proposals of a MAIA job.
      *
-     * @api {get} maia-jobs/:id/training-proposals
+     * @api {get} maia-jobs/:id/training-proposals Get training proposals
      * @apiGroup Maia
      * @apiName IndexMaiaTrainingProposals
      * @apiPermission projectEditor
@@ -49,7 +49,7 @@ class TrainingProposalController extends Controller
     /**
      * Update a training proposal.
      *
-     * @api {put} maia/training-proposals/:id
+     * @api {put} maia/training-proposals/:id Update a training proposal
      * @apiGroup Maia
      * @apiName UpdateTrainingProposal
      * @apiPermission projectEditor
@@ -75,7 +75,7 @@ class TrainingProposalController extends Controller
     /**
      * Get the image patch file of a training proposal.
      *
-     * @api {get} maia/training-proposals/:id/file
+     * @api {get} maia/training-proposals/:id/file Get a training proposal patch
      * @apiGroup Maia
      * @apiName ShowTrainingProposalFile
      * @apiPermission projectEditor

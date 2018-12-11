@@ -18,7 +18,7 @@ class MaiaJobController extends Controller
      * Creates a new MAIA job for the specified volume.
      *
      * @api {post} volumes/:id/maia-jobs Create a new MAIA job
-     * @apiGroup MaiaJobs
+     * @apiGroup Maia
      * @apiName StoreMaiaJob
      * @apiPermission projectEditor
      * @apiDescription New MAIA jobs cannot be created for volumes with very large (tiled) images.
@@ -70,8 +70,8 @@ class MaiaJobController extends Controller
     /**
      * Continue a MAIA job from training proposal selection and refinement to instance segmentation.
      *
-     * @api {put} maia-jobs/:id
-     * @apiGroup MaiaJobs
+     * @api {put} maia-jobs/:id Continue a MAIA job
+     * @apiGroup Maia
      * @apiName UpdateMaiaJob
      * @apiPermission projectEditor
      * @apiDescription A job can only be continued if it is in training proposal selection and refinement state, and if it has selected training proposals.
@@ -95,8 +95,8 @@ class MaiaJobController extends Controller
     /**
      * Delete a MAIA job.
      *
-     * @api {delete} maia-jobs/:id
-     * @apiGroup MaiaJobs
+     * @api {delete} maia-jobs/:id Delete a MAIA job
+     * @apiGroup Maia
      * @apiName DestroyMaiaJob
      * @apiPermission projectEditor
      *

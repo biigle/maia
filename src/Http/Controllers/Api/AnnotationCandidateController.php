@@ -14,7 +14,7 @@ class AnnotationCandidateController extends Controller
     /**
      * Get all annotation candidates of a MAIA job.
      *
-     * @api {get} maia-jobs/:id/annotation-candidates
+     * @api {get} maia-jobs/:id/annotation-candidates Get annotation candidates
      * @apiGroup Maia
      * @apiName IndexMaiaAnnotationCandidates
      * @apiPermission projectEditor
@@ -49,7 +49,7 @@ class AnnotationCandidateController extends Controller
     /**
      * Update an annotation candidate.
      *
-     * @api {put} maia/annotation-candidates/:id
+     * @api {put} maia/annotation-candidates/:id Update an annotation candidate
      * @apiGroup Maia
      * @apiName UpdateAnnotationCandidate
      * @apiPermission projectEditor
@@ -74,7 +74,7 @@ class AnnotationCandidateController extends Controller
     /**
      * Get the image patch file of a annotation candidate.
      *
-     * @api {get} maia/annotation-candidates/:id/file
+     * @api {get} maia/annotation-candidates/:id/file Get an annotation candidate patch
      * @apiGroup Maia
      * @apiName ShowTrainingProposalFile
      * @apiPermission projectEditor
