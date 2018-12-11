@@ -39,7 +39,7 @@ class TrainingProposalControllerTest extends ApiTestCase
             ]]);
     }
 
-     public function testSubmit()
+    public function testSubmit()
     {
         $job = MaiaJobTest::create([
             'state_id' => State::noveltyDetectionId(),

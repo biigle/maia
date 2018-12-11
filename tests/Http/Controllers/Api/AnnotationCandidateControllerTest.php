@@ -39,6 +39,45 @@ class AnnotationCandidateControllerTest extends ApiTestCase
             ]]);
     }
 
+    public function testSubmit()
+    {
+        $job = MaiaJobTest::create([
+            'state_id' => State::instanceSegmentationId(),
+            'volume_id' => $this->volume()->id,
+        ]);
+        $this->doTestApiRoute('POST', "/api/v1/maia-jobs/{$job->id}/annotation-candidates");
+
+        $this->beGuest();
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(403);
+
+        $this->beEditor();
+        // Annotation candidates can only be submitted from annotation candidate state.
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(422);
+
+        $job->state_id = State::annotationCandidatesId();
+        $job->save();
+
+        $c1 = AnnotationCandidateTest::create([
+            'job_id' => $job->id,
+            'label_id' => $this->labelChild()->id,
+            'points' => [1, 2, 3],
+        ]);
+
+        $annotation = AnnotationTest::create();
+        $c2 = AnnotationCandidateTest::create([
+            'job_id' => $job->id,
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => $annotation->id,
+            'points' => [1, 2, 3],
+        ]);
+
+        Queue::fake();
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(200);
+        $this->assertNotNull($c1->fresh()->annotation_id);
+        $this->assertEquals($annotation->id, $c2->fresh()->annotation_id);
+        Queue::assertPushed(GenerateAnnotationPatch::class);
+    }
+
     public function testUpdate()
     {
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);

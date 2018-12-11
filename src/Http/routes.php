@@ -36,6 +36,7 @@ $router->group([
         $router->get('maia/training-proposals/{id}/file', 'TrainingProposalController@showFile');
 
         $router->get('maia-jobs/{id}/annotation-candidates', 'AnnotationCandidateController@index');
+        $router->post('maia-jobs/{id}/annotation-candidates', 'AnnotationCandidateController@submit');
         $router->put('maia/annotation-candidates/{id}', 'AnnotationCandidateController@update');
         $router->get('maia/annotation-candidates/{id}/file', 'AnnotationCandidateController@showFile');
 

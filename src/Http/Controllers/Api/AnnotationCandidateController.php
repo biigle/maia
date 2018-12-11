@@ -2,11 +2,15 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
+use DB;
+use Biigle\Annotation;
+use Biigle\AnnotationLabel;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Http\Requests\UpdateAnnotationCandidate;
+use Biigle\Modules\Maia\Http\Requests\SubmitAnnotationCandidates;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class AnnotationCandidateController extends Controller
@@ -48,6 +52,60 @@ class AnnotationCandidateController extends Controller
                 $candidate->addHidden('label_id');
             })
             ->toArray();
+    }
+
+    /**
+     * Convert annotation candidates to annotations.
+     *
+     * @api {post} maia-jobs/:id/annotation-candidates Convert annotation candidates
+     * @apiGroup Maia
+     * @apiName ConvertAnnotationCandidates
+     * @apiPermission projectEditor
+     * @apiDescription This converts all annotation candidates with attached label which have not been converted yet.
+     *
+     * @apiParam {Number} id The job ID.
+     *
+     * @param SubmitAnnotationCandidates $request
+     * @return \Illuminate\Http\Response
+     */
+    public function submit(SubmitAnnotationCandidates $request)
+    {
+
+        DB::transaction(function () use ($request) {
+            $candidates = $request->job->annotationCandidates()
+                ->whereNull('annotation_id')
+                ->whereNotNull('label_id')
+                ->get();
+
+            $newAnnotations = [];
+            $newAnnotationLabels = [];
+
+            foreach ($candidates as $candidate) {
+                $annotation = new Annotation;
+                $annotation->image_id = $candidate->image_id;
+                $annotation->shape_id = $candidate->shape_id;
+                $annotation->points = $candidate->points;
+                $annotation->save();
+                $newAnnotations[] = $annotation;
+
+                $candidate->annotation_id = $annotation->id;
+                $candidate->save();
+
+                $newAnnotationLabels[] = [
+                    'annotation_id' => $annotation->id,
+                    'label_id' => $candidate->label_id,
+                    'user_id' => $request->user()->id,
+                    'confidence' => 1,
+                ];
+            }
+
+            AnnotationLabel::insert($newAnnotationLabels);
+
+            foreach ($newAnnotations as $annotation) {
+                GenerateAnnotationPatch::dispatch($annotation);
+            }
+        });
+
     }
 
     /**
