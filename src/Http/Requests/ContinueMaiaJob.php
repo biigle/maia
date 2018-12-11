@@ -6,7 +6,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Illuminate\Foundation\Http\FormRequest;
 use Biigle\Modules\Maia\MaiaJobState as State;
 
-class UpdateMaiaJob extends FormRequest
+class ContinueMaiaJob extends FormRequest
 {
     /**
      * The job to update

@@ -26,11 +26,12 @@ $router->group([
         ]);
 
         $router->resource('maia-jobs', 'MaiaJobController', [
-            'only' => ['update', 'destroy'],
+            'only' => ['destroy'],
             'parameters' => ['maia-jobs' => 'id'],
         ]);
 
         $router->get('maia-jobs/{id}/training-proposals', 'TrainingProposalController@index');
+        $router->post('maia-jobs/{id}/training-proposals', 'TrainingProposalController@submit');
         $router->put('maia/training-proposals/{id}', 'TrainingProposalController@update');
         $router->get('maia/training-proposals/{id}/file', 'TrainingProposalController@showFile');
 

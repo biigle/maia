@@ -36,7 +36,7 @@ biigle.$component('maia.components.candidatesImageGridImage', {
         },
         title: function () {
             if (this.selectable) {
-                return this.selected ? 'Remove selected label' : 'Assign selected label';
+                return this.selected ? 'Detach label' : 'Attach selected label';
             }
         },
         labelStyle: function () {

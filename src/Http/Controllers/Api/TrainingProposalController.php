@@ -5,6 +5,9 @@ namespace Biigle\Modules\Maia\Http\Controllers\Api;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
+use Biigle\Modules\Maia\Http\Requests\ContinueMaiaJob;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Http\Requests\UpdateTrainingProposal;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
@@ -44,6 +47,31 @@ class TrainingProposalController extends Controller
             ->orderBy('score', 'desc')
             ->get()
             ->toArray();
+    }
+
+    /**
+     * Continue a MAIA job from training proposal selection and refinement to instance segmentation.
+     *
+     * @api {post} maia-jobs/:id/training-proposals Submit training proposals
+     * @apiGroup Maia
+     * @apiName ContinueMaiaJob
+     * @apiPermission projectEditor
+     * @apiDescription A job can only be continued if it is in training proposal selection and refinement state, and if it has selected training proposals.
+     *
+     * @apiParam {Number} id The job ID.
+     *
+     * @param ContinueMaiaJob $request
+     * @return \Illuminate\Http\Response
+     */
+    public function submit(ContinueMaiaJob $request)
+    {
+        $request->job->state_id = State::instanceSegmentationId();
+        $request->job->save();
+        event(new MaiaJobContinued($request->job));
+
+        if (!$this->isAutomatedRequest()) {
+            return $this->fuzzyRedirect('maia', $request->job->id);
+        }
     }
 
     /**

@@ -2,13 +2,11 @@
 
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
-use Event;
 use ApiTestCase;
 use Biigle\Tests\ImageTest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 
@@ -109,41 +107,6 @@ class MaiaJobControllerTest extends ApiTestCase
         // MAIA is not available for volumes with tiled images.
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(422);
-    }
-
-    public function testUpdate()
-    {
-        $job = MaiaJobTest::create([
-            'state_id' => State::noveltyDetectionId(),
-            'volume_id' => $this->volume()->id,
-        ]);
-        $this->doTestApiRoute('PUT', "/api/v1/maia-jobs/{$job->id}");
-
-        $this->beGuest();
-        $this->putJson("/api/v1/maia-jobs/{$job->id}")->assertStatus(403);
-
-        $this->beEditor();
-        // The job can only continue from training proposals state.
-        $this->putJson("/api/v1/maia-jobs/{$job->id}")->assertStatus(422);
-
-        $job->state_id = State::trainingProposalsId();
-        $job->save();
-
-        // The job cannot continue if it has no selected training proposals.
-        $this->putJson("/api/v1/maia-jobs/{$job->id}")->assertStatus(422);
-
-        TrainingProposalTest::create([
-            'job_id' => $job->id,
-            'selected' => true,
-        ]);
-
-        Event::fake();
-        $this->putJson("/api/v1/maia-jobs/{$job->id}")->assertStatus(200);
-        Event::assertDispatched(MaiaJobContinued::class);
-        $this->assertEquals(State::instanceSegmentationId(), $job->fresh()->state_id);
-
-        // Job is no longer in training proposal state.
-        $this->putJson("/api/v1/maia-jobs/{$job->id}")->assertStatus(422);
     }
 
     public function testDestroy()

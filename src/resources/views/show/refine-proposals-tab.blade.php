@@ -20,9 +20,8 @@
                 </div>
             </div>
 
-            <form action="{{url("api/v1/maia-jobs/{$job->id}")}}" method="POST" onsubmit="return confirm('Once the training proposals have been submitted, you are no longer able to modify them. Continue?')">
+            <form action="{{url("api/v1/maia-jobs/{$job->id}/training-proposals")}}" method="POST" onsubmit="return confirm('Once the training proposals have been submitted, you are no longer able to modify them. Continue?')">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="_method" value="PUT">
                 <button type="submit" class="btn btn-block" :class="buttonClass" :disabled="hasNoSelectedProposals">Submit training proposals</button>
             </form>
         @else
