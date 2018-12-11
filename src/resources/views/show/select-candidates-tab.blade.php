@@ -1,4 +1,4 @@
-<select-candidates-tab :label-trees="labelTrees" v-on:proceed="openRefineCandidatesTab" inline-template>
+<select-candidates-tab :label-trees="labelTrees" v-on:select="handleSelectedLabel" v-on:proceed="openRefineCandidatesTab" inline-template>
 <div class="sidebar-tab__content sidebar-tab__content--maia">
     <div class="maia-tab-content__top">
         <label-trees

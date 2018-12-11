@@ -7,7 +7,7 @@
  * resource.getFile({id: candidateId}).then(...);
  *
  * Update the candidate:
- * resource.update({id: 1}, {points: [1, 2, 3]}).then(...);
+ * resource.update({id: 1}, {label_id: 123}).then(...);
  *
  * @type {Vue.resource}
  */

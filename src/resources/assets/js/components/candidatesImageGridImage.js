@@ -5,7 +5,7 @@
  */
 biigle.$component('maia.components.candidatesImageGridImage', {
     mixins: [biigle.$require('volumes.components.imageGridImage')],
-    template: '<figure class="image-grid__image" :class="classObject" :title="title">' +
+    template: '<figure class="image-grid__image image-grid__image--annotation-candidate" :class="classObject" :title="title">' +
         '<div v-if="showIcon" class="image-icon">' +
             '<i class="fas" :class="iconClass"></i>' +
         '</div>' +
@@ -15,10 +15,21 @@ biigle.$component('maia.components.candidatesImageGridImage', {
                 '<span class="fa fa-external-link-square-alt" aria-hidden="true"></span>' +
             '</a>' +
         '</div>' +
+        '<div v-if="selected" class="attached-label">' +
+            '<span class="attached-label__color" :style="labelStyle"></span> ' +
+            '<span class="attached-label__name" v-text="label.name"></span>' +
+        '</div>' +
     '</figure>',
     computed: {
         showAnnotationLink: function () {
             return false;
+        },
+        label: function () {
+            if (this.selected) {
+                return this.$parent.selectedCandidateIds[this.image.id];
+            }
+
+            return null;
         },
         selected: function () {
             return this.$parent.selectedCandidateIds.hasOwnProperty(this.image.id);
@@ -27,6 +38,11 @@ biigle.$component('maia.components.candidatesImageGridImage', {
             if (this.selectable) {
                 return this.selected ? 'Remove selected label' : 'Assign selected label';
             }
+        },
+        labelStyle: function () {
+            return {
+                'background-color': '#' + this.label.color,
+            };
         },
     },
     methods: {

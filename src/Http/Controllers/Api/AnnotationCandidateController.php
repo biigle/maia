@@ -26,7 +26,7 @@ class AnnotationCandidateController extends Controller
      * [
      *     {
      *         "id": 1,
-     *         "selected": false,
+     *         "label": null,
      *         "image_id": 20
      *     }
      * ]
@@ -40,9 +40,13 @@ class AnnotationCandidateController extends Controller
         $this->authorize('access', $job);
 
         return $job->annotationCandidates()
-            ->select('id', 'image_id')
+            ->select('id', 'image_id', 'label_id')
             ->orderBy('score', 'desc')
+            ->with('label')
             ->get()
+            ->each(function ($candidate) {
+                $candidate->addHidden('label_id');
+            })
             ->toArray();
     }
 

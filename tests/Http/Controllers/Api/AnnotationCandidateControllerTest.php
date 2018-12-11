@@ -35,6 +35,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
             ->assertJson([[
                 'id' => $annotation->id,
                 'image_id' => $annotation->image_id,
+                'label' => null,
             ]]);
     }
 
