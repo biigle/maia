@@ -1,9 +1,10 @@
 /**
- * A variant of the annotation canvas used for the refinement of MAIA training proposals.
+ * A variant of the annotation canvas used for the refinement of training proposals and
+ * annotation candidates.
  *
  * @type {Object}
  */
-biigle.$component('maia.components.refineProposalsCanvas', {
+biigle.$component('maia.components.refineCanvas', {
     mixins: [biigle.$require('annotations.components.annotationCanvas')],
     props: {
         unselectedAnnotations: {
@@ -15,7 +16,7 @@ biigle.$component('maia.components.refineProposalsCanvas', {
     },
     data: function () {
         return {
-            selectingProposal: false,
+            selectingAnnotation: false,
         };
     },
     computed: {
@@ -31,7 +32,7 @@ biigle.$component('maia.components.refineProposalsCanvas', {
             this.$emit('next-image');
         },
         toggleMarkAsInteresting: function () {
-            this.selectingProposal = !this.selectingProposal;
+            this.selectingAnnotation = !this.selectingAnnotation;
         },
         createUnselectedAnnotationsLayer: function () {
             this.unselectedAnnotationFeatures = new ol.Collection();
@@ -48,19 +49,19 @@ biigle.$component('maia.components.refineProposalsCanvas', {
                 opacity: 0.5,
             });
         },
-        createSelectProposalInteraction: function (features) {
+        createSelectMaiaAnnotationInteraction: function (features) {
             var Interaction = biigle.$require('annotations.ol.AttachLabelInteraction');
-            this.selectProposalInteraction = new Interaction({
+            this.selectMaiaAnnotationInteraction = new Interaction({
                 map: this.map,
                 features: features
             });
-            this.selectProposalInteraction.setActive(false);
-            this.selectProposalInteraction.on('attach', this.handleSelectProposal);
+            this.selectMaiaAnnotationInteraction.setActive(false);
+            this.selectMaiaAnnotationInteraction.on('attach', this.handleSelectMaiaAnnotation);
         },
-        handleSelectProposal: function (e) {
+        handleSelectMaiaAnnotation: function (e) {
             this.$emit('select', e.feature.get('annotation'));
         },
-        handleUnselectProposal: function () {
+        handleUnselectMaiaAnnotation: function () {
             if (this.selectedAnnotations.length > 0) {
                 this.$emit('unselect', this.selectedAnnotations[0]);
             }
@@ -70,8 +71,8 @@ biigle.$component('maia.components.refineProposalsCanvas', {
         unselectedAnnotations: function (annotations) {
             this.refreshAnnotationSource(annotations, this.unselectedAnnotationSource);
         },
-        selectingProposal: function (selecting) {
-            this.selectProposalInteraction.setActive(selecting);
+        selectingAnnotation: function (selecting) {
+            this.selectMaiaAnnotationInteraction.setActive(selecting);
         },
     },
     created: function () {
@@ -82,9 +83,9 @@ biigle.$component('maia.components.refineProposalsCanvas', {
         this.selectInteraction.setActive(false);
 
         if (this.canModify) {
-            this.createSelectProposalInteraction(this.unselectedAnnotationFeatures);
-            this.map.addInteraction(this.selectProposalInteraction);
-            biigle.$require('keyboard').on('Delete', this.handleUnselectProposal, 0, this.listenerSet);
+            this.createSelectMaiaAnnotationInteraction(this.unselectedAnnotationFeatures);
+            this.map.addInteraction(this.selectMaiaAnnotationInteraction);
+            biigle.$require('keyboard').on('Delete', this.handleUnselectMaiaAnnotation, 0, this.listenerSet);
         }
     },
 });

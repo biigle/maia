@@ -31,7 +31,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             selectProposalsTab: biigle.$require('maia.components.selectProposalsTab'),
             proposalsImageGrid: biigle.$require('maia.components.proposalsImageGrid'),
             refineProposalsTab: biigle.$require('maia.components.refineProposalsTab'),
-            refineProposalsCanvas: biigle.$require('maia.components.refineProposalsCanvas'),
+            refineCanvas: biigle.$require('maia.components.refineCanvas'),
             selectCandidatesTab: biigle.$require('maia.components.selectCandidatesTab'),
             candidatesImageGrid: biigle.$require('maia.components.candidatesImageGrid'),
             refineCandidatesTab: biigle.$require('maia.components.refineCandidatesTab'),
@@ -66,6 +66,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             currentCandidateImageIndex: null,
             currentCandidates: [],
             currentCandidatesById: {},
+            focussedCandidate: null,
             candidateAnnotationCache: {},
             selectedLabel: null,
         },
@@ -251,6 +252,42 @@ biigle.$viewModel('maia-show-container', function (element) {
                 return this.currentCandidates.filter(function (p) {
                     return !this.selectedCandidateIds.hasOwnProperty(p.id);
                 }, this);
+            },
+            previousFocussedCandidate: function () {
+                var index = (this.selectedCandidates.indexOf(this.focussedCandidate) - 1 + this.selectedCandidates.length) % this.selectedCandidates.length;
+
+                return this.selectedCandidates[index];
+            },
+            nextFocussedCandidate: function () {
+                var index = (this.selectedCandidates.indexOf(this.focussedCandidate) + 1) % this.selectedCandidates.length;
+
+                return this.selectedCandidates[index];
+            },
+            nextFocussedCandidateImageId: function () {
+                if (this.nextFocussedCandidate) {
+                    return this.nextFocussedCandidate.image_id;
+                }
+
+                return this.nextCandidateImageId;
+            },
+            // The focussed training proposal might change while the refine tab tool is
+            // closed but it should be updated only when it it opened again. Else the
+            // canvas would not update correctly.
+            focussedCandidateToShow: function () {
+                if (this.refineCandidatesTabOpen) {
+                    return this.focussedCandidate;
+                }
+
+                return null;
+            },
+            focussedCandidateArray: function () {
+                if (this.focussedCandidateToShow) {
+                    return this.currentSelectedCandidates.filter(function (p) {
+                        return p.id === this.focussedCandidateToShow.id;
+                    }, this);
+                }
+
+                return [];
             },
         },
         methods: {
@@ -501,15 +538,15 @@ biigle.$viewModel('maia-show-container', function (element) {
                 }
             },
             selectCandidate: function (candidate) {
-                this.updateSelectCandidate(candidate, this.selectedLabel);
-                    //.then(this.maybeInitFocussedCandidate)
+                this.updateSelectCandidate(candidate, this.selectedLabel)
+                    .then(this.maybeInitFocussedCandidate);
             },
             unselectCandidate: function (candidate) {
-                // var next = this.nextFocussedCandidate;
+                var next = this.nextFocussedCandidate;
                 this.updateSelectCandidate(candidate, null)
                     .bind(this)
                     .then(function () {
-                        // this.maybeUnsetFocussedCandidate(candidate, next);
+                        this.maybeUnsetFocussedCandidate(candidate, next);
                     });
             },
             updateSelectCandidate: function (candidate, label) {
@@ -547,8 +584,44 @@ biigle.$viewModel('maia-show-container', function (element) {
             handlePreviousCandidateImage: function () {
                 this.currentCandidateImageIndex = this.previousCandidateImageIndex;
             },
+            handlePreviousCandidate: function () {
+                if (this.previousFocussedCandidate) {
+                    this.focussedCandidate = this.previousFocussedCandidate;
+                } else {
+                    this.handlePreviousCandidateImage();
+                }
+            },
             handleNextCandidateImage: function () {
                 this.currentCandidateImageIndex = this.nextCandidateImageIndex;
+            },
+            handleNextCandidate: function () {
+                if (this.nextFocussedCandidate) {
+                    this.focussedCandidate = this.nextFocussedCandidate;
+                } else {
+                    this.handleNextCandidateImage();
+                }
+            },
+            focusCandidateToShow: function () {
+                if (this.focussedCandidateToShow) {
+                    var p = this.currentCandidatesById[this.focussedCandidateToShow.id];
+                    if (p) {
+                        this.$refs.refineCandidatesCanvas.focusAnnotation(p, true, false);
+                    }
+                }
+            },
+            maybeInitFocussedCandidate: function () {
+                if (!this.focussedCandidate && this.hasSelectedCandidates) {
+                    this.focussedCandidate = this.selectedCandidates[0];
+                }
+            },
+            maybeUnsetFocussedCandidate: function (proposal, next) {
+                if (this.focussedCandidate && this.focussedCandidate.id === proposal.id) {
+                    if (next && next.id !== proposal.id) {
+                        this.focussedCandidate = next;
+                    } else {
+                        this.focussedCandidate = null;
+                    }
+                }
             },
             handleSelectedLabel: function (label) {
                 this.selectedLabel = label;
@@ -565,6 +638,38 @@ biigle.$viewModel('maia-show-container', function (element) {
                 for (var i = index1 + 1; i <= index2; i++) {
                     callback(all[i]);
                 }
+            },
+            cacheNextCandidateImage: function () {
+                // Do nothing if there is only one image.
+                if (this.currentCandidateImageId !== this.nextFocussedCandidateImageId) {
+                    imagesStore.fetchImage(this.nextFocussedCandidateImageId)
+                        // Ignore errors in this case. The application will try to reload
+                        // the data again if the user switches to the respective image
+                        // and display the error message then.
+                        .catch(function () {});
+                }
+            },
+            cacheNextCandidateAnnotations: function () {
+                // Do nothing if there is only one image.
+                if (this.currentCandidateImageId !== this.nextFocussedCandidateImageId) {
+                    this.fetchCandidateAnnotations(this.nextFocussedCandidateImageId)
+                        // Ignore errors in this case. The application will try to reload
+                        // the data again if the user switches to the respective image
+                        // and display the error message then.
+                        .catch(function () {});
+                }
+            },
+            handleRefineCandidate: function (candidates) {
+                Vue.Promise.all(candidates.map(this.updateCandidatePoints))
+                    .catch(messages.handleErrorResponse);
+            },
+            updateCandidatePoints: function (candidate) {
+                var toUpdate = this.currentCandidatesById[candidate.id];
+                return annotationCandidateApi
+                    .update({id: candidate.id}, {points: candidate.points})
+                    .then(function () {
+                        toUpdate.points = candidate.points;
+                    });
             },
         },
         watch: {
@@ -606,7 +711,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             visitedRefineCandidatesTab: function () {
                 this.fetchCandidates()
-                    .then(this.maybeInitFocussedProposal)
+                    .then(this.maybeInitFocussedCandidate)
                     .then(this.maybeInitCurrentCandidateImage);
             },
             currentProposalImageId: function (id) {
@@ -646,13 +751,23 @@ biigle.$viewModel('maia-show-container', function (element) {
                             this.fetchCandidates(),
                         ])
                         .then(this.setCurrentCandidateImageAndAnnotations)
-                        // .then(this.focusProposalToShow)
-                        // .then(this.cacheNextProposalImage)
-                        // .then(this.cacheNextProposalAnnotations)
+                        .then(this.focusCandidateToShow)
+                        .then(this.cacheNextCandidateImage)
+                        .then(this.cacheNextCandidateAnnotations)
                         .catch(this.handleLoadingError)
                         .finally(this.finishLoading);
                 } else {
                     this.setCurrentCandidateImageAndAnnotations([null, null]);
+                }
+            },
+            focussedCandidateToShow: function (candidate, old) {
+                if (candidate) {
+                    if (old && old.image_id === candidate.image_id) {
+                        this.focusCandidateToShow();
+                    } else {
+                        this.currentCandidateImageIndex = this.candidateImageIds.indexOf(candidate.image_id);
+                    }
+                    // this.setSeenCandidateId(proposal);
                 }
             },
         },

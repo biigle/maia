@@ -1,4 +1,4 @@
-<refine-proposals-canvas
+<refine-canvas
     :can-modify="isInTrainingProposalState"
     :show-minimap="hasCurrentProposalImage"
     :image="currentProposalImage"
@@ -35,4 +35,4 @@
             @endif
         </div>
     </div>
-</refine-proposals-canvas>
+</refine-canvas>
