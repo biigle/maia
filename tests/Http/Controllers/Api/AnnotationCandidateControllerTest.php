@@ -32,10 +32,11 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates")
             ->assertStatus(200)
-            ->assertJson([[
+            ->assertExactJson([[
                 'id' => $annotation->id,
                 'image_id' => $annotation->image_id,
                 'label' => null,
+                'annotation_id' => null,
             ]]);
     }
 
@@ -73,7 +74,9 @@ class AnnotationCandidateControllerTest extends ApiTestCase
 
         Queue::fake();
         $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(200);
-        $this->assertNotNull($c1->fresh()->annotation_id);
+        $annotationId = $c1->fresh()->annotation_id;
+        $this->assertNotNull($annotationId);
+        $response->assertExactJson([$c1->id => $annotationId]);
         $this->assertEquals($annotation->id, $c2->fresh()->annotation_id);
         Queue::assertPushed(GenerateAnnotationPatch::class);
     }

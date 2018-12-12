@@ -13,5 +13,9 @@ biigle.$component('maia.components.candidatesImageGrid', {
             type: Object,
             required: true,
         },
+        convertedCandidateIds: {
+            type: Object,
+            required: true,
+        },
     },
 });

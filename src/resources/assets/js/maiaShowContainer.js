@@ -61,6 +61,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             fetchCandidatesPromise: null,
             hasCandidates: false,
             selectedCandidateIds: {},
+            convertedCandidateIds: {},
             lastSelectedCandidate: null,
             currentCandidateImage: null,
             currentCandidateImageIndex: null,
@@ -320,8 +321,7 @@ biigle.$viewModel('maia-show-container', function (element) {
 
                     this.fetchProposalsPromise = maiaJobApi.getTrainingProposals({id: job.id});
 
-                    this.fetchProposalsPromise.then(this.setProposals)
-                        .catch(messages.handleErrorResponse)
+                    this.fetchProposalsPromise.then(this.setProposals, messages.handleErrorResponse)
                         .finally(this.finishLoading);
                 }
 
@@ -494,10 +494,17 @@ biigle.$viewModel('maia-show-container', function (element) {
                 messages.danger(message);
             },
             setSelectedCandidateId: function (candidate) {
-                if (candidate.label) {
+                if (candidate.label && !candidate.annotation_id) {
                     Vue.set(this.selectedCandidateIds, candidate.id, candidate.label);
                 } else {
                     Vue.delete(this.selectedCandidateIds, candidate.id);
+                }
+            },
+            setConvertedCandidateId: function (candidate) {
+                if (candidate.annotation_id) {
+                    Vue.set(this.convertedCandidateIds, candidate.id, candidate.annotation_id);
+                } else {
+                    Vue.delete(this.convertedCandidateIds, candidate.id);
                 }
             },
             setCandidates: function (response) {
@@ -506,6 +513,7 @@ biigle.$viewModel('maia-show-container', function (element) {
                 CANDIDATES.forEach(function (p) {
                     CANDIDATES_BY_ID[p.id] = p;
                     this.setSelectedCandidateId(p);
+                    this.setConvertedCandidateId(p);
                 }, this);
 
                 this.hasCandidates = CANDIDATES.length > 0;
@@ -516,8 +524,7 @@ biigle.$viewModel('maia-show-container', function (element) {
 
                     this.fetchCandidatesPromise = maiaJobApi.getAnnotationCandidates({id: job.id});
 
-                    this.fetchCandidatesPromise.then(this.setCandidates)
-                        .catch(messages.handleErrorResponse)
+                    this.fetchCandidatesPromise.then(this.setCandidates, messages.handleErrorResponse)
                         .finally(this.finishLoading);
                 }
 
@@ -537,8 +544,11 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             selectCandidate: function (candidate) {
                 if (this.selectedLabel) {
-                    this.updateSelectCandidate(candidate, this.selectedLabel)
-                        .then(this.maybeInitFocussedCandidate);
+                    // Do not select candidates that have been converted.
+                    if (!candidate.annotation_id) {
+                        this.updateSelectCandidate(candidate, this.selectedLabel)
+                            .then(this.maybeInitFocussedCandidate);
+                    }
                 } else {
                     messages.info('Please select a label first.');
                 }
@@ -677,6 +687,20 @@ biigle.$viewModel('maia-show-container', function (element) {
                     .then(function () {
                         toUpdate.points = candidate.points;
                     });
+            },
+            handleConvertCandidates: function () {
+                this.startLoading();
+                maiaJobApi.convertAnnotationCandidates({id: job.id}, {})
+                    .then(this.handleConvertedCandidates, messages.handleErrorResponse)
+                    .finally(this.finishLoading);
+            },
+            handleConvertedCandidates: function (response) {
+                Object.keys(response.body).forEach(function (id) {
+                    var candidate = CANDIDATES_BY_ID[id];
+                    candidate.annotation_id = response.body[id];
+                    this.setSelectedCandidateId(candidate);
+                    this.setConvertedCandidateId(candidate);
+                }, this);
             },
         },
         watch: {

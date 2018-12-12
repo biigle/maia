@@ -34,10 +34,36 @@ biigle.$component('maia.components.candidatesImageGridImage', {
         selected: function () {
             return this.$parent.selectedCandidateIds.hasOwnProperty(this.image.id);
         },
-        title: function () {
-            if (this.selectable) {
-                return this.selected ? 'Detach label' : 'Attach selected label';
+        converted: function () {
+            return this.$parent.convertedCandidateIds.hasOwnProperty(this.image.id);
+        },
+        selectable: function () {
+            return !this.converted;
+        },
+        classObject: function () {
+            return {
+                'image-grid__image--selected': this.selected || this.converted,
+                'image-grid__image--selectable': this.selectable,
+                'image-grid__image--fade': this.selectedFade,
+                'image-grid__image--small-icon': this.smallIcon,
+            };
+        },
+        iconClass: function () {
+            if (this.converted) {
+                return 'fa-lock';
             }
+
+            return 'fa-' + this.selectedIcon;
+        },
+        showIcon: function () {
+            return this.selectable || this.selected || this.converted;
+        },
+        title: function () {
+            if (this.converted) {
+                return 'This annotation candidate has been converted';
+            }
+
+            return this.selected ? 'Detach label' : 'Attach selected label';
         },
         labelStyle: function () {
             return {

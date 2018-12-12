@@ -34,6 +34,11 @@ biigle.$component('maia.components.refineCandidatesTab', {
         handleDeselectedLabel: function (label) {
             this.$emit('select', null);
         },
+        handleConvertCandidates: function (label) {
+            if (!this.hasNoSelectedCandidates) {
+                this.$emit('convert');
+            }
+        },
     },
     created: function () {
         //

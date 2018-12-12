@@ -2,6 +2,7 @@
     v-show="hasCandidates"
     :images="candidates"
     :selected-candidate-ids="selectedCandidateIds"
+    :converted-candidate-ids="convertedCandidateIds"
     empty-url="{{ asset(config('thumbnails.empty_url')) }}"
     :width="{{config('thumbnails.width')}}"
     :height="{{config('thumbnails.height')}}"

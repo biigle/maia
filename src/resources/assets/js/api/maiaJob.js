@@ -42,4 +42,8 @@ biigle.$declare('maia.api.maiaJob', Vue.resource('api/v1/maia-jobs{/id}', {}, {
         method: 'GET',
         url: 'api/v1/maia-jobs{/jobId}/images{/imageId}/annotation-candidates',
     },
+    convertAnnotationCandidates: {
+        method: 'POST',
+        url: 'api/v1/maia-jobs{/id}/annotation-candidates',
+    },
 }));
