@@ -32,6 +32,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             proposalsImageGrid: biigle.$require('maia.components.proposalsImageGrid'),
             refineProposalsTab: biigle.$require('maia.components.refineProposalsTab'),
             refineCanvas: biigle.$require('maia.components.refineCanvas'),
+            refineCandidatesCanvas: biigle.$require('maia.components.refineCandidatesCanvas'),
             selectCandidatesTab: biigle.$require('maia.components.selectCandidatesTab'),
             candidatesImageGrid: biigle.$require('maia.components.candidatesImageGrid'),
             refineCandidatesTab: biigle.$require('maia.components.refineCandidatesTab'),
@@ -251,7 +252,12 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             currentUnselectedCandidates: function () {
                 return this.currentCandidates.filter(function (p) {
-                    return !this.selectedCandidateIds.hasOwnProperty(p.id);
+                    return !this.selectedCandidateIds.hasOwnProperty(p.id) && !this.convertedCandidateIds.hasOwnProperty(p.id);
+                }, this);
+            },
+            currentConvertedCandidates: function () {
+                return this.currentCandidates.filter(function (p) {
+                    return this.convertedCandidateIds.hasOwnProperty(p.id);
                 }, this);
             },
             previousFocussedCandidate: function () {

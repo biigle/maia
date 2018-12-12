@@ -42,7 +42,7 @@ biigle.$component('maia.components.refineCanvas', {
             this.unselectedAnnotationLayer = new ol.layer.Vector({
                 source: this.unselectedAnnotationSource,
                 // Should be below regular annotations which are at index 100.
-                zIndex: 50,
+                zIndex: 99,
                 updateWhileAnimating: true,
                 updateWhileInteracting: true,
                 style: biigle.$require('annotations.stores.styles').editing,

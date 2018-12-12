@@ -1,9 +1,10 @@
-<refine-canvas
+<refine-candidates-canvas
     :can-modify="isInAnnotationCandidateState"
     :show-minimap="hasCurrentCandidateImage"
     :image="currentCandidateImage"
     :annotations="currentSelectedCandidates"
     :unselected-annotations="currentUnselectedCandidates"
+    :converted-annotations="currentConvertedCandidates"
     :selected-annotations="focussedCandidateArray"
     v-on:previous-image="handlePreviousCandidateImage"
     v-on:previous="handlePreviousCandidate"
@@ -33,4 +34,4 @@
             </div>
         </div>
     </div>
-</refine-canvas>
+</refine-candidates-canvas>
