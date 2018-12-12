@@ -2,7 +2,7 @@
 <form id="maia-job-form" method="POST" action="{{ url("api/v1/volumes/{$volume->id}/maia-jobs") }}">
     <fieldset>
         <legend v-cloak v-show="showAdvanced">Novelty Detection</legend>
-        <div class="form-group{{ $errors->has('nd_clusters') ? ' has-error' : '' }}">
+        <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_clusters') ? ' has-error' : '' }}">
             <label for="nd_clusters">Number of image clusters</label>
             <input type="number" class="form-control" name="nd_clusters" id="nd_clusters" value="{{ old('nd_clusters', 5) }}" required min="1" max="100" step="1">
             @if($errors->has('nd_clusters'))
@@ -14,7 +14,7 @@
             @endif
         </div>
 
-        <div class="form-group{{ $errors->has('nd_patch_size') ? ' has-error' : '' }}">
+        <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_patch_size') ? ' has-error' : '' }}">
             <label for="nd_patch_size">Patch size</label>
             <input type="number" class="form-control" name="nd_patch_size" id="nd_patch_size" value="{{ old('nd_patch_size', 39) }}" required min="3" max="99" step="2">
             @if($errors->has('nd_patch_size'))
@@ -26,8 +26,58 @@
             @endif
         </div>
 
+        <div class="form-group{{ $errors->has('use_existing') ? ' has-error' : '' }}">
+            <label for="use_existing">
+                <input type="checkbox" name="use_existing" id="use_existing" v-model="useExistingAnnotations">
+                Use existing annotations
+            </label>
+            @if($errors->has('use_existing'))
+               <span class="help-block">{{ $errors->first('use_existing') }}</span>
+            @else
+                <span class="help-block">
+                    Use existing annotations as training proposals. All annotations will be converted to circles.
+                </span>
+            @endif
+            <p v-cloak v-show="useExistingAnnotations && !hasLabels && !loading" class="text-warning">
+                There are no existing annotations.
+            </p>
+        </div>
+
+        <div v-cloak v-show="showAdvanced && hasLabels" class="form-group">
+            <label for="restrict_labels">Restrict to labels</label>
+            <typeahead class="typeahead--block" :items="labels" placeholder="Label name" :clear-on-select="true" v-on:select="handleSelectedLabel"></typeahead>
+            <span class="help-block">
+                Only use existing annotations with these selected labels.
+            </span>
+
+            <ul class="list-group">
+                <li v-for="label in selectedLabels" class="list-group-item">
+                    <span class="label-color-dot" v-if="label.color" :style="{'background-color': '#' + label.color}" class="label-color"></span><span v-text="label.name"></span>
+                    <button title="Remove label from selection" type="button" class="close" v-on:click="handleUnselectLabel(label)">&times;</button>
+                </li>
+                <li v-if="!hasSelectedLabels" class="list-group-item text-muted">No restriction</li>
+            </ul>
+
+            <input v-for="label in selectedLabels" type="hidden" name="restrict_labels[]" :value="label.id">
+        </div>
+
+        <div v-show="canSkipNoveltyDetection" v-cloak class="form-group{{ $errors->has('skip_nd') ? ' has-error' : '' }}">
+            <label for="skip_nd">
+                <input type="checkbox" name="skip_nd" id="skip_nd" v-model="skipNoveltyDetection">
+                Skip novelty detection
+            </label>
+            @if($errors->has('skip_nd'))
+               <span class="help-block">{{ $errors->first('skip_nd') }}</span>
+            @else
+                <span class="help-block">
+                    You can choose to skip the novelty detection stage if you use existing annotations as training proposals. Make sure that you have enough training proposals in this case.
+                </span>
+            @endif
+        </div>
+
+
         <div v-cloak v-show="showAdvanced">
-            <div class="form-group{{ $errors->has('nd_threshold') ? ' has-error' : '' }}">
+            <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_threshold') ? ' has-error' : '' }}">
                 <label for="nd_threshold">Threshold percentile</label>
                 <input type="number" class="form-control" name="nd_threshold" id="nd_threshold" value="{{ old('nd_threshold', 99) }}" required min="0" max="99" step="1">
                 @if($errors->has('nd_threshold'))
@@ -39,7 +89,7 @@
                 @endif
             </div>
 
-            <div class="form-group{{ $errors->has('nd_latent_size') ? ' has-error' : '' }}">
+            <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_latent_size') ? ' has-error' : '' }}">
                 <label for="nd_latent_size">Latent layer size</label>
                 <input type="number" class="form-control" name="nd_latent_size" id="nd_latent_size" value="{{ old('nd_latent_size', 0.1) }}" required min="0.05" max="0.75" step="0.05">
                 @if($errors->has('nd_latent_size'))
@@ -51,7 +101,7 @@
                 @endif
             </div>
 
-            <div class="form-group{{ $errors->has('nd_trainset_size') ? ' has-error' : '' }}">
+            <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_trainset_size') ? ' has-error' : '' }}">
                 <label for="nd_trainset_size">Number of training patches</label>
                 <input type="number" class="form-control" name="nd_trainset_size" id="nd_trainset_size" value="{{ old('nd_trainset_size', 10000) }}" required min="1000" max="100000" step="1">
                 @if($errors->has('nd_trainset_size'))
@@ -63,7 +113,7 @@
                 @endif
             </div>
 
-            <div class="form-group{{ $errors->has('nd_epochs') ? ' has-error' : '' }}">
+            <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_epochs') ? ' has-error' : '' }}">
                 <label for="nd_epochs">Number of training epochs</label>
                 <input type="number" class="form-control" name="nd_epochs" id="nd_epochs" value="{{ old('nd_epochs', 100) }}" required min="50" max="1000" step="1">
                 @if($errors->has('nd_epochs'))
@@ -75,7 +125,7 @@
                 @endif
             </div>
 
-            <div class="form-group{{ $errors->has('nd_stride') ? ' has-error' : '' }}">
+            <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_stride') ? ' has-error' : '' }}">
                 <label for="nd_stride">Stride</label>
                 <input type="number" class="form-control" name="nd_stride" id="nd_stride" value="{{ old('nd_stride', 2) }}" required min="1" max="10" step="1">
                 @if($errors->has('nd_stride'))
@@ -87,7 +137,7 @@
                 @endif
             </div>
 
-            <div class="form-group{{ $errors->has('nd_ignore_radius') ? ' has-error' : '' }}">
+            <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_ignore_radius') ? ' has-error' : '' }}">
                 <label for="nd_ignore_radius">Ignore radius</label>
                 <input type="number" class="form-control" name="nd_ignore_radius" id="nd_ignore_radius" value="{{ old('nd_ignore_radius', 5) }}" required min="0" step="1">
                 @if($errors->has('nd_ignore_radius'))
@@ -135,3 +185,16 @@
         <button type="submit" class="btn btn-success pull-right">Create job</button>
     </div>
 </form>
+
+@push('styles')
+<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
+@endpush
+
+@push('scripts')
+<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
+<script type="text/javascript">
+    biigle.$declare('maia.volumeId', {!! $volume->id !!});
+    biigle.$declare('maia.useExistingAnnotations', {!! old('use_existing') ? 'true' : 'false' !!});
+    biigle.$declare('maia.skipNoveltyDetection', {!! old('skip_nd') ? 'true' : 'false' !!});
+</script>
+@endpush
