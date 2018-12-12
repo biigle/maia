@@ -696,10 +696,12 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             handleConvertedCandidates: function (response) {
                 Object.keys(response.body).forEach(function (id) {
+                    var next = this.nextFocussedCandidate;
                     var candidate = CANDIDATES_BY_ID[id];
                     candidate.annotation_id = response.body[id];
                     this.setSelectedCandidateId(candidate);
                     this.setConvertedCandidateId(candidate);
+                    this.maybeUnsetFocussedCandidate(candidate, next);
                 }, this);
             },
         },
