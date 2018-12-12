@@ -336,7 +336,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             updateSelectProposal: function (proposal, selected) {
                 proposal.selected = selected;
                 this.setSelectedProposalId(proposal);
-                var promise = trainingProposalApi.update({id: proposal.id}, {trainingProposald: selected});
+                var promise = trainingProposalApi.update({id: proposal.id}, {selected: selected});
 
                 promise.catch(function (response) {
                     messages.handleErrorResponse(response);
