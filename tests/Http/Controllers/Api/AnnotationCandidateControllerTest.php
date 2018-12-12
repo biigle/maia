@@ -73,7 +73,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         ]);
 
         Queue::fake();
-        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(200);
+        $response = $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(200);
         $annotationId = $c1->fresh()->annotation_id;
         $this->assertNotNull($annotationId);
         $response->assertExactJson([$c1->id => $annotationId]);
