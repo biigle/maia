@@ -3,7 +3,7 @@
 @elseif ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::failedNoveltyDetectionId())
     <strong class="text-danger">failed novelty detection</strong>
 @elseif ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::trainingProposalsId())
-    <strong class="text-warning">waiting for training proposal selection</strong>
+    <strong class="text-warning">waiting for training proposals</strong>
 @elseif ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::instanceSegmentationId())
     <strong class="text-warning">running instance segmentation</strong>
 @elseif ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::failedInstanceSegmentationId())

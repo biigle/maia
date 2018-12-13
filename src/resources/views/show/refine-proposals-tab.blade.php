@@ -22,7 +22,7 @@
             </div>
             <div v-else v-cloak class="panel panel-info">
                 <div class="panel-body text-info">
-                    Modify each training proposal that was selected as interesting, so that it fully encloses the interesting object or region of the image. Then submit the training proposals to continue with MAIA.
+                    Modify each selected training proposal, so that it fully encloses the interesting object or region of the image. Then submit the training proposals to continue with MAIA.
                 </div>
             </div>
 
