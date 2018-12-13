@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use DB;
 use Biigle\Shape;
 use Biigle\Jobs\Job;
 use Biigle\Annotation;
@@ -73,10 +74,7 @@ class UseExistingAnnotations extends Job
             ->where('images.volume_id', $this->job->volume_id)
             ->when(!empty($restrictLabels), function ($query) use ($restrictLabels) {
                 return $query->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-                    ->whereIn('annotation_labels.label_id', $restrictLabels)
-                    // Annotations can have multiple labels but we want only one row
-                    // returned for each annotation.
-                    ->groupBy('annotations.id');
+                    ->whereIn('annotation_labels.label_id', $restrictLabels);
             });
     }
 
@@ -96,7 +94,10 @@ class UseExistingAnnotations extends Job
     protected function convertAnnotations()
     {
         $this->getAnnotationsQuery()
-            ->select('annotations.id', 'annotations.points', 'annotations.image_id', 'annotations.shape_id')
+            // Use DISTINCT ON to get only one result per annotation, no matter how many
+            // matching labels are attached to it. We can't simply use DISTINCT because
+            // the rows include JSON.
+            ->select(DB::raw('DISTINCT ON (annotations.id) annotations.id, annotations.points, annotations.image_id, annotations.shape_id'))
             ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'annotations.id');
     }
 

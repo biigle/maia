@@ -129,6 +129,22 @@ class UseExistingAnnotationsTest extends TestCase
         $this->assertEquals(State::trainingProposalsId(), $job->fresh()->state_id);
     }
 
+    public function testHandleSkipNdAndRestrictLabels()
+    {
+        $al = AnnotationLabelTest::create();
+        $job = MaiaJobTest::create([
+            'volume_id' => $al->annotation->image->volume_id,
+            'params' => [
+                'use_existing' => true,
+                'skip_nd' => true,
+                'restrict_labels' => [$al->label_id],
+            ],
+        ]);
+
+        (new UseExistingAnnotations($job))->handle();
+        $this->assertEquals(1, $job->trainingProposals()->count());
+    }
+
     public function testHandleSkipNdNoAnnotations()
     {
         $job = MaiaJobTest::create([
