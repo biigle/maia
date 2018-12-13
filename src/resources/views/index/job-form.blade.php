@@ -29,7 +29,7 @@
         <div class="form-group{{ $errors->has('use_existing') ? ' has-error' : '' }}">
             <label for="use_existing">
                 <input type="checkbox" name="use_existing" id="use_existing" v-model="useExistingAnnotations">
-                Use existing annotations
+                Use existing annotations <loader v-cloak :active="loading"></loader>
             </label>
             @if($errors->has('use_existing'))
                <span class="help-block">{{ $errors->first('use_existing') }}</span>
@@ -38,12 +38,12 @@
                     Use existing annotations as training proposals. All annotations will be converted to circles.
                 </span>
             @endif
-            <p v-cloak v-show="useExistingAnnotations && !hasLabels && !loading" class="text-warning">
+            <p v-cloak v-show="hasNoExistingAnnotations" class="text-warning">
                 There are no existing annotations.
             </p>
         </div>
 
-        <div v-cloak v-show="showAdvanced && hasLabels" class="form-group">
+        <div v-cloak v-show="showRestrictLabelsInput" class="form-group">
             <label for="restrict_labels">Restrict to labels</label>
             <typeahead class="typeahead--block" :items="labels" placeholder="Label name" :clear-on-select="true" v-on:select="handleSelectedLabel"></typeahead>
             <span class="help-block">
@@ -182,7 +182,7 @@
 
     <div class="form-group">
         <button v-on:click="toggle" type="button" class="btn btn-default"><span v-if="showAdvanced" v-cloak>Hide</span><span v-else>Show</span> advanced settings</button>
-        <button type="submit" class="btn btn-success pull-right">Create job</button>
+        <button type="submit" class="btn btn-success pull-right" v-on:click="submit" :disabled="submitted">Create job</button>
     </div>
 </form>
 

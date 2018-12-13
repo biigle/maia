@@ -17,6 +17,7 @@ biigle.$viewModel('maia-job-form', function (element) {
             shouldFetchLabels: false,
             labels: [],
             selectedLabels: [],
+            submitted: false,
         },
         computed: {
             canSkipNoveltyDetection: function () {
@@ -27,6 +28,12 @@ biigle.$viewModel('maia-job-form', function (element) {
             },
             hasSelectedLabels: function () {
                 return this.selectedLabels.length > 0;
+            },
+            showRestrictLabelsInput: function () {
+                return this.showAdvanced && this.useExistingAnnotations && this.hasLabels;
+            },
+            hasNoExistingAnnotations: function () {
+                return this.useExistingAnnotations && !this.hasLabels && !this.loading;
             },
         },
         methods: {
@@ -46,6 +53,9 @@ biigle.$viewModel('maia-job-form', function (element) {
                 if (index >= 0) {
                     this.selectedLabels.splice(index, 1);
                 }
+            },
+            submit: function () {
+                this.submitted = true;
             },
         },
         watch: {
