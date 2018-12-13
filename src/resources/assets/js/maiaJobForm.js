@@ -73,5 +73,10 @@ biigle.$viewModel('maia-job-form', function (element) {
                 }
             },
         },
+        created: function () {
+            if (this.useExistingAnnotations) {
+                this.shouldFetchLabels = true;
+            }
+        },
     });
 });

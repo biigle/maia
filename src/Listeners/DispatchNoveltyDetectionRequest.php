@@ -6,6 +6,7 @@ use Queue;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
+use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
 
@@ -19,9 +20,16 @@ class DispatchNoveltyDetectionRequest implements ShouldQueue
      */
     public function handle(MaiaJobCreated $event)
     {
-        $request = new NoveltyDetectionRequest($event->job);
-        Queue::connection(config('maia.request_connection'))
-            ->pushOn(config('maia.request_queue'), $request);
+        if ($event->job->shouldUseExistingAnnotations()) {
+            UseExistingAnnotations::dispatch($event->job);
+        }
+
+
+        if (!$event->job->shouldSkipNoveltyDetection()) {
+            $request = new NoveltyDetectionRequest($event->job);
+            Queue::connection(config('maia.request_connection'))
+                ->pushOn(config('maia.request_queue'), $request);
+        }
     }
 
     /**

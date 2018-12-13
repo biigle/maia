@@ -9,42 +9,56 @@
         <table class="table">
             <thead>
                 <tr colspan="2">
-                    <th>Novelty Detection</th>
+                    <th>
+                        Novelty Detection
+                        @if ($job->shouldSkipNoveltyDetection())
+                            <span class="text-muted">(skipped)</span>
+                        @endif
+                    </th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Clusters</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'nd_clusters')}}</code></td>
-                </tr>
-                <tr>
-                    <td>Patch size</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'nd_patch_size')}}</code></td>
-                </tr>
-                <tr>
-                    <td>Threshold</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'nd_threshold')}}</code></td>
-                </tr>
-                <tr>
-                    <td>Latent size</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'nd_latent_size')}}</code></td>
-                </tr>
-                <tr>
-                    <td>Training size</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'nd_trainset_size')}}</code></td>
-                </tr>
-                <tr>
-                    <td>Training epochs</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'nd_epochs')}}</code></td>
-                </tr>
-                <tr>
-                    <td>Stride</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'nd_stride')}}</code></td>
-                </tr>
-                <tr>
-                    <td>Ignore radius</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'nd_ignore_radius')}}</code></td>
-                </tr>
+                @unless ($job->shouldSkipNoveltyDetection())
+                    <tr>
+                        <td>Clusters</td>
+                        <td class="text-right"><code>{{array_get($job->params, 'nd_clusters')}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Patch size</td>
+                        <td class="text-right"><code>{{array_get($job->params, 'nd_patch_size')}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Threshold</td>
+                        <td class="text-right"><code>{{array_get($job->params, 'nd_threshold')}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Latent size</td>
+                        <td class="text-right"><code>{{array_get($job->params, 'nd_latent_size')}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Training size</td>
+                        <td class="text-right"><code>{{array_get($job->params, 'nd_trainset_size')}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Training epochs</td>
+                        <td class="text-right"><code>{{array_get($job->params, 'nd_epochs')}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Stride</td>
+                        <td class="text-right"><code>{{array_get($job->params, 'nd_stride')}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Ignore radius</td>
+                        <td class="text-right"><code>{{array_get($job->params, 'nd_ignore_radius')}}</code></td>
+                    </tr>
+                @endif
+                @if ($job->shouldUseExistingAnnotations())
+                    <tr colspan="2">
+                        <td class="text-muted">
+                            used existing annotations
+                        </td>
+                    </tr>
+                @endif
             </tbody>
         </table>
         <table class="table">

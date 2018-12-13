@@ -37,13 +37,17 @@ class StoreMaiaJob extends FormRequest
     public function rules()
     {
         return [
-            'nd_clusters' => 'required|integer|min:1|max:100',
-            'nd_patch_size' => ['required', 'integer', 'min:3', 'max:99', new OddNumber],
-            'nd_threshold' => 'required|integer|min:0|max:99',
-            'nd_latent_size' => 'required|numeric|min:0.05|max:0.75',
-            'nd_trainset_size' => 'required|integer|min:1000|max:100000',
-            'nd_epochs' => 'required|integer|min:50|max:1000',
-            'nd_stride' => 'required|integer|min:1|max:10',
+            'use_existing' => 'required_with:restrict_labels,skip_nd|boolean',
+            'restrict_labels' => 'array',
+            'restrict_labels.*' => 'integer|exists:labels,id',
+            'skip_nd' => 'boolean',
+            'nd_clusters' => 'required_unless:skip_nd,true|integer|min:1|max:100',
+            'nd_patch_size' => ['required_unless:skip_nd,true', 'integer', 'min:3', 'max:99', new OddNumber],
+            'nd_threshold' => 'required_unless:skip_nd,true|integer|min:0|max:99',
+            'nd_latent_size' => 'required_unless:skip_nd,true|numeric|min:0.05|max:0.75',
+            'nd_trainset_size' => 'required_unless:skip_nd,true|integer|min:1000|max:100000',
+            'nd_epochs' => 'required_unless:skip_nd,true|integer|min:50|max:1000',
+            'nd_stride' => 'required_unless:skip_nd,true|integer|min:1|max:10',
             'is_epochs_head' => 'required|integer|min:1',
             'is_epochs_all' => 'required|integer|min:1',
         ];

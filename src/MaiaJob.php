@@ -153,4 +153,25 @@ class MaiaJob extends Model
     {
         return $this->setJsonAttr('error', $error);
     }
+
+    /**
+     * Determine if this job should use existing annotations.
+     *
+     * @return bool
+     */
+    public function shouldUseExistingAnnotations()
+    {
+        return $this->getJsonAttr('params.use_existing', false);
+    }
+
+    /**
+     * Determine if this job should skip novelty detection.
+     *
+     * @return bool
+     */
+    public function shouldSkipNoveltyDetection()
+    {
+        return $this->shouldUseExistingAnnotations()
+            && $this->getJsonAttr('params.skip_nd', false);
+    }
 }

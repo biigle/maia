@@ -109,6 +109,74 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertStatus(422);
     }
 
+    public function testStoreUseExisting()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $this->defaultParams['use_existing'] = 'abc';
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            // Parameter must be bool.
+            ->assertStatus(422);
+
+        $this->defaultParams['use_existing'] = true;
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(200);
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseExistingAnnotations());
+    }
+
+    public function testStoreRestrictLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $this->defaultParams['restrict_labels'] = [$this->labelChild()->id];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            // Requires 'use_existing'.
+            ->assertStatus(422);
+
+        $this->defaultParams['use_existing'] = true;
+        $this->defaultParams['restrict_labels'] = [999];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            // Must contain valid label IDs.
+            ->assertStatus(422);
+
+        $this->defaultParams['restrict_labels'] = [$this->labelChild()->id];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(200);
+        $job = MaiaJob::first();
+        $this->assertArrayHasKey('restrict_labels', $job->params);
+        $this->assertEquals([$this->labelChild()->id], $job->params['restrict_labels']);
+    }
+
+    public function testStoreSkipNd()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'skip_nd' => true,
+            'nd_clusters' => 10,
+            'is_epochs_head' => 1,
+            'is_epochs_all' => 1,
+        ];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Requires 'use_existing'.
+            ->assertStatus(422);
+
+        $params['use_existing'] = true;
+        $params['skip_nd'] = 'abc';
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Must be bool.
+            ->assertStatus(422);
+
+        $params['skip_nd'] = true;
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // nd_* parameters are no longer required.
+            ->assertStatus(200);
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldSkipNoveltyDetection());
+        $this->assertArrayNotHasKey('nd_clusters', $job->params);
+    }
+
     public function testDestroy()
     {
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);

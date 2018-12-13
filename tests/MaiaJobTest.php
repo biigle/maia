@@ -93,4 +93,24 @@ class MaiaJobTest extends ModelTestCase
         $this->model->delete();
         Event::assertDispatched(MaiaJobDeleted::class);
     }
+
+    public function testShouldUseExistingAnnotations()
+    {
+        $this->assertFalse($this->model->shouldUseExistingAnnotations());
+        $this->model->params = ['use_existing' => false];
+        $this->assertFalse($this->model->shouldUseExistingAnnotations());
+        $this->model->params = ['use_existing' => true];
+        $this->assertTrue($this->model->shouldUseExistingAnnotations());
+    }
+
+    public function testShouldSkipNoveltyDetection()
+    {
+        $this->assertFalse($this->model->shouldSkipNoveltyDetection());
+        $this->model->params = ['skip_nd' => true];
+        $this->assertFalse($this->model->shouldSkipNoveltyDetection());
+        $this->model->params = ['skip_nd' => true, 'use_existing' => true];
+        $this->assertTrue($this->model->shouldSkipNoveltyDetection());
+        $this->model->params = ['skip_nd' => false, 'use_existing' => true];
+        $this->assertFalse($this->model->shouldSkipNoveltyDetection());
+    }
 }

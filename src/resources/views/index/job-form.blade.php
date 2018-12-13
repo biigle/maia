@@ -28,7 +28,7 @@
 
         <div class="form-group{{ $errors->has('use_existing') ? ' has-error' : '' }}">
             <label for="use_existing">
-                <input type="checkbox" name="use_existing" id="use_existing" v-model="useExistingAnnotations">
+                <input type="checkbox" name="use_existing" id="use_existing" v-model="useExistingAnnotations" value="1">
                 Use existing annotations <loader v-cloak :active="loading"></loader>
             </label>
             @if($errors->has('use_existing'))
@@ -63,7 +63,7 @@
 
         <div v-show="canSkipNoveltyDetection" v-cloak class="form-group{{ $errors->has('skip_nd') ? ' has-error' : '' }}">
             <label for="skip_nd">
-                <input type="checkbox" name="skip_nd" id="skip_nd" v-model="skipNoveltyDetection">
+                <input type="checkbox" name="skip_nd" id="skip_nd" v-model="skipNoveltyDetection" value="1">
                 Skip novelty detection
             </label>
             @if($errors->has('skip_nd'))
