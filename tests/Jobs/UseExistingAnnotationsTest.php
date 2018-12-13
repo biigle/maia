@@ -141,6 +141,8 @@ class UseExistingAnnotationsTest extends TestCase
             ],
         ]);
 
+        Queue::fake();
+        Notification::fake();
         (new UseExistingAnnotations($job))->handle();
         $this->assertEquals(1, $job->trainingProposals()->count());
     }
