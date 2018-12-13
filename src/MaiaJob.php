@@ -161,7 +161,7 @@ class MaiaJob extends Model
      */
     public function shouldUseExistingAnnotations()
     {
-        return $this->getJsonAttr('params.use_existing', false);
+        return (bool) $this->getJsonAttr('params.use_existing', false);
     }
 
     /**
@@ -172,6 +172,6 @@ class MaiaJob extends Model
     public function shouldSkipNoveltyDetection()
     {
         return $this->shouldUseExistingAnnotations()
-            && $this->getJsonAttr('params.skip_nd', false);
+            && (bool) $this->getJsonAttr('params.skip_nd', false);
     }
 }

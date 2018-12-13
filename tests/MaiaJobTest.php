@@ -101,6 +101,8 @@ class MaiaJobTest extends ModelTestCase
         $this->assertFalse($this->model->shouldUseExistingAnnotations());
         $this->model->params = ['use_existing' => true];
         $this->assertTrue($this->model->shouldUseExistingAnnotations());
+        $this->model->params = ['use_existing' => "1"];
+        $this->assertTrue($this->model->shouldUseExistingAnnotations());
     }
 
     public function testShouldSkipNoveltyDetection()
@@ -109,6 +111,8 @@ class MaiaJobTest extends ModelTestCase
         $this->model->params = ['skip_nd' => true];
         $this->assertFalse($this->model->shouldSkipNoveltyDetection());
         $this->model->params = ['skip_nd' => true, 'use_existing' => true];
+        $this->assertTrue($this->model->shouldSkipNoveltyDetection());
+        $this->model->params = ['skip_nd' => "1", 'use_existing' => true];
         $this->assertTrue($this->model->shouldSkipNoveltyDetection());
         $this->model->params = ['skip_nd' => false, 'use_existing' => true];
         $this->assertFalse($this->model->shouldSkipNoveltyDetection());
