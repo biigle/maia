@@ -123,7 +123,6 @@ class JobResponse extends Job implements ShouldQueue
             'score' => $annotation[3],
             'image_id' => $imageId,
             'shape_id' => Shape::circleId(),
-            // 'selected' is false by default.
         ];
     }
 

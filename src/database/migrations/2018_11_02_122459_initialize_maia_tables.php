@@ -74,7 +74,9 @@ class InitializeMaiaTables extends Migration
             $table->increments('id');
             // JSON type cant have a default value so it must be nullable.
             $table->json('points')->nullable();
-            $table->float('score');
+            // A score is null if the training proposal was created based on an existing
+            // annotation. These proposals should be sorted before all others.
+            $table->float('score')->nullable();
             $table->boolean('selected')->default(false);
 
             $table->integer('image_id')->unsigned()->index();

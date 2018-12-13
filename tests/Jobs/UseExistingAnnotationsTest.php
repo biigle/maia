@@ -56,6 +56,7 @@ class UseExistingAnnotationsTest extends TestCase
         $this->assertEquals(1, $job->trainingProposals()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a1->points, $proposal->points);
+        $this->assertNull($proposal->score);
     }
 
     public function testHandleShapeConversion()

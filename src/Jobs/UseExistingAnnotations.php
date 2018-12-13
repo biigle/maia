@@ -116,7 +116,7 @@ class UseExistingAnnotations extends Job
                 'image_id' => $annotation->image_id,
                 'shape_id' => Shape::circleId(),
                 'job_id' => $this->job->id,
-                'score' => 0,
+                // score should be null in this case.
             ];
         });
 
