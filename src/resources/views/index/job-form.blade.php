@@ -1,4 +1,7 @@
 <h3>Create a new MAIA job</h3>
+<p>
+    A job may run for many hours or even a day. Please choose your parameters carefully.
+</p>
 <form id="maia-job-form" method="POST" action="{{ url("api/v1/volumes/{$volume->id}/maia-jobs") }}">
     <fieldset>
         <legend v-cloak v-show="showAdvanced">Novelty Detection</legend>
