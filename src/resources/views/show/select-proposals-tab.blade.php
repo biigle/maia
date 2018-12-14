@@ -4,7 +4,11 @@
         <p class="lead">
             <span v-text="selectedProposalsCount">0</span> of <span v-text="proposalsCount">0</span> selected
         </p>
-        @if ($job->state_id !== $states['training-proposals'])
+        @if ($job->state_id === $states['training-proposals'])
+            <p>
+                The quality of annotation candidates directly depends on the number of selected training proposals. In some cases a few hundred may be sufficient, in other cases many more might be required.
+            </p>
+        @else
             <div class="panel panel-default">
                 <div class="panel-body">
                     The training proposals have been submitted and can no longer be edited.

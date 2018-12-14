@@ -5,6 +5,9 @@
             <p class="lead" :class="textClass">
                 <span v-text="numberSeenProposals">0</span> of <span v-text="numberSelectedProposals">0</span> seen
             </p>
+            <p>
+                The quality of annotation candidates directly depends on the number of selected training proposals. In some cases a few hundred may be sufficient, in other cases many more might be required.
+            </p>
         @else
             <div class="panel panel-default">
                 <div class="panel-body">
