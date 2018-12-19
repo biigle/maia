@@ -1,5 +1,5 @@
 @extends('app')
-@section('title', "{$volume->title}")
+@section('title', "{$volume->name} MAIA")
 
 @push('styles')
 <link href="{{ cachebust_asset('vendor/volumes/styles/main.css') }}" rel="stylesheet">
