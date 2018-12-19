@@ -48,6 +48,7 @@ class StoreMaiaJob extends FormRequest
             'nd_trainset_size' => 'required_unless:skip_nd,true|integer|min:1000|max:100000',
             'nd_epochs' => 'required_unless:skip_nd,true|integer|min:50|max:1000',
             'nd_stride' => 'required_unless:skip_nd,true|integer|min:1|max:10',
+            'nd_ignore_radius' => 'required_unless:skip_nd,true|integer|min:0',
             'is_epochs_head' => 'required|integer|min:1',
             'is_epochs_all' => 'required|integer|min:1',
         ];
