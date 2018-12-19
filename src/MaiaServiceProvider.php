@@ -45,6 +45,7 @@ class MaiaServiceProvider extends ServiceProvider
         $modules->register('maia', [
             'viewMixins' => [
                 'volumesSidebar',
+                'manualTutorial',
             ],
             'apidoc' => [__DIR__.'/Http/Controllers/Api/'],
         ]);

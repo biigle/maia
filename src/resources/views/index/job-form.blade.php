@@ -1,6 +1,6 @@
 <h3>Create a new MAIA job</h3>
 <p>
-    A job may run for many hours or even a day. Please choose your parameters carefully.
+    A job can run for many hours or even a day. Please choose your parameters carefully before you submit a new job.
 </p>
 <form id="maia-job-form" method="POST" action="{{ url("api/v1/volumes/{$volume->id}/maia-jobs") }}">
     <fieldset>
@@ -184,7 +184,7 @@
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
     <div class="form-group">
-        <button v-on:click="toggle" type="button" class="btn btn-default"><span v-if="showAdvanced" v-cloak>Hide</span><span v-else>Show</span> advanced settings</button>
+        <button v-on:click="toggle" type="button" class="btn btn-default"><span v-if="showAdvanced" v-cloak>Hide</span><span v-else>Show</span> advanced parameters</button>
         <button type="submit" class="btn btn-success pull-right" v-on:click="submit" :disabled="submitted">Create job</button>
     </div>
 </form>
