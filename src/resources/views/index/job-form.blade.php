@@ -1,10 +1,10 @@
-<h3>Create a new MAIA job</h3>
+<h3>Create a new MAIA job <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'about'])}}" title="More information on MAIA" target="_blank"><i class="fas fa-info-circle"></i></a></h3>
 <p>
     A job can run for many hours or even a day. Please choose your parameters carefully before you submit a new job.
 </p>
 <form id="maia-job-form" method="POST" action="{{ url("api/v1/volumes/{$volume->id}/maia-jobs") }}">
     <fieldset>
-        <legend v-cloak v-show="showAdvanced">Novelty Detection</legend>
+        <legend v-cloak v-show="showAdvanced">Novelty Detection <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}#configurable-parameters" title="More information on the configurable parameters for novelty detection" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
         <div v-show="!skipNoveltyDetection" class="form-group{{ $errors->has('nd_clusters') ? ' has-error' : '' }}">
             <label for="nd_clusters">Number of image clusters</label>
             <input type="number" class="form-control" name="nd_clusters" id="nd_clusters" value="{{ old('nd_clusters', 5) }}" required min="1" max="100" step="1">
@@ -154,7 +154,7 @@
         </div>
     </fieldset>
     <fieldset v-cloak v-show="showAdvanced">
-        <legend>Instance Segmentation</legend>
+        <legend>Instance Segmentation <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}#configurable-parameters" title="More information on the configurable parameters for instance segmentation" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
         <div class="form-group{{ $errors->has('is_epochs_head') ? ' has-error' : '' }}">
             <label for="is_epochs_head">Number of training epochs (head)</label>
             <input type="number" class="form-control" name="is_epochs_head" id="is_epochs_head" value="{{ old('is_epochs_head', 20) }}" required min="1" step="1">
