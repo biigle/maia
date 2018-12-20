@@ -157,7 +157,7 @@
         <h3><a name="skip-novelty-detection"></a>Skip novelty detection</h3>
 
         <p>
-            If you chose to <a href="#use-existing-annotations">use existing annotations</a> as training proposals, a new checkbox to "Skip novelty detection" appears. Select this checkbox if you do not want to run the novelty detection at all and only want to use the existing annotations as training proposals.
+            If you chose to use existing annotations as training proposals, a new checkbox to "Skip novelty detection" appears. Select this checkbox if you do not want to run the novelty detection at all and only want to use the existing annotations as training proposals.
         </p>
 
         <p>
