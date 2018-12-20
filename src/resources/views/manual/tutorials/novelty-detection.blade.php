@@ -85,7 +85,7 @@
         </p>
 
         <p>
-            The latent layer size is denoted as the compression factor in <em>s</em>&nbsp;=&nbsp[0.1<em>r</em>] in the MAIA paper <a href="#ref1">[1]</a>. The 0.1 is the parameter that you can configure here.
+            The latent layer size is denoted as the compression factor in <em>s</em>&nbsp;=&nbsp;[0.1<em>r</em>] in the MAIA paper <a href="#ref1">[1]</a>. The 0.1 is the parameter that you can configure here.
         </p>
 
         <h4>Number of training patches</h4>
