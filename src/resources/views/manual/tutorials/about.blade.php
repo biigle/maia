@@ -30,6 +30,9 @@
         <p>
             Continue reading about MAIA in the articles about the individual stages. You can start with the first stage: <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>.
         </p>
+        <p>
+            Further reading:
+        </p>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">A description of the first MAIA stage: Novelty detection.</a></li>
             <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">A description of the second MAIA stage: Training proposals.</a></li>
