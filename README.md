@@ -17,6 +17,7 @@ Take a look at the [`requirements.txt`](requirements.txt) for the Python depende
 
 1. Add `Biigle\Modules\Maia\MaiaServiceProvider::class` to the `providers` array in `config/app.php`.
 2. Run `php artisan maia:publish` to refresh the public assets of this package. Do this for every update of the package.
+3. Run `php artisan migrate` to create the new database tables.
 
 ### If you use biigle/gpus on a remote machine
 
