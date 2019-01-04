@@ -36,16 +36,19 @@ class InstanceSegmentationRequest extends JobRequest
     public function handle()
     {
         $this->createTmpDir();
-        $images = $this->getGenericImages();
 
-        $datasetOutputPath = $this->generateDataset($images);
-        $trainingOutputPath = $this->performTraining($datasetOutputPath);
-        $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
+        try {
+            $images = $this->getGenericImages();
 
-        $annotations = $this->parseAnnotations($images);
-        $this->dispatchResponse($annotations);
+            $datasetOutputPath = $this->generateDataset($images);
+            $trainingOutputPath = $this->performTraining($datasetOutputPath);
+            $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
 
-        $this->cleanup();
+            $annotations = $this->parseAnnotations($images);
+            $this->dispatchResponse($annotations);
+        } finally {
+            $this->cleanup();
+        }
     }
 
     /**
