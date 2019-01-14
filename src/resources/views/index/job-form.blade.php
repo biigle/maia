@@ -24,7 +24,7 @@
                <span class="help-block">{{ $errors->first('nd_patch_size') }}</span>
             @else
                 <span class="help-block">
-                    Size in pixels of the image patches used determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
+                    Size in pixels of the image patches used to determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
                 </span>
             @endif
         </div>

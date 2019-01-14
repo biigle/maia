@@ -49,7 +49,7 @@
         </p>
 
         <p>
-            This parameter specifies the size in pixels of the image patches used determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
+            This parameter specifies the size in pixels of the image patches used to determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
         </p>
 
         <p>
