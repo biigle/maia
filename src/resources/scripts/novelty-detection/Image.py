@@ -1,9 +1,12 @@
 import os
-import PIL
+from PIL import Image as PilImage, ImageFile
 import numpy as np
 from sklearn.feature_extraction.image import extract_patches_2d
 from skimage.filters.rank import entropy
 from skimage.morphology import disk
+
+# Attempt to load truncated images, see: https://github.com/biigle/maia/issues/30
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class Image(object):
 
@@ -20,10 +23,10 @@ class Image(object):
         return np.reshape(patches, (number, size * size * 3)) if vectorize else patches
 
     def image(self):
-        return np.array(PIL.Image.open(self.path))
+        return np.array(PilImage.open(self.path))
 
     def _get_resized_image(self):
-        img = PIL.Image.open(self.path)
+        img = PilImage.open(self.path)
         if img.width > img.height:
             width = 500
             height = img.height * width // img.width
@@ -31,7 +34,7 @@ class Image(object):
             height = 500
             width = img.width * height // img.height
 
-        return img.resize((width, height), PIL.Image.BILINEAR)
+        return img.resize((width, height), PilImage.BILINEAR)
 
     def extract_pca_features(self):
         return np.array(self._get_resized_image()).flatten()
