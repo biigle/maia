@@ -97,8 +97,8 @@ class UseExistingAnnotations extends Job
             // Use DISTINCT ON to get only one result per annotation, no matter how many
             // matching labels are attached to it. We can't simply use DISTINCT because
             // the rows include JSON.
-            ->select(DB::raw('DISTINCT ON (annotations.id) annotations.id, annotations.points, annotations.image_id, annotations.shape_id'))
-            ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'annotations.id');
+            ->select(DB::raw('DISTINCT ON (annotations_id) annotations.id as annotations_id, annotations.points, annotations.image_id, annotations.shape_id'))
+            ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'annotations.id', 'annotations_id');
     }
 
     /**
