@@ -23,13 +23,12 @@ class Config(mrcnn.config.Config):
 
 class TrainingConfig(Config):
     def __init__(self, params, trainset):
-        self.IMAGE_MIN_DIM = trainset['crop_dimension']
+        self.IMAGE_MAX_DIM = trainset['crop_dimension']
         # Determine the number of images per batch that the GPU can handle. From the
         # Mask R-CNN config: "A 12GB GPU can typically handle 2 images of 1024x1024px."
-        # So a 6GB GPU should be able to handle 1024x1024px. I found that one 1024px²
-        # image per 12 GB is more accurate.
-        factor = 1024**2 / 12 # 1024px²/12GB
-        self.IMAGES_PER_GPU = math.floor((params['available_bytes'] / 1e+9) * (factor / trainset['crop_dimension']**2))
+        # So a 6GB GPU should be able to handle 1024x1024px.
+        factor = 1024**2 / 6 # 1024px²/6GB
+        self.IMAGES_PER_GPU = math.floor((params['available_bytes'] / 1e+9) * (factor / self.IMAGE_MAX_DIM**2))
 
         # In total, we want to train with about 2000 images per epoch. So we adjust the
         # number of steps according to the batch size determined above.

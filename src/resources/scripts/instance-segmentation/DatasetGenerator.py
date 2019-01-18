@@ -21,7 +21,7 @@ class DatasetGenerator(object):
 
         self.training_images_path = '{}/training_images'.format(self.tmp_dir)
         self.training_masks_path = '{}/training_masks'.format(self.tmp_dir)
-        self.crop_dimension = 500
+        self.crop_dimension = 512
 
     def generate(self):
         self.ensure_train_masks_dirs()
