@@ -53,6 +53,16 @@ class DetectionRunner(object):
             post_executor = full_executor
 
         images = ImageCollection(self.images, executor=full_executor);
+        images.prune_corrupt_images()
+        total_images = len(images)
+
+        if total_images == 0:
+            print('No image files to process.')
+            return
+        elif total_images < self.clusters:
+            print('{} clusters were requested but only {} images are there. Reducing clusters to {}.'.format(self.clusters, total_images, total_images))
+            self.clusters = total_images
+
         if self.clusters > 1:
             clusters = images.make_clusters(number=self.clusters)
         else:

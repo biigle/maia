@@ -30,6 +30,9 @@ class ImageCollection(object):
     def __len__(self):
         return len(self.images)
 
+    def prune_corrupt_images(self):
+        self.images = [image for image in self.images if not image.is_corrupt()]
+
     def set_executor(self, executor):
         self.executor = executor
 

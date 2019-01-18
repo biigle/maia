@@ -219,9 +219,14 @@ class JobRequest extends Job implements ShouldQueue
      */
     protected function parseAnnotationsFile($image)
     {
-        $id = $image->getId();
+        $path = "{$this->tmpDir}/{$image->getId()}.json";
 
-        return json_decode(File::get("{$this->tmpDir}/{$id}.json"), true);
+        // This might happen for corrupt image files which are skipped.
+        if (!File::exists($path)) {
+            return [];
+        }
+
+        return json_decode(File::get($path), true);
     }
 
 }

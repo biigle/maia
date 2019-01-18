@@ -19,6 +19,16 @@ class Image(object):
 
         return np.reshape(patches, (number, size * size * 3)) if vectorize else patches
 
+    def is_corrupt(self):
+        image = PilImage.open(self.path)
+        try:
+            image.load()
+        except IOError as e:
+            print('Image #{} is corrupt!'.format(self.id))
+            return True
+
+        return False
+
     def image(self):
         return np.array(PilImage.open(self.path))
 

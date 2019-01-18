@@ -63,9 +63,10 @@ class InferenceRunner(object):
             # Remove the job from the list so it is not returned by wait() again.
             jobs.remove(job)
             image, info =  job.result()
-            print('Image {} of {} (#{})'.format(popped_index, total_images, info['id']))
-            results = model.detect([image])
-            self.process_result(info['id'], results[0])
+            if image is not False:
+                print('Image {} of {} (#{})'.format(popped_index, total_images, info['id']))
+                results = model.detect([image])
+                self.process_result(info['id'], results[0])
 
             # If there are still images left, push a new job to the "queue".
             if pushed_index < total_images:
@@ -73,7 +74,15 @@ class InferenceRunner(object):
                 pushed_index += 1
 
     def load_image(self, i):
-        return self.dataset.load_image(i), self.dataset.image_info[i]
+        info = self.dataset.image_info[i]
+
+        try:
+            image = self.dataset.load_image(i)
+        except (IOError, OSError, ValueError) as e:
+            print('Error while loading image #{}! Skipping...'.format(info['id']))
+            return False, False
+
+        return image, info
 
     def process_result(self, image_id, result):
         points = []

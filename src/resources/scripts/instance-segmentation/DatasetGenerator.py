@@ -37,9 +37,10 @@ class DatasetGenerator(object):
 
         for job in as_completed(jobs):
             i, m, p = job.result()
-            images.extend(i)
-            masks.extend(m)
-            mean_pixels.extend(p)
+            if i is not False:
+                images.extend(i)
+                masks.extend(m)
+                mean_pixels.extend(p)
 
         mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()
 
@@ -66,6 +67,13 @@ class DatasetGenerator(object):
 
     def process_image(self, imageId, proposals):
         image = Image.open(self.images[imageId])
+        try:
+            image.load()
+        except IOError as e:
+            print('Image #{} is corrupt! Skipping...'.format(imageId))
+
+            return False, False, False
+
         mask = np.zeros((image.height, image.width), dtype=np.uint8)
         for proposal in proposals:
             # 1 is the class ID of 'Interesting'.
