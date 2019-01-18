@@ -27,14 +27,7 @@ class Image(object):
 
     def _get_resized_image(self):
         img = PilImage.open(self.path)
-        if img.width > img.height:
-            width = 500
-            height = img.height * width // img.width
-        else:
-            height = 500
-            width = img.width * height // img.height
-
-        return img.resize((width, height), PilImage.BILINEAR)
+        return img.resize((500, 500), PilImage.BILINEAR)
 
     def extract_pca_features(self):
         return np.array(self._get_resized_image()).flatten()
