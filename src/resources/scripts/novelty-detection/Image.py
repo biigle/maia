@@ -1,12 +1,9 @@
 import os
-from PIL import Image as PilImage, ImageFile
+from PIL import Image as PilImage
 import numpy as np
 from sklearn.feature_extraction.image import extract_patches_2d
 from skimage.filters.rank import entropy
 from skimage.morphology import disk
-
-# Attempt to load truncated images, see: https://github.com/biigle/maia/issues/30
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class Image(object):
 

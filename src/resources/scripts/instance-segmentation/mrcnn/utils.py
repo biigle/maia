@@ -20,14 +20,10 @@ import skimage.transform
 import urllib.request
 import shutil
 import warnings
-from PIL import ImageFile
 from distutils.version import LooseVersion
 
 # URL from which to download the latest COCO trained weights
 COCO_MODEL_URL = "https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rcnn_coco.h5"
-
-# Attempt to load truncated images, see: https://github.com/biigle/maia/issues/30
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 ############################################################
 #  Bounding Boxes
