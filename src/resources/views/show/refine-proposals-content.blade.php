@@ -16,9 +16,7 @@
     ref="refineProposalsCanvas"
     inline-template>
     <div class="annotation-canvas">
-        <minimap v-show="showMinimap" :extent="extent" :projection="projection" inline-template>
-            <div class="annotation-canvas__minimap"></div>
-        </minimap>
+        <minimap v-show="showMinimap" :extent="extent"></minimap>
         <div class="annotation-canvas__toolbar">
             <div v-if="hasAnnotations" class="btn-group">
                 <control-button icon="fa-step-backward" title="Previous training proposal 𝗟𝗲𝗳𝘁 𝗮𝗿𝗿𝗼𝘄" v-on:click="handlePrevious"></control-button>
