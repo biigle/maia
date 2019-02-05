@@ -3,15 +3,15 @@
 namespace Biigle\Tests\Modules\Maia;
 
 use TestCase;
+use Biigle\FileCache\GenericFile;
 use Biigle\Modules\Maia\GenericImage;
-use Biigle\ImageCache\GenericImage as ImageCacheImage;
 
 class GenericImageTest extends TestCase
 {
     public function testInstance()
     {
         $i = new GenericImage(1, 'url');
-        $this->assertTrue($i instanceof ImageCacheImage);
+        $this->assertTrue($i instanceof GenericFile);
     }
 
     public function testAttributes()

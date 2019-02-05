@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use File;
 use Exception;
-use ImageCache;
+use FileCache;
 use Biigle\Modules\Maia\MaiaJob;
 
 class InstanceSegmentationRequest extends JobRequest
@@ -95,7 +95,7 @@ class InstanceSegmentationRequest extends JobRequest
             return array_key_exists($image->getId(), $this->trainingProposals);
         });
 
-        ImageCache::batch($relevantImages, function ($images, $paths) use ($outputPath) {
+        FileCache::batch($relevantImages, function ($images, $paths) use ($outputPath) {
             $imagesMap = $this->buildImagesMap($images, $paths);
             $inputPath = $this->createDatasetJson($imagesMap, $outputPath);
             $script = config('maia.mrcnn_dataset_script');
@@ -199,7 +199,7 @@ class InstanceSegmentationRequest extends JobRequest
      */
     protected function performInference($images, $datasetOutputPath, $trainingOutputPath)
     {
-        ImageCache::batch($images, function ($images, $paths) use ($datasetOutputPath, $trainingOutputPath) {
+        FileCache::batch($images, function ($images, $paths) use ($datasetOutputPath, $trainingOutputPath) {
             $imagesMap = $this->buildImagesMap($images, $paths);
             $inputPath = $this->createInferenceJson($imagesMap);
             $script = config('maia.mrcnn_inference_script');

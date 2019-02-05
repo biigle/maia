@@ -6,7 +6,7 @@ use File;
 use Queue;
 use TestCase;
 use Exception;
-use ImageCache;
+use FileCache;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
@@ -19,7 +19,7 @@ class InstanceSegmentationRequestTest extends TestCase
     public function testHandle()
     {
         Queue::fake();
-        ImageCache::fake();
+        FileCache::fake();
 
         $params = [
             'is_epochs_head' => 20,

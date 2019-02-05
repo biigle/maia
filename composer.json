@@ -13,7 +13,7 @@
         "biigle/label-trees": "^1.19",
         "biigle/largo": "^2.4",
         "biigle/annotations": "^3.9",
-        "biigle/laravel-image-cache": "^1.1"
+        "biigle/laravel-file-cache": "^2.0"
     },
     "autoload": {
         "psr-4": {

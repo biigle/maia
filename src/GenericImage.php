@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Maia;
 
-use Biigle\ImageCache\GenericImage as BaseImage;
+use Biigle\FileCache\GenericFile;
 
-class GenericImage extends BaseImage
+class GenericImage extends GenericFile
 {
     /**
      * The image ID.

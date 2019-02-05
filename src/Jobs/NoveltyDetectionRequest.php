@@ -5,7 +5,7 @@ namespace Biigle\Modules\Maia\Jobs;
 use File;
 use Queue;
 use Exception;
-use ImageCache;
+use FileCache;
 use Biigle\Modules\Maia\MaiaJob;
 
 /**
@@ -30,7 +30,7 @@ class NoveltyDetectionRequest extends JobRequest
         try {
             $images = $this->getGenericImages();
 
-            ImageCache::batch($images, function ($images, $paths) {
+            FileCache::batch($images, function ($images, $paths) {
                 $script = config('maia.novelty_detection_script');
                 $path = $this->createInputJson($images, $paths);
                 $this->python("{$script} {$path}");

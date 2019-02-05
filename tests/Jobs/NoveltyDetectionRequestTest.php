@@ -6,7 +6,7 @@ use File;
 use Queue;
 use TestCase;
 use Exception;
-use ImageCache;
+use FileCache;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
@@ -18,7 +18,7 @@ class NoveltyDetectionRequestTest extends TestCase
     public function testHandle()
     {
         Queue::fake();
-        ImageCache::fake();
+        FileCache::fake();
 
         $params = [
             'nd_clusters' => 5,
