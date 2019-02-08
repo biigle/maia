@@ -5,6 +5,7 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Views;
 use ApiTestCase;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Biigle\Modules\Maia\MaiaJobState as State;
 
 class MaiaJobControllerTest extends ApiTestCase
 {
@@ -49,6 +50,17 @@ class MaiaJobControllerTest extends ApiTestCase
         // Not allowed to see MAIA jobs.
         $this->beGuest();
         $this->get("maia/{$job->id}")->assertStatus(403);
+
+        $this->beEditor();
+        $this->get("maia/{$job->id}")->assertStatus(200);
+    }
+
+    public function testShowAnnotationCandidates()
+    {
+        $job = MaiaJobTest::create([
+            'volume_id' => $this->volume()->id,
+            'state_id' => State::annotationCandidatesId(),
+        ]);
 
         $this->beEditor();
         $this->get("maia/{$job->id}")->assertStatus(200);

@@ -83,7 +83,7 @@ class MaiaJobController extends Controller
             } else {
                 // Array of all project IDs that the user and the image have in common
                 // and where the user is editor, expert or admin.
-                $projectIds = Project::inCommon($user, $image->volume_id, [
+                $projectIds = Project::inCommon($user, $volume->id, [
                     Role::editorId(),
                     Role::expertId(),
                     Role::adminId(),
