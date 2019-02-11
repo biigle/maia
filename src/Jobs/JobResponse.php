@@ -65,10 +65,10 @@ class JobResponse extends Job implements ShouldQueue
         // Make sure to roll back any DB modifications if an error occurs.
         DB::transaction(function () use ($job) {
             $this->createMaiaAnnotations();
-            $this->dispatchAnnotationPatchJobs($job);
             $this->updateJobState($job);
         });
 
+        $this->dispatchAnnotationPatchJobs($job);
         $this->sendNotification($job);
     }
 
