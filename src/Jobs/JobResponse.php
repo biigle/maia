@@ -143,7 +143,7 @@ class JobResponse extends Job implements ShouldQueue
      */
     protected function dispatchAnnotationPatchJobs(MaiaJob $job)
     {
-        $this->getCreatedAnnotations($job)->chunk(1000, function ($chunk) {
+        $this->getCreatedAnnotations($job)->chunkById(1000, function ($chunk) {
             foreach ($chunk as $annotation) {
                 GenerateAnnotationPatch::dispatch($annotation, $annotation->getPatchPath());
             }
