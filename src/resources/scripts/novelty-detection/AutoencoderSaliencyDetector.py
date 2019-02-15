@@ -79,9 +79,10 @@ class AutoencoderSaliencyDetector(object):
         img = PIL.Image.open(image_path)
 
         # Determine how many patches fit into memory.
-        # *2 because the extracted patches are reshaped witch duplicates the data
+        # *2 because the extracted patches are reshaped which duplicates the data
         # *4 because the patches are cast to float32 (= 4 Bytes)
-        px_per_batch = available_bytes / (self.n_input * 2 * 4)
+        # *0.8 to account for "overhead", see: https://github.com/biigle/maia/issues/15
+        px_per_batch = 0.8 * available_bytes / (self.n_input * 2 * 4)
 
         chunks = self._get_chunks(img.width, img.height, px_per_batch)
         tmp_result = []
@@ -117,7 +118,7 @@ class AutoencoderSaliencyDetector(object):
         # See: https://github.com/tensorflow/tensorflow/blob/1ad5e692e2fc218ca0b2a9a461c19762fdc9674b/tensorflow/core/framework/common_shape_fns.cc#L37
         effective_width = (width - self.patch_size + self.stride) / self.stride
         double_padding = 2 * self.padding
-        # Rows that should be porcessed per chunk. These rows contain exactly
+        # Rows that should be processed per chunk. These rows contain exactly
         # px_per_chunk pixels that are evaluated with the current stride.
         rows_per_chunk = int(np.ceil(px_per_chunk / effective_width)) * self.stride
         # Finally add the padding to each chunk.

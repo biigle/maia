@@ -11,8 +11,6 @@ class InferenceRunner(object):
     def __init__(self, params, trainset):
         # Path to the directory to store temporary files.
         self.tmp_dir = params['tmp_dir']
-        # Estimated available GPU memory in bytes.
-        self.available_bytes = params['available_bytes']
         # Storage path of the trained Mask R-CNN model.
         self.model_dir = params['model_dir']
         # Path to the trained weights to use for inference.
