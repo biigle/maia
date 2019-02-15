@@ -72,11 +72,15 @@ class StoreMaiaJob extends FormRequest
                 ->exists();
 
             if ($hasJobInProgress) {
-                $validator->errors()->add('clusters', 'A new MAIA job can only be sumbitted if there are no other jobs in progress for the same volume.');
+                $validator->errors()->add('volume', 'A new MAIA job can only be sumbitted if there are no other jobs in progress for the same volume.');
             }
 
             if ($this->volume->hasTiledImages()) {
                 $validator->errors()->add('volume', 'New MAIA jobs cannot be created for volumes with very large images.');
+            }
+
+            if (!$this->input('skip_nd') && $this->volume->images()->count() < $this->input('nd_clusters')) {
+                $validator->errors()->add('nd_clusters', 'The number of image clusters must not be greater than the number of images in the volume.');
             }
         });
     }

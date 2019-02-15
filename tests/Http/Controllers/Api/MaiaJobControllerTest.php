@@ -18,7 +18,7 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         parent::setUp();
         $this->defaultParams = [
-            'nd_clusters' => 5,
+            'nd_clusters' => 1,
             'nd_patch_size' => 39,
             'nd_threshold' => 99,
             'nd_latent_size' => 0.1,
@@ -29,6 +29,7 @@ class MaiaJobControllerTest extends ApiTestCase
             'is_epochs_head' => 20,
             'is_epochs_all' => 10,
         ];
+        ImageTest::create(['volume_id' => $this->volume()->id]);
     }
 
     public function testStore()
@@ -101,7 +102,7 @@ class MaiaJobControllerTest extends ApiTestCase
     public function testStoreTiledImages()
     {
         $id = $this->volume()->id;
-        ImageTest::create(['volume_id' => $id, 'tiled' => true]);
+        ImageTest::create(['volume_id' => $id, 'tiled' => true, 'filename' => 'x']);
 
         $this->beEditor();
         // MAIA is not available for volumes with tiled images.
@@ -175,6 +176,20 @@ class MaiaJobControllerTest extends ApiTestCase
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldSkipNoveltyDetection());
         $this->assertArrayNotHasKey('nd_clusters', $job->params);
+    }
+
+    public function testStoreNdClustersTooFewImages()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $this->defaultParams['nd_clusters'] = 2;
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(422);
+
+        $this->defaultParams['skip_nd'] = true;
+        $this->defaultParams['use_existing'] = true;
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(200);
     }
 
     public function testDestroy()
