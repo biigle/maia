@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia\Listeners;
 
-use File;
+use Storage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 
@@ -16,10 +16,17 @@ class PruneTrainingProposalPatches implements ShouldQueue
      */
     public function handle(MaiaJobContinued $event)
     {
-        $event->job->trainingProposals()->unselected()->chunk(1000, function ($chunk) {
-            $chunk->each(function ($proposal) {
-                File::delete($proposal->getPatchPath());
+        $disk = Storage::disk(config('maia.training_proposal_storage_disk'));
+        $format = config('largo.patch_format');
+
+        $event->job->trainingProposals()
+            ->unselected()
+            ->with('image')
+            ->chunkById(1000, function ($chunk) use ($disk, $format) {
+                foreach ($chunk as $proposal) {
+                    $prefix = fragment_uuid_path($proposal->image->uuid);
+                    $disk->delete("{$prefix}/{$proposal->id}.{$format}");
+                }
             });
-        });
     }
 }

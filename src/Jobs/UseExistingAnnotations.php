@@ -186,9 +186,10 @@ class UseExistingAnnotations extends Job
      */
     protected function dispatchAnnotationPatchJobs()
     {
-        $this->job->trainingProposals()->chunk(1000, function ($chunk) {
-            $chunk->each(function ($proposal) {
-                GenerateAnnotationPatch::dispatch($proposal, $proposal->getPatchPath());
+        $disk = config('maia.training_proposal_storage_disk');
+        $this->job->trainingProposals()->chunk(1000, function ($chunk) use ($disk) {
+            $chunk->each(function ($proposal) use ($disk) {
+                GenerateAnnotationPatch::dispatch($proposal, $disk);
             });
         });
     }

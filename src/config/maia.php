@@ -2,6 +2,16 @@
 
 return [
     /*
+    | Storage disk where the training proposal patch images will be stored
+    */
+    'training_proposal_storage_disk' => env('MAIA_TRAINING_PROPOSAL_STORAGE_DISK'),
+
+    /*
+    | Storage disk where the annotation candidate patch images will be stored
+    */
+    'annotation_candidate_storage_disk' => env('MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK'),
+
+    /*
     | Queue to submit new MAIA jobs to.
     */
     'request_queue' => env('MAIA_REQUEST_QUEUE', 'default'),
@@ -20,11 +30,6 @@ return [
     | Queue connection to submit the result data of MAIA jobs to.
     */
     'response_connection' => env('MAIA_RESPONSE_CONNECTION', 'gpu-response'),
-
-    /*
-    | Directory where the annotation patch images will be stored
-    */
-    'patch_storage' => storage_path('maia_patches'),
 
     /*
     | Directory where the temporary files of novelty detection or instance segmentation

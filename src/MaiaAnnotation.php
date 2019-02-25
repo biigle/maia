@@ -82,25 +82,4 @@ abstract class MaiaAnnotation extends Model implements AnnotationContract
     {
         return $this->image;
     }
-
-    /**
-     * Get the path to the annotation patch file.
-     *
-     * @return string
-     */
-    public function getPatchPath(): string
-    {
-        $prefix = config('maia.patch_storage');
-        $format = config('largo.patch_format');
-        $name = $this->getPatchFilename();
-
-        return "{$prefix}/{$this->job_id}/{$name}.{$format}";
-    }
-
-    /**
-     * Get the file name (without extension) of the annotation patch file.
-     *
-     * @return string
-     */
-    abstract protected function getPatchFilename(): string;
 }

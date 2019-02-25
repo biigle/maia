@@ -93,7 +93,8 @@ class TrainingProposalController extends Controller
     {
         if ($request->filled('points')) {
             $request->proposal->points = $request->input('points');
-            GenerateAnnotationPatch::dispatch($request->proposal, $request->proposal->getPatchPath());
+            $disk = config('maia.training_proposal_storage_disk');
+            GenerateAnnotationPatch::dispatch($request->proposal, $disk);
         }
 
         $request->proposal->selected = $request->input('selected', $request->proposal->selected);

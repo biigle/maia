@@ -62,4 +62,12 @@ class NoveltyDetectionResponse extends JobResponse
     {
         $job->user->notify(new NoveltyDetectionComplete($job));
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getPatchStorageDisk()
+    {
+        return config('maia.training_proposal_storage_disk');
+    }
 }

@@ -107,8 +107,10 @@ class AnnotationCandidateController extends Controller
             return $annotations;
         });
 
+        $disk = config('largo.patch_storage_disk');
+
         foreach ($annotations as $annotation) {
-            GenerateAnnotationPatch::dispatch($annotation);
+            GenerateAnnotationPatch::dispatch($annotation, $disk);
         }
 
         return array_map(function ($a) {
@@ -135,7 +137,8 @@ class AnnotationCandidateController extends Controller
     {
         if ($request->filled('points')) {
             $request->candidate->points = $request->input('points');
-            GenerateAnnotationPatch::dispatch($request->candidate, $request->candidate->getPatchPath());
+            $disk = config('maia.annotation_candidate_storage_disk');
+            GenerateAnnotationPatch::dispatch($request->candidate, $disk);
         }
 
         if ($request->has('label_id')) {
