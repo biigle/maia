@@ -43,7 +43,13 @@ class TrainingProposalController extends Controller
         $this->authorize('access', $job);
 
         return $job->trainingProposals()
-            ->select('id', 'selected', 'image_id')
+            ->join('images', 'images.id', '=', 'maia_training_proposals.image_id')
+            ->select(
+                'maia_training_proposals.id',
+                'maia_training_proposals.selected',
+                'maia_training_proposals.image_id',
+                'images.uuid as uuid'
+            )
             ->orderBy('score', 'desc')
             ->get()
             ->toArray();
@@ -99,30 +105,5 @@ class TrainingProposalController extends Controller
 
         $request->proposal->selected = $request->input('selected', $request->proposal->selected);
         $request->proposal->save();
-    }
-
-    /**
-     * Get the image patch file of a training proposal.
-     *
-     * @api {get} maia/training-proposals/:id/file Get a training proposal patch
-     * @apiGroup Maia
-     * @apiName ShowTrainingProposalFile
-     * @apiPermission projectEditor
-     *
-     * @apiParam {Number} id The training proposal ID.
-     *
-     * @param int $id Training proposal ID
-     * @return \Illuminate\Http\Response
-     */
-    public function showFile($id)
-    {
-        $a = TrainingProposal::findOrFail($id);
-        $this->authorize('access', $a);
-
-        try {
-            return response()->download($a->getPatchPath());
-        } catch (FileNotFoundException $e) {
-            abort(404, $e->getMessage());
-        }
     }
 }

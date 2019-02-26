@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Views;
 
+use Storage;
 use Biigle\Role;
 use Biigle\Volume;
 use Biigle\Project;
@@ -104,7 +105,20 @@ class MaiaJobController extends Controller
             $trees = collect([]);
         }
 
+        $tpUrlTemplate = Storage::disk(config('maia.training_proposal_storage_disk'))
+            ->url('{prefix}/{id}.'.config('largo.patch_format'));
 
-        return view('maia::show', compact('job', 'volume', 'states', 'trees'));
+        $acUrlTemplate = Storage::disk(config('maia.annotation_candidate_storage_disk'))
+            ->url('{prefix}/{id}.'.config('largo.patch_format'));
+
+
+        return view('maia::show', compact(
+            'job',
+            'volume',
+            'states',
+            'trees',
+            'tpUrlTemplate',
+            'acUrlTemplate'
+        ));
     }
 }

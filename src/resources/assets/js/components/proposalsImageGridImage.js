@@ -4,12 +4,15 @@
  * @type {Object}
  */
 biigle.$component('maia.components.proposalsImageGridImage', {
-    mixins: [biigle.$require('volumes.components.imageGridImage')],
+    mixins: [
+        biigle.$require('volumes.components.imageGridImage'),
+        biigle.$require('largo.mixins.annotationPatch'),
+    ],
     template: '<figure class="image-grid__image" :class="classObject" :title="title">' +
         '<div v-if="showIcon" class="image-icon">' +
             '<i class="fas" :class="iconClass"></i>' +
         '</div>' +
-        '<img @click="toggleSelect" :src="url || emptyUrl">' +
+        '<img @click="toggleSelect" :src="url || emptyUrl" @error="showEmptyImage">' +
         '<div v-if="showAnnotationLink" class="image-buttons">' +
             '<a :href="showAnnotationLink" target="_blank" class="image-button" title="Show the annotation in the annotation tool">' +
                 '<span class="fa fa-external-link-square-alt" aria-hidden="true"></span>' +
@@ -37,10 +40,14 @@ biigle.$component('maia.components.proposalsImageGridImage', {
         selectedFade: function () {
             return this.selectable;
         },
-    },
-    methods: {
-        getBlob: function () {
-            return biigle.$require('maia.api.trainingProposal').getFile({id: this.image.id});
+        id: function () {
+            return this.image.id;
+        },
+        uuid: function () {
+            return this.image.uuid;
+        },
+        urlTemplate: function () {
+            return biigle.$require('maia.tpUrlTemplate');
         },
     },
 });
