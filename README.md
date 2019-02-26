@@ -23,15 +23,15 @@ Take a look at the [`requirements.txt`](requirements.txt) for the Python depende
     // MAIA_TRAINING_PROPOSAL_STORAGE_DISK
     'maia-tp' => [
         'driver' => 'local',
-        'root' => storage_path('app/public/maia-tp'),
-        'url' => env('APP_URL').'/storage/maia-tp',
+        'root' => storage_path('app/public/maia-tp-patches'),
+        'url' => env('APP_URL').'/storage/maia-tp-patches',
         'visibility' => 'public',
     ],
     // MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK
     'maia-ac' => [
         'driver' => 'local',
-        'root' => storage_path('app/public/maia-ac'),
-        'url' => env('APP_URL').'/storage/maia-ac',
+        'root' => storage_path('app/public/maia-ac-patches'),
+        'url' => env('APP_URL').'/storage/maia-ac-patches',
         'visibility' => 'public',
     ],
     ```
