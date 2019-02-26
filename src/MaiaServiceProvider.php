@@ -78,6 +78,11 @@ class MaiaServiceProvider extends ServiceProvider
         });
         $this->commands('command.maia.publish');
 
+        $this->app->singleton('command.maia.migrate-patch-storage', function ($app) {
+            return new \Biigle\Modules\Maia\Console\Commands\MigratePatchStorage;
+        });
+        $this->commands('command.maia.migrate-patch-storage');
+
         if (config('app.env') === 'testing') {
             $this->registerEloquentFactoriesFrom(__DIR__.'/database/factories');
         }
@@ -92,6 +97,7 @@ class MaiaServiceProvider extends ServiceProvider
     {
         return [
             'command.maia.publish',
+            'command.maia.migrate-patch-storage',
         ];
     }
 
