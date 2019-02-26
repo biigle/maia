@@ -32,10 +32,11 @@ class TrainingProposalControllerTest extends ApiTestCase
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")
             ->assertStatus(200)
-            ->assertJson([[
+            ->assertExactJson([[
                 'id' => $annotation->id,
                 'selected' => $annotation->selected,
                 'image_id' => $annotation->image_id,
+                'uuid' => $annotation->image->uuid,
             ]]);
     }
 
@@ -153,20 +154,5 @@ class TrainingProposalControllerTest extends ApiTestCase
             ->assertStatus(200);
 
         Queue::assertPushed(GenerateAnnotationPatch::class);
-    }
-
-    public function testShowFile()
-    {
-        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
-        $a = TrainingProposalTest::create(['job_id' => $job->id]);
-
-        $this->doTestApiRoute('GET', "/api/v1/maia/training-proposals/{$a->id}/file");
-
-        $this->beGuest();
-        $this->getJson("/api/v1/maia/training-proposals/{$a->id}/file")->assertStatus(403);
-
-        $this->beEditor();
-        Response::shouldReceive('download')->once();
-        $this->getJson("/api/v1/maia/training-proposals/{$a->id}/file")->assertStatus(200);
     }
 }

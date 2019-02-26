@@ -18,6 +18,24 @@ Take a look at the [`requirements.txt`](requirements.txt) for the Python depende
 1. Add `Biigle\Modules\Maia\MaiaServiceProvider::class` to the `providers` array in `config/app.php`.
 2. Run `php artisan maia:publish` to refresh the public assets of this package. Do this for every update of the package.
 3. Run `php artisan migrate` to create the new database tables.
+4. Configure a storage disk each for the training proposal and annotation candidate patches. Set the `MAIA_TRAINING_PROPOSAL_STORAGE_DISK` and `MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK` variables in the `.env` file to the name of the respective storage disk. Do not use the same disk for both! The content of the storage disks should be publicly accessible. Example for local disks:
+    ```php
+    // MAIA_TRAINING_PROPOSAL_STORAGE_DISK
+    'maia-tp' => [
+        'driver' => 'local',
+        'root' => storage_path('app/public/maia-tp'),
+        'url' => env('APP_URL').'/storage/maia-tp',
+        'visibility' => 'public',
+    ],
+    // MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK
+    'maia-ac' => [
+        'driver' => 'local',
+        'root' => storage_path('app/public/maia-ac'),
+        'url' => env('APP_URL').'/storage/maia-ac',
+        'visibility' => 'public',
+    ],
+    ```
+    This requires the link `storage -> ../storage/app/public` in the `public` directory.
 
 ### If you use biigle/gpus on a remote machine
 

@@ -62,4 +62,12 @@ class InstanceSegmentationResponse extends JobResponse
     {
         $job->user->notify(new InstanceSegmentationComplete($job));
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getPatchStorageDisk()
+    {
+        return config('maia.annotation_candidate_storage_disk');
+    }
 }

@@ -8,7 +8,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
-use Biigle\Modules\Maia\Events\MaiaJobDeleted;
+use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Listeners\DeleteAnnotationPatches;
 use Illuminate\Database\Eloquent\Factory as EloquentFactory;
@@ -61,7 +61,7 @@ class MaiaServiceProvider extends ServiceProvider
         Event::listen(MaiaJobCreated::class, DispatchNoveltyDetectionRequest::class);
         Event::listen(MaiaJobContinued::class, DispatchInstanceSegmentationRequest::class);
         Event::listen(MaiaJobContinued::class, PruneTrainingProposalPatches::class);
-        Event::listen(MaiaJobDeleted::class, DeleteAnnotationPatches::class);
+        Event::listen(MaiaJobDeleting::class, DeleteAnnotationPatches::class);
     }
 
     /**
@@ -78,6 +78,11 @@ class MaiaServiceProvider extends ServiceProvider
         });
         $this->commands('command.maia.publish');
 
+        $this->app->singleton('command.maia.migrate-patch-storage', function ($app) {
+            return new \Biigle\Modules\Maia\Console\Commands\MigratePatchStorage;
+        });
+        $this->commands('command.maia.migrate-patch-storage');
+
         if (config('app.env') === 'testing') {
             $this->registerEloquentFactoriesFrom(__DIR__.'/database/factories');
         }
@@ -92,6 +97,7 @@ class MaiaServiceProvider extends ServiceProvider
     {
         return [
             'command.maia.publish',
+            'command.maia.migrate-patch-storage',
         ];
     }
 

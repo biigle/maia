@@ -7,7 +7,7 @@ use Biigle\Volume;
 use Biigle\Traits\HasJsonAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
-use Biigle\Modules\Maia\Events\MaiaJobDeleted;
+use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 
 class MaiaJob extends Model
 {
@@ -29,7 +29,7 @@ class MaiaJob extends Model
      */
     protected $dispatchesEvents = [
         'created' => MaiaJobCreated::class,
-        'deleted' => MaiaJobDeleted::class,
+        'deleting' => MaiaJobDeleting::class,
     ];
 
     /**

@@ -45,12 +45,4 @@ class TrainingProposal extends MaiaAnnotation
     {
         return $query->where('maia_training_proposals.selected', false);
     }
-
-    /**
-     * {@inhertidoc}
-     */
-    protected function getPatchFilename(): string
-    {
-        return "p-{$this->id}";
-    }
 }

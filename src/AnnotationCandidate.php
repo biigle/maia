@@ -33,12 +33,4 @@ class AnnotationCandidate extends MaiaAnnotation
     {
         return $this->belongsTo(Annotation::class);
     }
-
-    /**
-     * {@inhertidoc}
-     */
-    protected function getPatchFilename(): string
-    {
-        return "c-{$this->id}";
-    }
 }

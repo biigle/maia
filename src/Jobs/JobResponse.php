@@ -143,9 +143,10 @@ class JobResponse extends Job implements ShouldQueue
      */
     protected function dispatchAnnotationPatchJobs(MaiaJob $job)
     {
-        $this->getCreatedAnnotations($job)->chunkById(1000, function ($chunk) {
+        $disk = $this->getPatchStorageDisk();
+        $this->getCreatedAnnotations($job)->chunkById(1000, function ($chunk) use ($disk) {
             foreach ($chunk as $annotation) {
-                GenerateAnnotationPatch::dispatch($annotation, $annotation->getPatchPath());
+                GenerateAnnotationPatch::dispatch($annotation, $disk);
             }
         });
     }
@@ -177,6 +178,16 @@ class JobResponse extends Job implements ShouldQueue
      * @param MaiaJob $job
      */
     protected function sendNotification(MaiaJob $job)
+    {
+        //
+    }
+
+    /**
+     * Get the storage disk to store the annotation patches to.
+     *
+     * @param string
+     */
+    protected function getPatchStorageDisk()
     {
         //
     }

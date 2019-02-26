@@ -45,7 +45,14 @@ class AnnotationCandidateController extends Controller
         $this->authorize('access', $job);
 
         return $job->annotationCandidates()
-            ->select('id', 'image_id', 'label_id', 'annotation_id')
+            ->join('images', 'images.id', '=', 'maia_annotation_candidates.image_id')
+            ->select(
+                'maia_annotation_candidates.id',
+                'maia_annotation_candidates.image_id',
+                'maia_annotation_candidates.label_id',
+                'maia_annotation_candidates.annotation_id',
+                'images.uuid as uuid'
+            )
             ->orderBy('score', 'desc')
             ->with('label')
             ->get()
@@ -107,8 +114,10 @@ class AnnotationCandidateController extends Controller
             return $annotations;
         });
 
+        $disk = config('largo.patch_storage_disk');
+
         foreach ($annotations as $annotation) {
-            GenerateAnnotationPatch::dispatch($annotation);
+            GenerateAnnotationPatch::dispatch($annotation, $disk);
         }
 
         return array_map(function ($a) {
@@ -135,7 +144,8 @@ class AnnotationCandidateController extends Controller
     {
         if ($request->filled('points')) {
             $request->candidate->points = $request->input('points');
-            GenerateAnnotationPatch::dispatch($request->candidate, $request->candidate->getPatchPath());
+            $disk = config('maia.annotation_candidate_storage_disk');
+            GenerateAnnotationPatch::dispatch($request->candidate, $disk);
         }
 
         if ($request->has('label_id')) {
@@ -143,30 +153,5 @@ class AnnotationCandidateController extends Controller
         }
 
         $request->candidate->save();
-    }
-
-    /**
-     * Get the image patch file of a annotation candidate.
-     *
-     * @api {get} maia/annotation-candidates/:id/file Get an annotation candidate patch
-     * @apiGroup Maia
-     * @apiName ShowTrainingProposalFile
-     * @apiPermission projectEditor
-     *
-     * @apiParam {Number} id The annotation candidate ID.
-     *
-     * @param int $id Annotation candidate ID
-     * @return \Illuminate\Http\Response
-     */
-    public function showFile($id)
-    {
-        $a = AnnotationCandidate::findOrFail($id);
-        $this->authorize('access', $a);
-
-        try {
-            return response()->download($a->getPatchPath());
-        } catch (FileNotFoundException $e) {
-            abort(404, $e->getMessage());
-        }
     }
 }

@@ -62,10 +62,4 @@ class TrainingProposalTest extends ModelTestCase
     {
         $this->assertEquals($this->model->image, $this->model->getImage());
     }
-
-    public function testGetPatchPath()
-    {
-        config(['maia.patch_storage' => 'testpath']);
-        $this->assertEquals("testpath/{$this->model->job_id}/p-{$this->model->id}.jpg", $this->model->getPatchPath());
-    }
 }
