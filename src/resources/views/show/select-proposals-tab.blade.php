@@ -4,6 +4,13 @@
         <p class="lead">
             <span v-text="selectedProposalsCount">0</span> of <span v-text="proposalsCount">0</span> selected
         </p>
+        @if ($tpLimit !== INF)
+            <div v-cloak  v-if="proposalsCount === {{$tpLimit}}" class="panel panel-warning">
+                <div class="panel-body text-warning">
+                    This job reached the allowed maximum of {{$tpLimit}} training proposals.
+                </div>
+            </div>
+        @endif
         @if ($job->state_id === $states['training-proposals'])
             <p>
                 The quality of annotation candidates directly depends on the number of selected training proposals. In some cases a few hundred may be sufficient, in other cases many more might be required.
