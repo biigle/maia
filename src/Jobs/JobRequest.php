@@ -193,9 +193,11 @@ class JobRequest extends Job implements ShouldQueue
         $isNull = 0;
 
         foreach ($images as $image) {
-            $annotations[$image->getId()] = $this->parseAnnotationsFile($image);
-            if (is_null($annotations[$image->getId()])) {
+            $newAnnotations = $this->parseAnnotationsFile($image);
+            if (is_null($newAnnotations)) {
                 $isNull += 1;
+            } else {
+                $annotations = array_merge($annotations, $newAnnotations);
             }
         }
 
@@ -226,7 +228,16 @@ class JobRequest extends Job implements ShouldQueue
             return [];
         }
 
-        return json_decode(File::get($path), true);
-    }
+        $annotations = json_decode(File::get($path), true);
 
+        if (is_array($annotations)) {
+            foreach ($annotations as &$annotation) {
+                array_unshift($annotation, $image->getId());
+            }
+        }
+
+        // Each annotation is an array:
+        // [$imageId, $xCenter, $yCenter, $radius, $score]
+        return $annotations;
+    }
 }

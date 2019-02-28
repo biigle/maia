@@ -7,6 +7,14 @@ return [
     'training_proposal_storage_disk' => env('MAIA_TRAINING_PROPOSAL_STORAGE_DISK'),
 
     /*
+    | Maximum number of automatically generated training proposals that are created for
+    | a job. This does not include any training proposals that were generated from
+    | existing annotations. The limit applies to the list of training proposals sorted
+    | by novelty score in descending order. Set to INF to allow any number.
+    */
+    'training_proposal_limit' => 50000,
+
+    /*
     | Storage disk where the annotation candidate patch images will be stored
     */
     'annotation_candidate_storage_disk' => env('MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK'),

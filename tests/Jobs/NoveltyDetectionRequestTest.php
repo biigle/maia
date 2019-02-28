@@ -54,10 +54,50 @@ class NoveltyDetectionRequestTest extends TestCase
 
             Queue::assertPushed(NoveltyDetectionResponse::class, function ($response) use ($job, $image) {
                 return $response->jobId === $job->id
-                    && $response->annotations === [$image->id => [[10, 20, 30, 123]]];
+                    && $response->annotations === [[$image->id, 10, 20, 30, 123]];
             });
 
             $this->assertTrue($request->cleanup);
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
+    public function testHandleLimit()
+    {
+        Queue::fake();
+        FileCache::fake();
+        config(['maia.training_proposal_limit' => 2]);
+
+        $params = [
+            'nd_clusters' => 5,
+            'nd_patch_size' => 39,
+            'nd_threshold' => 99,
+            'nd_latent_size' => 0.1,
+            'nd_trainset_size' => 10000,
+            'nd_epochs' => 100,
+            'nd_stride' => 2,
+            'nd_ignore_radius' => 5,
+            'available_bytes' => 8E+9,
+            'max_workers' => 2,
+        ];
+        $job = MaiaJobTest::create(['params' => $params]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+        $tmpDir = config('maia.tmp_dir')."/maia-{$job->id}-novelty-detection";
+        $inputJsonPath = "{$tmpDir}/input.json";
+
+        try {
+            $request = new NdJobStub($job);
+            $request->annotations = "[[10,20,30,1],[10,20,30,1],[10,20,30,123]]";
+            $request->handle();
+
+            Queue::assertPushed(NoveltyDetectionResponse::class, function ($response) use ($job, $image) {
+                return $response->jobId === $job->id
+                    && count($response->annotations) == 2
+                    && in_array([$image->id, 10, 20, 30, 1], $response->annotations)
+                    && in_array([$image->id, 10, 20, 30, 123], $response->annotations);
+            });
+
         } finally {
             File::deleteDirectory($tmpDir);
         }
@@ -79,12 +119,13 @@ class NdJobStub extends NoveltyDetectionRequest
 {
     public $command = '';
     public $cleanup = false;
+    public $annotations = "[[10,20,30,123]]";
 
     protected function python($command, $log = 'log.txt')
     {
         $this->command = $command;
         $imageId = array_keys($this->images)[0];
-        File::put("{$this->tmpDir}/{$imageId}.json", "[[10, 20, 30, 123]]");
+        File::put("{$this->tmpDir}/{$imageId}.json", $this->annotations);
     }
 
     protected function cleanup()

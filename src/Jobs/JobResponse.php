@@ -23,14 +23,11 @@ class JobResponse extends Job implements ShouldQueue
     public $jobId;
 
     /**
-     * Center points, radii and scores of annotations to create, indexed by image
-     * ID. Example:
+     * Image ID, center points, radii and scores of annotations to create.
+     * Example:
      * [
-     *     image_id => [
-     *         [center_x, center_y, radius, score],
-     *         [center_x, center_y, radius, score],
-     *         ...
-     *     ],
+     *     [image_id, center_x, center_y, radius, score],
+     *     [image_id, center_x, center_y, radius, score],
      *     ...
      * ]
      *
@@ -77,19 +74,16 @@ class JobResponse extends Job implements ShouldQueue
      */
     protected function createMaiaAnnotations()
     {
-        $maiaAnnotations = collect([]);
+        $maiaAnnotations = array_map(function ($annotation) {
+            return $this->createMaiaAnnotation($annotation);
+        }, $this->annotations);
 
-        foreach ($this->annotations as $imageId => $proposals) {
-            foreach ($proposals as $proposal) {
-                $maiaAnnotations->push($this->createMaiaAnnotation($imageId, $proposal));
-            }
-        }
-
-        $maiaAnnotations->chunk(9000)->each(function ($chunk) {
-            // Chunk the insert because PDO's maximum number of query parameters is
-            // 65535. Each annotation has 7 parameters so we can store roughly 9000
-            // annotations in one call.
-            $this->insertAnnotationChunk($chunk->toArray());
+        // Chunk the insert because PDO's maximum number of query parameters is
+        // 65535. Each annotation has 7 parameters so we can store roughly 9000
+        // annotations in one call.
+        $maiaAnnotations = array_chunk($maiaAnnotations, 9000);
+        array_walk($maiaAnnotations, function ($chunk) {
+            $this->insertAnnotationChunk($chunk);
         });
     }
 
@@ -106,22 +100,21 @@ class JobResponse extends Job implements ShouldQueue
     /**
      * Create an insert array for a MAIA annotation.
      *
-     * @param int $imageId
      * @param array $annotation
      *
      * @return array
      */
-    protected function createMaiaAnnotation($imageId, $annotation)
+    protected function createMaiaAnnotation($annotation)
     {
         $points = array_map(function ($coordinate) {
             return round($coordinate, 2);
-        }, [$annotation[0], $annotation[1], $annotation[2]]);
+        }, [$annotation[1], $annotation[2], $annotation[3]]);
 
         return [
             'job_id' => $this->jobId,
             'points' => json_encode($points),
-            'score' => $annotation[3],
-            'image_id' => $imageId,
+            'score' => $annotation[4],
+            'image_id' => $annotation[0],
             'shape_id' => Shape::circleId(),
         ];
     }

@@ -23,7 +23,7 @@ class NoveltyDetectionResponseTest extends TestCase
         $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
-        $proposals = [$image->id => [[100, 200, 20, 0.9]]];
+        $proposals = [[$image->id, 100, 200, 20, 0.9]];
 
         $response = new NoveltyDetectionResponse($job->id, $proposals);
         Queue::fake();
@@ -44,12 +44,28 @@ class NoveltyDetectionResponseTest extends TestCase
         Notification::assertSentTo($job->user, NoveltyDetectionComplete::class);
     }
 
+    public function testHandleLimit()
+    {
+        config(['maia.training_proposal_limit' => 1]);
+        $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+
+        $proposals = [[$image->id, 100, 200, 20, 0.9], [$image->id, 100, 200, 20, 1.9]];
+
+        $response = new NoveltyDetectionResponse($job->id, $proposals);
+        $response->handle();
+
+        $annotations = $job->trainingProposals()->get();
+        $this->assertEquals(1, $annotations->count());
+        $this->assertEquals(1.9, $annotations[0]->score);
+    }
+
     public function testHandleWrongState()
     {
         $job = MaiaJobTest::create(['state_id' => State::failedNoveltyDetectionId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
-        $proposals = [$image->id => [[100, 200, 20, 0]]];
+        $proposals = [[$image->id, 100, 200, 20, 0]];
 
         $response = new NoveltyDetectionResponse($job->id, $proposals);
         Queue::fake();
@@ -66,7 +82,7 @@ class NoveltyDetectionResponseTest extends TestCase
         $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
-        $proposals = [$image->id => [[100, 200, 20, 0.9]]];
+        $proposals = [[$image->id, 100, 200, 20, 0.9]];
 
         $response = new NoveltyDetectionResponseStub($job->id, $proposals);
         try {
@@ -83,7 +99,7 @@ class NoveltyDetectionResponseTest extends TestCase
     public function testFailed()
     {
         $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
-        $proposals = [1 => [[100, 200, 20, 0.9]]];
+        $proposals = [[1, 100, 200, 20, 0.9]];
 
         $response = new NoveltyDetectionResponse($job->id, $proposals);
         Queue::fake();

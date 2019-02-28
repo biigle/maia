@@ -105,9 +105,8 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertContains("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
             Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $image) {
-
                 return $response->jobId === $job->id
-                    && $response->annotations[$image->id] === [[10, 20, 30, 123]];
+                    && in_array([$image->id, 10, 20, 30, 123], $response->annotations);
             });
 
             $this->assertTrue($request->cleanup);

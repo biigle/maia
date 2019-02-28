@@ -23,7 +23,7 @@ class InstanceSegmentationResponseTest extends TestCase
         $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
-        $candidates = [$image->id => [[100, 200, 20, 0]]];
+        $candidates = [[$image->id, 100, 200, 20, 0]];
 
         $response = new InstanceSegmentationResponse($job->id, $candidates);
         Queue::fake();
@@ -50,7 +50,7 @@ class InstanceSegmentationResponseTest extends TestCase
         $job = MaiaJobTest::create(['state_id' => State::failedInstanceSegmentationId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
-        $candidates = [$image->id => [[100, 200, 20, 0]]];
+        $candidates = [[$image->id, 100, 200, 20, 0]];
 
         $response = new InstanceSegmentationResponse($job->id, $candidates);
         Queue::fake();
@@ -67,7 +67,7 @@ class InstanceSegmentationResponseTest extends TestCase
         $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
-        $proposals = [$image->id => [[100, 200, 20, 0.9]]];
+        $proposals = [[$image->id, 100, 200, 20, 0.9]];
 
         $response = new InstanceSegmentationResponseStub($job->id, $proposals);
         try {
@@ -84,7 +84,7 @@ class InstanceSegmentationResponseTest extends TestCase
     public function testFailed()
     {
         $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
-        $proposals = [1 => [[100, 200, 20, 0.9]]];
+        $proposals = [[1, 100, 200, 20, 0.9]];
 
         $response = new InstanceSegmentationResponse($job->id, $proposals);
         Queue::fake();
