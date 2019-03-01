@@ -574,9 +574,9 @@ biigle.$viewModel('maia-show-container', function (element) {
                 var labelId = label ? label.id : null;
                 var promise = annotationCandidateApi.update({id: candidate.id}, {label_id: labelId});
 
-                promise.catch(function (response) {
+                promise.bind(this).catch(function (response) {
                     messages.handleErrorResponse(response);
-                    candidate.label = !oldLabel;
+                    candidate.label = oldLabel;
                     this.setSelectedCandidateId(candidate);
                 });
 
