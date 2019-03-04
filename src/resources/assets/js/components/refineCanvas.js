@@ -81,11 +81,19 @@ biigle.$component('maia.components.refineCanvas', {
 
         // Disallow unselecting of currently highlighted training proposal.
         this.selectInteraction.setActive(false);
+        var kb = biigle.$require('keyboard');
 
         if (this.canModify) {
             this.createSelectMaiaAnnotationInteraction(this.unselectedAnnotationFeatures);
             this.map.addInteraction(this.selectMaiaAnnotationInteraction);
-            biigle.$require('keyboard').on('Delete', this.handleUnselectMaiaAnnotation, 0, this.listenerSet);
+            kb.on('Delete', this.handleUnselectMaiaAnnotation, 0, this.listenerSet);
         }
+
+        // Disable shortcut for the measure interaction.
+        kb.off('F', this.toggleMeasuring, this.listenerSet);
+    },
+    mounted: function () {
+        // Disable shortcut for the translate interaction.
+        biigle.$require('keyboard').off('m', this.toggleTranslating, this.listenerSet);
     },
 });
