@@ -3,12 +3,9 @@
 namespace Biigle\Modules\Maia\Events;
 
 use Biigle\Modules\Maia\MaiaJob;
-use Illuminate\Queue\SerializesModels;
 
 class MaiaJobDeleting
 {
-    use SerializesModels;
-
     /**
      * The job that caused this event.
      *

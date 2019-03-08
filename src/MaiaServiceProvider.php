@@ -10,11 +10,11 @@ use Illuminate\Support\ServiceProvider;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Modules\Maia\Listeners\DeleteAnnotationPatches;
 use Illuminate\Database\Eloquent\Factory as EloquentFactory;
+use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
+use Biigle\Modules\Maia\Listeners\PrepareDeleteAnnotationPatches;
 use Biigle\Modules\Maia\Listeners\DispatchNoveltyDetectionRequest;
 use Biigle\Modules\Maia\Listeners\DispatchInstanceSegmentationRequest;
-use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
 
 class MaiaServiceProvider extends ServiceProvider
 {
@@ -61,7 +61,7 @@ class MaiaServiceProvider extends ServiceProvider
         Event::listen(MaiaJobCreated::class, DispatchNoveltyDetectionRequest::class);
         Event::listen(MaiaJobContinued::class, DispatchInstanceSegmentationRequest::class);
         Event::listen(MaiaJobContinued::class, PruneTrainingProposalPatches::class);
-        Event::listen(MaiaJobDeleting::class, DeleteAnnotationPatches::class);
+        Event::listen(MaiaJobDeleting::class, PrepareDeleteAnnotationPatches::class);
     }
 
     /**

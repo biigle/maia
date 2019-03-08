@@ -1,13 +1,12 @@
 <?php
 
-namespace Biigle\Tests\Modules\Maia\Listeners;
+namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Storage;
 use TestCase;
-use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
+use Biigle\Modules\Maia\Jobs\DeleteAnnotationPatches;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
-use Biigle\Modules\Maia\Listeners\DeleteAnnotationPatches;
 
 class DeleteAnnotationPatchesTest extends TestCase
 {
@@ -27,8 +26,7 @@ class DeleteAnnotationPatchesTest extends TestCase
         Storage::disk('test')->put("{$tpPrefix}/{$tp->id}.jpg", 'content');
         Storage::disk('test2')->put("{$acPrefix}/{$ac->id}.jpg", 'content');
 
-        $event = new MaiaJobDeleting($tp->job);
-        (new DeleteAnnotationPatches)->handle($event);
+        (new DeleteAnnotationPatches($tp->job))->handle();
 
         $this->assertFalse(Storage::disk('test')->exists("{$tpPrefix}/{$tp->id}.jpg"));
         $this->assertFalse(Storage::disk('test2')->exists("{$acPrefix}/{$ac->id}.jpg"));
