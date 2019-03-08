@@ -106,10 +106,10 @@ class MaiaJobController extends Controller
         }
 
         $tpUrlTemplate = Storage::disk(config('maia.training_proposal_storage_disk'))
-            ->url('{prefix}/{id}.'.config('largo.patch_format'));
+            ->url(':prefix/:id.'.config('largo.patch_format'));
 
         $acUrlTemplate = Storage::disk(config('maia.annotation_candidate_storage_disk'))
-            ->url('{prefix}/{id}.'.config('largo.patch_format'));
+            ->url(':prefix/:id.'.config('largo.patch_format'));
 
         $tpLimit = config('maia.training_proposal_limit');
 

@@ -26,7 +26,7 @@
     biigle.$declare('maia.job', {!! $job->toJson() !!});
     biigle.$declare('maia.states', {!! $states->toJson() !!});
     biigle.$declare('maia.labelTrees', {!! $trees->toJson() !!});
-    biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/{id}/file') !!}');
+    biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/:id/file') !!}');
     biigle.$declare('maia.tpUrlTemplate', '{{$tpUrlTemplate}}');
     biigle.$declare('maia.acUrlTemplate', '{{$acUrlTemplate}}');
 </script>
