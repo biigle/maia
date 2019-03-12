@@ -46,6 +46,7 @@ class NoveltyDetectionResponseTest extends TestCase
 
     public function testHandleLimit()
     {
+        Notification::fake();
         config(['maia.training_proposal_limit' => 1]);
         $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
