@@ -15,11 +15,7 @@
 <script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/volumes/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/largo/scripts/main.js') }}"></script>
-@if (app()->environment('local') && File::exists(public_path('vendor/annotations/scripts/ol-debug.js')))
-    <script src="{{ cachebust_asset('vendor/annotations/scripts/ol-debug.js') }}"></script>
-@else
-    <script src="{{ cachebust_asset('vendor/annotations/scripts/ol.js') }}"></script>
-@endif
+<script src="{{ cachebust_asset('vendor/annotations/scripts/ol.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/annotations/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/maia/scripts/main.js') }}"></script>
 <script type="text/javascript">
