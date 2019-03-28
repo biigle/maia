@@ -36,7 +36,7 @@ class MaiaJobController extends Controller
      * @apiParam (Optional parameters) {booolean} use_existing Set to `true` to use existing annotations as training proposals.
      * @apiParam (Optional parameters) {Array} restrict_labels Array of label IDs to restrict the existing annotations to, which should be used as training proposals. `use_existing` must be set if this parameter is present.
      * @apiParam (Optional parameters) {boolean} skip_nd Set to `true` to skip the novelty detection stage and take only existing annotations as training proposals. `use_existing` must be set if this parameter is present. Also, all `nd_*` parameters are ignored and no longer required if this parameter is set.
-     * @apiParam (Optional parameters) {string} description Short description text for the job. Use this to find a stored MAIA model later.
+     * @apiParam (Optional parameters) {string} description Short description text for the job. This field is required if `is_store_model` is `true`.
      * @apiParam (Optional parameters) {bool} is_store_model Store the trained MAIA model for instance segmentation so it can be reused later.
      *
      * @param StoreMaiaJob $request

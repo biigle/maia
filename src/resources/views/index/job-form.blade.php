@@ -153,28 +153,56 @@
             </div>
         </div>
     </fieldset>
-    <fieldset v-cloak v-show="showAdvanced">
-        <legend>Instance Segmentation <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}#configurable-parameters" title="More information on the configurable parameters for instance segmentation" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
-        <div class="form-group{{ $errors->has('is_epochs_head') ? ' has-error' : '' }}">
-            <label for="is_epochs_head">Number of training epochs (head)</label>
-            <input type="number" class="form-control" name="is_epochs_head" id="is_epochs_head" value="{{ old('is_epochs_head', 20) }}" required min="1" step="1">
-            @if($errors->has('is_epochs_head'))
-               <span class="help-block">{{ $errors->first('is_epochs_head') }}</span>
+    <fieldset>
+        <div v-cloak v-show="showAdvanced">
+            <legend>Instance Segmentation <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}#configurable-parameters" title="More information on the configurable parameters for instance segmentation" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
+            <div class="form-group{{ $errors->has('is_epochs_head') ? ' has-error' : '' }}">
+                <label for="is_epochs_head">Number of training epochs (head)</label>
+                <input type="number" class="form-control" name="is_epochs_head" id="is_epochs_head" value="{{ old('is_epochs_head', 20) }}" required min="1" step="1">
+                @if($errors->has('is_epochs_head'))
+                   <span class="help-block">{{ $errors->first('is_epochs_head') }}</span>
+                @else
+                    <span class="help-block">
+                        Time spent on training only the head layers of Mask R-CNN for instance segmentation. This is faster and should be a higher number than epochs (all).
+                    </span>
+                @endif
+            </div>
+
+            <div class="form-group{{ $errors->has('is_epochs_all') ? ' has-error' : '' }}">
+                <label for="is_epochs_all">Number of training epochs (all)</label>
+                <input type="number" class="form-control" name="is_epochs_all" id="is_epochs_all" value="{{ old('is_epochs_all', 10) }}" required min="1" step="1">
+                @if($errors->has('is_epochs_all'))
+                   <span class="help-block">{{ $errors->first('is_epochs_all') }}</span>
+                @else
+                    <span class="help-block">
+                        Time spent on training all layers of Mask R-CNN for instance segmentation. This is slower and should be a lower number than epochs (head).
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="form-group{{ $errors->has('is_store_model') ? ' has-error' : '' }}">
+            <label for="is_store_model">
+                <input type="checkbox" name="is_store_model" id="is_store_model" v-model="storeModel" value="1">
+                Store trained model
+            </label>
+            @if($errors->has('is_store_model'))
+               <span class="help-block">{{ $errors->first('is_store_model') }}</span>
             @else
                 <span class="help-block">
-                    Time spent on training only the head layers of Mask R-CNN for instance segmentation. This is faster and should be a higher number than epochs (all).
+                    Store the trained instance segmentation model to reuse it for another MAIA job.
                 </span>
             @endif
         </div>
 
-        <div class="form-group{{ $errors->has('is_epochs_all') ? ' has-error' : '' }}">
-            <label for="is_epochs_all">Number of training epochs (all)</label>
-            <input type="number" class="form-control" name="is_epochs_all" id="is_epochs_all" value="{{ old('is_epochs_all', 10) }}" required min="1" step="1">
-            @if($errors->has('is_epochs_all'))
-               <span class="help-block">{{ $errors->first('is_epochs_all') }}</span>
+        <div v-cloak v-if="storeModel" class="form-group{{ $errors->has('description') ? ' has-error' : '' }}">
+            <label for="description">Description</label>
+            <input type="text" class="form-control" name="description" id="description" value="{{ old('description') }}" required placeholder="Detection of Kolga Hyalina in {{$volume->name}}">
+            @if($errors->has('description'))
+               <span class="help-block">{{ $errors->first('description') }}</span>
             @else
                 <span class="help-block">
-                    Time spent on training all layers of Mask R-CNN for instance segmentation. This is slower and should be a lower number than epochs (head).
+                    Description for this job so the stored instance segmentation model can be found later.
                 </span>
             @endif
         </div>
@@ -199,5 +227,6 @@
     biigle.$declare('maia.volumeId', {!! $volume->id !!});
     biigle.$declare('maia.useExistingAnnotations', {!! old('use_existing') ? 'true' : 'false' !!});
     biigle.$declare('maia.skipNoveltyDetection', {!! old('skip_nd') ? 'true' : 'false' !!});
+    biigle.$declare('maia.storeModel', {!! old('is_store_model') ? 'true' : 'false' !!});
 </script>
 @endpush

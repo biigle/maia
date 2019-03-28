@@ -13,6 +13,7 @@ biigle.$viewModel('maia-job-form', function (element) {
         data: {
             useExistingAnnotations: biigle.$require('maia.useExistingAnnotations'),
             skipNoveltyDetection: biigle.$require('maia.skipNoveltyDetection'),
+            storeModel: biigle.$require('maia.storeModel'),
             showAdvanced: false,
             shouldFetchLabels: false,
             labels: [],

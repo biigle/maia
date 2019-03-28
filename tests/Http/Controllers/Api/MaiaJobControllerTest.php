@@ -247,11 +247,17 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertStatus(422);
 
         $this->defaultParams['is_store_model'] = true;
+        // Description is required.
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(422);
+
+        $this->defaultParams['description'] = 'My Description';
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(200);
 
         $job = MaiaJob::first();
         $this->assertTrue($job->params['is_store_model']);
+        $this->assertEquals('My Description', $job->description);
     }
 
     public function testDestroy()

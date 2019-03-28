@@ -18,7 +18,7 @@
         <h3><a name="configurable-parameters"></a>Configurable parameters</h3>
 
         <p>
-            The configurable parameters for this stage are not shown by default in the form to submit a new MAIA job. Click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form to show the parameters for the instance segmentation stage.
+            Some configurable parameters for this stage are not shown by default in the form to submit a new MAIA job. Click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form to show these parameters for the instance segmentation stage.
         </p>
 
         <h4><a name="number-of-training-epochs-head"></a>Number of training epochs (head)</h4>
@@ -39,6 +39,18 @@
 
         <p>
             Time spent on training all layers of Mask R-CNN for instance segmentation. This is slower and should be a lower number than epochs (head).
+        </p>
+
+        <h4><a name="store-trained-model"></a>Store trained model</h4>
+
+        <p>
+            When checked, the instance segmentation model will be permanently stored and can be reused for another MAIA job.
+        </p>
+
+        <h4><a name="description"></a>Description</h4>
+
+        <p>
+            Description for the job so the stored instance segmentation model can be found later.
         </p>
     </div>
     <div class="row">

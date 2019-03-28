@@ -6,6 +6,11 @@
         <p>
             created <span title="{{$job->created_at->toIso8601String()}}">{{$job->created_at->diffForHumans()}} by {{$job->user->firstname}} {{$job->user->lastname}}</span>
         </p>
+        @if ($job->description)
+            <p>
+                {{$job->description}}
+            </p>
+        @endif
         <table class="table">
             <thead>
                 <tr colspan="2">
@@ -75,6 +80,10 @@
                 <tr>
                     <td>Training epochs (all)</td>
                     <td class="text-right"><code>{{array_get($job->params, 'is_epochs_all')}}</code></td>
+                </tr>
+                <tr>
+                    <td>Store trained model</td>
+                    <td class="text-right"><code>{{array_get($job->params, 'is_store_model') ? 'yes' : 'no'}}</code></td>
                 </tr>
             </tbody>
         </table>
