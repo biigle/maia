@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use File;
 use Queue;
+use Storage;
 use TestCase;
 use Exception;
 use FileCache;
@@ -18,14 +19,18 @@ class InstanceSegmentationRequestTest extends TestCase
 {
     public function testHandle()
     {
+        config([
+            'maia.tmp_dir' => '/tmp',
+            'maia.model_storage_disk' => 'test',
+        ]);
         Queue::fake();
         FileCache::fake();
+        Storage::fake('test');
 
         $params = [
             'is_epochs_head' => 20,
             'is_epochs_all' => 10,
-            'available_bytes' => 8E+9,
-            'max_workers' => 2,
+            'is_store_model' => false,
         ];
 
         $job = MaiaJobTest::create(['params' => $params]);
@@ -43,7 +48,6 @@ class InstanceSegmentationRequestTest extends TestCase
             'image_id' => $image->id,
             'selected' => false,
         ]);
-        config(['maia.tmp_dir' => '/tmp']);
         $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
         $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
         $datasetOutputJsonPath = "{$tmpDir}/output-dataset.json";
@@ -104,16 +108,57 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertEquals($expectInferenceJson, $inputJson);
             $this->assertContains("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
+            $this->assertFalse(Storage::disk('test')->exists($job->id));
+
             Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $image) {
                 return $response->jobId === $job->id
-                    && in_array([$image->id, 10, 20, 30, 123], $response->annotations);
+                    && in_array([$image->id, 10, 20, 30, 123], $response->annotations)
+                    && $response->storedModel === false;
             });
 
             $this->assertTrue($request->cleanup);
         } finally {
             File::deleteDirectory($tmpDir);
         }
+    }
 
+    public function testHandleStoreModel()
+    {
+        config([
+            'maia.tmp_dir' => '/tmp',
+            'maia.model_storage_disk' => 'test',
+        ]);
+        Queue::fake();
+        FileCache::fake();
+        Storage::fake('test');
+
+        $params = [
+            'is_epochs_head' => 20,
+            'is_epochs_all' => 10,
+            'is_store_model' => true,
+        ];
+
+        $job = MaiaJobTest::create(['params' => $params]);
+        $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+        TrainingProposalTest::create([
+            'job_id' => $job->id,
+            'image_id' => $image->id,
+            'points' => [10.5, 20.4, 30],
+            'selected' => true,
+        ]);
+
+        try {
+            (new IsJobStub($job))->handle();
+
+            $this->assertTrue(Storage::disk('test')->exists($job->id));
+            $this->assertEquals('model', Storage::disk('test')->get($job->id));
+            Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) {
+                return $response->storedModel === true;
+            });
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
     }
 
     public function testFailed()
@@ -144,7 +189,11 @@ class IsJobStub extends InstanceSegmentationRequest
         if (str_contains($command, 'DatasetGenerator')) {
             File::put("{$this->tmpDir}/output-dataset.json", '{}');
         } elseif (str_contains($command, 'TrainingRunner')) {
-            File::put("{$this->tmpDir}/output-training.json", '{}');
+            File::put("{$this->tmpDir}/output-training.json", json_encode([
+                'model_path' => "{$this->tmpDir}/models/mask_rcnn_final.h5",
+            ]));
+            File::makeDirectory("{$this->tmpDir}/models");
+            File::put("{$this->tmpDir}/models/mask_rcnn_final.h5", 'model');
         } elseif (str_contains($command, 'InferenceRunner')) {
             foreach ($this->images as $id => $image) {
                 File::put("{$this->tmpDir}/{$id}.json", "[[10, 20, 30, 123]]");

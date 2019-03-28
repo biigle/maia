@@ -12,6 +12,26 @@ use Biigle\Modules\Maia\Notifications\InstanceSegmentationComplete;
 class InstanceSegmentationResponse extends JobResponse
 {
     /**
+     * Specifies whether the Mask R-CNN model has been stored.
+     *
+     * @var bool
+     */
+    public $storedModel;
+
+    /**
+     * Create a new instance
+     *
+     * @param int $jobId
+     * @param array $annotations
+     * @param bool $storedModel
+     */
+    public function __construct($jobId, $annotations, $storedModel)
+    {
+        parent::__construct($jobId, $annotations);
+        $this->storedModel = $storedModel;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function getExpectedJobStateId()
@@ -52,6 +72,7 @@ class InstanceSegmentationResponse extends JobResponse
     protected function updateJobState(MaiaJob $job)
     {
         $job->state_id = State::annotationCandidatesId();
+        $job->has_model = $this->storedModel;
         $job->save();
     }
 

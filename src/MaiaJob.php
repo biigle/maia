@@ -20,6 +20,7 @@ class MaiaJob extends Model
      */
     protected $casts = [
         'attrs' => 'array',
+        'has_model' => 'bool',
     ];
 
     /**

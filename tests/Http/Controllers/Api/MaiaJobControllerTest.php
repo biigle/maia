@@ -28,6 +28,7 @@ class MaiaJobControllerTest extends ApiTestCase
             'nd_ignore_radius' => 5,
             'is_epochs_head' => 20,
             'is_epochs_all' => 10,
+            'is_store_model' => false,
         ];
         ImageTest::create(['volume_id' => $this->volume()->id]);
     }
@@ -67,8 +68,19 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->assertEquals($this->editor()->id, $job->user_id);
         $this->assertEquals(State::noveltyDetectionId(), $job->state_id);
         $this->assertEquals($this->defaultParams, $job->params);
+        $this->assertNull($job->description);
+        $this->assertFalse($job->has_model);
+    }
 
-        // only one running job at a time
+    public function testStoreRunningNoveltyDetection()
+    {
+        $id = $this->volume()->id;
+        $job = MaiaJobTest::create([
+            'state_id' => State::noveltyDetectionId(),
+            'volume_id' => $this->volume()->id,
+        ]);
+
+        $this->beEditor();
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(422);
     }
@@ -84,6 +96,19 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->beEditor();
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(200);
+    }
+
+    public function testStoreRunningInstanceSegmentation()
+    {
+        $id = $this->volume()->id;
+        $job = MaiaJobTest::create([
+            'state_id' => State::instanceSegmentationId(),
+            'volume_id' => $this->volume()->id,
+        ]);
+
+        $this->beEditor();
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(422);
     }
 
     public function testStoreFailedInstanceSegmentation()
@@ -190,6 +215,43 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->defaultParams['use_existing'] = true;
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(200);
+    }
+
+    public function testStoreDescription()
+    {
+        $id = $this->volume()->id;
+
+        $this->beEditor();
+        $this->defaultParams['description'] = 'My Description';
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(200);
+
+        $job = MaiaJob::first();
+        $this->assertEquals('My Description', $job->description);
+    }
+
+    public function testStoreStoreModel()
+    {
+        $id = $this->volume()->id;
+
+        $this->beEditor();
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(200);
+
+        $this->assertFalse(MaiaJob::first()->params['is_store_model']);
+        MaiaJob::first()->delete();
+
+        $this->defaultParams['is_store_model'] = 'invalid';
+        // Field must be a bool.
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(422);
+
+        $this->defaultParams['is_store_model'] = true;
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(200);
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->params['is_store_model']);
     }
 
     public function testDestroy()

@@ -37,6 +37,7 @@ class StoreMaiaJob extends FormRequest
     public function rules()
     {
         return [
+            'description' => 'nullable',
             'use_existing' => 'required_with:restrict_labels,skip_nd|boolean',
             'restrict_labels' => 'array',
             'restrict_labels.*' => 'integer|exists:labels,id',
@@ -51,6 +52,7 @@ class StoreMaiaJob extends FormRequest
             'nd_ignore_radius' => 'required_unless:skip_nd,true|integer|min:0',
             'is_epochs_head' => 'required|integer|min:1',
             'is_epochs_all' => 'required|integer|min:1',
+            'is_store_model' => 'boolean',
         ];
     }
 

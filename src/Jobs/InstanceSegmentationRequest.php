@@ -3,8 +3,10 @@
 namespace Biigle\Modules\Maia\Jobs;
 
 use File;
+use Storage;
 use Exception;
 use FileCache;
+use SplFileInfo;
 use Biigle\Modules\Maia\MaiaJob;
 
 class InstanceSegmentationRequest extends JobRequest
@@ -45,7 +47,12 @@ class InstanceSegmentationRequest extends JobRequest
             $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
 
             $annotations = $this->parseAnnotations($images);
-            $this->dispatchResponse($annotations);
+            if ($this->jobParams['is_store_model']) {
+                $this->storeTrainedModel($trainingOutputPath);
+                $this->dispatchResponse($annotations, true);
+            } else {
+                $this->dispatchResponse($annotations, false);
+            }
         } finally {
             $this->cleanup();
         }
@@ -251,10 +258,11 @@ class InstanceSegmentationRequest extends JobRequest
      * Dispatch the job to store the instance segmentation results.
      *
      * @param array $annotations
+     * @param bool $storedModel
      */
-    protected function dispatchResponse($annotations)
+    protected function dispatchResponse($annotations, $storedModel)
     {
-        $this->dispatch(new InstanceSegmentationResponse($this->jobId, $annotations));
+        $this->dispatch(new InstanceSegmentationResponse($this->jobId, $annotations, $storedModel));
     }
 
     /**
@@ -271,5 +279,18 @@ class InstanceSegmentationRequest extends JobRequest
     protected function getTmpDirPath()
     {
         return parent::getTmpDirPath()."-instance-segmentation";
+    }
+
+    /**
+     * Store the trained Mask R-CNN model for later use.
+     *
+     * @param string $trainingOutputPath
+     */
+    protected function storeTrainedModel($trainingOutputPath)
+    {
+        $output = json_decode(File::get($trainingOutputPath), true);
+        $model = new SplFileInfo($output['model_path']);
+        Storage::disk(config('maia.model_storage_disk'))
+            ->putFileAs('', $model, $this->jobId);
     }
 }

@@ -23,6 +23,8 @@ class MaiaJobTest extends ModelTestCase
         $this->assertNotNull($this->model->created_at);
         $this->assertNotNull($this->model->updated_at);
         $this->assertNotNull($this->model->state);
+        $this->assertNotNull($this->model->description);
+        $this->assertFalse($this->model->has_model);
     }
 
     public function testTrainingProposals()

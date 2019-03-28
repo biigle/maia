@@ -25,7 +25,7 @@ class InstanceSegmentationResponseTest extends TestCase
 
         $candidates = [[$image->id, 100, 200, 20, 0]];
 
-        $response = new InstanceSegmentationResponse($job->id, $candidates);
+        $response = new InstanceSegmentationResponse($job->id, $candidates, false);
         Queue::fake();
         Notification::fake();
         $response->handle();
@@ -40,9 +40,19 @@ class InstanceSegmentationResponseTest extends TestCase
         $this->assertNull($annotations[0]->annotation_id);
         $this->assertEquals($image->id, $annotations[0]->image_id);
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
+        $this->assertFalse($job->fresh()->has_model);
 
         Queue::assertPushed(GenerateAnnotationPatch::class);
         Notification::assertSentTo($job->user, InstanceSegmentationComplete::class);
+    }
+
+    public function testHandleStoredModel()
+    {
+        $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
+        Queue::fake();
+        Notification::fake();
+        (new InstanceSegmentationResponse($job->id, [], true))->handle();
+        $this->assertTrue($job->fresh()->has_model);
     }
 
     public function testHandleWrongState()
@@ -52,7 +62,7 @@ class InstanceSegmentationResponseTest extends TestCase
 
         $candidates = [[$image->id, 100, 200, 20, 0]];
 
-        $response = new InstanceSegmentationResponse($job->id, $candidates);
+        $response = new InstanceSegmentationResponse($job->id, $candidates, false);
         Queue::fake();
         $response->handle();
 
@@ -69,7 +79,7 @@ class InstanceSegmentationResponseTest extends TestCase
 
         $proposals = [[$image->id, 100, 200, 20, 0.9]];
 
-        $response = new InstanceSegmentationResponseStub($job->id, $proposals);
+        $response = new InstanceSegmentationResponseStub($job->id, $proposals, false);
         try {
             $response->handle();
             $this->assertFalse(true);
@@ -86,7 +96,7 @@ class InstanceSegmentationResponseTest extends TestCase
         $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
         $proposals = [[1, 100, 200, 20, 0.9]];
 
-        $response = new InstanceSegmentationResponse($job->id, $proposals);
+        $response = new InstanceSegmentationResponse($job->id, $proposals, false);
         Queue::fake();
         $response->failed(new Exception);
         Queue::assertPushed(InstanceSegmentationFailure::class);

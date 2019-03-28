@@ -36,6 +36,7 @@ Take a look at the [`requirements.txt`](requirements.txt) for the Python depende
     ],
     ```
     This requires the link `storage -> ../storage/app/public` in the `public` directory.
+5. Configure the storage disk for trained Mask R-CNN models. Set the `MAIA_MODEL_STORAGE_DISK` variable in the `.env` file to the name of the storage disk.
 
 ### If you use biigle/gpus on a remote machine
 
@@ -50,6 +51,8 @@ composer config repositories.annotations vcs https://github.com/biigle/annotatio
 ```
 
 Add `$app->register(Biigle\Modules\Maia\MaiaGpuServiceProvider::class);` to `bootstrap/app.php`.
+
+Configure the storage disk for trained Mask R-CNN models. Set the `MAIA_MODEL_STORAGE_DISK` variable in the `.env` file to the name of the storage disk. This must be the same storage disk than for your BIIGLE application instance.
 
 ## Configuration
 

@@ -36,6 +36,8 @@ class MaiaJobController extends Controller
      * @apiParam (Optional parameters) {booolean} use_existing Set to `true` to use existing annotations as training proposals.
      * @apiParam (Optional parameters) {Array} restrict_labels Array of label IDs to restrict the existing annotations to, which should be used as training proposals. `use_existing` must be set if this parameter is present.
      * @apiParam (Optional parameters) {boolean} skip_nd Set to `true` to skip the novelty detection stage and take only existing annotations as training proposals. `use_existing` must be set if this parameter is present. Also, all `nd_*` parameters are ignored and no longer required if this parameter is set.
+     * @apiParam (Optional parameters) {string} description Short description text for the job. Use this to find a stored MAIA model later.
+     * @apiParam (Optional parameters) {bool} is_store_model Store the trained MAIA model for instance segmentation so it can be reused later.
      *
      * @param StoreMaiaJob $request
      * @return \Illuminate\Http\Response
@@ -46,6 +48,7 @@ class MaiaJobController extends Controller
         $job->volume_id = $request->volume->id;
         $job->user_id = $request->user()->id;
         $job->state_id = State::noveltyDetectionId();
+        $job->description = $request->input('description');
         $paramKeys = [
             'use_existing',
             'restrict_labels',
@@ -53,6 +56,7 @@ class MaiaJobController extends Controller
             // is_* are parameters for instance segmentation.
             'is_epochs_head',
             'is_epochs_all',
+            'is_store_model',
         ];
 
         if (!$request->has('skip_nd')) {
@@ -69,7 +73,11 @@ class MaiaJobController extends Controller
             ]);
         }
 
-        $job->params = $request->only($paramKeys);
+        $defaultParams = [
+            'is_store_model' => false,
+        ];
+
+        $job->params = array_merge($defaultParams, $request->only($paramKeys));
         $job->save();
 
         if ($this->isAutomatedRequest()) {

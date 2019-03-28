@@ -9,5 +9,7 @@ $factory->define(Biigle\Modules\Maia\MaiaJob::class, function ($faker) {
             return factory(Biigle\User::class)->create()->id;
         },
         'state_id' => Biigle\Modules\Maia\MaiaJobState::noveltyDetectionId(),
+        'has_model' => false,
+        'description' => $faker->text(),
     ];
 });

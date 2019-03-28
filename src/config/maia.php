@@ -94,6 +94,11 @@ return [
     */
     'coco_model_path' => storage_path('maia_jobs').'/mask_rcnn_coco.h5',
 
+    /*
+    | Storage disk where the trained Mask R-CNN models will be stored
+    */
+    'model_storage_disk' => env('MAIA_MODEL_STORAGE_DISK'),
+
     'notifications' => [
         /*
         | Set the way notifications for MAIA job state changes are sent by default.
