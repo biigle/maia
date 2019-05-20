@@ -77,6 +77,10 @@ class DatasetGenerator(object):
         mask = np.zeros((image.height, image.width), dtype=np.uint8)
         for proposal in proposals:
             # 1 is the class ID of 'Interesting'.
+            # Observe order of drawing the circles if multiple classes should be trained.
+            # One solution might be to draw the circle of the current proposal again when
+            # its crop is generated in the loop below, so the current proposal is always
+            # "on top".
             cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], 1, -1)
 
         mask = Image.fromarray(mask)
