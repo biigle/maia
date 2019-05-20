@@ -64,12 +64,16 @@ class InferenceRunner(object):
             if image is not False:
                 print('Image {} of {} (#{})'.format(popped_index, total_images, info['id']))
                 results = model.detect([image])
-                self.process_result(info['id'], results[0])
+                # Postprocess ansynchronously but independent of the "queue".
+                executor.submit(self.process_result, info['id'], results[0])
 
             # If there are still images left, push a new job to the "queue".
             if pushed_index < total_images:
                 jobs.add(executor.submit(self.load_image, pushed_index))
                 pushed_index += 1
+
+        # Wait for pending jobs (of the postprocessing).
+        executor.shutdown(True)
 
     def load_image(self, i):
         info = self.dataset.image_info[i]
