@@ -90,7 +90,7 @@ biigle.$component('maia.components.refineCanvas', {
         }
 
         // Disable shortcut for the measure interaction.
-        kb.off('F', this.toggleMeasuring, this.listenerSet);
+        kb.off('Shift+f', this.toggleMeasuring, this.listenerSet);
     },
     mounted: function () {
         // Disable shortcut for the translate interaction.
