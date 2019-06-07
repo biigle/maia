@@ -93,8 +93,8 @@ class MaiaJobController extends Controller
 
             // All label trees that are used by all projects which are visible to the
             // user.
-            $trees = LabelTree::with('labels')
-                ->select('id', 'name')
+            $trees = LabelTree::select('id', 'name', 'version_id')
+                ->with('labels', 'version')
                 ->whereIn('id', function ($query) use ($projectIds) {
                     $query->select('label_tree_id')
                         ->from('label_tree_project')
