@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAnnotationCandidateIndex extends Migration
+class CreateIndices extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +15,12 @@ class CreateAnnotationCandidateIndex extends Migration
     {
         Schema::table('maia_annotation_candidates', function (Blueprint $table) {
             $table->index('annotation_id');
+            $table->index('label_id');
+            $table->index('job_id');
+        });
+
+        Schema::table('maia_training_proposals', function (Blueprint $table) {
+            $table->index('job_id');
         });
     }
 
@@ -25,8 +31,14 @@ class CreateAnnotationCandidateIndex extends Migration
      */
     public function down()
     {
+        Schema::table('maia_training_proposals', function (Blueprint $table) {
+            $table->dropIndex(['job_id']);
+        });
+
         Schema::table('maia_annotation_candidates', function (Blueprint $table) {
             $table->dropIndex(['annotation_id']);
+            $table->dropIndex(['label_id']);
+            $table->dropIndex(['job_id']);
         });
     }
 }
