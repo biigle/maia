@@ -2480,8 +2480,10 @@ class MaskRCNN():
             # Convert neural network mask to full size mask
             full_mask = utils.unmold_mask(masks[i], boxes[i], original_image_shape)
             full_masks.append(full_mask)
-        full_masks = np.stack(full_masks, axis=-1)\
-            if full_masks else np.empty(original_image_shape[:2] + (0,))
+        # Do not stack the masks to a single array because this takes very long for
+        # large images. We can work with the list of masks later just as well.
+        # full_masks = np.stack(full_masks, axis=-1)\
+        #     if full_masks else np.empty(original_image_shape[:2] + (0,))
 
         return boxes, class_ids, scores, full_masks
 
