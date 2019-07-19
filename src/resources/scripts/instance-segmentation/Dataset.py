@@ -34,9 +34,11 @@ class Dataset(mrcnn.utils.Dataset):
         class_masks = []
         for c in contours:
             c = c.squeeze(axis=1)
-            class_id = mask[c[0][1], c[0][0]]
+            source_class_id = mask[c[0][1], c[0][0]]
+            # Map the source ID to the internal continuous IDs.
+            class_id = self.map_source_class_id('{}.{}'.format(self.name, source_class_id))
 
-            if class_id not in self.ignore_classes:
+            if source_class_id not in self.ignore_classes:
                 class_mask = np.zeros((mask.shape[0], mask.shape[1]))
                 cv2.drawContours(class_mask, [c], -1, 1, -1)
                 class_ids.append(class_id)
