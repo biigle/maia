@@ -44,34 +44,34 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><code>A</code>, <code>Arrow left</code>, <code>Page up</code></td>
+                    <td><kbd>A</kbd>, <kbd>Arrow left</kbd>, <kbd>Page up</kbd></td>
                     <td>Move up one page</td>
                 </tr>
                 <tr>
-                    <td><code>D</code>, <code>Arrow right</code>, <code>Page down</code></td>
+                    <td><kbd>D</kbd>, <kbd>Arrow right</kbd>, <kbd>Page down</kbd></td>
                     <td>Move down one page</td>
                 </tr>
                 <tr>
-                    <td><code>W</code>, <code>Arrow up</code></td>
+                    <td><kbd>W</kbd>, <kbd>Arrow up</kbd></td>
                     <td>Move up one row</td>
                 </tr>
                 <tr>
-                    <td><code>S</code>, <code>Arrow down</code></td>
+                    <td><kbd>S</kbd>, <kbd>Arrow down</kbd></td>
                     <td>Move down one row</td>
                 </tr>
                 <tr>
-                    <td><code>Home</code></td>
+                    <td><kbd>Home</kbd></td>
                     <td>Move up to the first row</td>
                 </tr>
                 <tr>
-                    <td><code>End</code></td>
+                    <td><kbd>End</kbd></td>
                     <td>Move down to the last row</td>
                 </tr>
             </tbody>
         </table>
 
         <p>
-            We recommend you to use the keyboard shortcuts to move through the image grid page by page and the mouse to select the interesting training proposals. To quickly select multiple adjacent training proposals in the grid, select the first one and then hold the <code>Shift</code> key while selecting the last one. This will select all training proposals between the first and the last selected one.
+            We recommend you to use the keyboard shortcuts to move through the image grid page by page and the mouse to select the interesting training proposals. To quickly select multiple adjacent training proposals in the grid, select the first one and then hold the <kbd>Shift</kbd> key while selecting the last one. This will select all training proposals between the first and the last selected one.
         </p>
 
         <p>
@@ -108,7 +108,7 @@
         </p>
 
         <p>
-            When you are finished with the refinement of one selected training proposal, continue to the next one with a click on the <i class="fas fa-step-forward"></i> button, or the <code>Space</code> or <code>Arrow right</code> shortcut keys. You can track your progress through all selected training proposals in the sidebar. It will tell you when have "seen" all selected training proposals.
+            When you are finished with the refinement of one selected training proposal, continue to the next one with a click on the <i class="fas fa-step-forward"></i> button, or the <kbd>Space</kbd> or <kbd>Arrow right</kbd> shortcut keys. You can track your progress through all selected training proposals in the sidebar. It will tell you when have "seen" all selected training proposals.
         </p>
 
         <p>
