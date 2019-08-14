@@ -1,23 +1,18 @@
 # BIIGLE MAIA Module
 
-Perform the Machine Learning Assisted Image Annotation method in BIIGLE.
+This is the BIIGLE module module for the [Machine Learning Assisted Image Annotation](https://doi.org/10.1371/journal.pone.0207498) method.
 
 ## Installation
 
-Install the module:
-
-```bash
-composer config repositories.maia vcs https://github.com/biigle/maia
-composer require biigle/maia
-```
-
-Take a look at the [`requirements.txt`](requirements.txt) for the Python dependencies of this module. Install the requirements with `pip install -r requirements.txt`.
+1. Run `composer config repositories.maia vcs git@github.com:biigle/maia.git`
+2. Run `composer require biigle/maia`.
+3. Install the Python dependencies with `pip install -r requirements.txt`.
 
 ### In your BIIGLE application instance
 
 1. Add `Biigle\Modules\Maia\MaiaServiceProvider::class` to the `providers` array in `config/app.php`.
-2. Run `php artisan maia:publish` to refresh the public assets of this package. Do this for every update of the package.
-3. Run `php artisan migrate` to create the new database tables.
+2. Run `php artisan vendor:publish --tag=public` to publish the public assets of this module.
+3. Run `docker-compose exec app php artisan migrate` to create the new database tables.
 4. Configure a storage disk each for the training proposal and annotation candidate patches. Set the `MAIA_TRAINING_PROPOSAL_STORAGE_DISK` and `MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK` variables in the `.env` file to the name of the respective storage disk. Do not use the same disk for both! The content of the storage disks should be publicly accessible. Example for local disks:
     ```php
     // MAIA_TRAINING_PROPOSAL_STORAGE_DISK
@@ -56,3 +51,13 @@ Add `$app->register(Biigle\Modules\Maia\MaiaGpuServiceProvider::class);` to `boo
 New processing jobs are submitted to the `default` queue of the `gpu` connection. You can configure these with the `MAIA_REQUEST_QUEUE` and `MAIA_REQUEST_CONNECTION` environment variables.
 
 The results of the processing jobs are submitted to the `default` queue of the `gpu-response` connection. You can configure these with the `MAIA_RESPONSE_QUEUE` and `MAIA_RESPONSE_CONNECTION` environment variables.
+
+## Developing
+
+Take a look at the [development guide](https://github.com/biigle/core/blob/master/DEVELOPING.md) of the core repository to get started with the development setup.
+
+Want to develop a new module? Head over to the [biigle/module](https://github.com/biigle/module) template repository.
+
+## Contributions and bug reports
+
+Contributions to BIIGLE are always welcome. Check out the [contribution guide](https://github.com/biigle/core/blob/master/CONTRIBUTING.md) to get started.
