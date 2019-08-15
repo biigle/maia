@@ -1,12 +1,18 @@
 {
     "name": "biigle/maia",
-    "description": "Perform the Machine Learning Assisted Image Annotation method in BIIGLE",
-    "type": "library",
+    "description": "BIIGLE module module for the Machine Learning Assisted Image Annotation method.",
+    "keywords": ["biigle", "biigle-module"],
+    "license": "GPL-3.0-only",
+    "support": {
+      "source": "https://github.com/biigle/maia",
+      "issues": "https://github.com/biigle/maia/issues"
+    },
+    "homepage": "https://biigle.de",
     "authors": [
-        {
-            "name": "Martin Zurowietz",
-            "email": "martin@cebitec.uni-bielefeld.de"
-        }
+      {
+         "name": "Martin Zurowietz",
+         "email": "martin@cebitec.uni-bielefeld.de"
+      }
     ],
     "require": {
         "biigle/volumes": "^2.7",
