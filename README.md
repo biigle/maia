@@ -52,6 +52,18 @@ New processing jobs are submitted to the `default` queue of the `gpu` connection
 
 The results of the processing jobs are submitted to the `default` queue of the `gpu-response` connection. You can configure these with the `MAIA_RESPONSE_QUEUE` and `MAIA_RESPONSE_CONNECTION` environment variables.
 
+## References
+
+Reference publications that you should cite if you use MAIA for one of your studies.
+
+- **BIIGLE 2.0**
+    [Langenkämper, D., Zurowietz, M., Schoening, T., & Nattkemper, T. W. (2017). Biigle 2.0-browsing and annotating large marine image collections.](https://doi.org/10.3389/fmars.2017.00083)
+    Frontiers in Marine Science, 4, 83. doi: `10.3389/fmars.2017.00083`
+
+- **MAIA**
+    [Zurowietz, M., Langenkämper, D., Hosking, B., Ruhl, H. A., & Nattkemper, T. W. (2018). MAIA—A machine learning assisted image annotation method for environmental monitoring and exploration.](https://doi.org/10.1371/journal.pone.0207498)
+    PloS one, 13(11), e0207498. doi: `10.1371/journal.pone.0207498`
+
 ## Developing
 
 Take a look at the [development guide](https://github.com/biigle/core/blob/master/DEVELOPING.md) of the core repository to get started with the development setup.
