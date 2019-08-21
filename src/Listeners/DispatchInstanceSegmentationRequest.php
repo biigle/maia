@@ -11,12 +11,12 @@ use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 
 class DispatchInstanceSegmentationRequest implements ShouldQueue
 {
-   /**
-     * Handle the event.
-     *
-     * @param  MaiaJobContinued  $event
-     * @return void
-     */
+    /**
+      * Handle the event.
+      *
+      * @param  MaiaJobContinued  $event
+      * @return void
+      */
     public function handle(MaiaJobContinued $event)
     {
         $request = new InstanceSegmentationRequest($event->job);

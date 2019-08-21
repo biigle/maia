@@ -36,12 +36,12 @@ class DeleteAnnotationPatches extends Job
         $this->annotationCandidates = $this->getAnnotationsArray($job->annotationCandidates());
     }
 
-   /**
-     * Handle the event.
-     *
-     * @param  MaiaJobDeleting  $event
-     * @return void
-     */
+    /**
+      * Handle the event.
+      *
+      * @param  MaiaJobDeleting  $event
+      * @return void
+      */
     public function handle()
     {
         $disk = Storage::disk(config('maia.training_proposal_storage_disk'));

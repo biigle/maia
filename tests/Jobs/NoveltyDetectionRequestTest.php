@@ -97,7 +97,6 @@ class NoveltyDetectionRequestTest extends TestCase
                     && in_array([$image->id, 10, 20, 30, 1], $response->annotations)
                     && in_array([$image->id, 10, 20, 30, 123], $response->annotations);
             });
-
         } finally {
             File::deleteDirectory($tmpDir);
         }

@@ -113,7 +113,6 @@ class InstanceSegmentationRequestTest extends TestCase
         } finally {
             File::deleteDirectory($tmpDir);
         }
-
     }
 
     public function testFailed()

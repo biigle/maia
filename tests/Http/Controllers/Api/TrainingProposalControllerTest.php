@@ -116,7 +116,6 @@ class TrainingProposalControllerTest extends ApiTestCase
         $a->refresh();
         $this->assertTrue($a->selected);
         $this->assertEquals([10, 20, 30], $a->points);
-
     }
 
     public function testUpdateAfterState()

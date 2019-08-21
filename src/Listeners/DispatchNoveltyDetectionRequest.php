@@ -12,12 +12,12 @@ use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
 
 class DispatchNoveltyDetectionRequest implements ShouldQueue
 {
-   /**
-     * Handle the event.
-     *
-     * @param  MaiaJobCreated  $event
-     * @return void
-     */
+    /**
+      * Handle the event.
+      *
+      * @param  MaiaJobCreated  $event
+      * @return void
+      */
     public function handle(MaiaJobCreated $event)
     {
         if ($event->job->shouldUseExistingAnnotations()) {

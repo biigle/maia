@@ -8,12 +8,12 @@ use Biigle\Modules\Maia\Events\MaiaJobContinued;
 
 class PruneTrainingProposalPatches implements ShouldQueue
 {
-   /**
-     * Handle the event.
-     *
-     * @param  MaiaJobContinued  $event
-     * @return void
-     */
+    /**
+      * Handle the event.
+      *
+      * @param  MaiaJobContinued  $event
+      * @return void
+      */
     public function handle(MaiaJobContinued $event)
     {
         $disk = Storage::disk(config('maia.training_proposal_storage_disk'));

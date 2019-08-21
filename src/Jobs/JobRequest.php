@@ -173,7 +173,6 @@ class JobRequest extends Job implements ShouldQueue
         if ($code !== 0) {
             $lines = File::get($logFile);
             throw new Exception("Error while executing python command '{$command}':\n{$lines}", $code);
-
         }
 
         return $logFile;
