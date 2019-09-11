@@ -26,7 +26,7 @@ biigle.$viewModel('maia-show-container', function (element) {
         el: element,
         mixins: [biigle.$require('core.mixins.loader')],
         components: {
-            sidebar: biigle.$require('annotations.components.sidebar'),
+            sidebar: biigle.$require('core.components.sidebar'),
             sidebarTab: biigle.$require('core.components.sidebarTab'),
             selectProposalsTab: biigle.$require('maia.components.selectProposalsTab'),
             proposalsImageGrid: biigle.$require('maia.components.proposalsImageGrid'),
