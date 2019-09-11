@@ -59,7 +59,7 @@ class MaiaJobControllerTest extends ApiTestCase
         ])->assertStatus(422);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertStatus(200);
+            ->assertSuccessful();
 
         $job = MaiaJob::first();
         $this->assertNotNull($job);
@@ -83,7 +83,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertStatus(200);
+            ->assertSuccessful();
     }
 
     public function testStoreFailedInstanceSegmentation()
@@ -96,7 +96,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertStatus(200);
+            ->assertSuccessful();
     }
 
     public function testStoreTiledImages()
@@ -121,7 +121,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $this->defaultParams['use_existing'] = true;
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertStatus(200);
+            ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
     }
@@ -143,7 +143,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $this->defaultParams['restrict_labels'] = [$this->labelChild()->id];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertStatus(200);
+            ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertArrayHasKey('restrict_labels', $job->params);
         $this->assertEquals([$this->labelChild()->id], $job->params['restrict_labels']);
@@ -172,7 +172,7 @@ class MaiaJobControllerTest extends ApiTestCase
         $params['skip_nd'] = true;
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             // nd_* parameters are no longer required.
-            ->assertStatus(200);
+            ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldSkipNoveltyDetection());
         $this->assertArrayNotHasKey('nd_clusters', $job->params);
@@ -189,7 +189,7 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->defaultParams['skip_nd'] = true;
         $this->defaultParams['use_existing'] = true;
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertStatus(200);
+            ->assertSuccessful();
     }
 
     public function testDestroy()
