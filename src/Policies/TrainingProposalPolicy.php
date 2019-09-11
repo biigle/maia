@@ -38,7 +38,7 @@ class TrainingProposalPolicy extends CachedPolicy
     public function access(User $user, TrainingProposal $proposal)
     {
         // Put this to persistent cache for rapid querying of proposal patches.
-        return Cache::remember("maia-proposal-can-access-{$user->id}-{$proposal->job_id}", 0.5, function () use ($user, $proposal) {
+        return Cache::remember("maia-proposal-can-access-{$user->id}-{$proposal->job_id}", 30, function () use ($user, $proposal) {
             // Check if user is editor, expert or admin of one of the projects, the proposal belongs to.
             return DB::table('project_user')
                 ->where('user_id', $user->id)

@@ -39,7 +39,7 @@ class AnnotationCandidatePolicy extends CachedPolicy
     public function access(User $user, AnnotationCandidate $candidate)
     {
         // Put this to persistent cache for rapid querying of candidate patches.
-        return Cache::remember("maia-candidate-can-access-{$user->id}-{$candidate->job_id}", 0.5, function () use ($user, $candidate) {
+        return Cache::remember("maia-candidate-can-access-{$user->id}-{$candidate->job_id}", 30, function () use ($user, $candidate) {
             // Check if user is editor, expert or admin of one of the projects, the candidate belongs to.
             return DB::table('project_user')
                 ->where('user_id', $user->id)
