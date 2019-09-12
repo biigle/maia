@@ -50,7 +50,7 @@ class NoveltyDetectionRequestTest extends TestCase
             unset($inputJson['images']);
             $this->assertEquals($expectJson, $inputJson);
 
-            $this->assertContains("DetectionRunner.py {$inputJsonPath}", $request->command);
+            $this->assertStringContainsString("DetectionRunner.py {$inputJsonPath}", $request->command);
 
             Queue::assertPushed(NoveltyDetectionResponse::class, function ($response) use ($job, $image) {
                 return $response->jobId === $job->id
