@@ -2,6 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
+use Str;
 use File;
 use Queue;
 use TestCase;
@@ -140,11 +141,11 @@ class IsJobStub extends InstanceSegmentationRequest
     {
         array_push($this->commands, $command);
 
-        if (str_contains($command, 'DatasetGenerator')) {
+        if (Str::contains($command, 'DatasetGenerator')) {
             File::put("{$this->tmpDir}/output-dataset.json", '{}');
-        } elseif (str_contains($command, 'TrainingRunner')) {
+        } elseif (Str::contains($command, 'TrainingRunner')) {
             File::put("{$this->tmpDir}/output-training.json", '{}');
-        } elseif (str_contains($command, 'InferenceRunner')) {
+        } elseif (Str::contains($command, 'InferenceRunner')) {
             foreach ($this->images as $id => $image) {
                 File::put("{$this->tmpDir}/{$id}.json", "[[10, 20, 30, 123]]");
             }

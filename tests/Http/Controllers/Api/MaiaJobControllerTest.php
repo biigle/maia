@@ -14,7 +14,7 @@ class MaiaJobControllerTest extends ApiTestCase
 {
     protected $defaultParams;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->defaultParams = [

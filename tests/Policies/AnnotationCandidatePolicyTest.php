@@ -10,7 +10,7 @@ use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 
 class AnnotationCandidatePolicyTest extends ApiTestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
