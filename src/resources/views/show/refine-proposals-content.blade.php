@@ -28,7 +28,10 @@
             </div>
             @if ($job->state_id === $states['training-proposals'])
                 <div class="btn-group drawing-controls">
-                    <control-button icon="fa-plus" title="Mark training proposals as interesting" :active="selectingMaiaAnnotation" v-on:click="toggleSelectingMaiaAnnotation"></control-button>
+                    <control-button icon="fa-minus" title="Unselect current training proposal as interesting 𝗗𝗲𝗹𝗲𝘁𝗲" :disabled="!hasSelectedAnnotations" v-on:click="handleUnselectMaiaAnnotation"></control-button>
+                </div>
+                <div class="btn-group drawing-controls">
+                    <control-button icon="fa-plus" title="Select training proposals as interesting" :active="selectingMaiaAnnotation" v-on:click="toggleSelectingMaiaAnnotation"></control-button>
                 </div>
             @endif
         </div>

@@ -43,7 +43,7 @@
         </p>
 
         <p>
-            You can select annotation candidates in the refinement tool as well. First select a label from the sidebar, then click on the <button class="btn btn-default btn-xs"><i class="fas fa-check"></i></button> button at the bottom and then click on the semitransparent dashed circle of the annotation candidate that you want to select and to which you want to attach the label.
+            You can select annotation candidates in the refinement tool as well. First select a label from the sidebar, then click on the <button class="btn btn-default btn-xs"><i class="fas fa-check"></i></button> button at the bottom and then click on the semitransparent dashed circle of the annotation candidate that you want to select and to which you want to attach the label. If the label of the currently highlighted annotation candidate should be removed again you can detach it by pressing <kbd>Delete</kbd> or the <button class="btn btn-default btn-xs"><i class="fas fa-times"></i></button> button at the bottom.
         </p>
 
         <h3><a name="conversion-of-annotation-candidates"></a>Conversion of annotation candidates</h3>

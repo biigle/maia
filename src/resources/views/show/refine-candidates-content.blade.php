@@ -28,6 +28,9 @@
                 <control-button icon="fa-step-forward" title="Next image 𝗥𝗶𝗴𝗵𝘁 𝗮𝗿𝗿𝗼𝘄/𝗦𝗽𝗮𝗰𝗲" v-on:click="handleNextImage"></control-button>
             </div>
             <div class="btn-group drawing-controls">
+                <control-button icon="fa-times" title="Detach the label from the current annotation candidate 𝗗𝗲𝗹𝗲𝘁𝗲" :disabled="!hasSelectedAnnotations" v-on:click="handleUnselectMaiaAnnotation"></control-button>
+            </div>
+            <div class="btn-group drawing-controls">
                 <control-button icon="fa-check" title="Attach a label to annotation candidates" :active="selectingMaiaAnnotation" v-on:click="toggleSelectingMaiaAnnotation"></control-button>
             </div>
         </div>

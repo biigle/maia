@@ -112,7 +112,7 @@
         </p>
 
         <p>
-            If you notice an interesting training proposal which has not been selected yet, you can select it directly in the refinement tool. First, click on the <button class="btn btn-default btn-xs"><i class="fas fa-plus"></i></button> button at the bottom and then click on the dashed circle of the unselected training proposal.
+            If you notice an interesting training proposal which has not been selected yet, you can select it directly in the refinement tool. First, click on the <button class="btn btn-default btn-xs"><i class="fas fa-plus"></i></button> button at the bottom and then click on the dashed circle of the unselected training proposal. If the currently highlighted training proposal was incorrectly selected as interesting you can unselect it by pressing <kbd>Delete</kbd> or the <button class="btn btn-default btn-xs"><i class="fas fa-minus"></i></button> button at the bottom.
         </p>
 
         <p class="text-center">
