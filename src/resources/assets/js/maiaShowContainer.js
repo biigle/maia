@@ -71,6 +71,12 @@ biigle.$viewModel('maia-show-container', function (element) {
             focussedCandidate: null,
             candidateAnnotationCache: {},
             selectedLabel: null,
+
+            // Increasing counter to use for sorting of selected proposals and
+            // candidates. If a proposal/candidate is selected it should always be sorted
+            // after all previously selected ones, regardless of it's ID or position
+            // in the data returned from the API.
+            sequenceCounter: 0,
         },
         computed: {
             infoTabOpen: function () {
@@ -103,9 +109,21 @@ biigle.$viewModel('maia-show-container', function (element) {
                 return [];
             },
             selectedProposals: function () {
-                return Object.keys(this.selectedProposalIds)
+                var selectedIds = this.selectedProposalIds;
+
+                return Object.keys(selectedIds)
                     .map(function (id) {
                         return PROPOSALS_BY_ID[id];
+                    })
+                    // Sort by image ID first and the proposals of the same image by
+                    // their assigned sequence ID. This way proposals that were selected
+                    // during refinement are always focussed next.
+                    .sort(function (a, b) {
+                        if (a.image_id === b.image_id) {
+                            return selectedIds[a.id] - selectedIds[b.id];
+                        }
+
+                        return a.image_id - b.image_id;
                     });
             },
             // The thumbnails of unselected proposals are deleted when the job advances
@@ -209,9 +227,21 @@ biigle.$viewModel('maia-show-container', function (element) {
                 return [];
             },
             selectedCandidates: function () {
-                return Object.keys(this.selectedCandidateIds)
+                var selectedIds = this.selectedCandidateIds;
+
+                return Object.keys(selectedIds)
                     .map(function (id) {
                         return CANDIDATES_BY_ID[id];
+                    })
+                    // Sort by image ID first and the candidates of the same image by
+                    // their assigned sequence ID. This way candidates that were selected
+                    // during refinement are always focussed next.
+                    .sort(function (a, b) {
+                        if (a.image_id === b.image_id) {
+                            return selectedIds[a.id] - selectedIds[b.id];
+                        }
+
+                        return a.image_id - b.image_id;
                     });
             },
             hasSelectedCandidates: function () {
@@ -354,7 +384,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             setSelectedProposalId: function (proposal) {
                 if (proposal.selected) {
-                    Vue.set(this.selectedProposalIds, proposal.id, true);
+                    Vue.set(this.selectedProposalIds, proposal.id, this.getSequenceId());
                 } else {
                     Vue.delete(this.selectedProposalIds, proposal.id);
                 }
@@ -501,7 +531,7 @@ biigle.$viewModel('maia-show-container', function (element) {
             },
             setSelectedCandidateId: function (candidate) {
                 if (candidate.label && !candidate.annotation_id) {
-                    Vue.set(this.selectedCandidateIds, candidate.id, candidate.label);
+                    Vue.set(this.selectedCandidateIds, candidate.id, this.getSequenceId());
                 } else {
                     Vue.delete(this.selectedCandidateIds, candidate.id);
                 }
@@ -709,6 +739,9 @@ biigle.$viewModel('maia-show-container', function (element) {
                     this.setConvertedCandidateId(candidate);
                     this.maybeUnsetFocussedCandidate(candidate, next);
                 }, this);
+            },
+            getSequenceId: function () {
+                return this.sequenceCounter++;
             },
         },
         watch: {
