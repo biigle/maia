@@ -7,7 +7,7 @@ use Biigle\Tests\Modules\Maia\MaiaJobTest;
 
 class MaiaJobPolicyTest extends ApiTestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);

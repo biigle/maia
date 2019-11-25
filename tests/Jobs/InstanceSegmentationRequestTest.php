@@ -2,6 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
+use Str;
 use File;
 use Queue;
 use TestCase;
@@ -88,12 +89,12 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertArrayNotHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertEquals($expectDatasetJson, $inputJson);
-            $this->assertContains("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
+            $this->assertStringContainsString("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
 
             $this->assertTrue(File::exists($trainingInputJsonPath));
             $inputJson = json_decode(File::get($trainingInputJsonPath), true);
             $this->assertEquals($expectTrainingJson, $inputJson);
-            $this->assertContains("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
+            $this->assertStringContainsString("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
 
             $this->assertTrue(File::exists($inferenceInputJsonPath));
             $inputJson = json_decode(File::get($inferenceInputJsonPath), true);
@@ -102,7 +103,7 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertArrayHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertEquals($expectInferenceJson, $inputJson);
-            $this->assertContains("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
+            $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
             Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $image) {
                 return $response->jobId === $job->id
@@ -140,11 +141,11 @@ class IsJobStub extends InstanceSegmentationRequest
     {
         array_push($this->commands, $command);
 
-        if (str_contains($command, 'DatasetGenerator')) {
+        if (Str::contains($command, 'DatasetGenerator')) {
             File::put("{$this->tmpDir}/output-dataset.json", '{}');
-        } elseif (str_contains($command, 'TrainingRunner')) {
+        } elseif (Str::contains($command, 'TrainingRunner')) {
             File::put("{$this->tmpDir}/output-training.json", '{}');
-        } elseif (str_contains($command, 'InferenceRunner')) {
+        } elseif (Str::contains($command, 'InferenceRunner')) {
             foreach ($this->images as $id => $image) {
                 File::put("{$this->tmpDir}/{$id}.json", "[[10, 20, 30, 123]]");
             }

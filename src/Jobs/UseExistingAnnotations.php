@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Maia\Jobs;
 
 use DB;
+use Arr;
 use Biigle\Shape;
 use Biigle\Jobs\Job;
 use Biigle\Annotation;
@@ -68,7 +69,7 @@ class UseExistingAnnotations extends Job
      */
     protected function getAnnotationsQuery()
     {
-        $restrictLabels = array_get($this->job->params, 'restrict_labels', []);
+        $restrictLabels = Arr::get($this->job->params, 'restrict_labels', []);
 
         return Annotation::join('images', 'annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->job->volume_id)

@@ -8,7 +8,7 @@ use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 
 class TrainingProposalPolicyTest extends ApiTestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);

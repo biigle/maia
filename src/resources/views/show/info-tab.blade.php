@@ -21,35 +21,35 @@
                 @unless ($job->shouldSkipNoveltyDetection())
                     <tr>
                         <td>Clusters</td>
-                        <td class="text-right"><code>{{array_get($job->params, 'nd_clusters')}}</code></td>
+                        <td class="text-right"><code>{{Arr::get($job->params, 'nd_clusters')}}</code></td>
                     </tr>
                     <tr>
                         <td>Patch size</td>
-                        <td class="text-right"><code>{{array_get($job->params, 'nd_patch_size')}}</code></td>
+                        <td class="text-right"><code>{{Arr::get($job->params, 'nd_patch_size')}}</code></td>
                     </tr>
                     <tr>
                         <td>Threshold</td>
-                        <td class="text-right"><code>{{array_get($job->params, 'nd_threshold')}}</code></td>
+                        <td class="text-right"><code>{{Arr::get($job->params, 'nd_threshold')}}</code></td>
                     </tr>
                     <tr>
                         <td>Latent size</td>
-                        <td class="text-right"><code>{{array_get($job->params, 'nd_latent_size')}}</code></td>
+                        <td class="text-right"><code>{{Arr::get($job->params, 'nd_latent_size')}}</code></td>
                     </tr>
                     <tr>
                         <td>Training size</td>
-                        <td class="text-right"><code>{{array_get($job->params, 'nd_trainset_size')}}</code></td>
+                        <td class="text-right"><code>{{Arr::get($job->params, 'nd_trainset_size')}}</code></td>
                     </tr>
                     <tr>
                         <td>Training epochs</td>
-                        <td class="text-right"><code>{{array_get($job->params, 'nd_epochs')}}</code></td>
+                        <td class="text-right"><code>{{Arr::get($job->params, 'nd_epochs')}}</code></td>
                     </tr>
                     <tr>
                         <td>Stride</td>
-                        <td class="text-right"><code>{{array_get($job->params, 'nd_stride')}}</code></td>
+                        <td class="text-right"><code>{{Arr::get($job->params, 'nd_stride')}}</code></td>
                     </tr>
                     <tr>
                         <td>Ignore radius</td>
-                        <td class="text-right"><code>{{array_get($job->params, 'nd_ignore_radius')}}</code></td>
+                        <td class="text-right"><code>{{Arr::get($job->params, 'nd_ignore_radius')}}</code></td>
                     </tr>
                 @endif
                 @if ($job->shouldUseExistingAnnotations())
@@ -70,11 +70,11 @@
             <tbody>
                 <tr>
                     <td>Training epochs (head)</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'is_epochs_head')}}</code></td>
+                    <td class="text-right"><code>{{Arr::get($job->params, 'is_epochs_head')}}</code></td>
                 </tr>
                 <tr>
                     <td>Training epochs (all)</td>
-                    <td class="text-right"><code>{{array_get($job->params, 'is_epochs_all')}}</code></td>
+                    <td class="text-right"><code>{{Arr::get($job->params, 'is_epochs_all')}}</code></td>
                 </tr>
             </tbody>
         </table>
