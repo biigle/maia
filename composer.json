@@ -9,10 +9,10 @@
         }
     ],
     "require": {
-        "biigle/volumes": "^2.7",
-        "biigle/label-trees": "^1.19",
-        "biigle/largo": "^2.4",
-        "biigle/annotations": "^3.9",
+        "biigle/volumes": "^2.7 | dev-master",
+        "biigle/label-trees": "^1.19 | dev-master",
+        "biigle/largo": "^2.4 | dev-master",
+        "biigle/annotations": "^3.9 | dev-master",
         "biigle/laravel-file-cache": "^3.0"
     },
     "autoload": {
