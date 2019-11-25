@@ -4,9 +4,8 @@ This is the BIIGLE module module for the [Machine Learning Assisted Image Annota
 
 ## Installation
 
-1. Run `composer config repositories.maia vcs git@github.com:biigle/maia.git`
-2. Run `composer require biigle/maia`.
-3. Install the Python dependencies with `pip install -r requirements.txt`.
+1. Run `composer require biigle/maia`.
+2. Install the Python dependencies with `pip install -r requirements.txt`.
 
 ### In your BIIGLE application instance
 
