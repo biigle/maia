@@ -1,5 +1,7 @@
 # BIIGLE MAIA Module
 
+[![Test status](https://github.com/biigle/maia/workflows/Tests/badge.svg)](https://github.com/biigle/maia/actions?query=workflow%3ATests)
+
 This is the BIIGLE module module for the [Machine Learning Assisted Image Annotation](https://doi.org/10.1371/journal.pone.0207498) method.
 
 ## Installation
