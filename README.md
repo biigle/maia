@@ -35,16 +35,6 @@ This is the BIIGLE module module for the [Machine Learning Assisted Image Annota
 
 ### If you use biigle/gpus on a remote machine
 
-Add the following repositories to your `composer.json`:
-
-```bash
-composer config repositories.label-trees vcs https://github.com/biigle/label-trees
-composer config repositories.projects vcs https://github.com/biigle/projects
-composer config repositories.volumes vcs https://github.com/biigle/volumes
-composer config repositories.largo vcs https://github.com/biigle/largo
-composer config repositories.annotations vcs https://github.com/biigle/annotations
-```
-
 Add `$app->register(Biigle\Modules\Maia\MaiaGpuServiceProvider::class);` to `bootstrap/app.php`.
 
 ## Configuration
