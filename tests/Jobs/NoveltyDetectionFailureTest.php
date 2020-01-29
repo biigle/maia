@@ -2,6 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
+use Log;
 use TestCase;
 use Exception;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
@@ -18,6 +19,7 @@ class NoveltyDetectionFailureTest extends TestCase
         $exception = new Exception('This is the message.');
         $failure = new NoveltyDetectionFailure($job->id, $exception);
 
+        Log::shouldReceive('error')->with("MAIA job {$job->id} failed!");
         Notification::fake();
         $failure->handle();
         Notification::assertSentTo($job->user, NoveltyDetectionFailed::class);

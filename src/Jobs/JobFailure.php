@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Log;
 use Exception;
 use Biigle\Modules\Maia\MaiaJob;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -48,6 +49,7 @@ class JobFailure extends Job implements ShouldQueue
         $this->updateJobState($job);
         $job->save();
         $this->sendNotification($job);
+        Log::error("MAIA job {$job->id} failed!");
     }
 
     /**
