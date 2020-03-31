@@ -1,6 +1,6 @@
 <?php
 
-namespace Biigle\Tests\Modules\Maia\Http\Controllers;
+namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
 
