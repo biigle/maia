@@ -190,7 +190,8 @@ class UseExistingAnnotations extends Job
         $disk = config('maia.training_proposal_storage_disk');
         $this->job->trainingProposals()->chunk(1000, function ($chunk) use ($disk) {
             $chunk->each(function ($proposal) use ($disk) {
-                GenerateAnnotationPatch::dispatch($proposal, $disk);
+                GenerateAnnotationPatch::dispatch($proposal, $disk)
+                    ->onQueue(config('largo.generate_annotation_patch_queue'));
             });
         });
     }

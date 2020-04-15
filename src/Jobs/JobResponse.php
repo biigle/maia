@@ -139,7 +139,8 @@ class JobResponse extends Job implements ShouldQueue
         $disk = $this->getPatchStorageDisk();
         $this->getCreatedAnnotations($job)->chunkById(1000, function ($chunk) use ($disk) {
             foreach ($chunk as $annotation) {
-                GenerateAnnotationPatch::dispatch($annotation, $disk);
+                GenerateAnnotationPatch::dispatch($annotation, $disk)
+                    ->onQueue(config('largo.generate_annotation_patch_queue'));
             }
         });
     }

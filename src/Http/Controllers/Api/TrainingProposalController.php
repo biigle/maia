@@ -100,7 +100,8 @@ class TrainingProposalController extends Controller
         if ($request->filled('points')) {
             $request->proposal->points = $request->input('points');
             $disk = config('maia.training_proposal_storage_disk');
-            GenerateAnnotationPatch::dispatch($request->proposal, $disk);
+            GenerateAnnotationPatch::dispatch($request->proposal, $disk)
+                ->onQueue(config('largo.generate_annotation_patch_queue'));
         }
 
         $request->proposal->selected = $request->input('selected', $request->proposal->selected);
