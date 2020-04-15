@@ -64,5 +64,12 @@
         <p>
             The creation of new annotations concludes a MAIA job. You can either keep the MAIA job for reference or delete it with a click on <button class="btn btn-danger btn-xs">Delete this job</button> in the <button class="btn btn-default btn-xs"><i class="fas fa-info-circle"></i></button> job information tab in the sidebar. Please remember to cite the appropriate <a href="{{route('manual')}}#references">reference publications</a> if you use MAIA for one of your studies.
         </p>
+        <h3>Further reading</h3>
+        <ul>
+            <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">A description of the first MAIA stage: Novelty detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">A description of the second MAIA stage: Training proposals.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">A description of the third MAIA stage: Instance segmentation.</a></li>
+        </ul>
     </div>
 @endsection

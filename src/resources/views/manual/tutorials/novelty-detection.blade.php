@@ -164,6 +164,13 @@
             Please note that the new MAIA job is shown as "running novelty detection" in the job overview page even if you chose to skip novelty detection. Just refresh the job overview page after a few seconds and the job should have proceeded to the second MAIA stage.
         </p>
 
+        <h3>Further reading</h3>
+        <ul>
+            <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">A description of the second MAIA stage: Training proposals.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">A description of the third MAIA stage: Instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">A description of the last MAIA stage: Annotation candidates.</a></li>
+        </ul>
     </div>
     <div class="row">
         <h3>References</h3>

@@ -127,5 +127,12 @@
         <p>
             When the training proposals have been submitted, the MAIA job automatically proceeds to the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation</a> stage.
         </p>
+        <h3>Further reading</h3>
+        <ul>
+            <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">A description of the first MAIA stage: Novelty detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">A description of the third MAIA stage: Instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">A description of the last MAIA stage: Annotation candidates.</a></li>
+        </ul>
     </div>
 @endsection

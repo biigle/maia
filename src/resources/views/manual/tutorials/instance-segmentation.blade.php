@@ -40,6 +40,13 @@
         <p>
             Time spent on training all layers of Mask R-CNN for instance segmentation. This is slower and should be a lower number than epochs (head).
         </p>
+        <h3>Further reading</h3>
+        <ul>
+            <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">A description of the first MAIA stage: Novelty detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">A description of the second MAIA stage: Training proposals.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">A description of the last MAIA stage: Annotation candidates.</a></li>
+        </ul>
     </div>
     <div class="row">
         <h3>References</h3>
