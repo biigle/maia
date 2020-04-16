@@ -33,12 +33,12 @@ jobs:
       run: |
         echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-    - uses: actions/cache@v1
-      with:
-        path: ${{ steps.composer-cache.outputs.dir }}
-        key: ${{ runner.os }}-composer
-        restore-keys: |
-          ${{ runner.os }}-composer
+    # - uses: actions/cache@v1
+    #   with:
+    #     path: ${{ steps.composer-cache.outputs.dir }}
+    #     key: ${{ runner.os }}-composer
+    #     restore-keys: |
+    #       ${{ runner.os }}-composer
 
     - name: Install Dependencies
       run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --prefer-dist --ignore-platform-reqs
