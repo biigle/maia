@@ -41,7 +41,7 @@ jobs:
     #       ${{ runner.os }}-composer
 
     - name: Install Dependencies
-      run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --prefer-dist--ignore-platform-reqs
+      run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --prefer-dist --ignore-platform-reqs
       working-directory: ../core
 
     - name: Remove BIIGLE modules
