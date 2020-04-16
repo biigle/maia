@@ -28,17 +28,17 @@ jobs:
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
       working-directory: ../core
 
-    # - name: Get Composer Cache Directory
-    #   id: composer-cache
-    #   run: |
-    #     echo "::set-output name=dir::$(composer config cache-files-dir)"
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: |
+        echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-    # - uses: actions/cache@v1
-    #   with:
-    #     path: ${{ steps.composer-cache.outputs.dir }}
-    #     key: ${{ runner.os }}-composer
-    #     restore-keys: |
-    #       ${{ runner.os }}-composer
+    - uses: actions/cache@v1
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer
+        restore-keys: |
+          ${{ runner.os }}-composer
 
     - name: Install Dependencies
       run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --prefer-dist --ignore-platform-reqs
