@@ -39,7 +39,6 @@ class DeleteAnnotationPatches extends Job
     /**
       * Handle the event.
       *
-      * @param  MaiaJobDeleting  $event
       * @return void
       */
     public function handle()

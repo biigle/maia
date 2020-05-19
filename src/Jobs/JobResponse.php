@@ -178,8 +178,6 @@ class JobResponse extends Job implements ShouldQueue
 
     /**
      * Get the storage disk to store the annotation patches to.
-     *
-     * @param string
      */
     protected function getPatchStorageDisk()
     {
