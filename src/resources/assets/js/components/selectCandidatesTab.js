@@ -13,7 +13,7 @@ biigle.$component('maia.components.selectCandidatesTab', {
             required: true,
         },
     },
-    data: function () {
+    data() {
         return {
             //
         };
@@ -22,17 +22,17 @@ biigle.$component('maia.components.selectCandidatesTab', {
         //
     },
     methods: {
-        handleSelectedLabel: function (label) {
+        handleSelectedLabel(label) {
             this.$emit('select', label);
         },
-        handleDeselectedLabel: function (label) {
+        handleDeselectedLabel(label) {
             this.$emit('select', null);
         },
-        proceed: function () {
+        proceed() {
             this.$emit('proceed');
         },
     },
-    created: function () {
+    created() {
         //
     },
 });

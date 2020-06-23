@@ -1,5 +1,5 @@
 /**
- * A variant of the annotation canvas used for the refinement of annotation candidates.
+ * A letiant of the annotation canvas used for the refinement of annotation candidates.
  *
  * @type {Object}
  */
@@ -8,19 +8,19 @@ biigle.$component('maia.components.refineCandidatesCanvas', {
     props: {
         convertedAnnotations: {
             type: Array,
-            default: function () {
+            default() {
                 return [];
             },
         },
     },
     methods: {
-        createConvertedAnnotationsLayer: function () {
+        createConvertedAnnotationsLayer() {
             this.convertedAnnotationFeatures = new ol.Collection();
             this.convertedAnnotationSource = new ol.source.Vector({
                 features: this.convertedAnnotationFeatures
             });
 
-            var fakeFeature = new ol.Object();
+            let fakeFeature = new ol.Object();
             fakeFeature.set('color', '999999');
 
             this.convertedAnnotationLayer = new ol.layer.Vector({
@@ -35,11 +35,11 @@ biigle.$component('maia.components.refineCandidatesCanvas', {
         },
     },
     watch: {
-        convertedAnnotations: function (annotations) {
+        convertedAnnotations(annotations) {
             this.refreshAnnotationSource(annotations, this.convertedAnnotationSource);
         },
     },
-    created: function () {
+    created() {
         this.createConvertedAnnotationsLayer();
         this.map.addLayer(this.convertedAnnotationLayer);
     },

@@ -17,30 +17,30 @@ biigle.$component('maia.components.refineCandidatesTab', {
             required: true,
         },
     },
-    data: function () {
+    data() {
         return {
             //
         };
     },
     computed: {
-        hasNoSelectedCandidates: function () {
+        hasNoSelectedCandidates() {
             return this.selectedCandidates.length === 0;
         },
     },
     methods: {
-        handleSelectedLabel: function (label) {
+        handleSelectedLabel(label) {
             this.$emit('select', label);
         },
-        handleDeselectedLabel: function (label) {
+        handleDeselectedLabel(label) {
             this.$emit('select', null);
         },
-        handleConvertCandidates: function (label) {
+        handleConvertCandidates(label) {
             if (!this.hasNoSelectedCandidates) {
                 this.$emit('convert');
             }
         },
     },
-    created: function () {
+    created() {
         //
     },
 });

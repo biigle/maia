@@ -1,5 +1,5 @@
 /**
- * A variant of the image grid used for the selection of MAIA training proposals.
+ * A letiant of the image grid used for the selection of MAIA training proposals.
  *
  * @type {Object}
  */

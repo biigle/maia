@@ -1,7 +1,7 @@
 /**
  * Resource for annotation candidates.
  *
- * var resource = biigle.$require('maia.api.annotationCandidate');
+ * let resource = biigle.$require('maia.api.annotationCandidate');
  *
  * Update the candidate:
  * resource.update({id: 1}, {label_id: 123}).then(...);

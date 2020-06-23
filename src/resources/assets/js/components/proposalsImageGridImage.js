@@ -1,5 +1,5 @@
 /**
- * A variant of the image grid image used for the selection of MAIA training proposals.
+ * A letiant of the image grid image used for the selection of MAIA training proposals.
  *
  * @type {Object}
  */
@@ -20,33 +20,33 @@ biigle.$component('maia.components.proposalsImageGridImage', {
         '</div>' +
     '</figure>',
     computed: {
-        showAnnotationLink: function () {
+        showAnnotationLink() {
             return false;
         },
-        selected: function () {
+        selected() {
             return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);
         },
-        title: function () {
+        title() {
             if (this.selectable) {
                 return this.selected ? 'Unselect as interesting' : 'Select as interesting';
             }
         },
         // Show the small icon when the job is no longer in training proposal state.
-        smallIcon: function () {
+        smallIcon() {
             return !this.selectable;
         },
         // Do not fade selected images when the job is no longer in training proposal
         // state.
-        selectedFade: function () {
+        selectedFade() {
             return this.selectable;
         },
-        id: function () {
+        id() {
             return this.image.id;
         },
-        uuid: function () {
+        uuid() {
             return this.image.uuid;
         },
-        urlTemplate: function () {
+        urlTemplate() {
             return biigle.$require('maia.tpUrlTemplate');
         },
     },

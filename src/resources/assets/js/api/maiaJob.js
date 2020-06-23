@@ -1,7 +1,7 @@
 /**
  * Resource for MAIA jobs.
  *
- * var resource = biigle.$require('maia.api.maiaJob');
+ * let resource = biigle.$require('maia.api.maiaJob');
  *
  * Create a MAIA job:
  * resource.save({id: volumeId}, {

@@ -1,5 +1,5 @@
 /**
- * A variant of the image grid image used for the selection of MAIA annotation candidates.
+ * A letiant of the image grid image used for the selection of MAIA annotation candidates.
  *
  * @type {Object}
  */
@@ -24,26 +24,26 @@ biigle.$component('maia.components.candidatesImageGridImage', {
         '</div>' +
     '</figure>',
     computed: {
-        showAnnotationLink: function () {
+        showAnnotationLink() {
             return false;
         },
-        label: function () {
+        label() {
             if (this.selected) {
                 return this.$parent.selectedCandidateIds[this.image.id];
             }
 
             return null;
         },
-        selected: function () {
+        selected() {
             return this.$parent.selectedCandidateIds.hasOwnProperty(this.image.id);
         },
-        converted: function () {
+        converted() {
             return this.$parent.convertedCandidateIds.hasOwnProperty(this.image.id);
         },
-        selectable: function () {
+        selectable() {
             return !this.converted;
         },
-        classObject: function () {
+        classObject() {
             return {
                 'image-grid__image--selected': this.selected || this.converted,
                 'image-grid__image--selectable': this.selectable,
@@ -51,35 +51,35 @@ biigle.$component('maia.components.candidatesImageGridImage', {
                 'image-grid__image--small-icon': this.smallIcon,
             };
         },
-        iconClass: function () {
+        iconClass() {
             if (this.converted) {
                 return 'fa-lock';
             }
 
             return 'fa-' + this.selectedIcon;
         },
-        showIcon: function () {
+        showIcon() {
             return this.selectable || this.selected || this.converted;
         },
-        title: function () {
+        title() {
             if (this.converted) {
                 return 'This annotation candidate has been converted';
             }
 
             return this.selected ? 'Detach label' : 'Attach selected label';
         },
-        labelStyle: function () {
+        labelStyle() {
             return {
                 'background-color': '#' + this.label.color,
             };
         },
-        id: function () {
+        id() {
             return this.image.id;
         },
-        uuid: function () {
+        uuid() {
             return this.image.uuid;
         },
-        urlTemplate: function () {
+        urlTemplate() {
             return biigle.$require('maia.acUrlTemplate');
         },
     },

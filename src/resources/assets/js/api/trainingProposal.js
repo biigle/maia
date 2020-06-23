@@ -1,7 +1,7 @@
 /**
  * Resource for training proposals.
  *
- * var resource = biigle.$require('maia.api.trainingProposal');
+ * let resource = biigle.$require('maia.api.trainingProposal');
  *
  * Update the proposal:
  * resource.update({id: 1}, {selected: true}).then(...);
