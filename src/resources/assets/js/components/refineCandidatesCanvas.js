@@ -6,7 +6,7 @@ import VectorSource from 'ol/source/Vector';
 import {StylesStore} from '../import';
 
 /**
- * A letiant of the annotation canvas used for the refinement of annotation candidates.
+ * A variant of the annotation canvas used for the refinement of annotation candidates.
  *
  * @type {Object}
  */

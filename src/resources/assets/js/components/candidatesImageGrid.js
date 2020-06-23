@@ -2,7 +2,7 @@ import Image from './candidatesImageGridImage';
 import {ImageGrid} from '../import';
 
 /**
- * A letiant of the image grid used for the selection of MAIA annotation candidates.
+ * A variant of the image grid used for the selection of MAIA annotation candidates.
  *
  * @type {Object}
  */

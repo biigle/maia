@@ -2,7 +2,7 @@ import Image from './proposalsImageGridImage';
 import {ImageGrid} from '../import';
 
 /**
- * A letiant of the image grid used for the selection of MAIA training proposals.
+ * A variant of the image grid used for the selection of MAIA training proposals.
  *
  * @type {Object}
  */
