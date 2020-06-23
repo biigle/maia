@@ -1,6 +1,6 @@
-import {LoaderMixin} from './import';
-import {LabelTypeahead} from './import';
 import {handleErrorResponse} from './import';
+import {LabelTypeahead} from './import';
+import {LoaderMixin} from './import';
 
 /**
  * View model for the form to submit new MAIA jobs

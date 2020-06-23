@@ -1,11 +1,19 @@
+import Collection from 'ol/Collection';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import {AnnotationCanvas} from '../import';
+import {AttachLabelInteraction} from '../import';
+import {Keyboard} from '../import';
+import {StylesStore} from '../import';
+
 /**
- * A letiant of the annotation canvas used for the refinement of training proposals and
+ * A variant of the annotation canvas used for the refinement of training proposals and
  * annotation candidates.
  *
  * @type {Object}
  */
-biigle.$component('maia.components.refineCanvas', {
-    mixins: [biigle.$require('annotations.components.annotationCanvas')],
+export default {
+    mixins: [AnnotationCanvas],
     props: {
         unselectedAnnotations: {
             type: Array,
@@ -35,25 +43,24 @@ biigle.$component('maia.components.refineCanvas', {
             this.selectingMaiaAnnotation = !this.selectingMaiaAnnotation;
         },
         createUnselectedAnnotationsLayer() {
-            this.unselectedAnnotationFeatures = new ol.Collection();
-            this.unselectedAnnotationSource = new ol.source.Vector({
+            this.unselectedAnnotationFeatures = new Collection();
+            this.unselectedAnnotationSource = new VectorSource({
                 features: this.unselectedAnnotationFeatures
             });
-            this.unselectedAnnotationLayer = new ol.layer.Vector({
+            this.unselectedAnnotationLayer = new VectorLayer({
                 source: this.unselectedAnnotationSource,
                 // Should be below regular annotations which are at index 100.
                 zIndex: 99,
                 updateWhileAnimating: true,
                 updateWhileInteracting: true,
-                style: biigle.$require('annotations.stores.styles').editing,
+                style: StylesStore.editing,
                 opacity: 0.5,
             });
         },
         createSelectMaiaAnnotationInteraction(features) {
-            let Interaction = biigle.$require('annotations.ol.AttachLabelInteraction');
-            this.selectMaiaAnnotationInteraction = new Interaction({
+            this.selectMaiaAnnotationInteraction = new AttachLabelInteraction({
                 map: this.map,
-                features: features
+                features: features,
             });
             this.selectMaiaAnnotationInteraction.setActive(false);
             this.selectMaiaAnnotationInteraction.on('attach', this.handleSelectMaiaAnnotation);
@@ -81,19 +88,18 @@ biigle.$component('maia.components.refineCanvas', {
 
         // Disallow unselecting of currently highlighted training proposal.
         this.selectInteraction.setActive(false);
-        let kb = biigle.$require('keyboard');
 
         if (this.canModify) {
             this.createSelectMaiaAnnotationInteraction(this.unselectedAnnotationFeatures);
             this.map.addInteraction(this.selectMaiaAnnotationInteraction);
-            kb.on('Delete', this.handleUnselectMaiaAnnotation, 0, this.listenerSet);
+            Keyboard.on('Delete', this.handleUnselectMaiaAnnotation, 0, this.listenerSet);
         }
 
         // Disable shortcut for the measure interaction.
-        kb.off('Shift+f', this.toggleMeasuring, this.listenerSet);
+        Keyboard.off('Shift+f', this.toggleMeasuring, this.listenerSet);
     },
     mounted() {
         // Disable shortcut for the translate interaction.
-        biigle.$require('keyboard').off('m', this.toggleTranslating, this.listenerSet);
+        Keyboard.off('m', this.toggleTranslating, this.listenerSet);
     },
-});
+};

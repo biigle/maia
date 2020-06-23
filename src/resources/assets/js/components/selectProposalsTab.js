@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.$component('maia.components.selectProposalsTab', {
+export default {
     props: {
         proposals: {
             type: Array,
@@ -13,11 +13,6 @@ biigle.$component('maia.components.selectProposalsTab', {
             type: Array,
             required: true,
         },
-    },
-    data() {
-        return {
-            //
-        };
     },
     computed: {
         selectedProposalsCount() {
@@ -32,7 +27,4 @@ biigle.$component('maia.components.selectProposalsTab', {
             this.$emit('proceed');
         },
     },
-    created() {
-        //
-    },
-});
+};

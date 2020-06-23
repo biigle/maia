@@ -21,7 +21,7 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('maia.api.maiaJob', Vue.resource('api/v1/maia-jobs{/id}', {}, {
+export default Vue.resource('api/v1/maia-jobs{/id}', {}, {
     save: {
         method: 'POST',
         url: 'api/v1/volumes{/id}/maia-jobs',
@@ -46,4 +46,4 @@ biigle.$declare('maia.api.maiaJob', Vue.resource('api/v1/maia-jobs{/id}', {}, {
         method: 'POST',
         url: 'api/v1/maia-jobs{/id}/annotation-candidates',
     },
-}));
+});

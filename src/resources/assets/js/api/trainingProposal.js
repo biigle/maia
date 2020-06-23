@@ -8,4 +8,4 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('maia.api.trainingProposal', Vue.resource('api/v1/maia/training-proposals{/id}'));
+export default Vue.resource('api/v1/maia/training-proposals{/id}');

@@ -8,4 +8,4 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('maia.api.annotationCandidate', Vue.resource('api/v1/maia/annotation-candidates{/id}'));
+export default Vue.resource('api/v1/maia/annotation-candidates{/id}');

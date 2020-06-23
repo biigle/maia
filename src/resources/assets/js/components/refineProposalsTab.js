@@ -3,7 +3,7 @@
  *
  * @type {Object}
  */
-biigle.$component('maia.components.refineProposalsTab', {
+export default {
     props: {
         selectedProposals: {
             type: Array,
@@ -34,4 +34,4 @@ biigle.$component('maia.components.refineProposalsTab', {
             return this.hasSeenAllSelectedProposals ? 'btn-success' : 'btn-default';
         },
     },
-});
+};

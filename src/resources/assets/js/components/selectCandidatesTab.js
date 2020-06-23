@@ -1,25 +1,19 @@
+import {LabelTrees} from '../import';
+
 /**
  * The select annotation candidates tab
  *
  * @type {Object}
  */
-biigle.$component('maia.components.selectCandidatesTab', {
+export default {
     components: {
-        labelTrees: biigle.$require('labelTrees.components.labelTrees'),
+        labelTrees: LabelTrees,
     },
     props: {
         labelTrees: {
             type: Array,
             required: true,
         },
-    },
-    data() {
-        return {
-            //
-        };
-    },
-    computed: {
-        //
     },
     methods: {
         handleSelectedLabel(label) {
@@ -32,7 +26,4 @@ biigle.$component('maia.components.selectCandidatesTab', {
             this.$emit('proceed');
         },
     },
-    created() {
-        //
-    },
-});
+};
