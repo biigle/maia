@@ -2,7 +2,7 @@ import {AnnotationPatch} from '../import';
 import {ImageGridImage} from '../import';
 
 /**
- * A letiant of the image grid image used for the selection of MAIA annotation candidates.
+ * A variant of the image grid image used for the selection of MAIA annotation candidates.
  *
  * @type {Object}
  */
