@@ -412,9 +412,9 @@ export default {
             this.currentProposalImage = args[0];
             this.currentProposals = args[1];
             this.currentProposalsById = {};
-            this.currentProposals.forEach(function (p) {
+            this.currentProposals.forEach((p) => {
                 this.currentProposalsById[p.id] = p;
-            }, this);
+            });
         },
         cacheNextProposalImage() {
             // Do nothing if there is only one image.
@@ -543,11 +543,11 @@ export default {
         setCandidates(response) {
             CANDIDATES = response.body;
 
-            CANDIDATES.forEach(function (p) {
+            CANDIDATES.forEach((p) => {
                 CANDIDATES_BY_ID[p.id] = p;
                 this.setSelectedCandidateId(p);
                 this.setConvertedCandidateId(p);
-            }, this);
+            });
 
             this.hasCandidates = CANDIDATES.length > 0;
         },
