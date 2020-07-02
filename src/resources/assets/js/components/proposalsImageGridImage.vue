@@ -1,3 +1,13 @@
+<template>
+    <figure class="image-grid__image" :class="classObject" :title="title">
+        <div v-if="showIcon" class="image-icon">
+            <i class="fas" :class="iconClass"></i>
+        </div>
+        <img @click="toggleSelect" :src="url || emptyUrl" @error="showEmptyImage">
+    </figure>
+</template>
+
+<script>
 import {AnnotationPatch} from '../import';
 import {ImageGridImage} from '../import';
 
@@ -11,12 +21,6 @@ export default {
         ImageGridImage,
         AnnotationPatch,
     ],
-    template: `<figure class="image-grid__image" :class="classObject" :title="title">
-        <div v-if="showIcon" class="image-icon">
-            <i class="fas" :class="iconClass"></i>
-        </div>
-        <img @click="toggleSelect" :src="url || emptyUrl" @error="showEmptyImage">
-    </figure>`,
     computed: {
         selected() {
             return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);
@@ -25,6 +29,8 @@ export default {
             if (this.selectable) {
                 return this.selected ? 'Unselect as interesting' : 'Select as interesting';
             }
+
+            return '';
         },
         id() {
             return this.image.id;
@@ -39,3 +45,5 @@ export default {
         },
     },
 };
+</script>
+

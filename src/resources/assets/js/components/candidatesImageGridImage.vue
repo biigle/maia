@@ -1,3 +1,17 @@
+<template>
+    <figure class="image-grid__image image-grid__image--annotation-candidate" :class="classObject" :title="title">
+        <div v-if="showIcon" class="image-icon">
+            <i class="fas" :class="iconClass"></i>
+        </div>
+        <img @click="toggleSelect" :src="url || emptyUrl" @error="showEmptyImage">
+        <div v-if="selected" class="attached-label">
+            <span class="attached-label__color" :style="labelStyle"></span>
+            <span class="attached-label__name" v-text="label.name"></span>
+        </div>
+    </figure>
+</template>
+
+<script>
 import {AnnotationPatch} from '../import';
 import {ImageGridImage} from '../import';
 
@@ -11,16 +25,6 @@ export default {
         ImageGridImage,
         AnnotationPatch,
     ],
-    template: `<figure class="image-grid__image image-grid__image--annotation-candidate" :class="classObject" :title="title">
-        <div v-if="showIcon" class="image-icon">
-            <i class="fas" :class="iconClass"></i>
-        </div>
-        <img @click="toggleSelect" :src="url || emptyUrl" @error="showEmptyImage">
-        <div v-if="selected" class="attached-label">
-            <span class="attached-label__color" :style="labelStyle"></span>
-            <span class="attached-label__name" v-text="label.name"></span>
-        </div>
-    </figure>`,
     computed: {
         label() {
             if (this.selected) {
@@ -78,3 +82,4 @@ export default {
         },
     },
 };
+</script>
