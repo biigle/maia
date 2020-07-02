@@ -1,7 +1,8 @@
+<script>
 import {LabelTrees} from '../import';
 
 /**
- * The select annotation candidates tab
+ * The refine annotation candidates tab
  *
  * @type {Object}
  */
@@ -10,9 +11,18 @@ export default {
         labelTrees: LabelTrees,
     },
     props: {
+        selectedCandidates: {
+            type: Array,
+            required: true,
+        },
         labelTrees: {
             type: Array,
             required: true,
+        },
+    },
+    computed: {
+        hasNoSelectedCandidates() {
+            return this.selectedCandidates.length === 0;
         },
     },
     methods: {
@@ -22,8 +32,11 @@ export default {
         handleDeselectedLabel() {
             this.$emit('select', null);
         },
-        proceed() {
-            this.$emit('proceed');
+        handleConvertCandidates() {
+            if (!this.hasNoSelectedCandidates) {
+                this.$emit('convert');
+            }
         },
     },
 };
+</script>

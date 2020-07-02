@@ -1,3 +1,4 @@
+<script>
 /**
  * The select training proposals tab
  *
@@ -28,3 +29,4 @@ export default {
         },
     },
 };
+</script>

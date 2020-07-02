@@ -1,3 +1,4 @@
+<script>
 import {handleErrorResponse} from './import';
 import {LabelTypeahead} from './import';
 import {LoaderMixin} from './import';
@@ -10,15 +11,17 @@ export default {
     components: {
         typeahead: LabelTypeahead,
     },
-    data: {
-        volumeId: null,
-        useExistingAnnotations: false,
-        skipNoveltyDetection: false,
-        showAdvanced: false,
-        shouldFetchLabels: false,
-        labels: [],
-        selectedLabels: [],
-        submitted: false,
+    data() {
+        return {
+            volumeId: null,
+            useExistingAnnotations: false,
+            skipNoveltyDetection: false,
+            showAdvanced: false,
+            shouldFetchLabels: false,
+            labels: [],
+            selectedLabels: [],
+            submitted: false,
+        };
     },
     computed: {
         canSkipNoveltyDetection() {
@@ -84,3 +87,4 @@ export default {
         }
     },
 };
+</script>

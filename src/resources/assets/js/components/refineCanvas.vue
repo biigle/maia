@@ -1,3 +1,4 @@
+<script>
 import Collection from 'ol/Collection';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
@@ -103,3 +104,4 @@ export default {
         Keyboard.off('m', this.toggleTranslating, this.listenerSet);
     },
 };
+</script>

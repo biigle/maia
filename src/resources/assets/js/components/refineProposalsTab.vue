@@ -1,3 +1,4 @@
+<script>
 /**
  * The refine training proposals tab
  *
@@ -35,3 +36,4 @@ export default {
         },
     },
 };
+</script>

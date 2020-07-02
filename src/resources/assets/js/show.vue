@@ -1,3 +1,4 @@
+<script>
 import CandidatesApi from './api/annotationCandidate';
 import CandidatesImageGrid from './components/candidatesImageGrid';
 import JobApi from './api/maiaJob';
@@ -45,48 +46,50 @@ export default {
         candidatesImageGrid: CandidatesImageGrid,
         refineCandidatesTab: RefineCandidatesTab,
     },
-    data: {
-        job: null,
-        states: null,
-        labelTrees: [],
-        visitedSelectProposalsTab: false,
-        visitedRefineProposalsTab: false,
-        visitedSelectCandidatesTab: false,
-        visitedRefineCandidatesTab: false,
-        openTab: 'info',
+    data() {
+        return {
+            job: null,
+            states: null,
+            labelTrees: [],
+            visitedSelectProposalsTab: false,
+            visitedRefineProposalsTab: false,
+            visitedSelectCandidatesTab: false,
+            visitedRefineCandidatesTab: false,
+            openTab: 'info',
 
-        fetchProposalsPromise: null,
-        hasProposals: false,
-        // Track these manually and not via a computed property because the number of
-        // training proposals can be huge.
-        selectedProposalIds: {},
-        seenProposalIds: {},
-        lastSelectedProposal: null,
-        currentProposalImage: null,
-        currentProposalImageIndex: null,
-        currentProposals: [],
-        currentProposalsById: {},
-        focussedProposal: null,
-        proposalAnnotationCache: {},
+            fetchProposalsPromise: null,
+            hasProposals: false,
+            // Track these manually and not via a computed property because the number of
+            // training proposals can be huge.
+            selectedProposalIds: {},
+            seenProposalIds: {},
+            lastSelectedProposal: null,
+            currentProposalImage: null,
+            currentProposalImageIndex: null,
+            currentProposals: [],
+            currentProposalsById: {},
+            focussedProposal: null,
+            proposalAnnotationCache: {},
 
-        fetchCandidatesPromise: null,
-        hasCandidates: false,
-        selectedCandidateIds: {},
-        convertedCandidateIds: {},
-        lastSelectedCandidate: null,
-        currentCandidateImage: null,
-        currentCandidateImageIndex: null,
-        currentCandidates: [],
-        currentCandidatesById: {},
-        focussedCandidate: null,
-        candidateAnnotationCache: {},
-        selectedLabel: null,
+            fetchCandidatesPromise: null,
+            hasCandidates: false,
+            selectedCandidateIds: {},
+            convertedCandidateIds: {},
+            lastSelectedCandidate: null,
+            currentCandidateImage: null,
+            currentCandidateImageIndex: null,
+            currentCandidates: [],
+            currentCandidatesById: {},
+            focussedCandidate: null,
+            candidateAnnotationCache: {},
+            selectedLabel: null,
 
-        // Increasing counter to use for sorting of selected proposals and
-        // candidates. If a proposal/candidate is selected it should always be sorted
-        // after all previously selected ones, regardless of it's ID or position
-        // in the data returned from the API.
-        sequenceCounter: 0,
+            // Increasing counter to use for sorting of selected proposals and
+            // candidates. If a proposal/candidate is selected it should always be sorted
+            // after all previously selected ones, regardless of it's ID or position
+            // in the data returned from the API.
+            sequenceCounter: 0,
+        };
     },
     computed: {
         infoTabOpen() {
@@ -840,3 +843,4 @@ export default {
         this.labelTrees = biigle.$require('maia.labelTrees');
     },
 };
+</script>

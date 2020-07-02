@@ -1,3 +1,4 @@
+<script>
 import Collection from 'ol/Collection';
 import OlObject from 'ol/Object';
 import RefineCanvas from './refineCanvas';
@@ -51,3 +52,4 @@ export default {
         this.map.addLayer(this.convertedAnnotationLayer);
     },
 };
+</script>
