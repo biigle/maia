@@ -19,7 +19,7 @@ export default {
         handleSelectedLabel(label) {
             this.$emit('select', label);
         },
-        handleDeselectedLabel(label) {
+        handleDeselectedLabel() {
             this.$emit('select', null);
         },
         proceed() {

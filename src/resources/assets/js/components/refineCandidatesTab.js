@@ -28,10 +28,10 @@ export default {
         handleSelectedLabel(label) {
             this.$emit('select', label);
         },
-        handleDeselectedLabel(label) {
+        handleDeselectedLabel() {
             this.$emit('select', null);
         },
-        handleConvertCandidates(label) {
+        handleConvertCandidates() {
             if (!this.hasNoSelectedCandidates) {
                 this.$emit('convert');
             }

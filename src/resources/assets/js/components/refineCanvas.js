@@ -33,10 +33,10 @@ export default {
         },
     },
     methods: {
-        handlePreviousImage(e) {
+        handlePreviousImage() {
             this.$emit('previous-image');
         },
-        handleNextImage(e) {
+        handleNextImage() {
             this.$emit('next-image');
         },
         toggleSelectingMaiaAnnotation() {
