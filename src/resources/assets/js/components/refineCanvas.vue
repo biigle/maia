@@ -1,99 +1,107 @@
+<script>
+import Collection from 'ol/Collection';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import {AnnotationCanvas} from '../import';
+import {AttachLabelInteraction} from '../import';
+import {Keyboard} from '../import';
+import {StylesStore} from '../import';
+
 /**
  * A variant of the annotation canvas used for the refinement of training proposals and
  * annotation candidates.
  *
  * @type {Object}
  */
-biigle.$component('maia.components.refineCanvas', {
-    mixins: [biigle.$require('annotations.components.annotationCanvas')],
+export default {
+    mixins: [AnnotationCanvas],
     props: {
         unselectedAnnotations: {
             type: Array,
-            default: function () {
+            default() {
                 return [];
             },
         },
     },
-    data: function () {
+    data() {
         return {
             selectingMaiaAnnotation: false,
         };
     },
     computed: {
-        hasAnnotations: function () {
+        hasAnnotations() {
             return this.annotations.length > 0;
         },
     },
     methods: {
-        handlePreviousImage: function (e) {
+        handlePreviousImage() {
             this.$emit('previous-image');
         },
-        handleNextImage: function (e) {
+        handleNextImage() {
             this.$emit('next-image');
         },
-        toggleSelectingMaiaAnnotation: function () {
+        toggleSelectingMaiaAnnotation() {
             this.selectingMaiaAnnotation = !this.selectingMaiaAnnotation;
         },
-        createUnselectedAnnotationsLayer: function () {
-            this.unselectedAnnotationFeatures = new ol.Collection();
-            this.unselectedAnnotationSource = new ol.source.Vector({
+        createUnselectedAnnotationsLayer() {
+            this.unselectedAnnotationFeatures = new Collection();
+            this.unselectedAnnotationSource = new VectorSource({
                 features: this.unselectedAnnotationFeatures
             });
-            this.unselectedAnnotationLayer = new ol.layer.Vector({
+            this.unselectedAnnotationLayer = new VectorLayer({
                 source: this.unselectedAnnotationSource,
                 // Should be below regular annotations which are at index 100.
                 zIndex: 99,
                 updateWhileAnimating: true,
                 updateWhileInteracting: true,
-                style: biigle.$require('annotations.stores.styles').editing,
+                style: StylesStore.editing,
                 opacity: 0.5,
             });
         },
-        createSelectMaiaAnnotationInteraction: function (features) {
-            var Interaction = biigle.$require('annotations.ol.AttachLabelInteraction');
-            this.selectMaiaAnnotationInteraction = new Interaction({
+        createSelectMaiaAnnotationInteraction(features) {
+            this.selectMaiaAnnotationInteraction = new AttachLabelInteraction({
                 map: this.map,
-                features: features
+                features: features,
             });
             this.selectMaiaAnnotationInteraction.setActive(false);
             this.selectMaiaAnnotationInteraction.on('attach', this.handleSelectMaiaAnnotation);
         },
-        handleSelectMaiaAnnotation: function (e) {
+        handleSelectMaiaAnnotation(e) {
             this.$emit('select', e.feature.get('annotation'));
         },
-        handleUnselectMaiaAnnotation: function () {
+        handleUnselectMaiaAnnotation() {
             if (this.selectedAnnotations.length > 0) {
                 this.$emit('unselect', this.selectedAnnotations[0]);
             }
         },
     },
     watch: {
-        unselectedAnnotations: function (annotations) {
+        unselectedAnnotations(annotations) {
             this.refreshAnnotationSource(annotations, this.unselectedAnnotationSource);
         },
-        selectingMaiaAnnotation: function (selecting) {
+        selectingMaiaAnnotation(selecting) {
             this.selectMaiaAnnotationInteraction.setActive(selecting);
         },
     },
-    created: function () {
+    created() {
         this.createUnselectedAnnotationsLayer();
         this.map.addLayer(this.unselectedAnnotationLayer);
 
         // Disallow unselecting of currently highlighted training proposal.
         this.selectInteraction.setActive(false);
-        var kb = biigle.$require('keyboard');
 
         if (this.canModify) {
             this.createSelectMaiaAnnotationInteraction(this.unselectedAnnotationFeatures);
             this.map.addInteraction(this.selectMaiaAnnotationInteraction);
-            kb.on('Delete', this.handleUnselectMaiaAnnotation, 0, this.listenerSet);
+            Keyboard.on('Delete', this.handleUnselectMaiaAnnotation, 0, this.listenerSet);
         }
 
         // Disable shortcut for the measure interaction.
-        kb.off('Shift+f', this.toggleMeasuring, this.listenerSet);
+        Keyboard.off('Shift+f', this.toggleMeasuring, this.listenerSet);
     },
-    mounted: function () {
+    mounted() {
         // Disable shortcut for the translate interaction.
-        biigle.$require('keyboard').off('m', this.toggleTranslating, this.listenerSet);
+        Keyboard.off('m', this.toggleTranslating, this.listenerSet);
     },
-});
+};
+</script>

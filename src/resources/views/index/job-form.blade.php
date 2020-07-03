@@ -189,12 +189,7 @@
     </div>
 </form>
 
-@push('styles')
-<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
-@endpush
-
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
 <script type="text/javascript">
     biigle.$declare('maia.volumeId', {!! $volume->id !!});
     biigle.$declare('maia.useExistingAnnotations', {!! old('use_existing') ? 'true' : 'false' !!});

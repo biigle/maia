@@ -1,9 +1,10 @@
+<script>
 /**
  * The refine training proposals tab
  *
  * @type {Object}
  */
-biigle.$component('maia.components.refineProposalsTab', {
+export default {
     props: {
         selectedProposals: {
             type: Array,
@@ -15,23 +16,24 @@ biigle.$component('maia.components.refineProposalsTab', {
         },
     },
     computed: {
-        numberSelectedProposals: function () {
+        numberSelectedProposals() {
             return this.selectedProposals.length;
         },
-        numberSeenProposals: function () {
+        numberSeenProposals() {
             return this.seenProposals.length;
         },
-        hasNoSelectedProposals: function () {
+        hasNoSelectedProposals() {
             return this.numberSelectedProposals === 0;
         },
-        hasSeenAllSelectedProposals: function () {
+        hasSeenAllSelectedProposals() {
             return this.numberSelectedProposals > 0 && this.numberSelectedProposals === this.numberSeenProposals;
         },
-        textClass: function () {
+        textClass() {
             return this.hasSeenAllSelectedProposals ? 'text-success' : '';
         },
-        buttonClass: function () {
+        buttonClass() {
             return this.hasSeenAllSelectedProposals ? 'btn-success' : 'btn-default';
         },
     },
-});
+};
+</script>

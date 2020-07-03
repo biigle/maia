@@ -1,11 +1,14 @@
+<script>
+import {LabelTrees} from '../import';
+
 /**
  * The refine annotation candidates tab
  *
  * @type {Object}
  */
-biigle.$component('maia.components.refineCandidatesTab', {
+export default {
     components: {
-        labelTrees: biigle.$require('labelTrees.components.labelTrees'),
+        labelTrees: LabelTrees,
     },
     props: {
         selectedCandidates: {
@@ -17,30 +20,23 @@ biigle.$component('maia.components.refineCandidatesTab', {
             required: true,
         },
     },
-    data: function () {
-        return {
-            //
-        };
-    },
     computed: {
-        hasNoSelectedCandidates: function () {
+        hasNoSelectedCandidates() {
             return this.selectedCandidates.length === 0;
         },
     },
     methods: {
-        handleSelectedLabel: function (label) {
+        handleSelectedLabel(label) {
             this.$emit('select', label);
         },
-        handleDeselectedLabel: function (label) {
+        handleDeselectedLabel() {
             this.$emit('select', null);
         },
-        handleConvertCandidates: function (label) {
+        handleConvertCandidates() {
             if (!this.hasNoSelectedCandidates) {
                 this.$emit('convert');
             }
         },
     },
-    created: function () {
-        //
-    },
-});
+};
+</script>

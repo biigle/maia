@@ -1,9 +1,10 @@
+<script>
 /**
  * The select training proposals tab
  *
  * @type {Object}
  */
-biigle.$component('maia.components.selectProposalsTab', {
+export default {
     props: {
         proposals: {
             type: Array,
@@ -14,25 +15,18 @@ biigle.$component('maia.components.selectProposalsTab', {
             required: true,
         },
     },
-    data: function () {
-        return {
-            //
-        };
-    },
     computed: {
-        selectedProposalsCount: function () {
+        selectedProposalsCount() {
             return this.selectedProposals.length;
         },
-        proposalsCount: function () {
+        proposalsCount() {
             return this.proposals.length;
         },
     },
     methods: {
-        proceed: function () {
+        proceed() {
             this.$emit('proceed');
         },
     },
-    created: function () {
-        //
-    },
-});
+};
+</script>

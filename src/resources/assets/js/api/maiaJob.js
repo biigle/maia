@@ -1,7 +1,7 @@
 /**
  * Resource for MAIA jobs.
  *
- * var resource = biigle.$require('maia.api.maiaJob');
+ * let resource = biigle.$require('maia.api.maiaJob');
  *
  * Create a MAIA job:
  * resource.save({id: volumeId}, {
@@ -21,7 +21,7 @@
  *
  * @type {Vue.resource}
  */
-biigle.$declare('maia.api.maiaJob', Vue.resource('api/v1/maia-jobs{/id}', {}, {
+export default Vue.resource('api/v1/maia-jobs{/id}', {}, {
     save: {
         method: 'POST',
         url: 'api/v1/volumes{/id}/maia-jobs',
@@ -46,4 +46,4 @@ biigle.$declare('maia.api.maiaJob', Vue.resource('api/v1/maia-jobs{/id}', {}, {
         method: 'POST',
         url: 'api/v1/maia-jobs{/id}/annotation-candidates',
     },
-}));
+});
