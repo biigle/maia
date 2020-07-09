@@ -2,13 +2,10 @@
 @section('title', "{$volume->name} MAIA")
 
 @push('styles')
-<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
-<link href="{{ cachebust_asset('vendor/volumes/styles/main.css') }}" rel="stylesheet">
 <link href="{{ cachebust_asset('vendor/maia/styles/main.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/maia/scripts/main.js') }}"></script>
 @endpush
 

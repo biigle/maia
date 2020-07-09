@@ -3,18 +3,12 @@
 @section('full-navbar', true)
 
 @push('styles')
-<link href="{{ cachebust_asset('vendor/label-trees/styles/main.css') }}" rel="stylesheet">
-<link href="{{ cachebust_asset('vendor/volumes/styles/main.css') }}" rel="stylesheet">
 <link href="{{ cachebust_asset('vendor/largo/styles/main.css') }}" rel="stylesheet">
-<link href="{{ cachebust_asset('vendor/annotations/styles/main.css') }}" rel="stylesheet">
 <link href="{{ cachebust_asset('vendor/maia/styles/main.css') }}" rel="stylesheet">
 @endpush
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/label-trees/scripts/main.js') }}"></script>
-<script src="{{ cachebust_asset('vendor/volumes/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/largo/scripts/main.js') }}"></script>
-<script src="{{ cachebust_asset('vendor/annotations/scripts/main.js') }}"></script>
 <script src="{{ cachebust_asset('vendor/maia/scripts/main.js') }}"></script>
 <script type="text/javascript">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
