@@ -2,16 +2,16 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
-use DB;
-use Carbon\Carbon;
 use Biigle\Annotation;
 use Biigle\AnnotationLabel;
-use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
-use Biigle\Modules\Maia\Http\Requests\UpdateAnnotationCandidate;
+use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\Http\Requests\SubmitAnnotationCandidates;
+use Biigle\Modules\Maia\Http\Requests\UpdateAnnotationCandidate;
+use Biigle\Modules\Maia\MaiaJob;
+use Carbon\Carbon;
+use DB;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class AnnotationCandidateController extends Controller

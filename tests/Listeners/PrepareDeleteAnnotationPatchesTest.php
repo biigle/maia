@@ -2,12 +2,12 @@
 
 namespace Biigle\Tests\Modules\Maia\Listeners;
 
-use Queue;
-use TestCase;
-use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Modules\Maia\Jobs\DeleteAnnotationPatches;
 use Biigle\Modules\Maia\Listeners\PrepareDeleteAnnotationPatches;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Queue;
+use TestCase;
 
 class PrepareDeleteAnnotationPatchesTest extends TestCase
 {

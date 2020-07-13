@@ -3,8 +3,8 @@
 namespace Biigle\Modules\Maia\Http\Requests;
 
 use Biigle\Modules\Maia\MaiaJob;
-use Illuminate\Foundation\Http\FormRequest;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Illuminate\Foundation\Http\FormRequest;
 
 class ContinueMaiaJob extends FormRequest
 {

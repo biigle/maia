@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
-use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\Modules\Maia\MaiaJob;
 
 class MaiaJobImagesController extends Controller
 {

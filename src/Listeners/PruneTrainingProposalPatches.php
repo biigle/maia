@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Maia\Listeners;
 
-use Storage;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Storage;
 
 class PruneTrainingProposalPatches implements ShouldQueue
 {

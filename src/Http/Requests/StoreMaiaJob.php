@@ -2,11 +2,11 @@
 
 namespace Biigle\Modules\Maia\Http\Requests;
 
-use Biigle\Volume;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Modules\Maia\Rules\OddNumber;
-use Illuminate\Foundation\Http\FormRequest;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Rules\OddNumber;
+use Biigle\Volume;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMaiaJob extends FormRequest
 {

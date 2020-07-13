@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Maia\Listeners;
 
-use Queue;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Modules\Maia\Jobs\DeleteAnnotationPatches;
+use Queue;
 
 class PrepareDeleteAnnotationPatches
 {

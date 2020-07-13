@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Queue;
-use Exception;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
+use Biigle\Modules\Maia\TrainingProposal;
+use Exception;
+use Queue;
 
 class NoveltyDetectionResponse extends JobResponse
 {

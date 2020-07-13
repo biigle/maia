@@ -3,9 +3,9 @@
 namespace Biigle\Modules\Maia\Notifications;
 
 use Biigle\Modules\Maia\MaiaJob;
-use Illuminate\Notifications\Notification;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class JobStateChanged extends Notification
 {

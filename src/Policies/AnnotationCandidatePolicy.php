@@ -2,13 +2,13 @@
 
 namespace Biigle\Modules\Maia\Policies;
 
-use DB;
-use Cache;
+use Biigle\Label;
+use Biigle\Modules\Maia\AnnotationCandidate;
+use Biigle\Policies\CachedPolicy;
 use Biigle\Role;
 use Biigle\User;
-use Biigle\Label;
-use Biigle\Policies\CachedPolicy;
-use Biigle\Modules\Maia\AnnotationCandidate;
+use Cache;
+use DB;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AnnotationCandidatePolicy extends CachedPolicy

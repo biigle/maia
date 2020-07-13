@@ -2,11 +2,11 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Storage;
-use TestCase;
-use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Biigle\Modules\Maia\Jobs\DeleteAnnotationPatches;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
+use Biigle\Tests\Modules\Maia\TrainingProposalTest;
+use Storage;
+use TestCase;
 
 class DeleteAnnotationPatchesTest extends TestCase
 {

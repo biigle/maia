@@ -2,17 +2,17 @@
 
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
+use ApiTestCase;
+use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Event;
 use Queue;
 use Response;
-use ApiTestCase;
-use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Tests\Modules\Maia\TrainingProposalTest;
-use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 
 class TrainingProposalControllerTest extends ApiTestCase
 {

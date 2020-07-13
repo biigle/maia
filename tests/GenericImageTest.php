@@ -2,9 +2,9 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
-use TestCase;
 use Biigle\FileCache\GenericFile;
 use Biigle\Modules\Maia\GenericImage;
+use TestCase;
 
 class GenericImageTest extends TestCase
 {

@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Maia\Listeners;
 
-use Queue;
-use Exception;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
+use Exception;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Queue;
 
 class DispatchInstanceSegmentationRequest implements ShouldQueue
 {

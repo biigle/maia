@@ -2,12 +2,12 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
-use Event;
-use ModelTestCase;
-use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Event;
+use ModelTestCase;
 
 class MaiaJobTest extends ModelTestCase
 {

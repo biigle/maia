@@ -2,13 +2,13 @@
 
 namespace Biigle\Tests\Modules\Maia\Listeners;
 
-use Queue;
-use TestCase;
-use Exception;
-use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
 use Biigle\Modules\Maia\Listeners\DispatchInstanceSegmentationRequest;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Exception;
+use Queue;
+use TestCase;
 
 class DispatchInstanceSegmentationRequestTest extends TestCase
 {

@@ -2,11 +2,11 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
-use Biigle\Shape;
-use ModelTestCase;
-use Biigle\Tests\LabelTest;
-use Biigle\Tests\AnnotationTest;
 use Biigle\Modules\Maia\AnnotationCandidate;
+use Biigle\Shape;
+use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\LabelTest;
+use ModelTestCase;
 
 class AnnotationCandidateTest extends ModelTestCase
 {

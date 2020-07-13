@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Storage;
 use Biigle\Image;
-use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
+use Biigle\Modules\Maia\MaiaJob;
+use Storage;
 
 class DeleteAnnotationPatches extends Job
 {

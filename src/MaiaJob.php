@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Maia;
 
-use Biigle\User;
-use Biigle\Volume;
-use Biigle\Traits\HasJsonAttributes;
-use Illuminate\Database\Eloquent\Model;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
+use Biigle\Traits\HasJsonAttributes;
+use Biigle\User;
+use Biigle\Volume;
+use Illuminate\Database\Eloquent\Model;
 
 class MaiaJob extends Model
 {

@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Maia;
 
-use Biigle\Label;
 use Biigle\Annotation;
+use Biigle\Label;
 
 class AnnotationCandidate extends MaiaAnnotation
 {

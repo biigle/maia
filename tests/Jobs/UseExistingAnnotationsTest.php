@@ -2,18 +2,18 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Queue;
-use TestCase;
+use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
 use Biigle\Shape;
-use Biigle\Tests\AnnotationTest;
 use Biigle\Tests\AnnotationLabelTest;
+use Biigle\Tests\AnnotationTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Illuminate\Support\Facades\Notification;
-use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
+use Queue;
+use TestCase;
 
 class UseExistingAnnotationsTest extends TestCase
 {

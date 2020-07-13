@@ -2,16 +2,16 @@
 
 namespace Biigle\Tests\Modules\Maia\Listeners;
 
-use Queue;
-use TestCase;
+use Biigle\Modules\Maia\Events\MaiaJobCreated;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
+use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
+use Biigle\Modules\Maia\Listeners\DispatchNoveltyDetectionRequest;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Exception;
 use Illuminate\Support\Facades\Bus;
-use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Biigle\Modules\Maia\Events\MaiaJobCreated;
-use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
-use Biigle\Modules\Maia\Listeners\DispatchNoveltyDetectionRequest;
+use Queue;
+use TestCase;
 
 class DispatchNoveltyDetectionRequestTest extends TestCase
 {

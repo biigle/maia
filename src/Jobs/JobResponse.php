@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use DB;
-use Biigle\Shape;
-use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Modules\Maia\MaiaAnnotation;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\MaiaAnnotation;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Shape;
+use DB;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
  * This job is executed on the machine running BIIGLE to store the results of novelty

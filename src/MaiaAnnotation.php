@@ -2,11 +2,11 @@
 
 namespace Biigle\Modules\Maia;
 
+use Biigle\Contracts\Annotation as AnnotationContract;
 use Biigle\Image;
 use Biigle\Shape;
 use Biigle\Traits\HasPointsAttribute;
 use Illuminate\Database\Eloquent\Model;
-use Biigle\Contracts\Annotation as AnnotationContract;
 
 abstract class MaiaAnnotation extends Model implements AnnotationContract
 {

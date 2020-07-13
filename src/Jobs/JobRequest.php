@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use File;
-use Queue;
-use Exception;
-use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\GenericImage;
+use Biigle\Modules\Maia\MaiaJob;
+use Exception;
+use File;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Queue;
 
 /**
  * This job is executed on a machine with GPU access.

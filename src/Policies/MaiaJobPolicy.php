@@ -2,11 +2,11 @@
 
 namespace Biigle\Modules\Maia\Policies;
 
-use DB;
-use Biigle\Role;
-use Biigle\User;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Policies\CachedPolicy;
+use Biigle\Role;
+use Biigle\User;
+use DB;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class MaiaJobPolicy extends CachedPolicy

@@ -2,16 +2,16 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use File;
-use Queue;
-use TestCase;
-use Exception;
-use FileCache;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
+use Exception;
+use File;
+use FileCache;
+use Queue;
+use TestCase;
 
 class NoveltyDetectionRequestTest extends TestCase
 {

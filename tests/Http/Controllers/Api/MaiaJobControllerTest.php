@@ -3,12 +3,12 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\Tests\ImageTest;
-use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Tests\ImageTest;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 
 class MaiaJobControllerTest extends ApiTestCase
 {

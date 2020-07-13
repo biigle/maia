@@ -2,13 +2,13 @@
 
 namespace Biigle\Tests\Modules\Maia\Listeners;
 
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
+use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
+use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use File;
 use Storage;
 use TestCase;
-use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Tests\Modules\Maia\TrainingProposalTest;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
-use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
 
 class PruneTrainingProposalPatchesTest extends TestCase
 {

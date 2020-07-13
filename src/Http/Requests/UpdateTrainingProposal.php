@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Maia\Http\Requests;
 
-use Exception;
-use Biigle\Modules\Maia\TrainingProposal;
-use Illuminate\Foundation\Http\FormRequest;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\TrainingProposal;
+use Exception;
+use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTrainingProposal extends FormRequest
 {

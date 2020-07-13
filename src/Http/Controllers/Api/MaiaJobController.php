@@ -2,13 +2,13 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
-use Queue;
-use Biigle\Volume;
-use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Http\Requests\StoreMaiaJob;
 use Biigle\Modules\Maia\Http\Requests\DestroyMaiaJob;
+use Biigle\Modules\Maia\Http\Requests\StoreMaiaJob;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Volume;
+use Queue;
 
 class MaiaJobController extends Controller
 {

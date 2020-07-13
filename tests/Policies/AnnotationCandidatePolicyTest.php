@@ -4,9 +4,9 @@ namespace Biigle\Tests\Modules\Maia\Policies;
 
 use ApiTestCase;
 use Biigle\Tests\LabelTest;
-use Biigle\Tests\ProjectTest;
-use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Biigle\Tests\ProjectTest;
 
 class AnnotationCandidatePolicyTest extends ApiTestCase
 {

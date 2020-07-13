@@ -2,11 +2,11 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use File;
-use Queue;
-use Exception;
-use FileCache;
 use Biigle\Modules\Maia\MaiaJob;
+use Exception;
+use File;
+use FileCache;
+use Queue;
 
 /**
  * This job is executed on a machine with GPU access.

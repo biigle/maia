@@ -2,14 +2,14 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Exception;
+use Illuminate\Support\Facades\Notification;
 use Log;
 use TestCase;
-use Exception;
-use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Illuminate\Support\Facades\Notification;
-use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
 
 class NoveltyDetectionFailureTest extends TestCase
 {

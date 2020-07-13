@@ -2,13 +2,13 @@
 
 namespace Biigle\Modules\Maia\Listeners;
 
-use Queue;
-use Exception;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
-use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
+use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
+use Exception;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Queue;
 
 class DispatchNoveltyDetectionRequest implements ShouldQueue
 {

@@ -2,19 +2,19 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Queue;
-use TestCase;
-use Exception;
-use Biigle\Shape;
-use Biigle\Tests\ImageTest;
-use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Tests\Modules\Maia\MaiaJobTest;
-use Illuminate\Support\Facades\Notification;
-use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
+use Biigle\Shape;
+use Biigle\Tests\ImageTest;
+use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Exception;
+use Illuminate\Support\Facades\Notification;
+use Queue;
+use TestCase;
 
 class NoveltyDetectionResponseTest extends TestCase
 {

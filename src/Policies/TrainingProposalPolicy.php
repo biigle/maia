@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Maia\Policies;
 
-use DB;
-use Cache;
+use Biigle\Modules\Maia\TrainingProposal;
+use Biigle\Policies\CachedPolicy;
 use Biigle\Role;
 use Biigle\User;
-use Biigle\Policies\CachedPolicy;
-use Biigle\Modules\Maia\TrainingProposal;
+use Cache;
+use DB;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TrainingProposalPolicy extends CachedPolicy

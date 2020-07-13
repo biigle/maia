@@ -2,18 +2,18 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use DB;
 use Arr;
-use Biigle\Shape;
-use Biigle\Jobs\Job;
 use Biigle\Annotation;
-use Biigle\Modules\Maia\MaiaJob;
-use Illuminate\Queue\SerializesModels;
-use Biigle\Modules\Maia\TrainingProposal;
-use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Jobs\Job;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
+use Biigle\Modules\Maia\TrainingProposal;
+use Biigle\Shape;
+use DB;
+use Illuminate\Queue\SerializesModels;
 
 class UseExistingAnnotations extends Job
 {

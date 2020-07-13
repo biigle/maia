@@ -2,8 +2,8 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
-use ModelTestCase;
 use Biigle\Modules\Maia\MaiaJobState;
+use ModelTestCase;
 
 class MaiaJobStateTest extends ModelTestCase
 {

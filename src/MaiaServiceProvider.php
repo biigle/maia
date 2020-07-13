@@ -2,19 +2,19 @@
 
 namespace Biigle\Modules\Maia;
 
-use Event;
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
+use Biigle\Modules\Maia\Events\MaiaJobCreated;
+use Biigle\Modules\Maia\Events\MaiaJobDeleting;
+use Biigle\Modules\Maia\Listeners\DispatchInstanceSegmentationRequest;
+use Biigle\Modules\Maia\Listeners\DispatchNoveltyDetectionRequest;
+use Biigle\Modules\Maia\Listeners\PrepareDeleteAnnotationPatches;
+use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
 use Biigle\Services\Modules;
+use Event;
+use Illuminate\Database\Eloquent\Factory as EloquentFactory;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Biigle\Modules\Maia\Events\MaiaJobCreated;
-use Biigle\Modules\Maia\Events\MaiaJobDeleting;
-use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Illuminate\Database\Eloquent\Factory as EloquentFactory;
-use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
-use Biigle\Modules\Maia\Listeners\PrepareDeleteAnnotationPatches;
-use Biigle\Modules\Maia\Listeners\DispatchNoveltyDetectionRequest;
-use Biigle\Modules\Maia\Listeners\DispatchInstanceSegmentationRequest;
 
 class MaiaServiceProvider extends ServiceProvider
 {

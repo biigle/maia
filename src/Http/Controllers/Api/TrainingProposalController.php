@@ -2,14 +2,14 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
-use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Http\Requests\ContinueMaiaJob;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Http\Requests\UpdateTrainingProposal;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\TrainingProposal;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class TrainingProposalController extends Controller

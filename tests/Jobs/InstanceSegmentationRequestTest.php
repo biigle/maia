@@ -2,18 +2,18 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Str;
-use File;
-use Queue;
-use TestCase;
-use Exception;
-use FileCache;
+use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
+use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
+use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
+use Exception;
+use File;
+use FileCache;
+use Queue;
+use Str;
+use TestCase;
 
 class InstanceSegmentationRequestTest extends TestCase
 {

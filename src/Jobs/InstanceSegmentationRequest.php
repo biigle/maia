@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use File;
-use Exception;
-use FileCache;
 use Biigle\Modules\Maia\MaiaJob;
+use Exception;
+use File;
+use FileCache;
 
 class InstanceSegmentationRequest extends JobRequest
 {

@@ -2,15 +2,15 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Views;
 
-use Storage;
+use Biigle\Http\Controllers\Views\Controller;
+use Biigle\LabelTree;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Project;
 use Biigle\Role;
 use Biigle\Volume;
-use Biigle\Project;
-use Biigle\LabelTree;
 use Illuminate\Http\Request;
-use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Http\Controllers\Views\Controller;
-use Biigle\Modules\Maia\MaiaJobState as State;
+use Storage;
 
 class MaiaJobController extends Controller
 {

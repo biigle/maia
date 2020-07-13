@@ -2,10 +2,10 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Log;
-use Exception;
 use Biigle\Modules\Maia\MaiaJob;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Log;
 
 /**
  * This job is executed on the machine running BIIGLE to store the error state of a

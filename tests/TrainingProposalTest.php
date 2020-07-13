@@ -2,9 +2,9 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
+use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Shape;
 use ModelTestCase;
-use Biigle\Modules\Maia\TrainingProposal;
 
 class TrainingProposalTest extends ModelTestCase
 {

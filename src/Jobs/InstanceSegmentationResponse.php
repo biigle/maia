@@ -2,12 +2,12 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Queue;
-use Exception;
-use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\AnnotationCandidate;
+use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\InstanceSegmentationComplete;
+use Exception;
+use Queue;
 
 class InstanceSegmentationResponse extends JobResponse
 {

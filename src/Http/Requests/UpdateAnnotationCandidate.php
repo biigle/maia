@@ -2,11 +2,11 @@
 
 namespace Biigle\Modules\Maia\Http\Requests;
 
-use Exception;
 use Biigle\Label;
-use Illuminate\Foundation\Http\FormRequest;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Exception;
+use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAnnotationCandidate extends FormRequest
 {

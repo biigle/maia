@@ -2,15 +2,15 @@
 
 namespace Biigle\Modules\Maia\Console\Commands;
 
-use File;
-use Storage;
 use Biigle\Annotation;
-use FilesystemIterator;
-use InvalidArgumentException;
-use Illuminate\Console\Command;
-use Biigle\Modules\Maia\TrainingProposal;
-use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\AnnotationCandidate;
+use Biigle\Modules\Maia\TrainingProposal;
+use File;
+use FilesystemIterator;
+use Illuminate\Console\Command;
+use InvalidArgumentException;
+use Storage;
 
 class MigratePatchStorage extends Command
 {

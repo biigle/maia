@@ -2,8 +2,8 @@
 
 namespace Biigle\Modules\Maia\Console\Commands;
 
-use Illuminate\Console\Command;
 use Biigle\Modules\Maia\MaiaServiceProvider as ServiceProvider;
+use Illuminate\Console\Command;
 
 class Publish extends Command
 {

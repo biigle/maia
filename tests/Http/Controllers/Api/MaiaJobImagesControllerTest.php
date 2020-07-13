@@ -4,9 +4,9 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
-use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 
 class MaiaJobImagesControllerTest extends ApiTestCase
 {
