@@ -2,9 +2,9 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
-use Biigle\Annotation;
-use Biigle\AnnotationLabel;
 use Biigle\Http\Controllers\Api\Controller;
+use Biigle\ImageAnnotation;
+use Biigle\ImageAnnotationLabel;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\Http\Requests\SubmitAnnotationCandidates;
@@ -89,7 +89,7 @@ class AnnotationCandidateController extends Controller
             $annotationLabels = [];
 
             foreach ($candidates as $candidate) {
-                $annotation = new Annotation;
+                $annotation = new ImageAnnotation;
                 $annotation->image_id = $candidate->image_id;
                 $annotation->shape_id = $candidate->shape_id;
                 $annotation->points = $candidate->points;
@@ -109,7 +109,7 @@ class AnnotationCandidateController extends Controller
                 ];
             }
 
-            AnnotationLabel::insert($annotationLabels);
+            ImageAnnotationLabel::insert($annotationLabels);
 
             return $annotations;
         });

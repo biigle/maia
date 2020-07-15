@@ -8,8 +8,8 @@ use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
 use Biigle\Shape;
-use Biigle\Tests\AnnotationLabelTest;
-use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageAnnotationLabelTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Illuminate\Support\Facades\Notification;
 use Queue;
@@ -19,9 +19,9 @@ class UseExistingAnnotationsTest extends TestCase
 {
     public function testHandle()
     {
-        $a = AnnotationTest::create(['shape_id' => Shape::circleId()]);
-        $al1 = AnnotationLabelTest::create(['annotation_id' => $a->id]);
-        $al2 = AnnotationLabelTest::create();
+        $a = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
+        $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
+        $al2 = ImageAnnotationLabelTest::create();
         $job = MaiaJobTest::create(['volume_id' => $a->image->volume_id]);
 
         Queue::fake();
@@ -34,18 +34,18 @@ class UseExistingAnnotationsTest extends TestCase
 
     public function testHandleRestrictLabels()
     {
-        $a1 = AnnotationTest::create(['shape_id' => Shape::circleId()]);
-        $al1 = AnnotationLabelTest::create(['annotation_id' => $a1->id]);
+        $a1 = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
+        $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a1->id]);
         // Create only one proposal even though the annotation has two matching labels.
-        $al2 = AnnotationLabelTest::create([
+        $al2 = ImageAnnotationLabelTest::create([
             'annotation_id' => $a1->id,
             'label_id' => $al1->label_id,
         ]);
-        $a2 = AnnotationTest::create([
+        $a2 = ImageAnnotationTest::create([
             'shape_id' => Shape::circleId(),
             'image_id' => $a1->image_id,
         ]);
-        $al3 = AnnotationLabelTest::create(['annotation_id' => $a2->id]);
+        $al3 = ImageAnnotationLabelTest::create(['annotation_id' => $a2->id]);
 
         $job = MaiaJobTest::create([
             'volume_id' => $a1->image->volume_id,
@@ -61,30 +61,30 @@ class UseExistingAnnotationsTest extends TestCase
 
     public function testHandleShapeConversion()
     {
-        $a1 = AnnotationTest::create([
+        $a1 = ImageAnnotationTest::create([
             'shape_id' => Shape::pointId(),
             'points' => [10, 20],
         ]);
 
-        $a2 = AnnotationTest::create([
+        $a2 = ImageAnnotationTest::create([
             'shape_id' => Shape::rectangleId(),
             'points' => [10, 10, 100, 10, 100, 100, 10, 100],
             'image_id' => $a1->image_id,
         ]);
 
-        $a3 = AnnotationTest::create([
+        $a3 = ImageAnnotationTest::create([
             'shape_id' => Shape::circleId(),
             'points' => [10, 20, 30],
             'image_id' => $a1->image_id,
         ]);
 
-        $a4 = AnnotationTest::create([
+        $a4 = ImageAnnotationTest::create([
             'shape_id' => Shape::lineId(),
             'points' => [10, 10, 20, 20],
             'image_id' => $a1->image_id,
         ]);
 
-        $a5 = AnnotationTest::create([
+        $a5 = ImageAnnotationTest::create([
             'shape_id' => Shape::polygonId(),
             'points' => [10, 10, 20, 20, 0, 20],
             'image_id' => $a1->image_id,
@@ -115,7 +115,7 @@ class UseExistingAnnotationsTest extends TestCase
 
     public function testHandleSkipNd()
     {
-        $a = AnnotationTest::create();
+        $a = ImageAnnotationTest::create();
         $job = MaiaJobTest::create([
             'volume_id' => $a->image->volume_id,
             'params' => ['use_existing' => true, 'skip_nd' => true],
@@ -132,7 +132,7 @@ class UseExistingAnnotationsTest extends TestCase
 
     public function testHandleSkipNdAndRestrictLabels()
     {
-        $al = AnnotationLabelTest::create();
+        $al = ImageAnnotationLabelTest::create();
         $job = MaiaJobTest::create([
             'volume_id' => $al->annotation->image->volume_id,
             'params' => [

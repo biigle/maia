@@ -4,7 +4,7 @@ namespace Biigle\Tests\Modules\Maia;
 
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Shape;
-use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\LabelTest;
 use ModelTestCase;
 
@@ -18,7 +18,7 @@ class AnnotationCandidateTest extends ModelTestCase
     public function testAttributes()
     {
         $label = LabelTest::create();
-        $annotation = AnnotationTest::create();
+        $annotation = ImageAnnotationTest::create();
         $this->model->label_id = $label->id;
         $this->model->annotation_id = $annotation->id;
         $this->model->save();
