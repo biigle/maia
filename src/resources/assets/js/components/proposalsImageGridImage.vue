@@ -3,7 +3,7 @@
         <div v-if="showIcon" class="image-icon">
             <i class="fas" :class="iconClass"></i>
         </div>
-        <img @click="toggleSelect" :src="url || emptyUrl" @error="showEmptyImage">
+        <img @click="toggleSelect" :src="srcUrl" @error="showEmptyImage">
     </figure>
 </template>
 
