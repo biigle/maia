@@ -69,7 +69,7 @@ class AnnotationCandidateController extends Controller
      * @apiGroup Maia
      * @apiName ConvertAnnotationCandidates
      * @apiPermission projectEditor
-     * @apiDescription This converts all annotation candidates with attached label which have not been converted yet. Returns a map of converted annotation candidate ID to newly created annotation ID.
+     * @apiDescription This converts all annotation candidates with attached label which have not been converted yet. Returns a map of converted annotation candidate ID to newly created image annotation ID.
      *
      * @apiParam {Number} id The job ID.
      *

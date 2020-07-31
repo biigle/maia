@@ -3,6 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
+use Biigle\MediaType;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
@@ -107,6 +108,17 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->beEditor();
         // MAIA is not available for volumes with tiled images.
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(422);
+    }
+
+    public function testStoreVideoVolume()
+    {
+        $volume = $this->volume();
+        $volume->media_type_id = MediaType::videoId();
+        $volume->save();
+
+        $this->beEditor();
+        $this->postJson("/api/v1/volumes/{$volume->id}/maia-jobs", $this->defaultParams)
             ->assertStatus(422);
     }
 

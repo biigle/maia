@@ -3,6 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Views;
 
 use ApiTestCase;
+use Biigle\MediaType;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
@@ -32,6 +33,13 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         ImageTest::create(['volume_id' => $id, 'tiled' => true]);
+        $this->beEditor();
+        $this->get("volumes/{$id}/maia")->assertStatus(404);
+    }
+
+    public function testIndexVideoVolume()
+    {
+        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
         $this->beEditor();
         $this->get("volumes/{$id}/maia")->assertStatus(404);
     }
