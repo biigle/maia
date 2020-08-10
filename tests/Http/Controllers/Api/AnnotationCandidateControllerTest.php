@@ -6,7 +6,7 @@ use ApiTestCase;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Tests\AnnotationTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\LabelTest;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
@@ -65,7 +65,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
             'points' => [1, 2, 3],
         ]);
 
-        $annotation = AnnotationTest::create();
+        $annotation = ImageAnnotationTest::create();
         $c2 = AnnotationCandidateTest::create([
             'job_id' => $job->id,
             'label_id' => $this->labelChild()->id,
@@ -146,7 +146,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
     public function testUpdateConverted()
     {
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
-        $annotation = AnnotationTest::create();
+        $annotation = ImageAnnotationTest::create();
         $a = AnnotationCandidateTest::create([
             'job_id' => $job->id,
             'annotation_id' => $annotation->id,

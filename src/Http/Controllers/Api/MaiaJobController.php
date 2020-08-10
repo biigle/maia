@@ -19,7 +19,7 @@ class MaiaJobController extends Controller
      * @apiGroup Maia
      * @apiName StoreMaiaJob
      * @apiPermission projectEditor
-     * @apiDescription New MAIA jobs cannot be created for volumes with very large (tiled) images.
+     * @apiDescription New MAIA jobs can only be created for image volumes without very large (tiled) images.
      *
      * @apiParam {Number} id The volume ID.
      *

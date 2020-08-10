@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia;
 
-use Biigle\Contracts\Annotation as AnnotationContract;
+use Biigle\Contracts\ImageAnnotation as AnnotationContract;
 use Biigle\Image;
 use Biigle\Shape;
 use Biigle\Traits\HasPointsAttribute;

@@ -10,6 +10,7 @@ use Biigle\Project;
 use Biigle\Role;
 use Biigle\Volume;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Storage;
 
 class MaiaJobController extends Controller
@@ -26,8 +27,8 @@ class MaiaJobController extends Controller
         $volume = Volume::findOrFail($id);
         $this->authorize('edit-in', $volume);
 
-        if ($volume->hasTiledImages()) {
-            abort(404);
+        if (!$volume->isImageVolume() || $volume->hasTiledImages()) {
+            abort(Response::HTTP_NOT_FOUND);
         }
 
         $jobs = MaiaJob::where('volume_id', $id)

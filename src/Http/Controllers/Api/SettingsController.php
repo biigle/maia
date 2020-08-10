@@ -5,6 +5,7 @@ namespace Biigle\Modules\Maia\Http\Controllers\Api;
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class SettingsController extends Controller
 {
@@ -24,7 +25,7 @@ class SettingsController extends Controller
     public function store(Request $request)
     {
         if (config('maia.notifications.allow_user_settings') === false) {
-            abort(404);
+            abort(Response::HTTP_NOT_FOUND);
         }
         $this->validate($request, [
             'maia_notifications' => 'filled|in:email,web',

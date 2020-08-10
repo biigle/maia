@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia;
 
-use Biigle\Annotation;
+use Biigle\ImageAnnotation;
 use Biigle\Label;
 
 class AnnotationCandidate extends MaiaAnnotation
@@ -31,6 +31,6 @@ class AnnotationCandidate extends MaiaAnnotation
      */
     public function annotation()
     {
-        return $this->belongsTo(Annotation::class);
+        return $this->belongsTo(ImageAnnotation::class);
     }
 }

@@ -3,7 +3,7 @@
         <div v-if="showIcon" class="image-icon">
             <i class="fas" :class="iconClass"></i>
         </div>
-        <img @click="toggleSelect" :src="url || emptyUrl" @error="showEmptyImage">
+        <img @click="toggleSelect" :src="srcUrl" @error="showEmptyImage">
         <div v-if="selected" class="attached-label">
             <span class="attached-label__color" :style="labelStyle"></span>
             <span class="attached-label__name" v-text="label.name"></span>

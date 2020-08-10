@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia\Console\Commands;
 
-use Biigle\Annotation;
+use Biigle\ImageAnnotation;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\TrainingProposal;

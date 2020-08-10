@@ -63,6 +63,10 @@ class StoreMaiaJob extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            if (!$this->volume->isImageVolume()) {
+                $validator->errors()->add('volume', 'MAIA is only available for image volumes.');
+            }
+
             $hasJobInProgress = MaiaJob::where('volume_id', $this->volume->id)
                 ->whereIn('state_id', [
                     State::noveltyDetectionId(),

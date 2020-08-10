@@ -3,7 +3,7 @@
 namespace Biigle\Modules\Maia\Jobs;
 
 use Arr;
-use Biigle\Annotation;
+use Biigle\ImageAnnotation;
 use Biigle\Jobs\Job;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\MaiaJob;
@@ -71,11 +71,11 @@ class UseExistingAnnotations extends Job
     {
         $restrictLabels = Arr::get($this->job->params, 'restrict_labels', []);
 
-        return Annotation::join('images', 'annotations.image_id', '=', 'images.id')
+        return ImageAnnotation::join('images', 'image_annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->job->volume_id)
             ->when(!empty($restrictLabels), function ($query) use ($restrictLabels) {
-                return $query->join('annotation_labels', 'annotation_labels.annotation_id', '=', 'annotations.id')
-                    ->whereIn('annotation_labels.label_id', $restrictLabels);
+                return $query->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
+                    ->whereIn('image_annotation_labels.label_id', $restrictLabels);
             });
     }
 
@@ -98,8 +98,8 @@ class UseExistingAnnotations extends Job
             // Use DISTINCT ON to get only one result per annotation, no matter how many
             // matching labels are attached to it. We can't simply use DISTINCT because
             // the rows include JSON.
-            ->select(DB::raw('DISTINCT ON (annotations_id) annotations.id as annotations_id, annotations.points, annotations.image_id, annotations.shape_id'))
-            ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'annotations.id', 'annotations_id');
+            ->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id'))
+            ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'image_annotations.id', 'annotations_id');
     }
 
     /**
@@ -127,11 +127,11 @@ class UseExistingAnnotations extends Job
     /**
      * Convert the points of an annotation to the points of a circle.
      *
-     * @param Annotation $annotation
+     * @param ImageAnnotation $annotation
      *
      * @return string JSON encoded points array.
      */
-    protected function convertAnnotationPoints(Annotation $annotation)
+    protected function convertAnnotationPoints(ImageAnnotation $annotation)
     {
         if ($annotation->shape_id === Shape::pointId()) {
             // Points are converted to circles with a default radius of 50 px.
