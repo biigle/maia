@@ -40,8 +40,4 @@ $router->group([
 
     $router->get('maia-jobs/{id}/images/{id2}/training-proposals', 'MaiaJobImagesController@indexTrainingProposals');
     $router->get('maia-jobs/{id}/images/{id2}/annotation-candidates', 'MaiaJobImagesController@indexAnnotationCandidates');
-
-    $router->post('users/my/settings/maia', [
-        'uses' => 'SettingsController@store',
-    ]);
 });

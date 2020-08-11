@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia;
 
+use Biigle\Http\Requests\UpdateUserSettings;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
@@ -53,6 +54,7 @@ class MaiaServiceProvider extends ServiceProvider
 
         if (config('maia.notifications.allow_user_settings')) {
             $modules->registerViewMixin('maia', 'settings.notifications');
+            UpdateUserSettings::addRule('maia_notifications', 'filled|in:email,web');
         }
 
         Gate::policy(MaiaJob::class, Policies\MaiaJobPolicy::class);
