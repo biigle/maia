@@ -70,7 +70,7 @@ export default {
             this.$emit('select', e.feature.get('annotation'));
         },
         handleUnselectMaiaAnnotation() {
-            if (this.selectedAnnotations.length > 0) {
+            if (!this.modifyInProgress && this.selectedAnnotations.length > 0) {
                 this.$emit('unselect', this.selectedAnnotations[0]);
             }
         },
