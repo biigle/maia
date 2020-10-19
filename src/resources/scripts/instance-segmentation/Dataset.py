@@ -25,32 +25,24 @@ class Dataset(mrcnn.utils.Dataset):
 
     def load_mask(self, image_index):
         file = self.masks[image_index]
-        mask = imread(file)
-        _, contours, _ = cv2.findContours(np.copy(mask), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        data = np.load(file, allow_pickle=True)
+        classes = []
+        masks = []
 
-        # The class to which a contour belongs is defined by the values of its pixels
-        # (class_id).
-        class_ids = []
-        class_masks = []
-        for c in contours:
-            c = c.squeeze(axis=1)
-            source_class_id = mask[c[0][1], c[0][0]]
-            # Map the source ID to the internal continuous IDs.
-            class_id = self.map_source_class_id('{}.{}'.format(self.name, source_class_id))
-
+        for mask in data['masks']:
+            # Only one class "Interesting" is supported for now.
+            source_class_id = 1
             if source_class_id not in self.ignore_classes:
-                class_mask = np.zeros((mask.shape[0], mask.shape[1]))
-                cv2.drawContours(class_mask, [c], -1, 1, -1)
-                class_ids.append(class_id)
-                class_masks.append(class_mask)
+                classes.append(self.map_source_class_id('{}.{}'.format(self.name, source_class_id)))
+                masks.append(mask)
 
-        if len(class_ids) == 0:
-            shape = mask.shape
-            class_masks = np.zeros((shape[0], shape[1], 0), dtype=np.bool)
-        else:
-            class_masks = np.stack(class_masks, axis = 2).astype(np.bool)
+        if len(classes) == 0:
+            return super().load_mask(image_index)
 
-        return class_masks, np.array(class_ids).astype(np.int32)
+        classes = np.array(classes, dtype=np.int32)
+        masks = np.stack(masks, axis = 2).astype(np.bool)
+
+        return masks, classes
 
 class TrainingDataset(Dataset):
     def __init__(self, trainset):
