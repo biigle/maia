@@ -21,25 +21,16 @@
             The configurable parameters for this stage are not shown by default in the form to submit a new MAIA job. Click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form to show the parameters for the instance segmentation stage.
         </p>
 
-        <h4><a name="number-of-training-epochs-head"></a>Number of training epochs (head)</h4>
+        <h4><a name="training-scheme"></a>Training scheme</h4>
 
         <p class="text-muted">
-            Integer greater than or equal to <code>1</code>. Default <code>20</code>
+            By default, the training scheme of UnKnoT <a href="#ref2">[2]</a> is used.
         </p>
 
         <p>
-            Time spent on training only the head layers of Mask R-CNN for instance segmentation. This is faster and should be a higher number than epochs (all).
+            A series of training steps consisting of layers to train, the number of epochs and the learning rate to use. Training should begin with the <code>heads</code> layers. The learning rate should decrease with subsequent steps.
         </p>
 
-        <h4><a name="number-of-training-epochs-all"></a>Number of training epochs (all)</h4>
-
-        <p class="text-muted">
-            Integer greater than or equal to <code>1</code>. Default <code>10</code>
-        </p>
-
-        <p>
-            Time spent on training all layers of Mask R-CNN for instance segmentation. This is slower and should be a lower number than epochs (head).
-        </p>
         <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
@@ -52,6 +43,7 @@
         <h3>References</h3>
         <ol>
             <li><a name="ref1"></a>Zurowietz, M., Langenkämper, D., Hosking, B., Ruhl, H. A., & Nattkemper, T. W. (2018). MAIA—A machine learning assisted image annotation method for environmental monitoring and exploration. PloS one, 13(11), e0207498. doi: <a href="https://doi.org/10.1371/journal.pone.0207498">10.1371/journal.pone.0207498</a></li>
+            <li><a name="ref2"></a>M. Zurowietz and T. W. Nattkemper, "Unsupervised Knowledge Transfer for Object Detection in Marine Environmental Monitoring and Exploration," in IEEE Access, vol. 8, pp. 143558-143568, 2020, doi: <a href="https://doi.org/10.1109/ACCESS.2020.3014441">10.1109/ACCESS.2020.3014441</a>.</li>
         </ol>
     </div>
 @endsection

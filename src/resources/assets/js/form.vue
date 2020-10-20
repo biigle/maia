@@ -21,6 +21,7 @@ export default {
             labels: [],
             selectedLabels: [],
             submitted: false,
+            trainScheme: [],
         };
     },
     computed: {
@@ -61,6 +62,19 @@ export default {
         submit() {
             this.submitted = true;
         },
+        removeTrainStep(index) {
+            this.trainScheme.splice(index, 1);
+        },
+        addTrainStep() {
+            let step = {layers: 'heads', epochs: 10, learning_rate: 0.001};
+            if (this.trainScheme.length > 0) {
+                let last = this.trainScheme[this.trainScheme.length - 1];
+                step.layers = last.layers;
+                step.epochs = last.epochs;
+                step.learning_rate = last.learning_rate;
+            }
+            this.trainScheme.push(step);
+        },
     },
     watch: {
         useExistingAnnotations(use) {
@@ -81,6 +95,8 @@ export default {
         this.volumeId = biigle.$require('maia.volumeId');
         this.useExistingAnnotations = biigle.$require('maia.useExistingAnnotations');
         this.skipNoveltyDetection = biigle.$require('maia.skipNoveltyDetection');
+        this.trainScheme = biigle.$require('maia.trainScheme');
+        this.showAdvanced = biigle.$require('maia.hasErrors');
 
         if (this.useExistingAnnotations) {
             this.shouldFetchLabels = true;

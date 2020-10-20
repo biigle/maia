@@ -52,12 +52,22 @@ class MaiaJobController extends Controller
 
         $newestJobHasFailed = $jobs->isNotEmpty() ? $jobs[0]->hasFailed() : false;
 
+        $defaultTrainScheme = collect([
+            ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.0005],
+            ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.00005],
+            ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.00001],
+        ]);
+
         return view('maia::index', compact(
             'volume',
             'jobs',
             'hasJobsInProgress',
             'hasJobsRunning',
-            'newestJobHasFailed'
+            'newestJobHasFailed',
+            'defaultTrainScheme'
         ));
     }
 
