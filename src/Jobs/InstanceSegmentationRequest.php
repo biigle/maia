@@ -176,9 +176,7 @@ class InstanceSegmentationRequest extends JobRequest
     {
         $path = "{$this->tmpDir}/input-training.json";
         $content = [
-            // TODO implement is_train_scheme instead of epochs_head and epochs_all
-            'is_epochs_head' => intval($this->jobParams['is_epochs_head']),
-            'is_epochs_all' => intval($this->jobParams['is_epochs_all']),
+            'is_train_scheme' => $this->jobParams['is_train_scheme'],
             'tmp_dir' => $this->tmpDir,
             'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),

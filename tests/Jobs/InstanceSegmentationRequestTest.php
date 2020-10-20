@@ -23,8 +23,9 @@ class InstanceSegmentationRequestTest extends TestCase
         FileCache::fake();
 
         $params = [
-            'is_epochs_head' => 20,
-            'is_epochs_all' => 10,
+            'is_train_scheme' => [
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
             'available_bytes' => 8E+9,
             'max_workers' => 2,
         ];
@@ -61,8 +62,9 @@ class InstanceSegmentationRequestTest extends TestCase
         ];
 
         $expectTrainingJson = [
-            'is_epochs_head' => 20,
-            'is_epochs_all' => 10,
+            'is_train_scheme' => [
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
             'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,

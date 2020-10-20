@@ -40,10 +40,10 @@ class TrainingRunner(object):
         ])
 
         epochs = 0
-        for train_step in scheme:
+        for train_step in self.train_scheme:
             print('Train step: ', train_step)
             epochs += train_step['epochs']
-            model.train(train_dataset,
+            model.train(self.dataset,
                 val_dataset=None,
                 learning_rate=train_step['learning_rate'],
                 augmentation=self.config.AUGMENTATION,

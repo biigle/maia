@@ -49,8 +49,11 @@ class StoreMaiaJob extends FormRequest
             'nd_epochs' => 'required_unless:skip_nd,true|integer|min:50|max:1000',
             'nd_stride' => 'required_unless:skip_nd,true|integer|min:1|max:10',
             'nd_ignore_radius' => 'required_unless:skip_nd,true|integer|min:0',
-            'is_epochs_head' => 'required|integer|min:1',
-            'is_epochs_all' => 'required|integer|min:1',
+            'is_train_scheme' => 'required|array|min:1',
+            'is_train_scheme.*' => 'array',
+            'is_train_scheme.*.layers' => 'required|in:heads,all',
+            'is_train_scheme.*.epochs' => 'required|integer|min:1',
+            'is_train_scheme.*.learning_rate' => 'required|numeric|min:0|max:1',
         ];
     }
 

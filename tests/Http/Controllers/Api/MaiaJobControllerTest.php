@@ -27,8 +27,10 @@ class MaiaJobControllerTest extends ApiTestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'is_epochs_head' => 20,
-            'is_epochs_all' => 10,
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
         ];
         ImageTest::create(['volume_id' => $this->volume()->id]);
     }
@@ -55,8 +57,23 @@ class MaiaJobControllerTest extends ApiTestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'is_epochs_head' => 20,
-            'is_epochs_all' => 10,
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
+        ])->assertStatus(422);
+
+        // empty train scheme
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", [
+            'nd_clusters' => 5,
+            'nd_patch_size' => 40,
+            'nd_threshold' => 99,
+            'nd_latent_size' => 0.1,
+            'nd_trainset_size' => 10000,
+            'nd_epochs' => 100,
+            'nd_stride' => 2,
+            'nd_ignore_radius' => 5,
+            'is_train_scheme' => [],
         ])->assertStatus(422);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
@@ -168,8 +185,10 @@ class MaiaJobControllerTest extends ApiTestCase
         $params = [
             'skip_nd' => true,
             'nd_clusters' => 10,
-            'is_epochs_head' => 1,
-            'is_epochs_all' => 1,
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
         ];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             // Requires 'use_existing'.

@@ -31,8 +31,7 @@ class MaiaJobController extends Controller
      * @apiParam (Required parameters) {number} nd_epochs Time spent on training when determining the training proposals.
      * @apiParam (Required parameters) {number} nd_stride A higher stride increases the speed of the novelty detection but reduces the sensitivity to small regions or objects.
      * @apiParam (Required parameters) {number} nd_ignore_radius Ignore training proposals or annotation candidates which have a radius smaller or equal than this value in pixels.
-     * @apiParam (Required parameters) {number} is_epochs_head Time spent on training only the head layers of Mask R-CNN for instance segmentation.
-     * @apiParam (Required parameters) {number} is_epochs_all Time spent on training  all layers of Mask R-CNN for instance segmentation.
+     * @apiParam (Required parameters) {array} is_train_scheme An array containing objects with the following properties. `layers`: Either `heads` or `all`, `epochs`: Number of epochs to train this step, `learing_rate`: Learing rate to use in this step.
      * @apiParam (Optional parameters) {booolean} use_existing Set to `true` to use existing annotations as training proposals.
      * @apiParam (Optional parameters) {Array} restrict_labels Array of label IDs to restrict the existing annotations to, which should be used as training proposals. `use_existing` must be set if this parameter is present.
      * @apiParam (Optional parameters) {boolean} skip_nd Set to `true` to skip the novelty detection stage and take only existing annotations as training proposals. `use_existing` must be set if this parameter is present. Also, all `nd_*` parameters are ignored and no longer required if this parameter is set.
@@ -51,8 +50,7 @@ class MaiaJobController extends Controller
             'restrict_labels',
             'skip_nd',
             // is_* are parameters for instance segmentation.
-            'is_epochs_head',
-            'is_epochs_all',
+            'is_train_scheme',
         ];
 
         if (!$request->has('skip_nd')) {
