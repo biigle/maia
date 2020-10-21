@@ -6,19 +6,16 @@
         <p>
             created <span title="{{$job->created_at->toIso8601String()}}">{{$job->created_at->diffForHumans()}} by {{$job->user->firstname}} {{$job->user->lastname}}</span>
         </p>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th colspan="2">
-                        Novelty Detection
-                        @if ($job->shouldSkipNoveltyDetection())
-                            <span class="text-muted">(skipped)</span>
-                        @endif
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @unless ($job->shouldSkipNoveltyDetection())
+        @if ($job->shouldUseNoveltyDetection())
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th colspan="2">
+                            Novelty Detection
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
                     <tr>
                         <td>Clusters</td>
                         <td class="text-right"><code>{{Arr::get($job->params, 'nd_clusters')}}</code></td>
@@ -51,16 +48,19 @@
                         <td>Ignore radius</td>
                         <td class="text-right"><code>{{Arr::get($job->params, 'nd_ignore_radius')}}</code></td>
                     </tr>
-                @endif
-                @if ($job->shouldUseExistingAnnotations())
-                    <tr colspan="2">
-                        <td class="text-muted">
-                            used existing annotations
-                        </td>
+                </tbody>
+            </table>
+        @elseif($job->shouldUseExistingAnnotations())
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th colspan="2">
+                            Used existing annotations
+                        </th>
                     </tr>
-                @endif
-            </tbody>
-        </table>
+                </thead>
+            </table>
+        @endif
         @if (Arr::has($job->params, 'is_train_scheme'))
             <table class="table">
                 <thead>

@@ -22,10 +22,7 @@ class DispatchNoveltyDetectionRequest implements ShouldQueue
     {
         if ($event->job->shouldUseExistingAnnotations()) {
             UseExistingAnnotations::dispatch($event->job);
-        }
-
-
-        if (!$event->job->shouldSkipNoveltyDetection()) {
+        } else if ($event->job->shouldUseNoveltyDetection()) {
             $request = new NoveltyDetectionRequest($event->job);
             Queue::connection(config('maia.request_connection'))
                 ->pushOn(config('maia.request_queue'), $request);

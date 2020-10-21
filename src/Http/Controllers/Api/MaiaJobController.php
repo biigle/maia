@@ -46,14 +46,12 @@ class MaiaJobController extends Controller
         $job->user_id = $request->user()->id;
         $job->state_id = State::noveltyDetectionId();
         $paramKeys = [
-            'use_existing',
-            'restrict_labels',
-            'skip_nd',
+            'training_data_method',
             // is_* are parameters for instance segmentation.
             'is_train_scheme',
         ];
 
-        if (!$request->has('skip_nd')) {
+        if ($request->input('training_data_method') === MaiaJob::TRAIN_NOVELTY_DETECTION) {
             $paramKeys = array_merge($paramKeys, [
                 // nd_* are parameters for novelty detection.
                 'nd_clusters',
@@ -64,6 +62,11 @@ class MaiaJobController extends Controller
                 'nd_epochs',
                 'nd_stride',
                 'nd_ignore_radius',
+            ]);
+        } else if ($request->input('training_data_method') === MaiaJob::TRAIN_OWN_ANNOTATIONS) {
+            $paramKeys = array_merge($paramKeys, [
+                // oa_* are parameters for own annotations.
+                'oa_restrict_labels',
             ]);
         }
 

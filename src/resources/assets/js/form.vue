@@ -14,20 +14,16 @@ export default {
     data() {
         return {
             volumeId: null,
-            useExistingAnnotations: false,
-            skipNoveltyDetection: false,
             showAdvanced: false,
             shouldFetchLabels: false,
             labels: [],
             selectedLabels: [],
             submitted: false,
             trainScheme: [],
+            trainingDataMethod: '',
         };
     },
     computed: {
-        canSkipNoveltyDetection() {
-            return this.useExistingAnnotations && this.hasLabels;
-        },
         hasLabels() {
             return this.labels.length > 0;
         },
@@ -39,6 +35,12 @@ export default {
         },
         hasNoExistingAnnotations() {
             return this.useExistingAnnotations && !this.hasLabels && !this.loading;
+        },
+        useExistingAnnotations() {
+            return this.trainingDataMethod === 'own_annotations';
+        },
+        useNoveltyDetection() {
+            return this.trainingDataMethod === 'novelty_detection';
         },
     },
     methods: {
@@ -93,10 +95,9 @@ export default {
     },
     created() {
         this.volumeId = biigle.$require('maia.volumeId');
-        this.useExistingAnnotations = biigle.$require('maia.useExistingAnnotations');
-        this.skipNoveltyDetection = biigle.$require('maia.skipNoveltyDetection');
         this.trainScheme = biigle.$require('maia.trainScheme');
         this.showAdvanced = biigle.$require('maia.hasErrors');
+        this.trainingDataMethod = biigle.$require('maia.trainingDataMethod');
 
         if (this.useExistingAnnotations) {
             this.shouldFetchLabels = true;

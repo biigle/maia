@@ -19,6 +19,7 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         parent::setUp();
         $this->defaultParams = [
+            'training_data_method' => 'novelty_detection',
             'nd_clusters' => 1,
             'nd_patch_size' => 39,
             'nd_threshold' => 99,
@@ -35,7 +36,7 @@ class MaiaJobControllerTest extends ApiTestCase
         ImageTest::create(['volume_id' => $this->volume()->id]);
     }
 
-    public function testStore()
+    public function testStoreNoveltyDetection()
     {
         $id = $this->volume()->id;
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/maia-jobs");
@@ -49,6 +50,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         // patch size must be an odd number
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", [
+            'training_data_method' => 'novelty_detection',
             'nd_clusters' => 5,
             'nd_patch_size' => 40,
             'nd_threshold' => 99,
@@ -65,6 +67,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         // empty train scheme
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", [
+            'training_data_method' => 'novelty_detection',
             'nd_clusters' => 5,
             'nd_patch_size' => 40,
             'nd_threshold' => 99,
@@ -139,17 +142,18 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertStatus(422);
     }
 
-    public function testStoreUseExisting()
+    public function testStoreUseExistingAnnotations()
     {
         $id = $this->volume()->id;
         $this->beEditor();
-        $this->defaultParams['use_existing'] = 'abc';
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            // Parameter must be bool.
-            ->assertStatus(422);
-
-        $this->defaultParams['use_existing'] = true;
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+        $params = [
+            'training_data_method' => 'own_annotations',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
+        ];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
@@ -159,54 +163,31 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         $this->beEditor();
-        $this->defaultParams['restrict_labels'] = [$this->labelChild()->id];
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            // Requires 'use_existing'.
-            ->assertStatus(422);
-
-        $this->defaultParams['use_existing'] = true;
-        $this->defaultParams['restrict_labels'] = [999];
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            // Must contain valid label IDs.
-            ->assertStatus(422);
-
-        $this->defaultParams['restrict_labels'] = [$this->labelChild()->id];
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertSuccessful();
-        $job = MaiaJob::first();
-        $this->assertArrayHasKey('restrict_labels', $job->params);
-        $this->assertEquals([$this->labelChild()->id], $job->params['restrict_labels']);
-    }
-
-    public function testStoreSkipNd()
-    {
-        $id = $this->volume()->id;
-        $this->beEditor();
         $params = [
-            'skip_nd' => true,
-            'nd_clusters' => 10,
+            'training_data_method' => 'novelty_detection',
+            'oa_restrict_labels' => [$this->labelChild()->id],
             'is_train_scheme' => [
                 ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
                 ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
             ],
         ];
+
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
-            // Requires 'use_existing'.
+            // Requires 'own_annotations'.
             ->assertStatus(422);
 
-        $params['use_existing'] = true;
-        $params['skip_nd'] = 'abc';
+        $params['training_data_method'] = 'own_annotations';
+        $params['oa_restrict_labels'] = [999];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
-            // Must be bool.
+            // Must contain valid label IDs.
             ->assertStatus(422);
 
-        $params['skip_nd'] = true;
+        $params['oa_restrict_labels'] = [$this->labelChild()->id];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
-            // nd_* parameters are no longer required.
             ->assertSuccessful();
         $job = MaiaJob::first();
-        $this->assertTrue($job->shouldSkipNoveltyDetection());
-        $this->assertArrayNotHasKey('nd_clusters', $job->params);
+        $this->assertArrayHasKey('oa_restrict_labels', $job->params);
+        $this->assertEquals([$this->labelChild()->id], $job->params['oa_restrict_labels']);
     }
 
     public function testStoreNdClustersTooFewImages()
@@ -216,11 +197,6 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->defaultParams['nd_clusters'] = 2;
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(422);
-
-        $this->defaultParams['skip_nd'] = true;
-        $this->defaultParams['use_existing'] = true;
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertSuccessful();
     }
 
     public function testDestroy()
