@@ -7,6 +7,8 @@ use Biigle\MediaType;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Tests\ImageAnnotationLabelTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
@@ -154,6 +156,17 @@ class MaiaJobControllerTest extends ApiTestCase
             ],
         ];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No existing annotations.
+            ->assertStatus(422);
+
+        ImageAnnotationTest::create([
+            'image_id' => ImageTest::create([
+                'volume_id' => $this->volume()->id,
+                'filename' => 'abc.jpg',
+            ])->id,
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
@@ -181,6 +194,21 @@ class MaiaJobControllerTest extends ApiTestCase
         $params['oa_restrict_labels'] = [999];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             // Must contain valid label IDs.
+            ->assertStatus(422);
+
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => ImageTest::create([
+                    'volume_id' => $this->volume()->id,
+                    'filename' => 'abc.jpg',
+                ])->id,
+            ])->id,
+        ]);
+
+        $params['oa_restrict_labels'] = [$this->labelRoot()->id];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No annotations with the chosen label.
             ->assertStatus(422);
 
         $params['oa_restrict_labels'] = [$this->labelChild()->id];

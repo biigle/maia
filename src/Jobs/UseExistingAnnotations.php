@@ -7,6 +7,7 @@ use Biigle\ImageAnnotation;
 use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
 use Biigle\Modules\Maia\TrainingProposal;
@@ -16,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 
 class UseExistingAnnotations extends Job
 {
-    use SerializesModels;
+    use SerializesModels, QueriesExistingAnnotations;
 
     /**
      * The job to use existing annotations for.
@@ -71,12 +72,7 @@ class UseExistingAnnotations extends Job
     {
         $restrictLabels = Arr::get($this->job->params, 'oa_restrict_labels', []);
 
-        return ImageAnnotation::join('images', 'image_annotations.image_id', '=', 'images.id')
-            ->where('images.volume_id', $this->job->volume_id)
-            ->when(!empty($restrictLabels), function ($query) use ($restrictLabels) {
-                return $query->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
-                    ->whereIn('image_annotation_labels.label_id', $restrictLabels);
-            });
+        return $this->getExistingAnnotationsQuery($this->job->volume_id, $restrictLabels);
     }
 
     /**
