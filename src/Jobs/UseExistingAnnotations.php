@@ -5,11 +5,10 @@ namespace Biigle\Modules\Maia\Jobs;
 use Arr;
 use Biigle\ImageAnnotation;
 use Biigle\Jobs\Job;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
+use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Shape;
 use DB;
@@ -25,6 +24,13 @@ class UseExistingAnnotations extends Job
      * @var MaiaJob
      */
     protected $job;
+
+    /**
+     * Ignore this job if the MAIA job does not exist any more.
+     *
+     * @var bool
+     */
+    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new isntance.
@@ -43,23 +49,17 @@ class UseExistingAnnotations extends Job
      */
     public function handle()
     {
-        if ($this->job->shouldSkipNoveltyDetection() && !$this->hasAnnotations()) {
-            $this->job->error = ['message' => 'Novelty detection should be skipped but there are no existing annotations to take as training proposals.'];
-            $this->job->state_id = State::failedNoveltyDetectionId();
+        if (!$this->hasAnnotations()) {
+            $this->job->error = ['message' => 'Existing annotations should be used but there are no existing annotations to take as training proposals.'];
+            $this->job->state_id = State::failedInstanceSegmentationId();
             $this->job->save();
-            $this->job->user->notify(new NoveltyDetectionFailed($this->job));
+            $this->job->user->notify(new InstanceSegmentationFailed($this->job));
 
             return;
         }
 
         $this->convertAnnotations();
-        $this->dispatchAnnotationPatchJobs();
-
-        if ($this->job->shouldSkipNoveltyDetection()) {
-            $this->job->state_id = State::trainingProposalsId();
-            $this->job->save();
-            $this->job->user->notify(new NoveltyDetectionComplete($this->job));
-        }
+        event(new MaiaJobContinued($this->job));
     }
 
     /**
@@ -69,7 +69,7 @@ class UseExistingAnnotations extends Job
      */
     protected function getAnnotationsQuery()
     {
-        $restrictLabels = Arr::get($this->job->params, 'restrict_labels', []);
+        $restrictLabels = Arr::get($this->job->params, 'oa_restrict_labels', []);
 
         return ImageAnnotation::join('images', 'image_annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $this->job->volume_id)
@@ -117,6 +117,8 @@ class UseExistingAnnotations extends Job
                 'image_id' => $annotation->image_id,
                 'shape_id' => Shape::circleId(),
                 'job_id' => $this->job->id,
+                // All these proposals should be taken for instance segmentation.
+                'selected' => true,
                 // score should be null in this case.
             ];
         });
@@ -180,19 +182,5 @@ class UseExistingAnnotations extends Job
         $r = round(sqrt($r), 2);
 
         return [$x, $y, $r];
-    }
-
-    /**
-     * Dispatch the jobs to generate image patches for the new training proposals.
-     */
-    protected function dispatchAnnotationPatchJobs()
-    {
-        $disk = config('maia.training_proposal_storage_disk');
-        $this->job->trainingProposals()->chunk(1000, function ($chunk) use ($disk) {
-            $chunk->each(function ($proposal) use ($disk) {
-                GenerateAnnotationPatch::dispatch($proposal, $disk)
-                    ->onQueue(config('largo.generate_annotation_patch_queue'));
-            });
-        });
     }
 }

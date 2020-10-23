@@ -17,7 +17,7 @@ class DispatchNoveltyDetectionRequestTest extends TestCase
 {
     public function testHandle()
     {
-        $job = MaiaJobTest::create();
+        $job = MaiaJobTest::create(['params' => ['training_data_method' => 'novelty_detection']]);
         $event = new MaiaJobCreated($job);
         $listener = new DispatchNoveltyDetectionRequest;
 
@@ -28,23 +28,7 @@ class DispatchNoveltyDetectionRequestTest extends TestCase
 
     public function testHandleUseExisting()
     {
-        $job = MaiaJobTest::create(['params' => ['use_existing' => true]]);
-        $event = new MaiaJobCreated($job);
-        $listener = new DispatchNoveltyDetectionRequest;
-
-        Queue::fake();
-        Bus::fake();
-        $listener->handle($event);
-        Queue::assertPushed(NoveltyDetectionRequest::class);
-        Bus::assertDispatched(UseExistingAnnotations::class);
-    }
-
-    public function testHandleSkipNd()
-    {
-        $job = MaiaJobTest::create(['params' => [
-            'use_existing' => true,
-            'skip_nd' => true,
-        ]]);
+        $job = MaiaJobTest::create(['params' => ['training_data_method' => 'own_annotations']]);
         $event = new MaiaJobCreated($job);
         $listener = new DispatchNoveltyDetectionRequest;
 

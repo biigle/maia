@@ -23,6 +23,6 @@ class InstanceSegmentationFailed extends JobStateChanged
      */
     protected function getMessage($job)
     {
-        return "MAIA job {$job->id} failed during instance segmentation. Please notify the BIIGLE administrators.";
+        return "MAIA job {$job->id} failed during instance segmentation.";
     }
 }

@@ -54,11 +54,22 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th colspan="2">
-                            Used existing annotations
+                        <th>
+                            Existing annotations
                         </th>
                     </tr>
                 </thead>
+                <tbody>
+                    @if (Arr::has($job->params, 'oa_restrict_labels'))
+                        <tr>
+                            <td>Restricted to label IDs: {{implode(', ', Arr::get($job->params, 'oa_restrict_labels', []))}}</td>
+                        </tr>
+                    @else
+                        <tr>
+                            <td>Using all annotations of this volume.</td>
+                        </tr>
+                    @endif
+                </tbody>
             </table>
         @endif
         @if (Arr::has($job->params, 'is_train_scheme'))

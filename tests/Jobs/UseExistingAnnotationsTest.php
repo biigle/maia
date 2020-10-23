@@ -3,14 +3,16 @@
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
 use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Event;
 use Illuminate\Support\Facades\Notification;
 use Queue;
 use TestCase;
@@ -19,26 +21,23 @@ class UseExistingAnnotationsTest extends TestCase
 {
     public function testHandle()
     {
-        // TODO: Update this job to make it completely independent of novelty detection.
-        // Instance segmentation should immediately proceed without the additional step
-        // of training proposal selection and refinement.
-        $this->markTestIncomplete();
         $a = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
         $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
         $al2 = ImageAnnotationLabelTest::create();
         $job = MaiaJobTest::create(['volume_id' => $a->image->volume_id]);
 
+        Event::fake();
         Queue::fake();
         (new UseExistingAnnotations($job))->handle();
-        Queue::assertPushed(GenerateAnnotationPatch::class);
-        $this->assertEquals(1, $job->trainingProposals()->count());
+        Event::assertDispatched(MaiaJobContinued::class);
+        Queue::assertNotPushed(GenerateAnnotationPatch::class);
+        $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a->points, $proposal->points);
     }
 
     public function testHandleRestrictLabels()
     {
-        $this->markTestIncomplete('Its now oa_restrict_labels');
         $a1 = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
         $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a1->id]);
         // Create only one proposal even though the annotation has two matching labels.
@@ -54,11 +53,11 @@ class UseExistingAnnotationsTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $a1->image->volume_id,
-            'params' => ['restrict_labels' => [$al1->label_id]],
+            'params' => ['oa_restrict_labels' => [$al1->label_id]],
         ]);
 
         (new UseExistingAnnotations($job))->handle();
-        $this->assertEquals(1, $job->trainingProposals()->count());
+        $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a1->points, $proposal->points);
         $this->assertNull($proposal->score);
@@ -66,7 +65,6 @@ class UseExistingAnnotationsTest extends TestCase
 
     public function testHandleShapeConversion()
     {
-        $this->markTestIncomplete();
         $a1 = ImageAnnotationTest::create([
             'shape_id' => Shape::pointId(),
             'points' => [10, 20],
@@ -99,7 +97,7 @@ class UseExistingAnnotationsTest extends TestCase
         $job = MaiaJobTest::create(['volume_id' => $a1->image->volume_id]);
 
         (new UseExistingAnnotations($job))->handle();
-        $this->assertEquals(5, $job->trainingProposals()->count());
+        $this->assertEquals(5, $job->trainingProposals()->selected()->count());
         $proposals = $job->trainingProposals;
 
         $this->assertEquals(Shape::circleId(), $proposals[0]->shape_id);
@@ -119,57 +117,15 @@ class UseExistingAnnotationsTest extends TestCase
         $this->assertEquals([10, 15, 11.18], $proposals[4]->points);
     }
 
-    public function testHandleSkipNd()
-    {
-        $this->markTestIncomplete();
-        $a = ImageAnnotationTest::create();
-        $job = MaiaJobTest::create([
-            'volume_id' => $a->image->volume_id,
-            'params' => ['use_existing' => true, 'skip_nd' => true],
-        ]);
-
-        Queue::fake();
-        Notification::fake();
-        (new UseExistingAnnotations($job))->handle();
-        Queue::assertPushed(GenerateAnnotationPatch::class);
-        Notification::assertSentTo($job->user, NoveltyDetectionComplete::class);
-        $this->assertEquals(1, $job->trainingProposals()->count());
-        $this->assertEquals(State::trainingProposalsId(), $job->fresh()->state_id);
-    }
-
-    public function testHandleSkipNdAndRestrictLabels()
-    {
-        $this->markTestIncomplete();
-        $al = ImageAnnotationLabelTest::create();
-        $job = MaiaJobTest::create([
-            'volume_id' => $al->annotation->image->volume_id,
-            'params' => [
-                'use_existing' => true,
-                'skip_nd' => true,
-                'restrict_labels' => [$al->label_id],
-            ],
-        ]);
-
-        Queue::fake();
-        Notification::fake();
-        (new UseExistingAnnotations($job))->handle();
-        $this->assertEquals(1, $job->trainingProposals()->count());
-    }
-
     public function testHandleSkipNdNoAnnotations()
     {
-        $this->markTestIncomplete();
-        $job = MaiaJobTest::create([
-            'params' => ['use_existing' => true, 'skip_nd' => true],
-        ]);
+        $job = MaiaJobTest::create();
 
-        Queue::fake();
         Notification::fake();
         (new UseExistingAnnotations($job))->handle();
-        Queue::assertNotPushed(GenerateAnnotationPatch::class);
-        Notification::assertSentTo($job->user, NoveltyDetectionFailed::class);
+        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
         $this->assertEquals(0, $job->trainingProposals()->count());
-        $this->assertEquals(State::failedNoveltyDetectionId(), $job->fresh()->state_id);
+        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 }

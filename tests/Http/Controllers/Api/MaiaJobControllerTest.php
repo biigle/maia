@@ -157,6 +157,7 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
     }
 
     public function testStoreRestrictLabels()
