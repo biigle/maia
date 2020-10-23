@@ -12,6 +12,7 @@ use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
+use Biigle\Tests\VolumeTest;
 
 class MaiaJobControllerTest extends ApiTestCase
 {
@@ -226,6 +227,66 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->defaultParams['nd_clusters'] = 2;
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(422);
+    }
+
+    public function testStoreKnowledgeTransfer()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'training_data_method' => 'knowledge_transfer',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+        ];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No volume specified.
+            ->assertStatus(422);
+
+        $params['kt_volume_id'] = $this->volume()->id;
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Cannot be the own volume.
+            ->assertStatus(422);
+
+
+        $volume = VolumeTest::create();
+        $params['kt_volume_id'] = $volume->id;
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No distance to ground in own volume.
+            ->assertStatus(422);
+
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No distance to ground in other volume.
+            ->assertStatus(422);
+
+        ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No permission to access the volume.
+            ->assertStatus(422);
+
+        $this->project()->addVolumeId($volume->id);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertArrayHasKey('kt_volume_id', $job->params);
+        $this->assertEquals($volume->id, $job->params['kt_volume_id']);
     }
 
     public function testDestroy()

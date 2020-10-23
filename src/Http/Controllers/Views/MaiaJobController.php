@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Maia\Http\Controllers\Views;
 
 use Biigle\Http\Controllers\Views\Controller;
+use Biigle\ImageAnnotation;
 use Biigle\LabelTree;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
@@ -61,13 +62,23 @@ class MaiaJobController extends Controller
             ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.00001],
         ]);
 
+        $canUseExistingAnnotations = ImageAnnotation::join('images', 'images.id', '=', 'image_annotations.image_id')
+            ->where('images.volume_id', $volume->id)
+            ->exists();
+
+        $canUseKnowledgeTransfer = !$volume->images()
+            ->whereNull('attrs->metadata->distance_to_ground')
+            ->exists();
+
         return view('maia::index', compact(
             'volume',
             'jobs',
             'hasJobsInProgress',
             'hasJobsRunning',
             'newestJobHasFailed',
-            'defaultTrainScheme'
+            'defaultTrainScheme',
+            'canUseExistingAnnotations',
+            'canUseKnowledgeTransfer'
         ));
     }
 

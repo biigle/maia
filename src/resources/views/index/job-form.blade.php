@@ -19,22 +19,24 @@
                 </label>
             </div>
             <div class="radio">
-                <label for="training_data_own_annotations">
-                    <input type="radio" id="training_data_own_annotations" name="training_data_method" value="own_annotations" v-model="trainingDataMethod">
+                <label for="training_data_own_annotations" @if (!$canUseExistingAnnotations) class="text-muted" @endif>
+                    <input type="radio" id="training_data_own_annotations" name="training_data_method" value="own_annotations" v-model="trainingDataMethod" @if (!$canUseExistingAnnotations) disabled @endif>
                     <strong>Existing annotations</strong>
-                    <loader v-cloak :active="loading"></loader>
-                    <div v-cloak v-show="hasNoExistingAnnotations" class="text-warning">
-                        There are no existing annotations. Please choose another method.
-                    </div>
+                    @if (!$canUseExistingAnnotations)
+                        <div class="text-warning">No existing annotations available for this volume.</div>
+                    @endif
                     <div class="help-block">
                         This method uses existing annotations in this volume as training data. All annotations will be converted to circles. <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">More information.</a>
                     </div>
                 </label>
             </div>
             <div class="radio">
-                <label for="training_data_unknot" class="text-muted">
-                    <input type="radio" id="training_data_unknot" name="training_data_method" value="unknot" v-model="trainingDataMethod" disabled>
-                    <strong>Knowledge transfer</strong> <span class="label label-warning">Coming soon</span>
+                <label for="training_data_unknot" @if (!$canUseKnowledgeTransfer) class="text-muted" @endif>
+                    <input type="radio" id="training_data_unknot" name="training_data_method" value="knowledge_transfer" v-model="trainingDataMethod" @if (!$canUseKnowledgeTransfer) disabled @endif>
+                    <strong>Knowledge transfer</strong>
+                    @if (!$canUseKnowledgeTransfer)
+                        <div class="text-warning">No distance to ground information available for this volume. <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}" title="Find out how to add distance to ground information"><i class="fa fa-question-circle"></i></a></div>
+                    @endif
                     <div class="help-block">
                         Knowlegde transfer uses existing annotations of another volume as training data. The images should be very similar to the ones of this volume and the classes of objects of interest should be the same. This method requires that the distance to ground metadata is present for every image of the two volumes. <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">More information.</a>
                     </div>
@@ -147,8 +149,9 @@
     <fieldset v-cloak v-if="useExistingAnnotations && showAdvanced">
         <legend>Existing Annotations <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}" title="More information on the configurable parameters for existing annotations" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
 
-        <div v-cloak v-show="showRestrictLabelsInput" class="form-group">
+        <div v-cloak class="form-group">
             <label for="restrict_labels">Restrict to labels</label>
+            <loader :active="loading"></loader>
             <typeahead class="typeahead--block" :items="labels" placeholder="Label name" :clear-on-select="true" v-on:select="handleSelectedLabel"></typeahead>
             <span class="help-block">
                 Only use existing annotations with these selected labels.
@@ -163,6 +166,24 @@
             </ul>
 
             <input v-for="label in selectedLabels" type="hidden" name="restrict_labels[]" :value="label.id">
+        </div>
+    </fieldset>
+
+    <fieldset v-cloak v-if="useKnowledgeTransfer">
+        <legend v-if="showAdvanced">Knowledge Transfer <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}" title="More information on the configurable parameters for knowledge transfer" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
+
+        <div class="form-group">
+            <label for="kt_volume_id">Volume</label>
+            <loader :active="loading"></loader>
+            <div v-if="hasNoKnowledgeTransferVolumes" class="text-warning">
+                No suitable volumes were found!
+            </div>
+            <typeahead class="typeahead--block" :items="knowledgeTransferVolumes" placeholder="Volume name" v-on:select="handleSelectedKnowledgeTransferVolume" :template="knowledgeTransferTypeaheadTemplate"></typeahead>
+            <span class="help-block">
+                The volume of which annotations should be used for knowledge transfer.
+            </span>
+
+            <input v-if="knowledgeTransferVolume" type="hidden" name="kt_volume_id" :value="knowledgeTransferVolume.id">
         </div>
     </fieldset>
 
@@ -221,7 +242,7 @@
 
     <div class="form-group">
         <button v-on:click="toggle" type="button" class="btn btn-default"><span v-if="showAdvanced" v-cloak>Hide</span><span v-else>Show</span> advanced parameters</button>
-        <button type="submit" class="btn btn-success pull-right" :disabled="submitted">Create job</button>
+        <button type="submit" class="btn btn-success pull-right" :disabled="canSubmit">Create job</button>
     </div>
 </form>
 

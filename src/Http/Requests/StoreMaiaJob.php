@@ -4,6 +4,7 @@ namespace Biigle\Modules\Maia\Http\Requests;
 
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Rules\KnowledgeTransferVolume;
 use Biigle\Modules\Maia\Rules\OddNumber;
 use Biigle\Volume;
 use Illuminate\Foundation\Http\FormRequest;
@@ -40,9 +41,8 @@ class StoreMaiaJob extends FormRequest
     public function rules()
     {
         return [
-            'training_data_method' => 'required|in:novelty_detection,own_annotations',
-            'oa_restrict_labels' => 'array',
-            'oa_restrict_labels.*' => 'integer|exists:labels,id',
+            'training_data_method' => 'required|in:novelty_detection,own_annotations,knowledge_transfer',
+
             'nd_clusters' => 'required_if:training_data_method,novelty_detection|integer|min:1|max:100',
             'nd_patch_size' => ['required_if:training_data_method,novelty_detection', 'integer', 'min:3', 'max:99', new OddNumber],
             'nd_threshold' => 'required_if:training_data_method,novelty_detection|integer|min:0|max:99',
@@ -51,6 +51,12 @@ class StoreMaiaJob extends FormRequest
             'nd_epochs' => 'required_if:training_data_method,novelty_detection|integer|min:50|max:1000',
             'nd_stride' => 'required_if:training_data_method,novelty_detection|integer|min:1|max:10',
             'nd_ignore_radius' => 'required_if:training_data_method,novelty_detection|integer|min:0',
+
+            'oa_restrict_labels' => 'array',
+            'oa_restrict_labels.*' => 'integer|exists:labels,id',
+
+            'kt_volume_id' => ['required_if:training_data_method,knowledge_transfer', 'integer', 'exists:volumes,id', new KnowledgeTransferVolume],
+
             'is_train_scheme' => 'required|array|min:1',
             'is_train_scheme.*' => 'array',
             'is_train_scheme.*.layers' => 'required|in:heads,all',

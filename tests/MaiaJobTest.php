@@ -111,4 +111,13 @@ class MaiaJobTest extends ModelTestCase
         $this->model->params = ['training_data_method' => 'own_annotations'];
         $this->assertTrue($this->model->shouldUseExistingAnnotations());
     }
+
+    public function testShouldUseKnowledgeTransfer()
+    {
+        $this->assertFalse($this->model->shouldUseKnowledgeTransfer());
+        $this->model->params = ['training_data_method' => 'novelty_detection'];
+        $this->assertFalse($this->model->shouldUseKnowledgeTransfer());
+        $this->model->params = ['training_data_method' => 'knowledge_transfer'];
+        $this->assertTrue($this->model->shouldUseKnowledgeTransfer());
+    }
 }

@@ -23,7 +23,8 @@ class MaiaJobController extends Controller
      *
      * @apiParam {Number} id The volume ID.
      *
-     * @apiParam (Required parameters) {string} training_data_method One of `novelty_detection` (to perform novelty detection to generate training data) or `own_annotations` (to use existing annotations of the same volume as training data).
+     * @apiParam (Required parameters) {string} training_data_method One of `novelty_detection` (to perform novelty detection to generate training data), `own_annotations` (to use existing annotations of the same volume as training data) or `knowledge_transfer` (to use knowlegde transfer to get training data from another volume).
+     * @apiParam (Required parameters) {array} is_train_scheme An array containing objects with the following properties. `layers`: Either `heads` or `all`, `epochs`: Number of epochs to train this step, `learing_rate`: Learing rate to use in this step.
      *
      * @apiParam (Required parameters for novelty detection) {number} nd_clusters Number of different kinds of images to expect. Images are of the same kind if they have similar lighting conditions or show similar patterns (e.g. sea floor, habitat types). Increase this number if you expect many different kinds of images. Lower the number to 1 if you have very few images and/or the content is largely uniform.
      * @apiParam (Required parameters for novelty detection) {number} nd_patch_size Size in pixels of the image patches used determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
@@ -34,9 +35,10 @@ class MaiaJobController extends Controller
      * @apiParam (Required parameters for novelty detection) {number} nd_stride A higher stride increases the speed of the novelty detection but reduces the sensitivity to small regions or objects.
      * @apiParam (Required parameters for novelty detection) {number} nd_ignore_radius Ignore training proposals or annotation candidates which have a radius smaller or equal than this value in pixels.
      *
-     * @apiParam (Required parameters) {array} is_train_scheme An array containing objects with the following properties. `layers`: Either `heads` or `all`, `epochs`: Number of epochs to train this step, `learing_rate`: Learing rate to use in this step.
      *
      * @apiParam (Optional parameters for existing annotations) {Array} oa_restrict_labels Array of label IDs to restrict the existing annotations to, which should be used as training proposals. `use_existing` must be set if this parameter is present.
+     *
+     * @apiParam (Required parameters for knowledge transfer) {number} kt_volume_id The ID of the volume from which to get the annotations for knowledge transfer.
      *
      * @param StoreMaiaJob $request
      * @return \Illuminate\Http\Response
@@ -52,10 +54,19 @@ class MaiaJobController extends Controller
             'is_train_scheme',
         ];
 
-        if ($request->input('training_data_method') === MaiaJob::TRAIN_NOVELTY_DETECTION) {
+        if ($request->input('training_data_method') === MaiaJob::TRAIN_OWN_ANNOTATIONS) {
+            $job->state_id = State::instanceSegmentationId();
+            $paramKeys = array_merge($paramKeys, [
+                'oa_restrict_labels',
+            ]);
+        } else if ($request->input('training_data_method') === MaiaJob::TRAIN_KNOWLEDGE_TRANSFER) {
+            $job->state_id = State::instanceSegmentationId();
+            $paramKeys = array_merge($paramKeys, [
+                'kt_volume_id',
+            ]);
+        } else {
             $job->state_id = State::noveltyDetectionId();
             $paramKeys = array_merge($paramKeys, [
-                // nd_* are parameters for novelty detection.
                 'nd_clusters',
                 'nd_patch_size',
                 'nd_threshold',
@@ -64,12 +75,6 @@ class MaiaJobController extends Controller
                 'nd_epochs',
                 'nd_stride',
                 'nd_ignore_radius',
-            ]);
-        } else if ($request->input('training_data_method') === MaiaJob::TRAIN_OWN_ANNOTATIONS) {
-            $job->state_id = State::instanceSegmentationId();
-            $paramKeys = array_merge($paramKeys, [
-                // oa_* are parameters for own annotations.
-                'oa_restrict_labels',
             ]);
         }
 

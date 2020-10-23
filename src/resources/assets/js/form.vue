@@ -1,4 +1,5 @@
 <script>
+import knowledgeTransferVolumeApi from './api/knowledgeTransferVolume';
 import {handleErrorResponse} from './import';
 import {LabelTypeahead} from './import';
 import {LoaderMixin} from './import';
@@ -21,6 +22,10 @@ export default {
             submitted: false,
             trainScheme: [],
             trainingDataMethod: '',
+            knowledgeTransferVolumes: [],
+            knowledgeTransferVolume: null,
+            shouldFetchKnowledgeTransferVolumes: false,
+            knowledgeTransferTypeaheadTemplate: '{{item.name}}<br><small>({{item.description}})</small>'
         };
     },
     computed: {
@@ -30,17 +35,20 @@ export default {
         hasSelectedLabels() {
             return this.selectedLabels.length > 0;
         },
-        showRestrictLabelsInput() {
-            return this.showAdvanced && this.useExistingAnnotations && this.hasLabels;
-        },
-        hasNoExistingAnnotations() {
-            return this.useExistingAnnotations && !this.hasLabels && !this.loading;
-        },
         useExistingAnnotations() {
             return this.trainingDataMethod === 'own_annotations';
         },
         useNoveltyDetection() {
             return this.trainingDataMethod === 'novelty_detection';
+        },
+        useKnowledgeTransfer() {
+            return this.trainingDataMethod === 'knowledge_transfer';
+        },
+        canSubmit() {
+            return this.submitted || (this.useKnowledgeTransfer && !this.knowledgeTransferVolume);
+        },
+        hasNoKnowledgeTransferVolumes() {
+            return this.shouldFetchKnowledgeTransferVolumes && !this.loading && this.knowledgeTransferVolumes.length === 0;
         },
     },
     methods: {
@@ -77,6 +85,20 @@ export default {
             }
             this.trainScheme.push(step);
         },
+        handleSelectedKnowledgeTransferVolume(volume) {
+            this.knowledgeTransferVolume = volume;
+        },
+        setKnowledgeTransferVolumes(response) {
+            this.knowledgeTransferVolumes = response.body
+                .filter(volume => volume.id !== this.volumeId)
+                .map(function (volume) {
+                    volume.description = volume.projects
+                        .map(project => project.name)
+                        .join(', ');
+
+                    return volume;
+                });
+        },
     },
     watch: {
         useExistingAnnotations(use) {
@@ -89,6 +111,19 @@ export default {
                 this.startLoading();
                 this.$http.get('api/v1/volumes{/id}/annotation-labels', {params: {id: this.volumeId}})
                     .then(this.setLabels, handleErrorResponse)
+                    .finally(this.finishLoading);
+            }
+        },
+        useKnowledgeTransfer(use) {
+            if (use) {
+                this.shouldFetchKnowledgeTransferVolumes = true;
+            }
+        },
+        shouldFetchKnowledgeTransferVolumes(fetch) {
+            if (fetch) {
+                this.startLoading();
+                knowledgeTransferVolumeApi.get()
+                    .then(this.setKnowledgeTransferVolumes, handleErrorResponse)
                     .finally(this.finishLoading);
             }
         },

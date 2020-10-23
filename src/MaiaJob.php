@@ -24,6 +24,11 @@ class MaiaJob extends Model
     const TRAIN_OWN_ANNOTATIONS = 'own_annotations';
 
     /**
+     * @var string
+     */
+    const TRAIN_KNOWLEDGE_TRANSFER = 'knowledge_transfer';
+
+    /**
      * The attributes that should be casted to native types.
      *
      * @var array
@@ -183,5 +188,15 @@ class MaiaJob extends Model
     {
         // Handle fallback where old jobs don't have a training_data_method yet.
         return $this->getJsonAttr('params.training_data_method') === self::TRAIN_NOVELTY_DETECTION || $this->getJsonAttr('params.training_data_method') === null;
+    }
+
+    /**
+     * Determine if this job should use knowledge transfer to get training data.
+     *
+     * @return bool
+     */
+    public function shouldUseKnowledgeTransfer()
+    {
+        return $this->getJsonAttr('params.training_data_method') === self::TRAIN_KNOWLEDGE_TRANSFER;
     }
 }
