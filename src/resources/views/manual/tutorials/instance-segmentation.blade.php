@@ -5,10 +5,10 @@
 @section('manual-content')
     <div class="row">
         <p class="lead">
-            A description of the third MAIA stage and the configurable parameters.
+            The automatic instance segmentation.
         </p>
         <p>
-            The third stage of a MAIA job processes all images of a volume with a supervised instance segmentation method (Mask&nbsp;R-CNN). This method uses the training proposals that you have selected and refined in the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">previous stage</a> of the MAIA job to learn a model for what you determined to be interesting objects or regions in the images. The instance segmentation method produces a set of "annotation candidates", which are image regions that the method found to be interesting based on your provided training proposals. When the instance segmentation is finished, the MAIA job will continue to the <a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">next stage</a> in which you can manually review the annotation candidates.
+            The third stage of a MAIA job processes all images of a volume with a supervised instance segmentation method (Mask&nbsp;R-CNN). This method uses the training proposals that were obtained with one of the three methods (<a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>, <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">existing annotations</a> or <a href="{{route('manual-tutorials', ['maia', 'knowledge transfer'])}}">knowledge transfer</a>) to learn a model for what you determined to be interesting objects or regions in the images. The instance segmentation method produces a set of "annotation candidates", which are image regions that the method found to be interesting based on your provided training proposals. When the instance segmentation is finished, the MAIA job will continue to the <a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">next stage</a> in which you can manually review the annotation candidates.
         </p>
 
         <p>
@@ -34,9 +34,11 @@
         <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">A description of the first MAIA stage: Novelty detection.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">A description of the second MAIA stage: Training proposals.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">A description of the last MAIA stage: Annotation candidates.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">Using novelty detection to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Using existing annotations to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Using knowledge transfer to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">Reviewing the training proposals from novelty detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from instance segmentation.</a></li>
         </ul>
     </div>
     <div class="row">

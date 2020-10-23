@@ -5,17 +5,17 @@
 @section('manual-content')
     <div class="row">
         <p class="lead">
-            A description of the last MAIA stage.
+            Reviewing the annotation candidates from instance segmentation.
         </p>
 
         <p>
-            A MAIA job is finished when it proceeded from the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation</a> to the annotation candidates stage. In this stage you can review the annotation candidates that were generated in the previous stage and convert them to real annotations. Similar to the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">training proposals</a> stage, this is done in two steps the <a href="#selection-of-annotation-candidates">selection of annotation candidates</a> and the <a href="#refinement-of-annotation-candidates">refinement of annotation candidates</a>.
+            A MAIA job is finished when it proceeded from the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation</a> to the annotation candidates stage. In this stage you can review the annotation candidates that were generated in the previous stage and convert them to real annotations. Similar to the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">training proposals</a> stage of novelty detection, this is done in two steps the <a href="#selection-of-annotation-candidates">selection of annotation candidates</a> and the <a href="#refinement-of-annotation-candidates">refinement of annotation candidates</a>.
         </p>
 
         <h3><a name="selection-of-annotation-candidates"></a>Selection of annotation candidates</h3>
 
         <p>
-            The selection of annotation candidates is very similar to the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#selection-of-training-proposals">selection of training proposals</a>. When you open the <button class="btn btn-default btn-xs"><i class="fas fa-check-square"></i></button>&nbsp;select annotation candidates tab in the sidebar, the annotation candidates are loaded and their image thumbnails are displayed in a regular grid. Please refer to the respective <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#selection-of-training-proposals">manual article</a> to learn how to interact with the thumbnail grid.
+            The selection of annotation candidates is very similar to the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#selection-of-training-proposals">selection of training proposals</a> of the novelty detection method. When you open the <button class="btn btn-default btn-xs"><i class="fas fa-check-square"></i></button>&nbsp;select annotation candidates tab in the sidebar, the annotation candidates are loaded and their image thumbnails are displayed in a regular grid. Please refer to the respective <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#selection-of-training-proposals">manual article</a> to learn how to interact with the thumbnail grid.
         </p>
 
         <p>
@@ -39,7 +39,7 @@
         <h3><a name="refinement-of-annotation-candidates"></a>Refinement of annotation candidates</h3>
 
         <p>
-            The refinement step for annotation candidates is also very similar to the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#refinement-of-training-proposals">refinement step for training proposals</a>. You cycle through all selected annotation candidates and modify the circle of each annotation candidate to fit to the object or region that it should mark. Please refer to the respective <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#refinement-of-training-proposals">manual article</a> to learn how to interact with the refinement tool.
+            The refinement step for annotation candidates is also very similar to the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#refinement-of-training-proposals">refinement step for training proposals</a> of the novelty detection method. You cycle through all selected annotation candidates and modify the circle of each annotation candidate to fit to the object or region that it should mark. Please refer to the respective <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#refinement-of-training-proposals">manual article</a> to learn how to interact with the refinement tool.
         </p>
 
         <p>
@@ -67,9 +67,11 @@
         <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">A description of the first MAIA stage: Novelty detection.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">A description of the second MAIA stage: Training proposals.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">A description of the third MAIA stage: Instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">Using novelty detection to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Using existing annotations to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Using knowledge transfer to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">Reviewing the training proposals from novelty detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">The automatic instance segmentation.</a></li>
         </ul>
     </div>
 @endsection

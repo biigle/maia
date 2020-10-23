@@ -14,7 +14,7 @@
                     <input type="radio" id="training_data_novelty_detection" name="training_data_method" value="novelty_detection" v-model="trainingDataMethod">
                     <strong>Novelty detection</strong>
                     <div class="help-block">
-                        Novelty detection attempts to find objects of interest in images where the background (e.g. sea floor) is rather uniform. It does not require prior annotations but has many parameters that can be tuned.
+                        Novelty detection attempts to find objects of interest in images where the background (e.g. sea floor) is rather uniform. It does not require prior annotations but has many parameters that can be tuned. <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">More information.</a>
                     </div>
                 </label>
             </div>
@@ -27,7 +27,7 @@
                         There are no existing annotations. Please choose another method.
                     </div>
                     <div class="help-block">
-                        This method uses existing annotations in this volume as training data. All annotations will be converted to circles.
+                        This method uses existing annotations in this volume as training data. All annotations will be converted to circles. <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">More information.</a>
                     </div>
                 </label>
             </div>
@@ -36,7 +36,7 @@
                     <input type="radio" id="training_data_unknot" name="training_data_method" value="unknot" v-model="trainingDataMethod" disabled>
                     <strong>Knowledge transfer</strong> <span class="label label-warning">Coming soon</span>
                     <div class="help-block">
-                        Knowlegde transfer uses existing annotations of another volume as training data. The images should be very similar to the ones of this volume and the classes of objects of interest should be the same. This method requires that the distance to ground metadata is present for every image of the two volumes.
+                        Knowlegde transfer uses existing annotations of another volume as training data. The images should be very similar to the ones of this volume and the classes of objects of interest should be the same. This method requires that the distance to ground metadata is present for every image of the two volumes. <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">More information.</a>
                     </div>
                 </label>
             </div>
@@ -145,7 +145,7 @@
     </fieldset>
 
     <fieldset v-cloak v-if="useExistingAnnotations && showAdvanced">
-        <legend>Existing Annotations <a class="btn btn-default btn-xs pull-right" href="#" title="More information on the configurable parameters for existing annotations" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
+        <legend>Existing Annotations <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}" title="More information on the configurable parameters for existing annotations" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
 
         <div v-cloak v-show="showRestrictLabelsInput" class="form-group">
             <label for="restrict_labels">Restrict to labels</label>

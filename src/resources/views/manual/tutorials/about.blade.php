@@ -22,11 +22,15 @@
         </p>
 
         <p>
-            In the third step (instance segmentation), the manually filtered set of training proposals is used to train a machine learning model for the automatic detection of the selected interesting objects. The model is highly specialized for this task and can usually detect most (if not all) instances of the interesting objects in the images. In the tests reported by the MAIA paper, 84% of the interesting objects were detected on average <a href="#ref1">[1]</a>. The detections are passed on as "annotation candidates" to the fourth step.
+            In addition to the novelty detection of the original MAIA method, BIIGLE offers alternative ways to obtain training proposals. Read more in the articles to use <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">existing annotations</a> or <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">knowledge transfer</a>.
         </p>
 
         <p>
-            As with the training proposals, the annotation candidates can contain detections that are not actually interesting objects. In addition, the machine learning model only detects the objects and does not attempt to automatically assign labels to them. In the fourth step, the annotation candidates are again manually filtered to select only the actually interesting objects. Furthermore, labels are manually attached to the selected candidates which are subsequently transformed to actual annotations.
+            In the third step (instance segmentation), the manually filtered or automatically obtained set of training proposals is used to train a machine learning model for the automatic detection of the selected interesting objects. The model is highly specialized for this task and can usually detect most (if not all) instances of the interesting objects in the images. In the tests reported by the MAIA paper, 84% of the interesting objects were detected on average <a href="#ref1">[1]</a>. The detections are passed on as "annotation candidates" to the fourth step.
+        </p>
+
+        <p>
+            As with the training proposals of the novelty detection, the annotation candidates can contain detections that are not actually interesting objects. In addition, the machine learning model only detects the objects and does not attempt to automatically assign labels to them. In the fourth step, the annotation candidates are again manually filtered to select only the actually interesting objects. Furthermore, labels are manually attached to the selected candidates which are subsequently transformed to actual annotations.
         </p>
 
         <p>
@@ -39,28 +43,30 @@
             To create new annotations with MAIA in BIIGLE, project editors, experts or admins can start a new MAIA "job" for a volume of a project. To start a new MAIA job, click on the <button class="btn btn-default btn-xs"><i class="fas fa-robot"></i></button> button in the sidebar of the volume overview. This will open up the MAIA overview for the volume, which lists any running or finished jobs, as well as a form to create a new MAIA job for the volume. New jobs can only be created when no other job is currently running for the volume.
         </p>
         <p>
-            The form to create a new MAIA job initially shows only the parameters that are most likely to be modified for each job. To show all available parameters, click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form. There are quite a lot parameters that can be configured for a MAIA job. Although sensible defaults are set, a careful configuration may be crucial for a good quality of the resulting annotations. You can read more on the configuration parameters of the <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection stage</a> and those of the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation stage</a> in the respective articles.
+            The form to create a new MAIA job presents you a choice between several methods to obtain training data (training proposals). Choose one that best fits to your use case. The form initially shows only the parameters that are most likely to be modified for each job. To show all available parameters, click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form. There can be quite a lot parameters that can be configured for a MAIA job. Although sensible defaults are set, a careful configuration may be crucial for a good quality of the resulting annotations. You can read more on the configuration parameters for <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>, <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">existing annotations</a>, <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">knowledge transfer</a> and <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation</a> in the respective articles.
         </p>
         <div class="panel panel-warning">
             <div class="panel-body text-warning">
-                A MAIA job can run for many hours or even a day. Please choose your parameters carefully before you submit a new job.
+                A MAIA job can run for many hours or even a day. Please choose your settings carefully before you submit a new job.
             </div>
         </div>
         <p>
-            A MAIA job runs through the four consecutive stages outlined above. The first and the third stages perform automatic processing of the images. The second and the fourth stages require manual interaction by you. Once you have created a new job, it will immediately start the automatic processing of the first stage. BIIGLE will notify you when this stage is finished and the job is waiting for your manual interaction in the second stage. In the same way you are notified when the automatic processing of the third stage is finished. You can change the way you receive new MAIA notifications in the <a href="{{route('settings-notifications')}}">notification settings</a> of your user account.
+            If novelty detection is chosen as the method to obtain training data, a MAIA job runs through the four consecutive stages outlined above. The first and the third stages perform automatic processing of the images. The second and the fourth stages require manual interaction by you. Once you have created a new job, it will immediately start the automatic processing of the first stage. BIIGLE will notify you when this stage is finished and the job is waiting for your manual interaction in the second stage. In the same way you are notified when the automatic processing of the third stage is finished. If existing annotations or knowledge transfer were chosen as the method to obtain training data, the job will directly proceed with the third stage, skipping the first two. You can change the way you receive new MAIA notifications in the <a href="{{route('settings-notifications')}}">notification settings</a> of your user account.
         </p>
         <p>
-            The overview page of a MAIA job shows a main content area and a sidebar with five different tabs. The first tab <button class="btn btn-default btn-xs"><i class="fas fa-info-circle"></i></button> shows general information about the job, including all the parameters that were used. The second <button class="btn btn-default btn-xs"><i class="fas fa-plus-square"></i></button> and third <button class="btn btn-default btn-xs"><i class="fas fa-pen-square"></i></button> tabs belong to the training proposals stage and are enabled once the job progresses to this stage. The fourth <button class="btn btn-default btn-xs"><i class="fas fa-check-square"></i></button> and fifth <button class="btn btn-default btn-xs"><i class="fas fa-pen-square"></i></button> tabs belong to the annotation candidates stage and are enabled once the job progresses to this stage.
+            The overview page of a MAIA job shows a main content area and a sidebar with multiple tabs. The first tab <button class="btn btn-default btn-xs"><i class="fas fa-info-circle"></i></button> shows general information about the job, including all the parameters that were used. The second <button class="btn btn-default btn-xs"><i class="fas fa-plus-square"></i></button> and third <button class="btn btn-default btn-xs"><i class="fas fa-pen-square"></i></button> tabs belong to the training proposals stage and are enabled once the job progresses to this stage. These tabs are visible only if novelty detection was chosen as the method to obtain training data. The fourth <button class="btn btn-default btn-xs"><i class="fas fa-check-square"></i></button> and fifth <button class="btn btn-default btn-xs"><i class="fas fa-pen-square"></i></button> tabs belong to the annotation candidates stage and are enabled once the job progresses to this stage.
         </p>
         <p>
-            Continue reading about MAIA in the articles about the individual stages. You can start with the first stage: <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>.
+            Continue reading about MAIA in the articles about the methods to obtain training data. You can start with the first method: <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>.
         </p>
         <h3>Further reading</h3>
         <ul>
-            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">A description of the first MAIA stage: Novelty detection.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">A description of the second MAIA stage: Training proposals.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">A description of the third MAIA stage: Instance segmentation.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">A description of the last MAIA stage: Annotation candidates.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">Using novelty detection to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Using existing annotations to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Using knowledge transfer to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">Reviewing the training proposals from novelty detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">The automatic instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from instance segmentation.</a></li>
         </ul>
     </div>
     <div class="row">
