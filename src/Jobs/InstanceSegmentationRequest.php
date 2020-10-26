@@ -2,7 +2,9 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Biigle\Modules\Maia\GenericImage;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Volume;
 use Exception;
 use File;
 use FileCache;
@@ -17,6 +19,20 @@ class InstanceSegmentationRequest extends JobRequest
     protected $trainingProposals;
 
     /**
+     * URL of the volume for knowledge transfer (if any).
+     *
+     * @var string
+     */
+    protected $knowledgeTransferVolumeUrl;
+
+    /**
+     * Filenames of the images of the knowledge transfer volume, indexed by their IDs.
+     *
+     * @var array
+     */
+    protected $knowledgeTransferImages;
+
+    /**
      * Create a new instance
      *
      * @param MaiaJob $job
@@ -28,6 +44,14 @@ class InstanceSegmentationRequest extends JobRequest
         // and the GPU server cannot instantiate MaiaAnnotation objects (as they depend
         // on biigle/core).
         $this->trainingProposals = $this->bundleTrainingProposals($job);
+
+        if ($this->shouldUseKnowledgeTransfer()) {
+            $volume = Volume::find($this->jobParams['kt_volume_id']);
+            $this->knowledgeTransferVolumeUrl = $volume->url;
+            $this->knowledgeTransferImages = $volume->images()
+                ->pluck('filename', 'id')
+                ->toArray();
+        }
     }
 
     /**
@@ -40,7 +64,13 @@ class InstanceSegmentationRequest extends JobRequest
         try {
             $images = $this->getGenericImages();
 
-            $datasetOutputPath = $this->generateDataset($images);
+            if ($this->shouldUseKnowledgeTransfer()) {
+                $datasetImages = $this->getKnowledgeTransferImages();
+            } else {
+                $datasetImages = $images;
+            }
+
+            $datasetOutputPath = $this->generateDataset($datasetImages);
             $trainingOutputPath = $this->performTraining($datasetOutputPath);
             $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
 
@@ -49,6 +79,16 @@ class InstanceSegmentationRequest extends JobRequest
         } finally {
             $this->cleanup();
         }
+    }
+
+    /**
+     * Determine whether knowledge transfer should be performed in this job.
+     *
+     * @return bool
+     */
+    protected function shouldUseKnowledgeTransfer()
+    {
+        return array_key_exists('training_data_method', $this->jobParams) && $this->jobParams['training_data_method'] === 'knowledge_transfer';
     }
 
     /**
@@ -124,6 +164,10 @@ class InstanceSegmentationRequest extends JobRequest
             'training_proposals' => $this->trainingProposals,
             'output_path' => $outputJsonPath,
         ];
+
+        if ($this->shouldUseKnowledgeTransfer()) {
+            $content['kt_scale_factor'] = $this->jobParams['kt_scale_factor'];
+        }
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
 
@@ -270,5 +314,20 @@ class InstanceSegmentationRequest extends JobRequest
     protected function getTmpDirPath()
     {
         return parent::getTmpDirPath()."-instance-segmentation";
+    }
+
+    /**
+     * Create GenericImage instances for the images of the knowledge transfer volume.
+     *
+     * @return array
+     */
+    protected function getKnowledgeTransferImages()
+    {
+        $images = [];
+        foreach ($this->knowledgeTransferImages as $id => $filename) {
+            $images[$id] = new GenericImage($id, "{$this->knowledgeTransferVolumeUrl}/{$filename}");
+        }
+
+        return $images;
     }
 }

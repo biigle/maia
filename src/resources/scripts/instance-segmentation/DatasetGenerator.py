@@ -23,6 +23,9 @@ class DatasetGenerator(object):
         self.training_masks_path = '{}/training_masks'.format(self.tmp_dir)
         self.crop_dimension = 512
 
+        # If this is != 1.0, scale/knowledge transfer is used.
+        self.scale_factor = params.get('kt_scale_factor', 1.0)
+
     def generate(self):
         self.ensure_train_masks_dirs()
         executor = ThreadPoolExecutor(max_workers=self.max_workers)
@@ -72,6 +75,10 @@ class DatasetGenerator(object):
             print('Image #{} is corrupt! Skipping...'.format(imageId))
 
             return False, False, False
+
+        if self.scale_factor != 1.0:
+            image = image.resize(self.scale_factor)
+            proposals = np.round(np.array(proposals, dtype=np.float32) * self.scale_factor).atype(int);
 
         masks = []
         for proposal in proposals:

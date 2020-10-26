@@ -118,6 +118,113 @@ class InstanceSegmentationRequestTest extends TestCase
         }
     }
 
+    public function testHandleKnowledgeTransfer()
+    {
+        Queue::fake();
+        FileCache::fake();
+
+        $otherImage = ImageTest::create();
+        $otherImage2 = ImageTest::create([
+            'volume_id' => $otherImage->volume_id,
+            'filename' => 'a',
+        ]);
+
+        $params = [
+            'training_data_method' => 'knowledge_transfer',
+            'kt_scale_factor' => 0.25,
+            'kt_volume_id' => $otherImage->volume_id,
+            'is_train_scheme' => [
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+            'available_bytes' => 8E+9,
+            'max_workers' => 2,
+        ];
+
+        $ownImage = ImageTest::create();
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => $params,
+        ]);
+        $trainingProposal = TrainingProposalTest::create([
+            'job_id' => $job->id,
+            'image_id' => $otherImage->id,
+            'points' => [10.5, 20.4, 30],
+            'selected' => true,
+        ]);
+        config(['maia.tmp_dir' => '/tmp']);
+        $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
+        $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
+        $datasetOutputJsonPath = "{$tmpDir}/output-dataset.json";
+        $trainingInputJsonPath = "{$tmpDir}/input-training.json";
+        $trainingOutputJsonPath = "{$tmpDir}/output-training.json";
+        $inferenceInputJsonPath = "{$tmpDir}/input-inference.json";
+
+        $expectDatasetJson = [
+            'kt_scale_factor' => 0.25,
+            'available_bytes' => 8E+9,
+            'max_workers' => 2,
+            'tmp_dir' => $tmpDir,
+            'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
+            'output_path' => "{$tmpDir}/output-dataset.json",
+        ];
+
+        $expectTrainingJson = [
+            'is_train_scheme' => [
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+            'available_bytes' => 8E+9,
+            'max_workers' => 2,
+            'tmp_dir' => $tmpDir,
+            'output_path' => "{$tmpDir}/output-training.json",
+            'coco_model_path' => config('maia.coco_model_path'),
+        ];
+
+        $expectInferenceJson = [
+            'available_bytes' => 8E+9,
+            'max_workers' => 2,
+            'tmp_dir' => $tmpDir,
+        ];
+
+        try {
+            $request = new IsJobStub($job);
+            $request->handle();
+
+            $this->assertTrue(File::isDirectory($tmpDir));
+
+            $this->assertTrue(File::exists($datasetInputJsonPath));
+            $inputJson = json_decode(File::get($datasetInputJsonPath), true);
+            $this->assertArrayHasKey('images', $inputJson);
+            $this->assertArrayHasKey($otherImage->id, $inputJson['images']);
+            $this->assertArrayNotHasKey($otherImage2->id, $inputJson['images']);
+            unset($inputJson['images']);
+            $this->assertEquals($expectDatasetJson, $inputJson);
+            $this->assertStringContainsString("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
+
+            $this->assertTrue(File::exists($trainingInputJsonPath));
+            $inputJson = json_decode(File::get($trainingInputJsonPath), true);
+            $this->assertEquals($expectTrainingJson, $inputJson);
+            $this->assertStringContainsString("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
+
+            $this->assertTrue(File::exists($inferenceInputJsonPath));
+            $inputJson = json_decode(File::get($inferenceInputJsonPath), true);
+            $this->assertArrayHasKey('images', $inputJson);
+            $this->assertArrayHasKey($ownImage->id, $inputJson['images']);
+            unset($inputJson['images']);
+            $this->assertEquals($expectInferenceJson, $inputJson);
+            $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
+
+            Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $ownImage) {
+                return $response->jobId === $job->id
+                    && in_array([$ownImage->id, 10, 20, 30, 123], $response->annotations);
+            });
+
+            $this->assertTrue($request->cleanup);
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
     public function testFailed()
     {
         $job = MaiaJobTest::create();
