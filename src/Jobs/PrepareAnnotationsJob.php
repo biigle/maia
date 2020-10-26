@@ -15,7 +15,7 @@ use Biigle\Shape;
 use DB;
 use Illuminate\Queue\SerializesModels;
 
-class UseExistingAnnotations extends Job
+abstract class PrepareAnnotationsJob extends Job
 {
     use SerializesModels, QueriesExistingAnnotations;
 
@@ -44,36 +44,11 @@ class UseExistingAnnotations extends Job
     }
 
     /**
-     * Execute the job.
-     *
-     * @return void
-     */
-    public function handle()
-    {
-        if (!$this->hasAnnotations()) {
-            $this->job->error = ['message' => 'Existing annotations should be used but there are no existing annotations to take as training proposals.'];
-            $this->job->state_id = State::failedInstanceSegmentationId();
-            $this->job->save();
-            $this->job->user->notify(new InstanceSegmentationFailed($this->job));
-
-            return;
-        }
-
-        $this->convertAnnotations();
-        event(new MaiaJobContinued($this->job));
-    }
-
-    /**
      * Get the query for the annotations to convert.
      *
      * @return \Illuminate\Database\Query\Builder
      */
-    protected function getAnnotationsQuery()
-    {
-        $restrictLabels = Arr::get($this->job->params, 'oa_restrict_labels', []);
-
-        return $this->getExistingAnnotationsQuery($this->job->volume_id, $restrictLabels);
-    }
+    protected abstract function getAnnotationsQuery();
 
     /**
      * Determine if there are any annotations to convert.
@@ -90,12 +65,14 @@ class UseExistingAnnotations extends Job
      */
     protected function convertAnnotations()
     {
-        $this->getAnnotationsQuery()
-            // Use DISTINCT ON to get only one result per annotation, no matter how many
-            // matching labels are attached to it. We can't simply use DISTINCT because
-            // the rows include JSON.
-            ->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id'))
-            ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'image_annotations.id', 'annotations_id');
+        DB::transaction(function () {
+            $this->getAnnotationsQuery()
+                // Use DISTINCT ON to get only one result per annotation, no matter how
+                // many matching labels are attached to it. We can't simply use DISTINCT
+                // because the rows include JSON.
+                ->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id'))
+                ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'image_annotations.id', 'annotations_id');
+        });
     }
 
     /**
@@ -109,7 +86,7 @@ class UseExistingAnnotations extends Job
     {
         $trainingProposals = $chunk->map(function ($annotation) {
             return [
-                'points' => $this->convertAnnotationPoints($annotation),
+                'points' => $this->convertAnnotationPointsToCircle($annotation),
                 'image_id' => $annotation->image_id,
                 'shape_id' => Shape::circleId(),
                 'job_id' => $this->job->id,
@@ -129,7 +106,7 @@ class UseExistingAnnotations extends Job
      *
      * @return string JSON encoded points array.
      */
-    protected function convertAnnotationPoints(ImageAnnotation $annotation)
+    protected function convertAnnotationPointsToCircle(ImageAnnotation $annotation)
     {
         if ($annotation->shape_id === Shape::pointId()) {
             // Points are converted to circles with a default radius of 50 px.

@@ -4,7 +4,7 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
+use Biigle\Modules\Maia\Jobs\PrepareExistingAnnotations;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Notification;
 use Queue;
 use TestCase;
 
-class UseExistingAnnotationsTest extends TestCase
+class PrepareExistingAnnotationsTest extends TestCase
 {
     public function testHandle()
     {
@@ -28,7 +28,7 @@ class UseExistingAnnotationsTest extends TestCase
 
         Event::fake();
         Queue::fake();
-        (new UseExistingAnnotations($job))->handle();
+        (new PrepareExistingAnnotations($job))->handle();
         Event::assertDispatched(MaiaJobContinued::class);
         Queue::assertNotPushed(GenerateAnnotationPatch::class);
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
@@ -56,7 +56,7 @@ class UseExistingAnnotationsTest extends TestCase
             'params' => ['oa_restrict_labels' => [$al1->label_id]],
         ]);
 
-        (new UseExistingAnnotations($job))->handle();
+        (new PrepareExistingAnnotations($job))->handle();
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a1->points, $proposal->points);
@@ -96,7 +96,7 @@ class UseExistingAnnotationsTest extends TestCase
 
         $job = MaiaJobTest::create(['volume_id' => $a1->image->volume_id]);
 
-        (new UseExistingAnnotations($job))->handle();
+        (new PrepareExistingAnnotations($job))->handle();
         $this->assertEquals(5, $job->trainingProposals()->selected()->count());
         $proposals = $job->trainingProposals;
 
@@ -122,7 +122,7 @@ class UseExistingAnnotationsTest extends TestCase
         $job = MaiaJobTest::create();
 
         Notification::fake();
-        (new UseExistingAnnotations($job))->handle();
+        (new PrepareExistingAnnotations($job))->handle();
         Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
         $this->assertEquals(0, $job->trainingProposals()->count());
         $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);

@@ -3,6 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 
 class KnowledgeTransferVolumeControllerTest extends ApiTestCase
@@ -17,10 +18,17 @@ class KnowledgeTransferVolumeControllerTest extends ApiTestCase
             ->assertStatus(200)
             ->assertExactJson([]);
 
-        ImageTest::create([
+        $image = ImageTest::create([
             'attrs' => ['metadata' => ['distance_to_ground' => 1]],
             'volume_id' => $volume->id,
         ]);
+
+        $this->getJson("/api/v1/volumes/filter/knowledge-transfer")
+            ->assertStatus(200)
+            // No annotations
+            ->assertExactJson([]);
+
+        ImageAnnotationTest::create(['image_id' => $image->id]);
 
         $this->getJson("/api/v1/volumes/filter/knowledge-transfer")
             ->assertStatus(200)

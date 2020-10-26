@@ -39,7 +39,7 @@ class KnowledgeTransferVolumeController extends Controller
     {
         return Volume::accessibleBy($request->user())
             ->select('id', 'name')
-            ->whereHas('images')
+            ->has('images.annotations')
             ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
                     ->from('images')

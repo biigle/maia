@@ -267,7 +267,7 @@ class MaiaJobControllerTest extends ApiTestCase
             // No distance to ground in other volume.
             ->assertStatus(422);
 
-        ImageTest::create([
+        $image = ImageTest::create([
             'volume_id' => $volume->id,
             'filename' => 'abc.jpg',
             'attrs' => ['metadata' => ['distance_to_ground' => 1]],
@@ -278,6 +278,12 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertStatus(422);
 
         $this->project()->addVolumeId($volume->id);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No annotations in the volume.
+            ->assertStatus(422);
+
+        ImageAnnotationTest::create(['image_id' => $image->id]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();

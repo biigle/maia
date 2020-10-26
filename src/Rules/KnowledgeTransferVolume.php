@@ -19,7 +19,7 @@ class KnowledgeTransferVolume implements Rule
     {
         return Volume::accessibleBy(request()->user())
             ->where('id', $value)
-            ->whereHas('images')
+            ->has('images.annotations')
             ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
                     ->from('images')
@@ -36,6 +36,6 @@ class KnowledgeTransferVolume implements Rule
      */
     public function message()
     {
-        return 'The :attribute is not suited for knowledge transfer. You must be authorized to access the volume and all images must have distance to ground information.';
+        return 'The :attribute is not suited for knowledge transfer. You must be authorized to access the volume, all images must have distance to ground information and there must be annotations.';
     }
 }
