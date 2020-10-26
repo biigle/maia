@@ -78,7 +78,7 @@ class DatasetGenerator(object):
 
         if self.scale_factor != 1.0:
             image = image.resize(self.scale_factor)
-            proposals = np.round(np.array(proposals, dtype=np.float32) * self.scale_factor).astype(int);
+            proposals = np.round(np.array(proposals, dtype=np.float32) * self.scale_factor).astype(int)
 
         masks = []
         for proposal in proposals:
