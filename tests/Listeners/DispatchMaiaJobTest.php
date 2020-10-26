@@ -6,20 +6,20 @@ use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
 use Biigle\Modules\Maia\Jobs\UseExistingAnnotations;
-use Biigle\Modules\Maia\Listeners\DispatchNoveltyDetectionRequest;
+use Biigle\Modules\Maia\Listeners\DispatchMaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Exception;
 use Illuminate\Support\Facades\Bus;
 use Queue;
 use TestCase;
 
-class DispatchNoveltyDetectionRequestTest extends TestCase
+class DispatchMaiaJobTest extends TestCase
 {
     public function testHandle()
     {
         $job = MaiaJobTest::create(['params' => ['training_data_method' => 'novelty_detection']]);
         $event = new MaiaJobCreated($job);
-        $listener = new DispatchNoveltyDetectionRequest;
+        $listener = new DispatchMaiaJob;
 
         Queue::fake();
         $listener->handle($event);
@@ -30,7 +30,7 @@ class DispatchNoveltyDetectionRequestTest extends TestCase
     {
         $job = MaiaJobTest::create(['params' => ['training_data_method' => 'own_annotations']]);
         $event = new MaiaJobCreated($job);
-        $listener = new DispatchNoveltyDetectionRequest;
+        $listener = new DispatchMaiaJob;
 
         Queue::fake();
         Bus::fake();
@@ -43,7 +43,7 @@ class DispatchNoveltyDetectionRequestTest extends TestCase
     {
         $job = MaiaJobTest::create();
         $event = new MaiaJobCreated($job);
-        $listener = new DispatchNoveltyDetectionRequest;
+        $listener = new DispatchMaiaJob;
 
         Queue::fake();
         $listener->failed($event, new Exception);

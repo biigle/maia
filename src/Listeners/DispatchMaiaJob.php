@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Queue;
 
-class DispatchNoveltyDetectionRequest implements ShouldQueue
+class DispatchMaiaJob implements ShouldQueue
 {
     /**
       * Handle the event.
