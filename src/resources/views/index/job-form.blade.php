@@ -150,7 +150,7 @@
         <legend>Existing Annotations <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}" title="More information on the configurable parameters for existing annotations" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
 
         <div v-cloak class="form-group">
-            <label for="restrict_labels">Restrict to labels</label>
+            <label for="oa_restrict_labels">Restrict to labels</label>
             <loader :active="loading"></loader>
             <typeahead class="typeahead--block" :items="labels" placeholder="Label name" :clear-on-select="true" v-on:select="handleSelectedLabel"></typeahead>
             <span class="help-block">
@@ -165,7 +165,7 @@
                 <li v-if="!hasSelectedLabels" class="list-group-item text-muted">No restriction</li>
             </ul>
 
-            <input v-for="label in selectedLabels" type="hidden" name="restrict_labels[]" :value="label.id">
+            <input v-for="label in selectedLabels" type="hidden" name="oa_restrict_labels[]" :value="label.id">
         </div>
     </fieldset>
 
@@ -184,6 +184,25 @@
             </span>
 
             <input v-if="knowledgeTransferVolume" type="hidden" name="kt_volume_id" :value="knowledgeTransferVolume.id">
+
+            <div v-if="showAdvanced">
+                <label for="kt_restrict_labels">Restrict to labels</label>
+                <typeahead class="typeahead--block" :items="knowledgeTransferLabels" placeholder="Label name" :clear-on-select="true" v-on:select="handleSelectedKnowledgeTransferLabel"></typeahead>
+                <span class="help-block">
+                    Only use existing annotations with these selected labels.
+                </span>
+
+                <ul class="list-group">
+                    <li v-for="label in selectedKnowledgeTransferLabels" class="list-group-item">
+                        <span class="label-color-dot" v-if="label.color" :style="{'background-color': '#' + label.color}" class="label-color"></span><span v-text="label.name"></span>
+                        <button title="Remove label from selection" type="button" class="close" v-on:click="handleUnselectKnowledgeTransferLabel(label)">&times;</button>
+                    </li>
+                    <li v-if="!hasSelectedKnowledgeTransferLabels" class="list-group-item text-muted">No restriction</li>
+                </ul>
+
+                <input v-for="label in selectedKnowledgeTransferLabels" type="hidden" name="kt_restrict_labels[]" :value="label.id">
+            </div>
+
         </div>
     </fieldset>
 

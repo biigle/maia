@@ -24,6 +24,16 @@
             The volume of which to use annotations as training data for the instance segmentation stage. Only volumes with <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">distance to ground</a> information for all images can be selected. The annotations should show the same or very similar object classes than those that should be found with the MAIA job.
         </p>
 
+        <h4>Restrict to labels</h4>
+
+        <p class="text-muted">
+            By default, all annotations are used.
+        </p>
+
+        <p>
+            Use the input field to select one or more labels. If present, only annotations with the chosen labels are used as training data for the MAIA job. If no labels are chosen, all annotations are used.
+        </p>
+
         <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>

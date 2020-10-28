@@ -56,6 +56,7 @@ class StoreMaiaJob extends FormRequest
             'oa_restrict_labels.*' => 'integer|exists:labels,id',
 
             'kt_volume_id' => ['required_if:training_data_method,knowledge_transfer', 'integer', 'exists:volumes,id', new KnowledgeTransferVolume],
+            'kt_restrict_labels.*' => 'integer|exists:labels,id',
 
             'is_train_scheme' => 'required|array|min:1',
             'is_train_scheme.*' => 'array',
@@ -101,6 +102,10 @@ class StoreMaiaJob extends FormRequest
             if ($this->input('training_data_method') === MaiaJob::TRAIN_OWN_ANNOTATIONS && $this->hasNoExistingAnnotations()) {
                 $validator->errors()->add('training_data_method', 'There are no existing annotations (with the chosen labels) in this volume.');
             }
+
+            if ($this->input('training_data_method') === MaiaJob::TRAIN_KNOWLEDGE_TRANSFER && $this->hasNoKnowledgeTransferAnnotations()) {
+                $validator->errors()->add('training_data_method', 'There are no existing annotations (with the chosen labels) in the volume chosen for knowledge transfer.');
+            }
         });
     }
 
@@ -114,5 +119,17 @@ class StoreMaiaJob extends FormRequest
         $restrictLabels = $this->input('oa_restrict_labels', []);
 
         return !$this->getExistingAnnotationsQuery($this->volume->id, $restrictLabels)->exists();
+    }
+
+    /**
+     * Determine if there are existing annotations in the volume chosen for knowledge transfer.
+     *
+     * @return boolean
+     */
+    protected function hasNoKnowledgeTransferAnnotations()
+    {
+        $restrictLabels = $this->input('kt_restrict_labels', []);
+
+        return !$this->getExistingAnnotationsQuery($this->input('kt_volume_id'), $restrictLabels)->exists();
     }
 }

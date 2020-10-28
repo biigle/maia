@@ -25,7 +25,9 @@ export default {
             knowledgeTransferVolumes: [],
             knowledgeTransferVolume: null,
             shouldFetchKnowledgeTransferVolumes: false,
-            knowledgeTransferTypeaheadTemplate: '{{item.name}}<br><small>({{item.description}})</small>'
+            knowledgeTransferTypeaheadTemplate: '{{item.name}}<br><small>({{item.description}})</small>',
+            knowledgeTransferLabelCache: [],
+            selectedKnowledgeTransferLabels: [],
         };
     },
     computed: {
@@ -49,6 +51,25 @@ export default {
         },
         hasNoKnowledgeTransferVolumes() {
             return this.shouldFetchKnowledgeTransferVolumes && !this.loading && this.knowledgeTransferVolumes.length === 0;
+        },
+        hasSelectedKnowledgeTransferLabels() {
+            return this.selectedKnowledgeTransferLabels.length > 0;
+        },
+        knowledgeTransferLabels() {
+            if (!this.knowledgeTransferVolume) {
+                return [];
+            }
+
+            let volumeId = this.knowledgeTransferVolume.id;
+
+            if (!this.knowledgeTransferLabelCache.hasOwnProperty(volumeId)) {
+                this.fetchLabels(volumeId)
+                    .then((response) => {
+                        this.knowledgeTransferLabelCache[volumeId] = response.body;
+                    }, handleErrorResponse);
+            }
+
+            return this.knowledgeTransferLabelCache[volumeId];
         },
     },
     methods: {
@@ -87,6 +108,7 @@ export default {
         },
         handleSelectedKnowledgeTransferVolume(volume) {
             this.knowledgeTransferVolume = volume;
+            this.selectedKnowledgeTransferLabels = [];
         },
         setKnowledgeTransferVolumes(response) {
             this.knowledgeTransferVolumes = response.body
@@ -99,6 +121,24 @@ export default {
                     return volume;
                 });
         },
+        fetchLabels(id) {
+            this.startLoading();
+            let promise = this.$http.get('api/v1/volumes{/id}/annotation-labels', {params: {id: id}});
+            promise.finally(this.finishLoading);
+
+            return promise;
+        },
+        handleSelectedKnowledgeTransferLabel(label) {
+            if (this.selectedKnowledgeTransferLabels.indexOf(label) === -1) {
+                this.selectedKnowledgeTransferLabels.push(label);
+            }
+        },
+        handleUnselectKnowledgeTransferLabel(label) {
+            let index = this.selectedKnowledgeTransferLabels.indexOf(label);
+            if (index >= 0) {
+                this.selectedKnowledgeTransferLabels.splice(index, 1);
+            }
+        },
     },
     watch: {
         useExistingAnnotations(use) {
@@ -108,10 +148,8 @@ export default {
         },
         shouldFetchLabels(fetch) {
             if (fetch) {
-                this.startLoading();
-                this.$http.get('api/v1/volumes{/id}/annotation-labels', {params: {id: this.volumeId}})
-                    .then(this.setLabels, handleErrorResponse)
-                    .finally(this.finishLoading);
+                this.fetchLabels(this.volumeId)
+                    .then(this.setLabels, handleErrorResponse);
             }
         },
         useKnowledgeTransfer(use) {

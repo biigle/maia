@@ -174,7 +174,7 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
     }
 
-    public function testStoreRestrictLabels()
+    public function testStoreExistingAnnotationsRestrictLabels()
     {
         $id = $this->volume()->id;
         $this->beEditor();
@@ -293,6 +293,67 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
+    }
+
+    public function testStoreKnowledgeTransferRestrictLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $volume = VolumeTest::create();
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+        $image = ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+        $this->project()->addVolumeId($volume->id);
+        $ia = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => $image->id,
+            ])->id,
+        ]);
+        $ia2 = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => $image->id,
+            ])->id,
+        ]);
+
+        $params = [
+            'kt_volume_id' => $volume->id,
+            'kt_restrict_labels' => [999],
+            'training_data_method' => 'knowledge_transfer',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+        ];
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Label does not exist.
+            ->assertStatus(422);
+
+        $params['kt_restrict_labels'] = [$ia2->label_id];
+        $ia2->delete();
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No annotations with the selected label.
+            ->assertStatus(422);
+
+        $params['kt_restrict_labels'] = [$ia->label_id];
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertArrayHasKey('kt_volume_id', $job->params);
+        $this->assertEquals($volume->id, $job->params['kt_volume_id']);
+        $this->assertArrayHasKey('kt_restrict_labels', $job->params);
+        $this->assertEquals([$ia->label_id], $job->params['kt_restrict_labels']);
     }
 
     public function testDestroy()

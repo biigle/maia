@@ -36,9 +36,11 @@ class MaiaJobController extends Controller
      * @apiParam (Required parameters for novelty detection) {number} nd_ignore_radius Ignore training proposals or annotation candidates which have a radius smaller or equal than this value in pixels.
      *
      *
-     * @apiParam (Optional parameters for existing annotations) {Array} oa_restrict_labels Array of label IDs to restrict the existing annotations to, which should be used as training proposals. `use_existing` must be set if this parameter is present.
+     * @apiParam (Optional parameters for existing annotations) {Array} oa_restrict_labels Array of label IDs to restrict the existing annotations to, which should be used as training proposals.
      *
      * @apiParam (Required parameters for knowledge transfer) {number} kt_volume_id The ID of the volume from which to get the annotations for knowledge transfer.
+     *
+     * @apiParam (Optional parameters for knowledge transfer) {Array} kt_restrict_labels Array of label IDs to restrict the annotations of the other volume to, which should be used as training proposals.
      *
      * @param StoreMaiaJob $request
      * @return \Illuminate\Http\Response
@@ -63,6 +65,7 @@ class MaiaJobController extends Controller
             $job->state_id = State::instanceSegmentationId();
             $paramKeys = array_merge($paramKeys, [
                 'kt_volume_id',
+                'kt_restrict_labels',
             ]);
         } else {
             $job->state_id = State::noveltyDetectionId();
