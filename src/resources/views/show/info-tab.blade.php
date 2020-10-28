@@ -71,6 +71,25 @@
                     @endif
                 </tbody>
             </table>
+        @elseif($job->shouldUseKnowledgeTransfer())
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Knowledge transfer
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <?php
+                            $volumeId = Arr::get($job->params, 'kt_volume_id');
+                            $v = Biigle\Volume::find($volumeId);
+                        ?>
+                        <td>Using all annotations of volume {{$v ? $v->name : $volumeId}}.</td>
+                    </tr>
+                </tbody>
+            </table>
         @endif
         @if (Arr::has($job->params, 'is_train_scheme'))
             <table class="table">
