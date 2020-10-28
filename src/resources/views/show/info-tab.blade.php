@@ -60,15 +60,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Arr::has($job->params, 'oa_restrict_labels'))
-                        <tr>
+                    <tr>
+                        @if (Arr::has($job->params, 'oa_restrict_labels'))
                             <td>Restricted to label IDs: {{implode(', ', Arr::get($job->params, 'oa_restrict_labels', []))}}</td>
-                        </tr>
-                    @else
-                        <tr>
+                        @else
                             <td>Using all annotations of this volume.</td>
-                        </tr>
-                    @endif
+                        @endif
+                    </tr>
                 </tbody>
             </table>
         @elseif($job->shouldUseKnowledgeTransfer())
@@ -86,7 +84,11 @@
                             $volumeId = Arr::get($job->params, 'kt_volume_id');
                             $v = Biigle\Volume::find($volumeId);
                         ?>
-                        <td>Using all annotations of volume {{$v ? $v->name : $volumeId}}.</td>
+                        @if (Arr::has($job->params, 'kt_restrict_labels'))
+                            <td>Restricted to label IDs: {{implode(', ', Arr::get($job->params, 'kt_restrict_labels', []))}} of volume {{$v ? $v->name : $volumeId}}.</td>
+                        @else
+                            <td>Using all annotations of volume {{$v ? $v->name : $volumeId}}.</td>
+                        @endif
                     </tr>
                 </tbody>
             </table>
