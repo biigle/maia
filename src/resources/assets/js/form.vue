@@ -63,10 +63,7 @@ export default {
             let volumeId = this.knowledgeTransferVolume.id;
 
             if (!this.knowledgeTransferLabelCache.hasOwnProperty(volumeId)) {
-                this.fetchLabels(volumeId)
-                    .then((response) => {
-                        this.knowledgeTransferLabelCache[volumeId] = response.body;
-                    }, handleErrorResponse);
+                this.fetchKnowledgeTransferLabels(volumeId);
             }
 
             return this.knowledgeTransferLabelCache[volumeId];
@@ -127,6 +124,12 @@ export default {
             promise.finally(this.finishLoading);
 
             return promise;
+        },
+        fetchKnowledgeTransferLabels(id) {
+            this.fetchLabels(id)
+                .then((response) => {
+                    this.knowledgeTransferLabelCache[id] = response.body;
+                }, handleErrorResponse);
         },
         handleSelectedKnowledgeTransferLabel(label) {
             if (this.selectedKnowledgeTransferLabels.indexOf(label) === -1) {
