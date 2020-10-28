@@ -8,9 +8,20 @@
             Using knowledge transfer to obtain training data.
         </p>
 
-        {{-- TODO --}}
         <p>
-            <span class="label label-warning">Coming soon</span>
+            This method allows you to choose existing annotations of another volume as training data for the instance segmentation stage. This is done using the "knowledge transfer" method UnKnoT <a href="#ref1">[1]</a>. All annotations will be converted to circles and the new MAIA job will immediately proceed to the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation stage</a>. This method can only be used if <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">distance to ground</a> information is available for all images of the volume of the MAIA job.
+        </p>
+
+        <h3><a name="configurable-parameters"></a>Configurable parameters</h3>
+
+        <p>
+            To show all configurable parameters, click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form.
+        </p>
+
+        <h4>Volume</h4>
+
+        <p>
+            The volume of which to use annotations as training data for the instance segmentation stage. Only volumes with <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">distance to ground</a> information for all images can be selected. The annotations should show the same or very similar object classes than those that should be found with the MAIA job.
         </p>
 
         <h3>Further reading</h3>
@@ -22,5 +33,12 @@
             <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">The automatic instance segmentation.</a></li>
             <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from instance segmentation.</a></li>
         </ul>
+    </div>
+
+     <div class="row">
+        <h3>References</h3>
+        <ol>
+            <li><a name="ref1"></a>M. Zurowietz and T. W. Nattkemper, "Unsupervised Knowledge Transfer for Object Detection in Marine Environmental Monitoring and Exploration," in IEEE Access, vol. 8, pp. 143558-143568, 2020, doi: <a href="https://doi.org/10.1109/ACCESS.2020.3014441">10.1109/ACCESS.2020.3014441</a></li>
+        </ol>
     </div>
 @endsection
