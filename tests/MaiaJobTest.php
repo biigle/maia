@@ -94,27 +94,30 @@ class MaiaJobTest extends ModelTestCase
         Event::assertDispatched(MaiaJobDeleting::class);
     }
 
+    public function testShouldUseNoveltyDetection()
+    {
+        $this->assertTrue($this->model->shouldUseNoveltyDetection());
+        $this->model->params = ['training_data_method' => 'own_annotations'];
+        $this->assertFalse($this->model->shouldUseNoveltyDetection());
+        $this->model->params = ['training_data_method' => 'novelty_detection'];
+        $this->assertTrue($this->model->shouldUseNoveltyDetection());
+    }
+
     public function testShouldUseExistingAnnotations()
     {
         $this->assertFalse($this->model->shouldUseExistingAnnotations());
-        $this->model->params = ['use_existing' => false];
+        $this->model->params = ['training_data_method' => 'novelty_detection'];
         $this->assertFalse($this->model->shouldUseExistingAnnotations());
-        $this->model->params = ['use_existing' => true];
-        $this->assertTrue($this->model->shouldUseExistingAnnotations());
-        $this->model->params = ['use_existing' => "1"];
+        $this->model->params = ['training_data_method' => 'own_annotations'];
         $this->assertTrue($this->model->shouldUseExistingAnnotations());
     }
 
-    public function testShouldSkipNoveltyDetection()
+    public function testShouldUseKnowledgeTransfer()
     {
-        $this->assertFalse($this->model->shouldSkipNoveltyDetection());
-        $this->model->params = ['skip_nd' => true];
-        $this->assertFalse($this->model->shouldSkipNoveltyDetection());
-        $this->model->params = ['skip_nd' => true, 'use_existing' => true];
-        $this->assertTrue($this->model->shouldSkipNoveltyDetection());
-        $this->model->params = ['skip_nd' => "1", 'use_existing' => true];
-        $this->assertTrue($this->model->shouldSkipNoveltyDetection());
-        $this->model->params = ['skip_nd' => false, 'use_existing' => true];
-        $this->assertFalse($this->model->shouldSkipNoveltyDetection());
+        $this->assertFalse($this->model->shouldUseKnowledgeTransfer());
+        $this->model->params = ['training_data_method' => 'novelty_detection'];
+        $this->assertFalse($this->model->shouldUseKnowledgeTransfer());
+        $this->model->params = ['training_data_method' => 'knowledge_transfer'];
+        $this->assertTrue($this->model->shouldUseKnowledgeTransfer());
     }
 }

@@ -1,8 +1,9 @@
 import mrcnn.utils
-from skimage.io import imread
 import cv2
 import numpy as np
 import os.path
+from pyvips import Image as VipsImage
+import skimage.color
 
 class Dataset(mrcnn.utils.Dataset):
     def __init__(self, images, name='no_name', masks=[], classes={}):
@@ -23,34 +24,60 @@ class Dataset(mrcnn.utils.Dataset):
 
         super().prepare()
 
+    def load_image(self, image_id):
+        """Load the specified image and return a [H,W,3] Numpy array.
+        """
+        # Load image with Vips because if ignores EXIF rotation (as it should).
+        image = self.vips_image_to_numpy_array(VipsImage.new_from_file(self.image_info[image_id]['path']))
+        # image = skimage.io.imread(self.image_info[image_id]['path'])
+        # If grayscale. Convert to RGB for consistency.
+        if image.ndim != 3:
+            image = skimage.color.gray2rgb(image)
+        # If has an alpha channel, remove it for consistency
+        if image.shape[-1] == 4:
+            image = image[..., :3]
+
+        return image
+
     def load_mask(self, image_index):
         file = self.masks[image_index]
-        mask = imread(file)
-        _, contours, _ = cv2.findContours(np.copy(mask), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        data = np.load(file, allow_pickle=True)
+        classes = []
+        masks = []
 
-        # The class to which a contour belongs is defined by the values of its pixels
-        # (class_id).
-        class_ids = []
-        class_masks = []
-        for c in contours:
-            c = c.squeeze(axis=1)
-            source_class_id = mask[c[0][1], c[0][0]]
-            # Map the source ID to the internal continuous IDs.
-            class_id = self.map_source_class_id('{}.{}'.format(self.name, source_class_id))
-
+        for mask in data['masks']:
+            # Only one class "Interesting" is supported for now.
+            source_class_id = 1
             if source_class_id not in self.ignore_classes:
-                class_mask = np.zeros((mask.shape[0], mask.shape[1]))
-                cv2.drawContours(class_mask, [c], -1, 1, -1)
-                class_ids.append(class_id)
-                class_masks.append(class_mask)
+                classes.append(self.map_source_class_id('{}.{}'.format(self.name, source_class_id)))
+                masks.append(mask)
 
-        if len(class_ids) == 0:
-            shape = mask.shape
-            class_masks = np.zeros((shape[0], shape[1], 0), dtype=np.bool)
-        else:
-            class_masks = np.stack(class_masks, axis = 2).astype(np.bool)
+        if len(classes) == 0:
+            return super().load_mask(image_index)
 
-        return class_masks, np.array(class_ids).astype(np.int32)
+        classes = np.array(classes, dtype=np.int32)
+        masks = np.stack(masks, axis = 2).astype(np.bool)
+
+        return masks, classes
+
+    def vips_image_to_numpy_array(self, image):
+        # https://libvips.github.io/pyvips/intro.html#numpy-and-pil
+        format_to_dtype = {
+            'uchar': np.uint8,
+            'char': np.int8,
+            'ushort': np.uint16,
+            'short': np.int16,
+            'uint': np.uint32,
+            'int': np.int32,
+            'float': np.float32,
+            'double': np.float64,
+            'complex': np.complex64,
+            'dpcomplex': np.complex128,
+        }
+
+        return np.ndarray(buffer=image.write_to_memory(),
+                   dtype=format_to_dtype[image.format],
+                   shape=[image.height, image.width, image.bands])
 
 class TrainingDataset(Dataset):
     def __init__(self, trainset):

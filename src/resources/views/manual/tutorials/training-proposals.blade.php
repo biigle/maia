@@ -5,7 +5,7 @@
 @section('manual-content')
     <div class="row">
         <p class="lead">
-            A description of the second MAIA stage.
+            Reviewing the training proposals from novelty detection.
         </p>
         <p>
             When one of your MAIA jobs proceeds from <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a> to the training proposals stage, you will get a notification from BIIGLE. In this stage, the MAIA job requires manual interaction from you before it can proceed to the next stage. This is done in two steps, the <a href="#selection-of-training-proposals">selection of training proposals</a> and the <a href="#refinement-of-training-proposals">refinement of training proposals</a>.
@@ -127,12 +127,14 @@
         <p>
             When the training proposals have been submitted, the MAIA job automatically proceeds to the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation</a> stage.
         </p>
-        <h3>Further reading</h3>
+       <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">A description of the first MAIA stage: Novelty detection.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">A description of the third MAIA stage: Instance segmentation.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">A description of the last MAIA stage: Annotation candidates.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">Using novelty detection to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Using existing annotations to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Using knowledge transfer to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">The automatic instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from instance segmentation.</a></li>
         </ul>
     </div>
 @endsection

@@ -8,10 +8,7 @@ import mrcnn.model as modellib
 class TrainingRunner(object):
 
     def __init__(self, params, trainset):
-        # Number of epochs to train head layers.
-        self.epochs_head = params['is_epochs_head']
-        # Number of epochs to train all layers.
-        self.epochs_all = params['is_epochs_all']
+        self.train_scheme = params['is_train_scheme']
         # Path to the directory to store temporary files.
         self.tmp_dir = params['tmp_dir']
         # Path to the COCO pretrained weights for Mask R-CNN
@@ -42,26 +39,17 @@ class TrainingRunner(object):
             "mrcnn_mask",
         ])
 
-        # Train the head branches
-        # Passing layers="heads" freezes all layers except the head layers.
-        model.train(self.dataset,
-                    val_dataset=None,
-                    learning_rate=self.config.LEARNING_RATE,
-                    augmentation=self.config.AUGMENTATION,
-                    workers=self.max_workers,
-                    epochs=self.epochs_head,
-                    layers='heads')
-
-        # Fine tune all layers
-        # The epochs *include* those of the previous training. So set 20 if you want to
-        # train for 10 epochs and already trained for 10 epochs.
-        model.train(self.dataset,
-                    val_dataset=None,
-                    learning_rate=self.config.LEARNING_RATE / 10,
-                    augmentation=self.config.AUGMENTATION,
-                    workers=self.max_workers,
-                    epochs=self.epochs_head + self.epochs_all,
-                    layers='all')
+        epochs = 0
+        for train_step in self.train_scheme:
+            print('Train step: ', train_step)
+            epochs += int(train_step['epochs'])
+            model.train(self.dataset,
+                val_dataset=None,
+                learning_rate=float(train_step['learning_rate']),
+                augmentation=self.config.AUGMENTATION,
+                workers=self.max_workers,
+                epochs=epochs,
+                layers=train_step['layers'])
 
         model_path = os.path.join(self.model_dir, "mask_rcnn_final.h5")
         model.keras_model.save_weights(model_path)

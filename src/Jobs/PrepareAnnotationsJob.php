@@ -5,19 +5,19 @@ namespace Biigle\Modules\Maia\Jobs;
 use Arr;
 use Biigle\ImageAnnotation;
 use Biigle\Jobs\Job;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
-use Biigle\Modules\Maia\Notifications\NoveltyDetectionFailed;
+use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Shape;
 use DB;
 use Illuminate\Queue\SerializesModels;
 
-class UseExistingAnnotations extends Job
+abstract class PrepareAnnotationsJob extends Job
 {
-    use SerializesModels;
+    use SerializesModels, QueriesExistingAnnotations;
 
     /**
      * The job to use existing annotations for.
@@ -25,6 +25,13 @@ class UseExistingAnnotations extends Job
      * @var MaiaJob
      */
     protected $job;
+
+    /**
+     * Ignore this job if the MAIA job does not exist any more.
+     *
+     * @var bool
+     */
+    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new isntance.
@@ -37,47 +44,11 @@ class UseExistingAnnotations extends Job
     }
 
     /**
-     * Execute the job.
-     *
-     * @return void
-     */
-    public function handle()
-    {
-        if ($this->job->shouldSkipNoveltyDetection() && !$this->hasAnnotations()) {
-            $this->job->error = ['message' => 'Novelty detection should be skipped but there are no existing annotations to take as training proposals.'];
-            $this->job->state_id = State::failedNoveltyDetectionId();
-            $this->job->save();
-            $this->job->user->notify(new NoveltyDetectionFailed($this->job));
-
-            return;
-        }
-
-        $this->convertAnnotations();
-        $this->dispatchAnnotationPatchJobs();
-
-        if ($this->job->shouldSkipNoveltyDetection()) {
-            $this->job->state_id = State::trainingProposalsId();
-            $this->job->save();
-            $this->job->user->notify(new NoveltyDetectionComplete($this->job));
-        }
-    }
-
-    /**
      * Get the query for the annotations to convert.
      *
      * @return \Illuminate\Database\Query\Builder
      */
-    protected function getAnnotationsQuery()
-    {
-        $restrictLabels = Arr::get($this->job->params, 'restrict_labels', []);
-
-        return ImageAnnotation::join('images', 'image_annotations.image_id', '=', 'images.id')
-            ->where('images.volume_id', $this->job->volume_id)
-            ->when(!empty($restrictLabels), function ($query) use ($restrictLabels) {
-                return $query->join('image_annotation_labels', 'image_annotation_labels.annotation_id', '=', 'image_annotations.id')
-                    ->whereIn('image_annotation_labels.label_id', $restrictLabels);
-            });
-    }
+    protected abstract function getAnnotationsQuery();
 
     /**
      * Determine if there are any annotations to convert.
@@ -94,12 +65,14 @@ class UseExistingAnnotations extends Job
      */
     protected function convertAnnotations()
     {
-        $this->getAnnotationsQuery()
-            // Use DISTINCT ON to get only one result per annotation, no matter how many
-            // matching labels are attached to it. We can't simply use DISTINCT because
-            // the rows include JSON.
-            ->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id'))
-            ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'image_annotations.id', 'annotations_id');
+        DB::transaction(function () {
+            $this->getAnnotationsQuery()
+                // Use DISTINCT ON to get only one result per annotation, no matter how
+                // many matching labels are attached to it. We can't simply use DISTINCT
+                // because the rows include JSON.
+                ->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id'))
+                ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'image_annotations.id', 'annotations_id');
+        });
     }
 
     /**
@@ -113,10 +86,12 @@ class UseExistingAnnotations extends Job
     {
         $trainingProposals = $chunk->map(function ($annotation) {
             return [
-                'points' => $this->convertAnnotationPoints($annotation),
+                'points' => $this->convertAnnotationPointsToCircle($annotation),
                 'image_id' => $annotation->image_id,
                 'shape_id' => Shape::circleId(),
                 'job_id' => $this->job->id,
+                // All these proposals should be taken for instance segmentation.
+                'selected' => true,
                 // score should be null in this case.
             ];
         });
@@ -131,7 +106,7 @@ class UseExistingAnnotations extends Job
      *
      * @return string JSON encoded points array.
      */
-    protected function convertAnnotationPoints(ImageAnnotation $annotation)
+    protected function convertAnnotationPointsToCircle(ImageAnnotation $annotation)
     {
         if ($annotation->shape_id === Shape::pointId()) {
             // Points are converted to circles with a default radius of 50 px.
@@ -180,19 +155,5 @@ class UseExistingAnnotations extends Job
         $r = round(sqrt($r), 2);
 
         return [$x, $y, $r];
-    }
-
-    /**
-     * Dispatch the jobs to generate image patches for the new training proposals.
-     */
-    protected function dispatchAnnotationPatchJobs()
-    {
-        $disk = config('maia.training_proposal_storage_disk');
-        $this->job->trainingProposals()->chunk(1000, function ($chunk) use ($disk) {
-            $chunk->each(function ($proposal) use ($disk) {
-                GenerateAnnotationPatch::dispatch($proposal, $disk)
-                    ->onQueue(config('largo.generate_annotation_patch_queue'));
-            });
-        });
     }
 }

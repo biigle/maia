@@ -1,4 +1,5 @@
 <script>
+import knowledgeTransferVolumeApi from './api/knowledgeTransferVolume';
 import {handleErrorResponse} from './import';
 import {LabelTypeahead} from './import';
 import {LoaderMixin} from './import';
@@ -14,30 +15,58 @@ export default {
     data() {
         return {
             volumeId: null,
-            useExistingAnnotations: false,
-            skipNoveltyDetection: false,
             showAdvanced: false,
             shouldFetchLabels: false,
             labels: [],
             selectedLabels: [],
             submitted: false,
+            trainScheme: [],
+            trainingDataMethod: '',
+            knowledgeTransferVolumes: [],
+            knowledgeTransferVolume: null,
+            shouldFetchKnowledgeTransferVolumes: false,
+            knowledgeTransferTypeaheadTemplate: '{{item.name}}<br><small>({{item.description}})</small>',
+            knowledgeTransferLabelCache: [],
+            selectedKnowledgeTransferLabels: [],
         };
     },
     computed: {
-        canSkipNoveltyDetection() {
-            return this.useExistingAnnotations && this.hasLabels;
-        },
         hasLabels() {
             return this.labels.length > 0;
         },
         hasSelectedLabels() {
             return this.selectedLabels.length > 0;
         },
-        showRestrictLabelsInput() {
-            return this.showAdvanced && this.useExistingAnnotations && this.hasLabels;
+        useExistingAnnotations() {
+            return this.trainingDataMethod === 'own_annotations';
         },
-        hasNoExistingAnnotations() {
-            return this.useExistingAnnotations && !this.hasLabels && !this.loading;
+        useNoveltyDetection() {
+            return this.trainingDataMethod === 'novelty_detection';
+        },
+        useKnowledgeTransfer() {
+            return this.trainingDataMethod === 'knowledge_transfer';
+        },
+        canSubmit() {
+            return this.submitted || (this.useKnowledgeTransfer && !this.knowledgeTransferVolume);
+        },
+        hasNoKnowledgeTransferVolumes() {
+            return this.shouldFetchKnowledgeTransferVolumes && !this.loading && this.knowledgeTransferVolumes.length === 0;
+        },
+        hasSelectedKnowledgeTransferLabels() {
+            return this.selectedKnowledgeTransferLabels.length > 0;
+        },
+        knowledgeTransferLabels() {
+            if (!this.knowledgeTransferVolume) {
+                return [];
+            }
+
+            let volumeId = this.knowledgeTransferVolume.id;
+
+            if (!this.knowledgeTransferLabelCache.hasOwnProperty(volumeId)) {
+                this.fetchKnowledgeTransferLabels(volumeId);
+            }
+
+            return this.knowledgeTransferLabelCache[volumeId];
         },
     },
     methods: {
@@ -61,6 +90,58 @@ export default {
         submit() {
             this.submitted = true;
         },
+        removeTrainStep(index) {
+            this.trainScheme.splice(index, 1);
+        },
+        addTrainStep() {
+            let step = {layers: 'heads', epochs: 10, learning_rate: 0.001};
+            if (this.trainScheme.length > 0) {
+                let last = this.trainScheme[this.trainScheme.length - 1];
+                step.layers = last.layers;
+                step.epochs = last.epochs;
+                step.learning_rate = last.learning_rate;
+            }
+            this.trainScheme.push(step);
+        },
+        handleSelectedKnowledgeTransferVolume(volume) {
+            this.knowledgeTransferVolume = volume;
+            this.selectedKnowledgeTransferLabels = [];
+        },
+        setKnowledgeTransferVolumes(response) {
+            this.knowledgeTransferVolumes = response.body
+                .filter(volume => volume.id !== this.volumeId)
+                .map(function (volume) {
+                    volume.description = volume.projects
+                        .map(project => project.name)
+                        .join(', ');
+
+                    return volume;
+                });
+        },
+        fetchLabels(id) {
+            this.startLoading();
+            let promise = this.$http.get('api/v1/volumes{/id}/annotation-labels', {params: {id: id}});
+            promise.finally(this.finishLoading);
+
+            return promise;
+        },
+        fetchKnowledgeTransferLabels(id) {
+            this.fetchLabels(id)
+                .then((response) => {
+                    this.knowledgeTransferLabelCache[id] = response.body;
+                }, handleErrorResponse);
+        },
+        handleSelectedKnowledgeTransferLabel(label) {
+            if (this.selectedKnowledgeTransferLabels.indexOf(label) === -1) {
+                this.selectedKnowledgeTransferLabels.push(label);
+            }
+        },
+        handleUnselectKnowledgeTransferLabel(label) {
+            let index = this.selectedKnowledgeTransferLabels.indexOf(label);
+            if (index >= 0) {
+                this.selectedKnowledgeTransferLabels.splice(index, 1);
+            }
+        },
     },
     watch: {
         useExistingAnnotations(use) {
@@ -70,17 +151,29 @@ export default {
         },
         shouldFetchLabels(fetch) {
             if (fetch) {
+                this.fetchLabels(this.volumeId)
+                    .then(this.setLabels, handleErrorResponse);
+            }
+        },
+        useKnowledgeTransfer(use) {
+            if (use) {
+                this.shouldFetchKnowledgeTransferVolumes = true;
+            }
+        },
+        shouldFetchKnowledgeTransferVolumes(fetch) {
+            if (fetch) {
                 this.startLoading();
-                this.$http.get('api/v1/volumes{/id}/annotation-labels', {params: {id: this.volumeId}})
-                    .then(this.setLabels, handleErrorResponse)
+                knowledgeTransferVolumeApi.get()
+                    .then(this.setKnowledgeTransferVolumes, handleErrorResponse)
                     .finally(this.finishLoading);
             }
         },
     },
     created() {
         this.volumeId = biigle.$require('maia.volumeId');
-        this.useExistingAnnotations = biigle.$require('maia.useExistingAnnotations');
-        this.skipNoveltyDetection = biigle.$require('maia.skipNoveltyDetection');
+        this.trainScheme = biigle.$require('maia.trainScheme');
+        this.showAdvanced = biigle.$require('maia.hasErrors');
+        this.trainingDataMethod = biigle.$require('maia.trainingDataMethod');
 
         if (this.useExistingAnnotations) {
             this.shouldFetchLabels = true;

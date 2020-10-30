@@ -14,6 +14,21 @@ class MaiaJob extends Model
     use HasJsonAttributes;
 
     /**
+     * @var string
+     */
+    const TRAIN_NOVELTY_DETECTION = 'novelty_detection';
+
+    /**
+     * @var string
+     */
+    const TRAIN_OWN_ANNOTATIONS = 'own_annotations';
+
+    /**
+     * @var string
+     */
+    const TRAIN_KNOWLEDGE_TRANSFER = 'knowledge_transfer';
+
+    /**
      * The attributes that should be casted to native types.
      *
      * @var array
@@ -155,23 +170,33 @@ class MaiaJob extends Model
     }
 
     /**
-     * Determine if this job should use existing annotations.
+     * Determine if this job should use existing annotations to get training data.
      *
      * @return bool
      */
     public function shouldUseExistingAnnotations()
     {
-        return (bool) $this->getJsonAttr('params.use_existing', false);
+        return $this->getJsonAttr('params.training_data_method') === self::TRAIN_OWN_ANNOTATIONS;
     }
 
     /**
-     * Determine if this job should skip novelty detection.
+     * Determine if this job should use novelty detection to get training data.
      *
      * @return bool
      */
-    public function shouldSkipNoveltyDetection()
+    public function shouldUseNoveltyDetection()
     {
-        return $this->shouldUseExistingAnnotations()
-            && (bool) $this->getJsonAttr('params.skip_nd', false);
+        // Handle fallback where old jobs don't have a training_data_method yet.
+        return $this->getJsonAttr('params.training_data_method') === self::TRAIN_NOVELTY_DETECTION || $this->getJsonAttr('params.training_data_method') === null;
+    }
+
+    /**
+     * Determine if this job should use knowledge transfer to get training data.
+     *
+     * @return bool
+     */
+    public function shouldUseKnowledgeTransfer()
+    {
+        return $this->getJsonAttr('params.training_data_method') === self::TRAIN_KNOWLEDGE_TRANSFER;
     }
 }

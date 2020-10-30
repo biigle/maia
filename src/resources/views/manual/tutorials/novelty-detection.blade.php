@@ -5,13 +5,13 @@
 @section('manual-content')
     <div class="row">
         <p class="lead">
-            A description of the first MAIA stage and the configurable parameters.
+            Using novelty detection to obtain training data.
         </p>
         <p>
-            The first stage of a MAIA job processes all images of a volume with an unsupervised novelty detection method. The novelty detection method attempts to find "interesting" objects or regions in the images, which are called "training proposals". The novelty detection acts without any prior knowledge of what is actually defined as interesting by you or anyone who wants to explore the images. Hence, the quality or meaningfulness of the training proposals may vary dramatically, depending on the images themselves and on what you are looking for.
+            This method to obtain training data processes all images of a volume with an unsupervised novelty detection method. The novelty detection method attempts to find "interesting" objects or regions in the images, which are called "training proposals". The novelty detection acts without any prior knowledge of what is actually defined as interesting by you or anyone who wants to explore the images. Hence, the quality or meaningfulness of the training proposals may vary dramatically, depending on the images themselves and on what you are looking for.
         </p>
         <p>
-            To make the novelty detection as flexible as possible, there are many parameters that can be configured before a new MAIA job is submitted. You might have to try out a few parameter combinations before the novelty detection produces meaningful training proposals. In cases where the novelty detection produces too few meaningful training proposals or does not work at all, you can augment the training proposals with <a href="#use-existing-annotations">your own annotations</a> or <a href="#skip-novelty-detection">skip the novelty detection</a> altogether.
+            To make the novelty detection as flexible as possible, there are many parameters that can be configured before a new MAIA job is submitted. You might have to try out a few parameter combinations before the novelty detection produces meaningful training proposals. In cases where the novelty detection produces too few meaningful training proposals or does not work at all, you can try one of the other methods to obtain training data: <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">existing annotations</a> or <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">knowledge transfer</a>.
         </p>
 
         <p>
@@ -21,7 +21,7 @@
         <h3><a name="configurable-parameters"></a>Configurable parameters</h3>
 
         <p>
-            By default only the two parameters for the novelty detection are shown, that are the most likely to be modified for each new job. To show all configurable parameters, click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form.
+            By default only the one parameter for the novelty detection is shown, that is the most likely to be modified for each new job. To show all configurable parameters, click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form.
         </p>
 
         <h4>Number of image clusters</h4>
@@ -144,32 +144,14 @@
             In the MAIA paper <a href="#ref1">[1]</a> no training proposals were ignored which is equivalent to an ignore radius of 0.
         </p>
 
-        <h3><a name="use-existing-annotations"></a>Use existing annotations</h3>
-
-        <p>
-            If you already have existing annotations for the volume or the novelty detection does not produce (enough) meaningful training proposals, you can select the checkbox "Use existing annotations" before you submit a new MAIA job. When this checkbox is checked, the existing annotations are also presented as training proposals in the second MAIA stage.
-        </p>
-
-        <p>
-            If the checkbox is selected, a new input appears that allows you to limit the used existing annotations to one or more labels. This way you can select only those annotations that make sense as training proposals. If you do not choose any label, all existing annotations are used as training proposals.
-        </p>
-
-        <h3><a name="skip-novelty-detection"></a>Skip novelty detection</h3>
-
-        <p>
-            If you chose to use existing annotations as training proposals, a new checkbox to "Skip novelty detection" appears. Select this checkbox if you do not want to run the novelty detection at all and only want to use the existing annotations as training proposals.
-        </p>
-
-        <p>
-            Please note that the new MAIA job is shown as "running novelty detection" in the job overview page even if you chose to skip novelty detection. Just refresh the job overview page after a few seconds and the job should have proceeded to the second MAIA stage.
-        </p>
-
         <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">A description of the second MAIA stage: Training proposals.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">A description of the third MAIA stage: Instance segmentation.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">A description of the last MAIA stage: Annotation candidates.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Using existing annotations to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Using knowledge transfer to obtain training data.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">Reviewing the training proposals from novelty detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">The automatic instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from instance segmentation.</a></li>
         </ul>
     </div>
     <div class="row">

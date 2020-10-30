@@ -7,9 +7,12 @@ use Biigle\MediaType;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Tests\ImageAnnotationLabelTest;
+use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
+use Biigle\Tests\VolumeTest;
 
 class MaiaJobControllerTest extends ApiTestCase
 {
@@ -19,6 +22,7 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         parent::setUp();
         $this->defaultParams = [
+            'training_data_method' => 'novelty_detection',
             'nd_clusters' => 1,
             'nd_patch_size' => 39,
             'nd_threshold' => 99,
@@ -27,13 +31,15 @@ class MaiaJobControllerTest extends ApiTestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'is_epochs_head' => 20,
-            'is_epochs_all' => 10,
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
         ];
         ImageTest::create(['volume_id' => $this->volume()->id]);
     }
 
-    public function testStore()
+    public function testStoreNoveltyDetection()
     {
         $id = $this->volume()->id;
         $this->doTestApiRoute('POST', "/api/v1/volumes/{$id}/maia-jobs");
@@ -47,6 +53,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         // patch size must be an odd number
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", [
+            'training_data_method' => 'novelty_detection',
             'nd_clusters' => 5,
             'nd_patch_size' => 40,
             'nd_threshold' => 99,
@@ -55,8 +62,24 @@ class MaiaJobControllerTest extends ApiTestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'is_epochs_head' => 20,
-            'is_epochs_all' => 10,
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
+        ])->assertStatus(422);
+
+        // empty train scheme
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", [
+            'training_data_method' => 'novelty_detection',
+            'nd_clusters' => 5,
+            'nd_patch_size' => 40,
+            'nd_threshold' => 99,
+            'nd_latent_size' => 0.1,
+            'nd_trainset_size' => 10000,
+            'nd_epochs' => 100,
+            'nd_stride' => 2,
+            'nd_ignore_radius' => 5,
+            'is_train_scheme' => [],
         ])->assertStatus(422);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
@@ -122,72 +145,79 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertStatus(422);
     }
 
-    public function testStoreUseExisting()
-    {
-        $id = $this->volume()->id;
-        $this->beEditor();
-        $this->defaultParams['use_existing'] = 'abc';
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            // Parameter must be bool.
-            ->assertStatus(422);
-
-        $this->defaultParams['use_existing'] = true;
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertSuccessful();
-        $job = MaiaJob::first();
-        $this->assertTrue($job->shouldUseExistingAnnotations());
-    }
-
-    public function testStoreRestrictLabels()
-    {
-        $id = $this->volume()->id;
-        $this->beEditor();
-        $this->defaultParams['restrict_labels'] = [$this->labelChild()->id];
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            // Requires 'use_existing'.
-            ->assertStatus(422);
-
-        $this->defaultParams['use_existing'] = true;
-        $this->defaultParams['restrict_labels'] = [999];
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            // Must contain valid label IDs.
-            ->assertStatus(422);
-
-        $this->defaultParams['restrict_labels'] = [$this->labelChild()->id];
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
-            ->assertSuccessful();
-        $job = MaiaJob::first();
-        $this->assertArrayHasKey('restrict_labels', $job->params);
-        $this->assertEquals([$this->labelChild()->id], $job->params['restrict_labels']);
-    }
-
-    public function testStoreSkipNd()
+    public function testStoreUseExistingAnnotations()
     {
         $id = $this->volume()->id;
         $this->beEditor();
         $params = [
-            'skip_nd' => true,
-            'nd_clusters' => 10,
-            'is_epochs_head' => 1,
-            'is_epochs_all' => 1,
+            'training_data_method' => 'own_annotations',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
         ];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
-            // Requires 'use_existing'.
+            // No existing annotations.
             ->assertStatus(422);
 
-        $params['use_existing'] = true;
-        $params['skip_nd'] = 'abc';
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
-            // Must be bool.
-            ->assertStatus(422);
+        ImageAnnotationTest::create([
+            'image_id' => ImageTest::create([
+                'volume_id' => $this->volume()->id,
+                'filename' => 'abc.jpg',
+            ])->id,
+        ]);
 
-        $params['skip_nd'] = true;
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
-            // nd_* parameters are no longer required.
             ->assertSuccessful();
         $job = MaiaJob::first();
-        $this->assertTrue($job->shouldSkipNoveltyDetection());
-        $this->assertArrayNotHasKey('nd_clusters', $job->params);
+        $this->assertTrue($job->shouldUseExistingAnnotations());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+    }
+
+    public function testStoreExistingAnnotationsRestrictLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'training_data_method' => 'novelty_detection',
+            'oa_restrict_labels' => [$this->labelChild()->id],
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
+        ];
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Requires 'own_annotations'.
+            ->assertStatus(422);
+
+        $params['training_data_method'] = 'own_annotations';
+        $params['oa_restrict_labels'] = [999];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Must contain valid label IDs.
+            ->assertStatus(422);
+
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => ImageTest::create([
+                    'volume_id' => $this->volume()->id,
+                    'filename' => 'abc.jpg',
+                ])->id,
+            ])->id,
+        ]);
+
+        $params['oa_restrict_labels'] = [$this->labelRoot()->id];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No annotations with the chosen label.
+            ->assertStatus(422);
+
+        $params['oa_restrict_labels'] = [$this->labelChild()->id];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+        $job = MaiaJob::first();
+        $this->assertArrayHasKey('oa_restrict_labels', $job->params);
+        $this->assertEquals([$this->labelChild()->id], $job->params['oa_restrict_labels']);
     }
 
     public function testStoreNdClustersTooFewImages()
@@ -197,11 +227,133 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->defaultParams['nd_clusters'] = 2;
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(422);
+    }
 
-        $this->defaultParams['skip_nd'] = true;
-        $this->defaultParams['use_existing'] = true;
-        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+    public function testStoreKnowledgeTransfer()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'training_data_method' => 'knowledge_transfer',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+        ];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No volume specified.
+            ->assertStatus(422);
+
+        $params['kt_volume_id'] = $this->volume()->id;
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Cannot be the own volume.
+            ->assertStatus(422);
+
+
+        $volume = VolumeTest::create();
+        $params['kt_volume_id'] = $volume->id;
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No distance to ground in own volume.
+            ->assertStatus(422);
+
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No distance to ground in other volume.
+            ->assertStatus(422);
+
+        $image = ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No permission to access the volume.
+            ->assertStatus(422);
+
+        $this->project()->addVolumeId($volume->id);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No annotations in the volume.
+            ->assertStatus(422);
+
+        ImageAnnotationTest::create(['image_id' => $image->id]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertArrayHasKey('kt_volume_id', $job->params);
+        $this->assertEquals($volume->id, $job->params['kt_volume_id']);
+    }
+
+    public function testStoreKnowledgeTransferRestrictLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $volume = VolumeTest::create();
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+        $image = ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+        $this->project()->addVolumeId($volume->id);
+        $ia = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => $image->id,
+            ])->id,
+        ]);
+        $ia2 = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => $image->id,
+            ])->id,
+        ]);
+
+        $params = [
+            'kt_volume_id' => $volume->id,
+            'kt_restrict_labels' => [999],
+            'training_data_method' => 'knowledge_transfer',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+        ];
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Label does not exist.
+            ->assertStatus(422);
+
+        $params['kt_restrict_labels'] = [$ia2->label_id];
+        $ia2->delete();
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No annotations with the selected label.
+            ->assertStatus(422);
+
+        $params['kt_restrict_labels'] = [$ia->label_id];
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertArrayHasKey('kt_volume_id', $job->params);
+        $this->assertEquals($volume->id, $job->params['kt_volume_id']);
+        $this->assertArrayHasKey('kt_restrict_labels', $job->params);
+        $this->assertEquals([$ia->label_id], $job->params['kt_restrict_labels']);
     }
 
     public function testDestroy()

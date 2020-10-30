@@ -10,26 +10,40 @@
     <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">Novelty detection</a>
 </h4>
 <p>
-    A description of the first MAIA stage and the configurable parameters.
+    Using novelty detection to obtain training data.
+</p>
+
+<h4>
+    <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Existing annotations</a>
+</h4>
+<p>
+    Using existing annotations to obtain training data.
+</p>
+
+<h4>
+    <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Knowledge transfer</a>
+</h4>
+<p>
+    Using knowledge transfer to obtain training data.
 </p>
 
 <h4>
     <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">Training proposals</a>
 </h4>
 <p>
-    A description of the second MAIA stage.
+    Reviewing the training proposals from novelty detection.
 </p>
 
 <h4>
     <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">Instance segmentation</a>
 </h4>
 <p>
-    A description of the third MAIA stage and the configurable parameters.
+    The automatic instance segmentation.
 </p>
 
 <h4>
     <a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Annotation candidates</a>
 </h4>
 <p>
-    A description of the last MAIA stage.
+    Reviewing the annotation candidates from instance segmentation.
 </p>

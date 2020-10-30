@@ -1,6 +1,6 @@
 import numpy as np
 import mrcnn.config
-import imgaug
+import imgaug.augmenters as iaa
 import math
 
 class Config(mrcnn.config.Config):
@@ -13,16 +13,18 @@ class Config(mrcnn.config.Config):
         self.VALIDATION_STEPS = 0
         # This is the mean pixel of the training images.
         self.MEAN_PIXEL = np.array(trainset['mean_pixel'])
-        self.AUGMENTATION = imgaug.augmenters.Sometimes(0.5, [
-            imgaug.augmenters.Fliplr(0.5),
-            imgaug.augmenters.Flipud(0.5),
-            imgaug.augmenters.Affine(rotate=(-180, 180)),
-            imgaug.augmenters.GaussianBlur(sigma=(0.0, 2.0)),
-        ])
+        self.AUGMENTATION = iaa.SomeOf((0, None), [
+            iaa.Fliplr(1.0),
+            iaa.Flipud(1.0),
+            iaa.Affine(rotate=[90, 180, 270]),
+            iaa.GaussianBlur(sigma=(1.0, 2.0)),
+            iaa.JpegCompression(compression=(25, 50)),
+        ], random_order=True)
         super().__init__()
 
 class TrainingConfig(Config):
     def __init__(self, params, trainset):
+        self.RPN_NMS_THRESHOLD = 0.85
         self.IMAGE_MAX_DIM = trainset['crop_dimension']
         # Determine the number of images per batch that the GPU can handle. From the
         # Mask R-CNN config: "A 12GB GPU can typically handle 2 images of 1024x1024px."
