@@ -8,13 +8,10 @@ This is the BIIGLE module module for the [Machine Learning Assisted Image Annota
 
 1. Run `composer require biigle/maia`.
 2. Install the Python dependencies with `pip install -r requirements.txt`.
-
-### In your BIIGLE application instance
-
-1. Add `Biigle\Modules\Maia\MaiaServiceProvider::class` to the `providers` array in `config/app.php`.
-2. Run `php artisan vendor:publish --tag=public` to publish the public assets of this module.
-3. Run `docker-compose exec app php artisan migrate` to create the new database tables.
-4. Configure a storage disk each for the training proposal and annotation candidate patches. Set the `MAIA_TRAINING_PROPOSAL_STORAGE_DISK` and `MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK` variables in the `.env` file to the name of the respective storage disk. Do not use the same disk for both! The content of the storage disks should be publicly accessible. Example for local disks:
+3. Add `Biigle\Modules\Maia\MaiaServiceProvider::class` to the `providers` array in `config/app.php`.
+4. Run `php artisan vendor:publish --tag=public` to publish the public assets of this module.
+5. Run `docker-compose exec app php artisan migrate` to create the new database tables.
+6. Configure a storage disk each for the training proposal and annotation candidate patches. Set the `MAIA_TRAINING_PROPOSAL_STORAGE_DISK` and `MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK` variables in the `.env` file to the name of the respective storage disk. Do not use the same disk for both! The content of the storage disks should be publicly accessible. Example for local disks:
     ```php
     // MAIA_TRAINING_PROPOSAL_STORAGE_DISK
     'maia-tp' => [
@@ -32,10 +29,6 @@ This is the BIIGLE module module for the [Machine Learning Assisted Image Annota
     ],
     ```
     This requires the link `storage -> ../storage/app/public` in the `public` directory.
-
-### If you use biigle/gpus on a remote machine
-
-Add `$app->register(Biigle\Modules\Maia\MaiaGpuServiceProvider::class);` to `bootstrap/app.php`.
 
 ## Configuration
 
