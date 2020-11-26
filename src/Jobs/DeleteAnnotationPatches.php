@@ -5,6 +5,7 @@ namespace Biigle\Modules\Maia\Jobs;
 use Biigle\Image;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Modules\Maia\MaiaJob;
+use Queue;
 use Storage;
 
 class DeleteAnnotationPatches extends Job
@@ -43,10 +44,10 @@ class DeleteAnnotationPatches extends Job
       */
     public function handle()
     {
-        $disk = Storage::disk(config('maia.training_proposal_storage_disk'));
+        $disk = config('maia.training_proposal_storage_disk');
         $this->deleteAnnotations($this->trainingProposals, $disk);
 
-        $disk = Storage::disk(config('maia.annotation_candidate_storage_disk'));
+        $disk = config('maia.annotation_candidate_storage_disk');
         $this->deleteAnnotations($this->annotationCandidates, $disk);
     }
 
@@ -54,26 +55,27 @@ class DeleteAnnotationPatches extends Job
      * Delete MAIA annotations form the specified storage disk.
      *
      * @param array $annotations
-     * @param FilesystemAdapter $disk
+     * @param string $disk
      */
     protected function deleteAnnotations($annotations, $disk)
     {
         $format = config('largo.patch_format');
 
-        // Process chunks of 100 images.
-        foreach (array_chunk($annotations, 100, true) as $chunk) {
-            $uuids = Image::whereIn('id', array_keys($chunk))->pluck('uuid', 'id');
-            foreach ($chunk as $imageId => $annotationIds) {
+        // Process chunks of 100 annotations.
+        foreach ($annotations->chunk(100) as $chunk) {
+            $uuids = Image::whereIn('id', $chunk->values())->pluck('uuid', 'id');
+            $files = $chunk->map(function ($imageId, $annotationId) use ($uuids, $format) {
                 $prefix = fragment_uuid_path($uuids[$imageId]);
-                foreach ($annotationIds as $id) {
-                    $disk->delete("{$prefix}/{$id}.{$format}");
-                }
-            }
+
+                return "{$prefix}/{$annotationId}.{$format}";
+            })->values()->toArray();
+
+            Queue::push(new DeleteAnnotationPatchChunk($disk, $files));
         }
     }
 
     /**
-     * Get the array of annotation IDs grouped by image IDs.
+     * Get the array of annotation IDs and their image ids.
      *
      * @param QueryBuilder $query
      *
@@ -81,12 +83,6 @@ class DeleteAnnotationPatches extends Job
      */
     protected function getAnnotationsArray($query)
     {
-        $ids = [];
-
-        $query->pluck('image_id', 'id')->each(function ($imageId, $id) use (&$ids) {
-            $ids[$imageId][] = $id;
-        });
-
-        return $ids;
+        return $query->pluck('image_id', 'id');
     }
 }
