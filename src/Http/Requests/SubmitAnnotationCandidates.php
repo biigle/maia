@@ -49,6 +49,10 @@ class SubmitAnnotationCandidates extends FormRequest
             if ($this->job->state_id !== State::annotationCandidatesId()) {
                 $validator->errors()->add('id', 'Annotation candidates can only be submitted if the job is in annotation candidates state.');
             }
+
+            if ($this->job->convertingCandidates) {
+                $validator->errors()->add('id', 'A job to convert annotation candidates is currently in progress. Please try again.');
+            }
         });
     }
 }

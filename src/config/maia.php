@@ -108,4 +108,9 @@ return [
         */
         'allow_user_settings' => true,
     ],
+
+    /*
+     | Specifies which queue should be used for the job to convert annotation sessions.
+     */
+    'convert_annotations_queue' => env('MAIA_CONVERT_ANNOTATIONS_QUEUE', 'default'),
 ];

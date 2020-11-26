@@ -554,8 +554,8 @@ export default {
 
             this.hasCandidates = CANDIDATES.length > 0;
         },
-        fetchCandidates() {
-            if (!this.fetchCandidatesPromise) {
+        fetchCandidates(force) {
+            if (!this.fetchCandidatesPromise || force) {
                 this.startLoading();
 
                 this.fetchCandidatesPromise = JobApi.getAnnotationCandidates({id: this.job.id});
@@ -722,18 +722,30 @@ export default {
         handleConvertCandidates() {
             this.startLoading();
             JobApi.convertAnnotationCandidates({id: this.job.id}, {})
-                .then(this.handleConvertedCandidates, handleErrorResponse)
-                .finally(this.finishLoading);
+                .then(this.waitForConvertedCandidates);
+        },
+        waitForConvertedCandidates() {
+            let wait = () => {
+                window.setTimeout(() => {
+                    JobApi.convertingAnnotationCandidates({id: this.job.id})
+                        .then(wait, this.handleConvertedCandidates);
+                }, 2000);
+            };
+
+            wait();
         },
         handleConvertedCandidates(response) {
-            Object.keys(response.body).forEach((id) => {
-                let next = this.nextFocussedCandidate;
-                let candidate = CANDIDATES_BY_ID[id];
-                candidate.annotation_id = response.body[id];
-                this.setSelectedCandidateId(candidate);
-                this.setConvertedCandidateId(candidate);
-                this.maybeUnsetFocussedCandidate(candidate, next);
-            });
+            if (response.status === 404) {
+                return this.fetchCandidates(true)
+                    .then(() => {
+                        let next = this.nextFocussedCandidate;
+                        this.candidates.map(c => this.maybeUnsetFocussedCandidate(c, next));
+                    })
+                    .then(this.finishLoading);
+            } else {
+                handleErrorResponse(response);
+                this.finishLoading();
+            }
         },
         getSequenceId() {
             return this.sequenceCounter++;

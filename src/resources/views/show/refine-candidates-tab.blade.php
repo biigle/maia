@@ -1,4 +1,4 @@
-<refine-candidates-tab :selected-candidates="selectedCandidates" :label-trees="labelTrees" v-on:select="handleSelectedLabel" v-on:convert="handleConvertCandidates" inline-template>
+<refine-candidates-tab :selected-candidates="selectedCandidates" :label-trees="labelTrees" :loading="loading" v-on:select="handleSelectedLabel" v-on:convert="handleConvertCandidates" inline-template>
 <div class="sidebar-tab__content sidebar-tab__content--maia">
     <div class="maia-tab-content__top">
         <label-trees
@@ -21,7 +21,7 @@
                 Modify each annotation candidate with attached label, so that it fully encloses the interesting object or region of the image. Then convert the annotation candidates to real annotations.
             </div>
         </div>
-        <button class="btn btn-success btn-block" :disabled="hasNoSelectedCandidates" v-on:click="handleConvertCandidates">Convert annotation candidates</button>
+        <button class="btn btn-success btn-block" :disabled="hasNoSelectedCandidates || loading" v-on:click="handleConvertCandidates">Convert annotation candidates</button>
     </div>
 </div>
 </refine-candidates-tab>

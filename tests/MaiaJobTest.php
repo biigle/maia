@@ -120,4 +120,11 @@ class MaiaJobTest extends ModelTestCase
         $this->model->params = ['training_data_method' => 'knowledge_transfer'];
         $this->assertTrue($this->model->shouldUseKnowledgeTransfer());
     }
+
+    public function testConvertingCandidatesAttribute()
+    {
+        $this->assertFalse($this->model->convertingCandidates);
+        $this->model->convertingCandidates = true;
+        $this->assertTrue($this->model->convertingCandidates);
+    }
 }

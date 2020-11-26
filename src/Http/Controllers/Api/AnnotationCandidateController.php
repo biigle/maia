@@ -3,16 +3,12 @@
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\ImageAnnotation;
-use Biigle\ImageAnnotationLabel;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
-use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\Http\Requests\SubmitAnnotationCandidates;
 use Biigle\Modules\Maia\Http\Requests\UpdateAnnotationCandidate;
+use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
 use Biigle\Modules\Maia\MaiaJob;
-use Carbon\Carbon;
-use DB;
-use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
+use Queue;
 
 class AnnotationCandidateController extends Controller
 {
@@ -69,7 +65,7 @@ class AnnotationCandidateController extends Controller
      * @apiGroup Maia
      * @apiName ConvertAnnotationCandidates
      * @apiPermission projectEditor
-     * @apiDescription This converts all annotation candidates with attached label which have not been converted yet. Returns a map of converted annotation candidate ID to newly created image annotation ID.
+     * @apiDescription This converts all annotation candidates with attached label which have not been converted yet. Conversion is done asynchronously. The process can be polled using (#Maia:GetConvertingAnnotations).
      *
      * @apiParam {Number} id The job ID.
      *
@@ -78,50 +74,9 @@ class AnnotationCandidateController extends Controller
      */
     public function submit(SubmitAnnotationCandidates $request)
     {
-        $annotations = DB::transaction(function () use ($request) {
-            $candidates = $request->job->annotationCandidates()
-                ->whereNull('annotation_id')
-                ->whereNotNull('label_id')
-                ->get();
-
-            $now = Carbon::now();
-            $annotations = [];
-            $annotationLabels = [];
-
-            foreach ($candidates as $candidate) {
-                $annotation = new ImageAnnotation;
-                $annotation->image_id = $candidate->image_id;
-                $annotation->shape_id = $candidate->shape_id;
-                $annotation->points = $candidate->points;
-                $annotation->save();
-                $annotations[$candidate->id] = $annotation;
-
-                $candidate->annotation_id = $annotation->id;
-                $candidate->save();
-
-                $annotationLabels[] = [
-                    'annotation_id' => $annotation->id,
-                    'label_id' => $candidate->label_id,
-                    'user_id' => $request->user()->id,
-                    'confidence' => 1,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            }
-
-            ImageAnnotationLabel::insert($annotationLabels);
-
-            return $annotations;
-        });
-
-        foreach ($annotations as $annotation) {
-            GenerateAnnotationPatch::dispatch($annotation)
-                ->onQueue(config('largo.generate_annotation_patch_queue'));
-        }
-
-        return array_map(function ($a) {
-            return $a->id;
-        }, $annotations);
+        Queue::push(new ConvertAnnotationCandidates($request->job, $request->user()));
+        $request->job->convertingCandidates = true;
+        $request->job->save();
     }
 
     /**

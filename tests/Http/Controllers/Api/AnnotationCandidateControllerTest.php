@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\ImageAnnotationTest;
@@ -46,40 +47,39 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $job = MaiaJobTest::create([
             'state_id' => State::instanceSegmentationId(),
             'volume_id' => $this->volume()->id,
+            'attrs' => ['converting_candidates' => true],
         ]);
         $this->doTestApiRoute('POST', "/api/v1/maia-jobs/{$job->id}/annotation-candidates");
 
         $this->beGuest();
-        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(403);
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")
+            ->assertStatus(403);
 
         $this->beEditor();
         // Annotation candidates can only be submitted from annotation candidate state.
-        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(422);
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")
+            ->assertStatus(422);
 
         $job->state_id = State::annotationCandidatesId();
         $job->save();
 
-        $c1 = AnnotationCandidateTest::create([
-            'job_id' => $job->id,
-            'label_id' => $this->labelChild()->id,
-            'points' => [1, 2, 3],
-        ]);
+        // The "job in progress" flag is still set
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")
+            ->assertStatus(422);
 
-        $annotation = ImageAnnotationTest::create();
-        $c2 = AnnotationCandidateTest::create([
-            'job_id' => $job->id,
-            'label_id' => $this->labelChild()->id,
-            'annotation_id' => $annotation->id,
-            'points' => [1, 2, 3],
-        ]);
+        $job->convertingCandidates = false;
+        $job->save();
 
         Queue::fake();
-        $response = $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")->assertStatus(200);
-        $annotationId = $c1->fresh()->annotation_id;
-        $this->assertNotNull($annotationId);
-        $response->assertExactJson([$c1->id => $annotationId]);
-        $this->assertEquals($annotation->id, $c2->fresh()->annotation_id);
-        Queue::assertPushed(GenerateAnnotationPatch::class);
+
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")
+            ->assertStatus(200);
+
+        Queue::assertPushed(ConvertAnnotationCandidates::class, function ($j) use ($job) {
+            return $j->job->id === $job->id;
+        });
+
+        $this->assertTrue($job->fresh()->convertingCandidates);
     }
 
     public function testUpdate()

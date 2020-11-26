@@ -46,4 +46,8 @@ export default Vue.resource('api/v1/maia-jobs{/id}', {}, {
         method: 'POST',
         url: 'api/v1/maia-jobs{/id}/annotation-candidates',
     },
+    convertingAnnotationCandidates: {
+        method: 'GET',
+        url: 'api/v1/maia-jobs{/id}/converting-candidates',
+    },
 });

@@ -199,4 +199,24 @@ class MaiaJob extends Model
     {
         return $this->getJsonAttr('params.training_data_method') === self::TRAIN_KNOWLEDGE_TRANSFER;
     }
+
+    /**
+     * Determine whether a job to convert candidates is running.
+     *
+     * @return bool
+     */
+    public function getConvertingCandidatesAttribute()
+    {
+        return $this->getJsonAttr('converting_candidates', false);
+    }
+
+    /**
+     * Set whether a job to convert candidates is running.
+     *
+     * @param bool $converting
+     */
+    public function setConvertingCandidatesAttribute(bool $converting)
+    {
+        return $this->setJsonAttr('converting_candidates', $converting);
+    }
 }
