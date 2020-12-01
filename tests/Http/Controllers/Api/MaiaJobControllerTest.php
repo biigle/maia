@@ -171,6 +171,7 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
+        $this->assertFalse($job->shouldShowTrainingProposals());
         $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
     }
 
@@ -218,6 +219,40 @@ class MaiaJobControllerTest extends ApiTestCase
         $job = MaiaJob::first();
         $this->assertArrayHasKey('oa_restrict_labels', $job->params);
         $this->assertEquals([$this->labelChild()->id], $job->params['oa_restrict_labels']);
+    }
+
+    public function testStoreUseExistingAnnotationsShowTrainingProposals()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'training_data_method' => 'own_annotations',
+            'oa_show_training_proposals' => 'abc',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
+        ];
+
+        ImageAnnotationTest::create([
+            'image_id' => ImageTest::create([
+                'volume_id' => $this->volume()->id,
+                'filename' => 'abc.jpg',
+            ])->id,
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Invalid argument.
+            ->assertStatus(422);
+
+        $params['oa_show_training_proposals'] = true;
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseExistingAnnotations());
+        $this->assertTrue($job->shouldShowTrainingProposals());
+        $this->assertEquals(State::noveltyDetectionId(), $job->state_id);
     }
 
     public function testStoreNdClustersTooFewImages()

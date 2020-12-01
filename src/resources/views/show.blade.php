@@ -48,7 +48,7 @@
         <sidebar-tab name="info" icon="info-circle" title="Job information">
             @include('maia::show.info-tab')
         </sidebar-tab>
-        @if ($job->shouldUseNoveltyDetection())
+        @if ($job->shouldShowTrainingProposals())
             @if ($job->state_id < $states['training-proposals'])
                 <sidebar-tab name="select-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
                 <sidebar-tab name="refine-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>

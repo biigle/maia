@@ -6,6 +6,7 @@ use Arr;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
+use Queue;
 
 class PrepareExistingAnnotations extends PrepareAnnotationsJob
 {
@@ -25,8 +26,22 @@ class PrepareExistingAnnotations extends PrepareAnnotationsJob
             return;
         }
 
+        if ($this->job->shouldShowTrainingProposals()) {
+            $this->selectTrainingProposals = false;
+        }
+
         $this->convertAnnotations();
-        event(new MaiaJobContinued($this->job));
+
+        if ($this->job->shouldShowTrainingProposals()) {
+            // Pretend this to be a novelty detection response that returned all existing
+            // annotations as training proposals.
+            Queue::connection(config('maia.response_connection'))
+                ->pushOn(config('maia.response_queue'), new NoveltyDetectionResponse($this->job->id, []));
+        } else {
+            // Continue with instance segmentation using all existing annotations as
+            // training data.
+            event(new MaiaJobContinued($this->job));
+        }
     }
 
     /**

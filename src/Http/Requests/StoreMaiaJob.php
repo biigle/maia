@@ -54,6 +54,7 @@ class StoreMaiaJob extends FormRequest
 
             'oa_restrict_labels' => 'array',
             'oa_restrict_labels.*' => 'integer|exists:labels,id',
+            'oa_show_training_proposals' => 'boolean',
 
             'kt_volume_id' => ['required_if:training_data_method,knowledge_transfer', 'integer', 'exists:volumes,id', new KnowledgeTransferVolume],
             'kt_restrict_labels.*' => 'integer|exists:labels,id',

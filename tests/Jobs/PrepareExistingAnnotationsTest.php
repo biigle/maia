@@ -4,6 +4,7 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
+use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Maia\Jobs\PrepareExistingAnnotations;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
@@ -24,7 +25,12 @@ class PrepareExistingAnnotationsTest extends TestCase
         $a = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
         $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
         $al2 = ImageAnnotationLabelTest::create();
-        $job = MaiaJobTest::create(['volume_id' => $a->image->volume_id]);
+        $job = MaiaJobTest::create([
+            'volume_id' => $a->image->volume_id,
+            'params' => [
+                'training_data_method' => 'own_annotations',
+            ],
+        ]);
 
         Event::fake();
         Queue::fake();
@@ -53,7 +59,10 @@ class PrepareExistingAnnotationsTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $a1->image->volume_id,
-            'params' => ['oa_restrict_labels' => [$al1->label_id]],
+            'params' => [
+                'training_data_method' => 'own_annotations',
+                'oa_restrict_labels' => [$al1->label_id],
+            ],
         ]);
 
         (new PrepareExistingAnnotations($job))->handle();
@@ -94,7 +103,12 @@ class PrepareExistingAnnotationsTest extends TestCase
             'image_id' => $a1->image_id,
         ]);
 
-        $job = MaiaJobTest::create(['volume_id' => $a1->image->volume_id]);
+        $job = MaiaJobTest::create([
+            'volume_id' => $a1->image->volume_id,
+            'params' => [
+                'training_data_method' => 'own_annotations',
+            ],
+        ]);
 
         (new PrepareExistingAnnotations($job))->handle();
         $this->assertEquals(5, $job->trainingProposals()->selected()->count());
@@ -127,5 +141,29 @@ class PrepareExistingAnnotationsTest extends TestCase
         $this->assertEquals(0, $job->trainingProposals()->count());
         $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
+    }
+
+    public function testHandleShowTrainingProposals()
+    {
+        $a = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
+        $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
+        $al2 = ImageAnnotationLabelTest::create();
+        $job = MaiaJobTest::create([
+            'volume_id' => $a->image->volume_id,
+            'params' => [
+                'training_data_method' => 'own_annotations',
+                'oa_show_training_proposals' => true,
+            ],
+        ]);
+
+        Event::fake();
+        Queue::fake();
+        (new PrepareExistingAnnotations($job))->handle();
+        Event::assertNotDispatched(MaiaJobContinued::class);
+        Queue::assertPushed(NoveltyDetectionResponse::class);
+        $this->assertEquals(0, $job->trainingProposals()->selected()->count());
+        $this->assertEquals(1, $job->trainingProposals()->count());
+        $proposal = $job->trainingProposals()->first();
+        $this->assertEquals($a->points, $proposal->points);
     }
 }

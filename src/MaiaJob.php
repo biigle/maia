@@ -219,4 +219,16 @@ class MaiaJob extends Model
     {
         return $this->setJsonAttr('converting_candidates', $converting);
     }
+
+    /**
+     * Determine if this job should show the training porposals tabs.
+     *
+     * @return bool
+     */
+    public function shouldShowTrainingProposals()
+    {
+        return $this->shouldUseNoveltyDetection() ||
+            ($this->shouldUseExistingAnnotations() &&
+            $this->getJsonAttr('params.oa_show_training_proposals', false));
+    }
 }

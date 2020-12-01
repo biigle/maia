@@ -67,6 +67,11 @@
                             <td>Using all annotations of this volume.</td>
                         @endif
                     </tr>
+                    @if ($job->shouldShowTrainingProposals())
+                        <tr>
+                            <td>Using a subset of selected training proposals.</td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         @elseif($job->shouldUseKnowledgeTransfer())

@@ -149,7 +149,7 @@
     <fieldset v-cloak v-if="useExistingAnnotations && showAdvanced">
         <legend>Existing Annotations <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}" title="More information on the configurable parameters for existing annotations" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
 
-        <div v-cloak class="form-group">
+        <div class="form-group">
             <label for="oa_restrict_labels">Restrict to labels</label>
             <loader :active="loading"></loader>
             <typeahead class="typeahead--block" :items="labels" placeholder="Label name" :clear-on-select="true" v-on:select="handleSelectedLabel"></typeahead>
@@ -166,6 +166,22 @@
             </ul>
 
             <input v-for="label in selectedLabels" type="hidden" name="oa_restrict_labels[]" :value="label.id">
+        </div>
+
+        <div class="form-group{{ $errors->has('oa_show_training_proposals') ? ' has-error' : '' }}">
+            <div class="checkbox">
+                <label for="oa_show_training_proposals">
+                    <input id="oa_show_training_proposals" type="checkbox" name="oa_show_training_proposals" value="1" @if(old('oa_show_training_proposals')) checked @endif>
+                    Show training proposals
+                </label>
+            </div>
+            @if ($errors->has('oa_show_training_proposals'))
+               <span class="help-block">{{ $errors->first('oa_show_training_proposals') }}</span>
+            @else
+                <span class="help-block">
+                    Show the existing annotations as selectable training proposals before continuing to the instance segmentation stage.
+                </span>
+            @endif
         </div>
     </fieldset>
 
@@ -268,7 +284,7 @@
 @push('scripts')
 <script type="text/javascript">
     biigle.$declare('maia.volumeId', {!! $volume->id !!});
-    biigle.$declare('maia.trainScheme', {!! old('is_train_scheme', $defaultTrainScheme) !!});
+    biigle.$declare('maia.trainScheme', {!! collect(old('is_train_scheme', $defaultTrainScheme)) !!});
     biigle.$declare('maia.hasErrors', {!! $errors->any() ? 'true' : 'false' !!});
     biigle.$declare('maia.trainingDataMethod', '{!! old('training_data_method', 'novelty_detection') !!}');
 </script>

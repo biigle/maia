@@ -127,4 +127,19 @@ class MaiaJobTest extends ModelTestCase
         $this->model->convertingCandidates = true;
         $this->assertTrue($this->model->convertingCandidates);
     }
+
+    public function testShouldShowTrainingProposals()
+    {
+        $this->model->params = ['training_data_method' => 'novelty_detection'];
+        $this->assertTrue($this->model->shouldShowTrainingProposals());
+        $this->model->params = ['training_data_method' => 'knowledge_transfer'];
+        $this->assertFalse($this->model->shouldShowTrainingProposals());
+        $this->model->params = ['training_data_method' => 'own_annotations'];
+        $this->assertFalse($this->model->shouldShowTrainingProposals());
+        $this->model->params = [
+            'training_data_method' => 'own_annotations',
+            'oa_show_training_proposals' => true,
+        ];
+        $this->assertTrue($this->model->shouldShowTrainingProposals());
+    }
 }

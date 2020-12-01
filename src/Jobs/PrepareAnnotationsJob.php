@@ -34,6 +34,13 @@ abstract class PrepareAnnotationsJob extends Job
     protected $deleteWhenMissingModels = true;
 
     /**
+     * Set newly converted training proposals as selected.
+     *
+     * @var bool
+     */
+    protected $selectTrainingProposals = true;
+
+    /**
      * Create a new isntance.
      *
      * @param MaiaJob $job
@@ -90,8 +97,9 @@ abstract class PrepareAnnotationsJob extends Job
                 'image_id' => $annotation->image_id,
                 'shape_id' => Shape::circleId(),
                 'job_id' => $this->job->id,
-                // All these proposals should be taken for instance segmentation.
-                'selected' => true,
+                // All these proposals should be taken for instance segmentation unless
+                // the user chose to review them as training proposals first.
+                'selected' => $this->selectTrainingProposals,
                 // score should be null in this case.
             ];
         });

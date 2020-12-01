@@ -53,14 +53,14 @@ class MaiaJobController extends Controller
 
         $newestJobHasFailed = $jobs->isNotEmpty() ? $jobs[0]->hasFailed() : false;
 
-        $defaultTrainScheme = collect([
+        $defaultTrainScheme = [
             ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
             ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.0005],
             ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.0001],
             ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
             ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.00005],
             ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.00001],
-        ]);
+        ];
 
         $canUseExistingAnnotations = ImageAnnotation::join('images', 'images.id', '=', 'image_annotations.image_id')
             ->where('images.volume_id', $volume->id)

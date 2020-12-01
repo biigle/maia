@@ -27,6 +27,16 @@
             Use the input field to select one or more labels. If present, only annotations with the chosen labels are used as training data for the MAIA job. If no labels are chosen, all annotations are used.
         </p>
 
+        <h4>Show training proposals</h4>
+
+        <p class="text-muted">
+            Off by default.
+        </p>
+
+        <p>
+            Show the existing annotations as selectable training proposals before continuing to the instance segmentation stage. This allows you to select only a subset of the existing annotations as training data (regardless their label).
+        </p>
+
         <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
