@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia;
 
-use Biigle\Contracts\ImageAnnotation as AnnotationContract;
+use Biigle\Contracts\Annotation as AnnotationContract;
 use Biigle\Image;
 use Biigle\Shape;
 use Biigle\Traits\HasPointsAttribute;
@@ -78,7 +78,7 @@ abstract class MaiaAnnotation extends Model implements AnnotationContract
     /**
      * {@inheritdoc}
      */
-    public function getImage(): Image
+    public function getFile(): Image
     {
         return $this->image;
     }
