@@ -3,7 +3,7 @@
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Http\Requests\ContinueMaiaJob;
 use Biigle\Modules\Maia\Http\Requests\UpdateTrainingProposal;
@@ -100,7 +100,7 @@ class TrainingProposalController extends Controller
         if ($request->filled('points')) {
             $request->proposal->points = $request->input('points');
             $disk = config('maia.training_proposal_storage_disk');
-            GenerateAnnotationPatch::dispatch($request->proposal, $disk)
+            GenerateImageAnnotationPatch::dispatch($request->proposal, $disk)
                 ->onQueue(config('largo.generate_annotation_patch_queue'));
         }
 

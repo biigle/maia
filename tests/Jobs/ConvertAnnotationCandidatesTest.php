@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\LabelTest;
@@ -47,6 +47,6 @@ class ConvertAnnotationCandidatesTest extends TestCase
 
         $this->assertEquals($annotation->id, $c2->fresh()->annotation_id);
 
-        Queue::assertPushed(GenerateAnnotationPatch::class);
+        Queue::assertPushed(GenerateImageAnnotationPatch::class);
     }
 }

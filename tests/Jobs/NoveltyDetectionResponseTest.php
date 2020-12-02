@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Maia\MaiaJob;
@@ -40,7 +40,7 @@ class NoveltyDetectionResponseTest extends TestCase
         $this->assertEquals($image->id, $annotations[0]->image_id);
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
-        Queue::assertPushed(GenerateAnnotationPatch::class);
+        Queue::assertPushed(GenerateImageAnnotationPatch::class);
         Notification::assertSentTo($job->user, NoveltyDetectionComplete::class);
     }
 
@@ -75,7 +75,7 @@ class NoveltyDetectionResponseTest extends TestCase
         $this->assertEquals(State::failedNoveltyDetectionId(), $job->fresh()->state_id);
 
         $this->assertFalse($job->trainingProposals()->exists());
-        Queue::assertNotPushed(GenerateAnnotationPatch::class);
+        Queue::assertNotPushed(GenerateImageAnnotationPatch::class);
     }
 
     public function testHandleRollback()

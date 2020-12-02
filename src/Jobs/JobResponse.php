@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\MaiaAnnotation;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Shape;
@@ -139,7 +139,7 @@ class JobResponse extends Job implements ShouldQueue
         $disk = $this->getPatchStorageDisk();
         $this->getCreatedAnnotations($job)->chunkById(1000, function ($chunk) use ($disk) {
             foreach ($chunk as $annotation) {
-                GenerateAnnotationPatch::dispatch($annotation, $disk)
+                GenerateImageAnnotationPatch::dispatch($annotation, $disk)
                     ->onQueue(config('largo.generate_annotation_patch_queue'));
             }
         });

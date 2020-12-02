@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Maia\Jobs\PrepareExistingAnnotations;
@@ -36,7 +36,7 @@ class PrepareExistingAnnotationsTest extends TestCase
         Queue::fake();
         (new PrepareExistingAnnotations($job))->handle();
         Event::assertDispatched(MaiaJobContinued::class);
-        Queue::assertNotPushed(GenerateAnnotationPatch::class);
+        Queue::assertNotPushed(GenerateImageAnnotationPatch::class);
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a->points, $proposal->points);

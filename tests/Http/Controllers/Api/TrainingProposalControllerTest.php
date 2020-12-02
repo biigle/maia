@@ -3,7 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
@@ -147,11 +147,11 @@ class TrainingProposalControllerTest extends ApiTestCase
         $this->putJson("/api/v1/maia/training-proposals/{$a->id}", ['selected' => true])
             ->assertStatus(200);
 
-        Queue::assertNotPushed(GenerateAnnotationPatch::class);
+        Queue::assertNotPushed(GenerateImageAnnotationPatch::class);
 
         $this->putJson("/api/v1/maia/training-proposals/{$a->id}", ['points' => [10, 20, 30]])
             ->assertStatus(200);
 
-        Queue::assertPushed(GenerateAnnotationPatch::class);
+        Queue::assertPushed(GenerateImageAnnotationPatch::class);
     }
 }

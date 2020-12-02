@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
 use Biigle\Modules\Maia\MaiaJob;
@@ -41,7 +41,7 @@ class InstanceSegmentationResponseTest extends TestCase
         $this->assertEquals($image->id, $annotations[0]->image_id);
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
-        Queue::assertPushed(GenerateAnnotationPatch::class);
+        Queue::assertPushed(GenerateImageAnnotationPatch::class);
         Notification::assertSentTo($job->user, InstanceSegmentationComplete::class);
     }
 
@@ -59,7 +59,7 @@ class InstanceSegmentationResponseTest extends TestCase
         $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
 
         $this->assertFalse($job->annotationCandidates()->exists());
-        Queue::assertNotPushed(GenerateAnnotationPatch::class);
+        Queue::assertNotPushed(GenerateImageAnnotationPatch::class);
     }
 
     public function testHandleRollback()

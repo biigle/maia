@@ -3,7 +3,7 @@
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Http\Requests\SubmitAnnotationCandidates;
 use Biigle\Modules\Maia\Http\Requests\UpdateAnnotationCandidate;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
@@ -99,7 +99,7 @@ class AnnotationCandidateController extends Controller
         if ($request->filled('points')) {
             $request->candidate->points = $request->input('points');
             $disk = config('maia.annotation_candidate_storage_disk');
-            GenerateAnnotationPatch::dispatch($request->candidate, $disk)
+            GenerateImageAnnotationPatch::dispatch($request->candidate, $disk)
                 ->onQueue(config('largo.generate_annotation_patch_queue'));
         }
 

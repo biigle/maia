@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\ImageAnnotation;
 use Biigle\ImageAnnotationLabel;
-use Biigle\Modules\Largo\Jobs\GenerateAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\User;
 use Carbon\Carbon;
@@ -101,7 +101,7 @@ class ConvertAnnotationCandidates extends Job
             });
 
             foreach ($annotations as $annotation) {
-                GenerateAnnotationPatch::dispatch($annotation)
+                GenerateImageAnnotationPatch::dispatch($annotation)
                     ->onQueue(config('largo.generate_annotation_patch_queue'));
             }
         } finally {
