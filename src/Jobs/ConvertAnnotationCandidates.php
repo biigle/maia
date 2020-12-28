@@ -44,6 +44,13 @@ class ConvertAnnotationCandidates extends Job
     public $tries = 1;
 
     /**
+     * Newly created annotations.
+     *
+     * @var array
+     */
+    protected $newAnnotations = [];
+
+    /**
      * Create a new isntance.
      *
      * @param MaiaJob $job
@@ -64,43 +71,14 @@ class ConvertAnnotationCandidates extends Job
     public function handle()
     {
         try {
-            $annotations = DB::transaction(function () {
-                $candidates = $this->job->annotationCandidates()
+            DB::transaction(function () {
+                $this->job->annotationCandidates()
                     ->whereNull('annotation_id')
                     ->whereNotNull('label_id')
-                    ->get();
-
-                $now = Carbon::now();
-                $annotations = [];
-                $annotationLabels = [];
-
-                foreach ($candidates as $candidate) {
-                    $annotation = new ImageAnnotation;
-                    $annotation->image_id = $candidate->image_id;
-                    $annotation->shape_id = $candidate->shape_id;
-                    $annotation->points = $candidate->points;
-                    $annotation->save();
-                    $annotations[$candidate->id] = $annotation;
-
-                    $candidate->annotation_id = $annotation->id;
-                    $candidate->save();
-
-                    $annotationLabels[] = [
-                        'annotation_id' => $annotation->id,
-                        'label_id' => $candidate->label_id,
-                        'user_id' => $this->user->id,
-                        'confidence' => 1,
-                        'created_at' => $now,
-                        'updated_at' => $now,
-                    ];
-                }
-
-                ImageAnnotationLabel::insert($annotationLabels);
-
-                return $annotations;
+                    ->chunkById(10000, [$this, 'processChunk']);
             });
 
-            foreach ($annotations as $annotation) {
+            foreach ($this->newAnnotations as $annotation) {
                 GenerateImageAnnotationPatch::dispatch($annotation)
                     ->onQueue(config('largo.generate_annotation_patch_queue'));
             }
@@ -108,5 +86,39 @@ class ConvertAnnotationCandidates extends Job
             $this->job->convertingCandidates = false;
             $this->job->save();
         }
+    }
+
+    /**
+     * Process a chunk of annotation candidates.
+     *
+     * @param \Illuminate\Support\Collection $candidates
+     */
+    public function processChunk($candidates)
+    {
+        $now = Carbon::now();
+        $annotationLabels = [];
+
+        foreach ($candidates as $candidate) {
+            $annotation = new ImageAnnotation;
+            $annotation->image_id = $candidate->image_id;
+            $annotation->shape_id = $candidate->shape_id;
+            $annotation->points = $candidate->points;
+            $annotation->save();
+            $this->newAnnotations[$candidate->id] = $annotation;
+
+            $candidate->annotation_id = $annotation->id;
+            $candidate->save();
+
+            $annotationLabels[] = [
+                'annotation_id' => $annotation->id,
+                'label_id' => $candidate->label_id,
+                'user_id' => $this->user->id,
+                'confidence' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        ImageAnnotationLabel::insert($annotationLabels);
     }
 }
