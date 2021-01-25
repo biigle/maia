@@ -36,7 +36,13 @@ class MaiaJobControllerTest extends ApiTestCase
                 ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
             ],
         ];
-        ImageTest::create(['volume_id' => $this->volume()->id]);
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'attrs' => [
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
     }
 
     public function testStoreNoveltyDetection()
@@ -126,10 +132,42 @@ class MaiaJobControllerTest extends ApiTestCase
     public function testStoreTiledImages()
     {
         $id = $this->volume()->id;
-        ImageTest::create(['volume_id' => $id, 'tiled' => true, 'filename' => 'x']);
+        ImageTest::create([
+            'volume_id' => $id,
+            'tiled' => true,
+            'filename' => 'x',
+            'attrs' => [
+                'width' => 10000,
+                'height' => 10000,
+            ],
+        ]);
 
         $this->beEditor();
         // MAIA is not available for volumes with tiled images.
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(422);
+    }
+
+    public function testStoreSmallImages()
+    {
+        $id = $this->volume()->id;
+        $i = ImageTest::create(['volume_id' => $id, 'filename' => 'x']);
+
+        $this->beEditor();
+        // MAIA is not available for volumes that contain images smaller than 512px
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(422);
+
+        $i->delete();
+
+        $i = ImageTest::create([
+            'volume_id' => $id,
+            'filename' => 'x',
+            'attrs' => [
+                'width' => 100,
+                'height' => 100,
+        ]]);
+
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
             ->assertStatus(422);
     }
@@ -164,6 +202,10 @@ class MaiaJobControllerTest extends ApiTestCase
             'image_id' => ImageTest::create([
                 'volume_id' => $this->volume()->id,
                 'filename' => 'abc.jpg',
+                'attrs' => [
+                    'width' => 512,
+                    'height' => 512,
+                ],
             ])->id,
         ]);
 
@@ -204,6 +246,10 @@ class MaiaJobControllerTest extends ApiTestCase
                 'image_id' => ImageTest::create([
                     'volume_id' => $this->volume()->id,
                     'filename' => 'abc.jpg',
+                    'attrs' => [
+                        'width' => 512,
+                        'height' => 512,
+                    ],
                 ])->id,
             ])->id,
         ]);
@@ -238,6 +284,10 @@ class MaiaJobControllerTest extends ApiTestCase
             'image_id' => ImageTest::create([
                 'volume_id' => $this->volume()->id,
                 'filename' => 'abc.jpg',
+                'attrs' => [
+                    'width' => 512,
+                    'height' => 512,
+                ],
             ])->id,
         ]);
 
@@ -295,7 +345,11 @@ class MaiaJobControllerTest extends ApiTestCase
         ImageTest::create([
             'volume_id' => $this->volume()->id,
             'filename' => 'abc.jpg',
-            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+            'attrs' => [
+                'metadata' => ['distance_to_ground' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
         ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
@@ -305,7 +359,11 @@ class MaiaJobControllerTest extends ApiTestCase
         $image = ImageTest::create([
             'volume_id' => $volume->id,
             'filename' => 'abc.jpg',
-            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+            'attrs' => [
+                'metadata' => ['distance_to_ground' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
         ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
@@ -338,12 +396,20 @@ class MaiaJobControllerTest extends ApiTestCase
         ImageTest::create([
             'volume_id' => $this->volume()->id,
             'filename' => 'abc.jpg',
-            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+            'attrs' => [
+                'metadata' => ['distance_to_ground' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
         ]);
         $image = ImageTest::create([
             'volume_id' => $volume->id,
             'filename' => 'abc.jpg',
-            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+            'attrs' => [
+                'metadata' => ['distance_to_ground' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
         ]);
         $this->project()->addVolumeId($volume->id);
         $ia = ImageAnnotationLabelTest::create([

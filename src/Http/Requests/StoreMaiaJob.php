@@ -96,6 +96,10 @@ class StoreMaiaJob extends FormRequest
                 $validator->errors()->add('volume', 'New MAIA jobs cannot be created for volumes with very large images.');
             }
 
+            if ($this->hasSmallImages($this->volume)) {
+                $validator->errors()->add('volume', 'New MAIA jobs cannot be created for volumes that contain images smaller than 512 pixels on one edge.');
+            }
+
             if ($this->input('training_data_method') === MaiaJob::TRAIN_NOVELTY_DETECTION && $this->volume->images()->count() < $this->input('nd_clusters')) {
                 $validator->errors()->add('nd_clusters', 'The number of image clusters must not be greater than the number of images in the volume.');
             }
@@ -132,5 +136,22 @@ class StoreMaiaJob extends FormRequest
         $restrictLabels = $this->input('kt_restrict_labels', []);
 
         return !$this->getExistingAnnotationsQuery($this->input('kt_volume_id'), $restrictLabels)->exists();
+    }
+
+    /**
+     * Determine whether the volume contains images smaller than 512px.
+     *
+     * @param Volume $volume
+     *
+     * @return boolean
+     */
+    protected function hasSmallImages(Volume $volume)
+    {
+        return $volume->images()
+            ->whereNull('attrs->width')
+            ->orWhereNull('attrs->height')
+            ->orWhere('attrs->width', '<', 512)
+            ->orWhere('attrs->height', '<', 512)
+            ->exists();
     }
 }
