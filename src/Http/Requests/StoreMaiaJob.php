@@ -148,10 +148,12 @@ class StoreMaiaJob extends FormRequest
     protected function hasSmallImages(Volume $volume)
     {
         return $volume->images()
-            ->whereNull('attrs->width')
-            ->orWhereNull('attrs->height')
-            ->orWhere('attrs->width', '<', 512)
-            ->orWhere('attrs->height', '<', 512)
+            ->where(function ($query) {
+                $query->whereNull('attrs->width')
+                ->orWhereNull('attrs->height')
+                ->orWhere('attrs->width', '<', 512)
+                ->orWhere('attrs->height', '<', 512);
+            })
             ->exists();
     }
 }

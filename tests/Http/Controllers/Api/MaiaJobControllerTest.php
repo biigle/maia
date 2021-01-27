@@ -172,6 +172,31 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertStatus(422);
     }
 
+    public function testStoreSmallImagesOtherVolume()
+    {
+        $id = $this->volume()->id;
+
+        ImageTest::create([
+            'filename' => 'x',
+            'attrs' => [
+                'width' => 100,
+                'height' => 100,
+        ]]);
+
+        $i = ImageTest::create([
+            'volume_id' => $id,
+            'filename' => 'x',
+            'attrs' => [
+                'width' => 512,
+                'height' => 512,
+        ]]);
+
+        $this->beEditor();
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(201);
+    }
+
     public function testStoreVideoVolume()
     {
         $volume = $this->volume();
