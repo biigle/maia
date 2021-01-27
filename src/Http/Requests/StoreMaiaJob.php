@@ -151,8 +151,8 @@ class StoreMaiaJob extends FormRequest
             ->where(function ($query) {
                 $query->whereNull('attrs->width')
                 ->orWhereNull('attrs->height')
-                ->orWhere('attrs->width', '<', 512)
-                ->orWhere('attrs->height', '<', 512);
+                ->orWhereRaw('("attrs"->>\'width\')::int < 512')
+                ->orWhereRaw('("attrs"->>\'height\')::int < 512');
             })
             ->exists();
     }
