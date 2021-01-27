@@ -275,7 +275,10 @@
 
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
-    <div class="form-group">
+    <div class="form-group{{ $errors->has('volume') ? ' has-error' : '' }}">
+        @if($errors->has('volume'))
+           <span class="help-block">{{ $errors->first('volume') }}</span>
+        @endif
         <button v-on:click="toggle" type="button" class="btn btn-default"><span v-if="showAdvanced" v-cloak>Hide</span><span v-else>Show</span> advanced parameters</button>
         <button type="submit" class="btn btn-success pull-right" :disabled="canSubmit">Create job</button>
     </div>
