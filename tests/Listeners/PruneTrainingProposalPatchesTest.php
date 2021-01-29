@@ -13,6 +13,8 @@ class PruneTrainingProposalPatchesTest extends TestCase
 {
     public function testHandle()
     {
+        config(['largo.patch_format' => 'jpg']);
+
         Queue::fake();
         $a = TrainingProposalTest::create(['selected' => true]);
 
