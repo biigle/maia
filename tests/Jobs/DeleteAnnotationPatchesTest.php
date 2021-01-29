@@ -16,6 +16,7 @@ class DeleteAnnotationPatchesTest extends TestCase
         Queue::fake();
         config(['maia.training_proposal_storage_disk' => 'test']);
         config(['maia.annotation_candidate_storage_disk' => 'test2']);
+        config(['largo.patch_format' => 'jpg']);
 
         $tp = TrainingProposalTest::create();
         $ac = AnnotationCandidateTest::create(['job_id' => $tp->job_id]);
@@ -27,12 +28,10 @@ class DeleteAnnotationPatchesTest extends TestCase
 
         (new DeleteAnnotationPatches($tp->job))->handle();
         Queue::assertPushed(DeleteAnnotationPatchChunk::class, function ($job) use ($tpFile) {
-            dump($job);
             return $job->disk === 'test' && $job->files[0] = $tpFile;
         });
 
         Queue::assertPushed(DeleteAnnotationPatchChunk::class, function ($job) use ($acFile) {
-            dump($job);
             return $job->disk === 'test2' && count($job->files) === 1 && $job->files[0] === $acFile;
         });
     }
