@@ -27,10 +27,12 @@ class DeleteAnnotationPatchesTest extends TestCase
 
         (new DeleteAnnotationPatches($tp->job))->handle();
         Queue::assertPushed(DeleteAnnotationPatchChunk::class, function ($job) use ($tpFile) {
+            dump($job);
             return $job->disk === 'test' && $job->files[0] = $tpFile;
         });
 
         Queue::assertPushed(DeleteAnnotationPatchChunk::class, function ($job) use ($acFile) {
+            dump($job);
             return $job->disk === 'test2' && count($job->files) === 1 && $job->files[0] === $acFile;
         });
     }
