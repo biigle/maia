@@ -59,7 +59,7 @@ class DeleteAnnotationPatches extends Job
      */
     protected function deleteAnnotations($annotations, $disk)
     {
-        $format = config('largo.patch_format', 'jpg');
+        $format = config('largo.patch_format');
 
         // Process chunks of 100 annotations.
         foreach ($annotations->chunk(100) as $chunk) {
