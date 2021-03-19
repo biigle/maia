@@ -30,7 +30,7 @@ class MaiaJobPolicyTest extends ApiTestCase
         $this->assertTrue($this->editor()->can('update', $this->job));
         $this->assertTrue($this->expert()->can('update', $this->job));
         $this->assertTrue($this->admin()->can('update', $this->job));
-        $this->assertTrue($this->globalAdmin()->can('update', $this->job));
+        $this->assertFalse($this->globalAdmin()->can('update', $this->job));
     }
 
     public function testDestroy()

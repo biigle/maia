@@ -22,7 +22,9 @@ class MaiaJobPolicy extends CachedPolicy
      */
     public function before($user, $ability)
     {
-        if ($user->can('sudo')) {
+        $except = ['update'];
+
+        if ($user->can('sudo') && !in_array($ability, $except)) {
             return true;
         }
     }

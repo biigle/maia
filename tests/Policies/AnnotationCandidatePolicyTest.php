@@ -34,7 +34,7 @@ class AnnotationCandidatePolicyTest extends ApiTestCase
         $this->assertTrue($this->editor()->can('update', $this->annotation));
         $this->assertTrue($this->expert()->can('update', $this->annotation));
         $this->assertTrue($this->admin()->can('update', $this->annotation));
-        $this->assertTrue($this->globalAdmin()->can('update', $this->annotation));
+        $this->assertFalse($this->globalAdmin()->can('update', $this->annotation));
     }
 
     public function testAttachLabel()
@@ -70,8 +70,8 @@ class AnnotationCandidatePolicyTest extends ApiTestCase
         $this->assertFalse($this->admin()->can('attach-label', [$this->annotation, $disallowedLabel]));
         $this->assertFalse($this->admin()->can('attach-label', [$this->annotation, $otherDisallowedLabel]));
 
-        $this->assertTrue($this->globalAdmin()->can('attach-label', [$this->annotation, $allowedLabel]));
-        $this->assertTrue($this->globalAdmin()->can('attach-label', [$this->annotation, $disallowedLabel]));
-        $this->assertTrue($this->globalAdmin()->can('attach-label', [$this->annotation, $otherDisallowedLabel]));
+        $this->assertFalse($this->globalAdmin()->can('attach-label', [$this->annotation, $allowedLabel]));
+        $this->assertFalse($this->globalAdmin()->can('attach-label', [$this->annotation, $disallowedLabel]));
+        $this->assertFalse($this->globalAdmin()->can('attach-label', [$this->annotation, $otherDisallowedLabel]));
     }
 }

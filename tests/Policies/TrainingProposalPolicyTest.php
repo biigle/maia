@@ -32,6 +32,6 @@ class TrainingProposalPolicyTest extends ApiTestCase
         $this->assertTrue($this->editor()->can('update', $this->annotation));
         $this->assertTrue($this->expert()->can('update', $this->annotation));
         $this->assertTrue($this->admin()->can('update', $this->annotation));
-        $this->assertTrue($this->globalAdmin()->can('update', $this->annotation));
+        $this->assertFalse($this->globalAdmin()->can('update', $this->annotation));
     }
 }
