@@ -19,14 +19,17 @@ class MaiaJobController extends Controller
     /**
      * Show the overview of MAIA jobs for a volume
      *
+     * @param Request $request
      * @param int $id Volume ID
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($id)
+    public function index(Request $request, $id)
     {
         $volume = Volume::findOrFail($id);
-        $this->authorize('edit-in', $volume);
+        if (!$request->user()->can('sudo')) {
+            $this->authorize('edit-in', $volume);
+        }
 
         if (!$volume->isImageVolume() || $volume->hasTiledImages()) {
             abort(Response::HTTP_NOT_FOUND);

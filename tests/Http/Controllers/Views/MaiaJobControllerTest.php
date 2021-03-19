@@ -27,6 +27,9 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->get("volumes/{$id}/maia")->assertStatus(200);
+
+        $this->beGlobalAdmin();
+        $this->get("volumes/{$id}/maia")->assertStatus(200);
     }
 
     public function testIndexTiledImage()
@@ -60,6 +63,9 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->get("maia/{$job->id}")->assertStatus(403);
 
         $this->beEditor();
+        $this->get("maia/{$job->id}")->assertStatus(200);
+
+        $this->beGlobalAdmin();
         $this->get("maia/{$job->id}")->assertStatus(200);
     }
 
