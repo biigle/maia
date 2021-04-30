@@ -98,7 +98,7 @@ class DatasetGenerator(object):
             image_paths.append(image_file)
             mask_paths.append(mask_file)
             np_crop = np.ndarray(buffer=image_crop.write_to_memory(), shape=[image_crop.height, image_crop.width, image_crop.bands], dtype=np.uint8)
-            mean_pixels.append(np_crop.reshape((-1, 3)).mean(axis = 0))
+            mean_pixels.append(np_crop.reshape((-1, image.bands)).mean(axis = 0))
 
         return image_paths, mask_paths, mean_pixels
 
