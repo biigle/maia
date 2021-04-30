@@ -67,7 +67,7 @@ class MaiaJobController extends Controller
                 'oa_restrict_labels',
                 'oa_show_training_proposals',
             ]);
-        } else if ($request->input('training_data_method') === MaiaJob::TRAIN_KNOWLEDGE_TRANSFER) {
+        } elseif ($request->input('training_data_method') === MaiaJob::TRAIN_KNOWLEDGE_TRANSFER) {
             $job->state_id = State::instanceSegmentationId();
             $paramKeys = array_merge($paramKeys, [
                 'kt_volume_id',

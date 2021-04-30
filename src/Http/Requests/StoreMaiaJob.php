@@ -6,9 +6,9 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Rules\KnowledgeTransferVolume;
 use Biigle\Modules\Maia\Rules\OddNumber;
+use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Volume;
 use Illuminate\Foundation\Http\FormRequest;
-use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 
 class StoreMaiaJob extends FormRequest
 {

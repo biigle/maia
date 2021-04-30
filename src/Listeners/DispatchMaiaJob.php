@@ -26,9 +26,9 @@ class DispatchMaiaJob implements ShouldQueue
             $request = new NoveltyDetectionRequest($event->job);
             Queue::connection(config('maia.request_connection'))
                 ->pushOn(config('maia.request_queue'), $request);
-        } else if ($event->job->shouldUseExistingAnnotations()) {
+        } elseif ($event->job->shouldUseExistingAnnotations()) {
             PrepareExistingAnnotations::dispatch($event->job);
-        } else if ($event->job->shouldUseKnowledgeTransfer()) {
+        } elseif ($event->job->shouldUseKnowledgeTransfer()) {
             PrepareKnowledgeTransfer::dispatch($event->job);
         } else {
             throw new Exception('Unknown training data method.');

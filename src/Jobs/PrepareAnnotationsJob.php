@@ -7,10 +7,10 @@ use Biigle\ImageAnnotation;
 use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
 use Biigle\Modules\Maia\TrainingProposal;
+use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Shape;
 use DB;
 use Illuminate\Queue\SerializesModels;
@@ -55,7 +55,7 @@ abstract class PrepareAnnotationsJob extends Job
      *
      * @return \Illuminate\Database\Query\Builder
      */
-    protected abstract function getAnnotationsQuery();
+    abstract protected function getAnnotationsQuery();
 
     /**
      * Determine if there are any annotations to convert.
