@@ -31,8 +31,8 @@ class Dataset(mrcnn.utils.Dataset):
         image = self.vips_image_to_numpy_array(VipsImage.new_from_file(self.image_info[image_id]['path']))
         # image = skimage.io.imread(self.image_info[image_id]['path'])
         # If grayscale. Convert to RGB for consistency.
-        if image.ndim != 3:
-            image = skimage.color.gray2rgb(image)
+        if image.ndim != 3 or image.shape[-1] == 1:
+            image = skimage.color.gray2rgb(image.squeeze())
         # If has an alpha channel, remove it for consistency
         if image.shape[-1] == 4:
             image = image[..., :3]
