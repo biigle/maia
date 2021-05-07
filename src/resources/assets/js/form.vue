@@ -25,7 +25,6 @@ export default {
             knowledgeTransferVolumes: [],
             knowledgeTransferVolume: null,
             shouldFetchKnowledgeTransferVolumes: false,
-            knowledgeTransferTypeaheadTemplate: '{{item.name}}<br><small>({{item.description}})</small>',
             knowledgeTransferLabelCache: [],
             selectedKnowledgeTransferLabels: [],
         };
