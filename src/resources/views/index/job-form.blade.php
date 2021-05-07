@@ -194,7 +194,7 @@
             <div v-if="hasNoKnowledgeTransferVolumes" class="text-warning">
                 No suitable volumes were found!
             </div>
-            <typeahead class="typeahead--block" :items="knowledgeTransferVolumes" placeholder="Volume name" v-on:select="handleSelectedKnowledgeTransferVolume" :template="knowledgeTransferTypeaheadTemplate"></typeahead>
+            <typeahead class="typeahead--block" :items="knowledgeTransferVolumes" placeholder="Volume name" v-on:select="handleSelectedKnowledgeTransferVolume" more-info="description"></typeahead>
             <span class="help-block">
                 The volume of which annotations should be used for knowledge transfer.
             </span>
