@@ -23,7 +23,7 @@ class Image(object):
         image = PilImage.open(self.path)
         try:
             image.load()
-        except IOError as e:
+        except (IOError, OSError) as e:
             print('Image #{} is corrupt!'.format(self.id))
             return True
 
