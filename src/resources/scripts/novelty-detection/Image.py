@@ -30,7 +30,12 @@ class Image(object):
         return False
 
     def image(self):
-        return np.array(PilImage.open(self.path))
+        image = np.array(PilImage.open(self.path))
+        # Remove alpha channel if present.
+        if image.shape[2] == 4:
+            image = np.delete(image, 3, axis=2)
+
+        return image
 
     def _get_resized_image(self):
         img = PilImage.open(self.path)
