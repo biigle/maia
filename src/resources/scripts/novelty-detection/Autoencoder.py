@@ -3,6 +3,8 @@
 import numpy as np
 import tensorflow as tf
 
+tf.compat.v1.disable_eager_execution()
+
 class Autoencoder(object):
 
     def __init__(self, n_layers, transfer_function=tf.nn.softplus, optimizer=tf.compat.v1.train.AdamOptimizer(), allow_growth=True):
