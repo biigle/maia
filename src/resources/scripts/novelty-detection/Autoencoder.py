@@ -5,29 +5,29 @@ import tensorflow as tf
 
 class Autoencoder(object):
 
-    def __init__(self, n_layers, transfer_function=tf.nn.softplus, optimizer=tf.train.AdamOptimizer(), allow_growth=True):
+    def __init__(self, n_layers, transfer_function=tf.nn.softplus, optimizer=tf.compat.v1.train.AdamOptimizer(), allow_growth=True):
         self.n_layers = n_layers
         self.transfer = transfer_function
 
         self.weights = self._initialize_weights()
 
         # model
-        self.x = tf.placeholder(tf.float32, [None, self.n_layers[0]])
+        self.x = tf.compat.v1.placeholder(tf.float32, [None, self.n_layers[0]])
         self.hidden_encode, self.hidden_recon = self._plug(self.x)
         self.reconstruction = self.hidden_recon[-1]
 
         # cost
-        self.cost = tf.losses.mean_squared_error(self.reconstruction, self.x)
+        self.cost = tf.compat.v1.losses.mean_squared_error(self.reconstruction, self.x)
         self.optimizer = optimizer.minimize(self.cost)
 
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = allow_growth
-        self.sess = tf.Session(config=config)
+        self.sess = tf.compat.v1.Session(config=config)
         self._initialize()
 
     def _initialize_weights(self):
         all_weights = dict()
-        initializer = tf.contrib.layers.xavier_initializer()
+        initializer = tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform")
         # Encoding network weights
         encoder_weights = []
         for layer in range(len(self.n_layers)-1):
@@ -73,7 +73,7 @@ class Autoencoder(object):
         return hidden_encode, hidden_recon
 
     def _initialize(self):
-        self.sess.run(tf.global_variables_initializer())
+        self.sess.run(tf.compat.v1.global_variables_initializer())
 
     '''
     Takes an input tensor (an array of flattened images) and returns the tensor that
@@ -82,7 +82,7 @@ class Autoencoder(object):
     '''
     def element_wise_cost(self, input_tensor):
         encode, recon = self._plug(input_tensor)
-        return tf.reduce_mean(tf.square(recon[-1] - input_tensor), 1)
+        return tf.reduce_mean(input_tensor=tf.square(recon[-1] - input_tensor), axis=1)
 
     def partial_fit(self, X):
         cost, opt = self.sess.run((self.cost, self.optimizer), feed_dict={self.x: X})
