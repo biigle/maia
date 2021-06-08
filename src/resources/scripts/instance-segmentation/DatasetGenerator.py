@@ -3,6 +3,7 @@ import sys
 import json
 import cv2
 from pyvips import Image as VipsImage
+from pyvips.error import Error as VipsError
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -45,7 +46,11 @@ class DatasetGenerator(object):
                 masks.extend(m)
                 mean_pixels.extend(p)
 
-        mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()
+        if len(images) == 0:
+            raise Exception('No images in dataset. All corrupt?')
+
+        # Discard additional channels (e.g. alpha)
+        mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()[:3]
 
         return {
             'training_images_path': self.training_images_path,
@@ -70,35 +75,36 @@ class DatasetGenerator(object):
 
     def process_image(self, imageId, proposals):
         try:
-            image = VipsImage.new_from_file(self.images[imageId], fail=True)
-        except Exception as e:
+            image = VipsImage.new_from_file(self.images[imageId])
+
+            if self.scale_factor != 1.0:
+                image = image.resize(self.scale_factor)
+                proposals = np.round(np.array(proposals, dtype=np.float32) * self.scale_factor).astype(int)
+
+            masks = []
+            for proposal in proposals:
+                mask = np.zeros((image.height, image.width), dtype=np.uint8)
+                cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], 1, -1)
+                masks.append(mask.astype(np.bool))
+
+            image_paths = []
+            mask_paths = []
+            mean_pixels = []
+
+            for i, proposal in enumerate(proposals):
+                image_file = '{}_{}.jpg'.format(imageId, i)
+                image_crop, mask_crops = self.generate_crop(image, masks, proposal)
+                mask_file = self.save_mask(mask_crops, image_file, self.training_masks_path)
+                image_crop.write_to_file(os.path.join(self.training_images_path, image_file), strip=True, Q=95)
+                image_paths.append(image_file)
+                mask_paths.append(mask_file)
+                np_crop = np.ndarray(buffer=image_crop.write_to_memory(), shape=[image_crop.height, image_crop.width, image_crop.bands], dtype=np.uint8)
+                mean_pixels.append(np_crop.reshape((-1, image.bands)).mean(axis = 0))
+
+        except VipsError as e:
             print('Image #{} is corrupt! Skipping...'.format(imageId))
 
             return False, False, False
-
-        if self.scale_factor != 1.0:
-            image = image.resize(self.scale_factor)
-            proposals = np.round(np.array(proposals, dtype=np.float32) * self.scale_factor).astype(int)
-
-        masks = []
-        for proposal in proposals:
-            mask = np.zeros((image.height, image.width), dtype=np.uint8)
-            cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], 1, -1)
-            masks.append(mask.astype(np.bool))
-
-        image_paths = []
-        mask_paths = []
-        mean_pixels = []
-
-        for i, proposal in enumerate(proposals):
-            image_file = '{}_{}.jpg'.format(imageId, i)
-            image_crop, mask_crops = self.generate_crop(image, masks, proposal)
-            mask_file = self.save_mask(mask_crops, image_file, self.training_masks_path)
-            image_crop.write_to_file(os.path.join(self.training_images_path, image_file), strip=True, Q=95)
-            image_paths.append(image_file)
-            mask_paths.append(mask_file)
-            np_crop = np.ndarray(buffer=image_crop.write_to_memory(), shape=[image_crop.height, image_crop.width, image_crop.bands], dtype=np.uint8)
-            mean_pixels.append(np_crop.reshape((-1, image.bands)).mean(axis = 0))
 
         return image_paths, mask_paths, mean_pixels
 
