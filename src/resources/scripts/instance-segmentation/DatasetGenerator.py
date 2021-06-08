@@ -3,6 +3,7 @@ import sys
 import json
 import cv2
 from pyvips import Image as VipsImage
+from pyvips.error import Error as VipsError
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -69,9 +70,13 @@ class DatasetGenerator(object):
            os.makedirs(self.training_masks_path)
 
     def process_image(self, imageId, proposals):
+        filename = self.images[imageId]
         try:
-            image = VipsImage.new_from_file(self.images[imageId], fail=True)
-        except Exception as e:
+            if filename.lower().endswith('.png'):
+                image = VipsImage.new_from_file(filename)
+            else:
+                image = VipsImage.new_from_file(filename, fail=True)
+        except VipsError as e:
             print('Image #{} is corrupt! Skipping...'.format(imageId))
 
             return False, False, False
