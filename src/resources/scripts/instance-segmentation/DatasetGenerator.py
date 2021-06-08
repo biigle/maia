@@ -46,6 +46,9 @@ class DatasetGenerator(object):
                 masks.extend(m)
                 mean_pixels.extend(p)
 
+        if len(images) == 0:
+            raise Exception('No images in dataset. All corrupt?')
+
         mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()
 
         return {
