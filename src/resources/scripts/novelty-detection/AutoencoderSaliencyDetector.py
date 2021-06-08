@@ -17,25 +17,25 @@ class AutoencoderSaliencyDetector(object):
         self.autoencoder = Autoencoder([self.n_input, n_hidden])
 
         # Load the image file.
-        self.x = tf.placeholder(tf.string)
-        self.chunk = tf.placeholder(tf.int32, [4])
+        self.x = tf.compat.v1.placeholder(tf.string)
+        self.chunk = tf.compat.v1.placeholder(tf.int32, [4])
 
-        self.read_file = tf.read_file(self.x)
-        self.decode_image = tf.to_float(tf.image.decode_image(self.read_file, channels=3))
+        self.read_file = tf.io.read_file(self.x)
+        self.decode_image = tf.cast(tf.image.decode_image(self.read_file, channels=3), dtype=tf.float32)
         # Slice image in chunks so really large images can be processed with constant
         # memory consumption.
         self.crop_chunk = tf.image.crop_to_bounding_box(self.decode_image, self.chunk[0], self.chunk[1], self.chunk[2], self.chunk[3])
 
         # Extract image patches in the correct size and reshape the 2D array of patches
         # to an 1D array that can be fed to the autoencoder.
-        self.extract_patches = tf.extract_image_patches(
+        self.extract_patches = tf.image.extract_patches(
             images=[self.crop_chunk],
-            ksizes=[1, self.patch_size, self.patch_size, 1],
+            sizes=[1, self.patch_size, self.patch_size, 1],
             strides=[1, self.stride, self.stride, 1],
             rates=[1, 1, 1, 1],
             padding='VALID'
         )
-        self.patches_shape = tf.shape(self.extract_patches[0])
+        self.patches_shape = tf.shape(input=self.extract_patches[0])
         self.reshape = tf.reshape(self.extract_patches[0], [-1, self.n_input])
 
         # Apply the autoencoder.
