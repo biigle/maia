@@ -49,7 +49,8 @@ class DatasetGenerator(object):
         if len(images) == 0:
             raise Exception('No images in dataset. All corrupt?')
 
-        mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()
+        # Discard additional channels (e.g. alpha)
+        mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()[:3]
 
         return {
             'training_images_path': self.training_images_path,
