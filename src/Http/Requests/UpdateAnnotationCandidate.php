@@ -47,7 +47,7 @@ class UpdateAnnotationCandidate extends FormRequest
     public function rules()
     {
         return [
-            'label_id' => 'nullable|id|exists:labels,id',
+            'label_id' => 'nullable|integer|exists:labels,id',
             'points' => 'array',
         ];
     }
