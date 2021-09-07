@@ -24,8 +24,8 @@ class DatasetGenerator(object):
         self.training_masks_path = '{}/training_masks'.format(self.tmp_dir)
         self.crop_dimension = 512
 
-        # If this is != 1.0, scale/knowledge transfer is used.
-        self.scale_factor = params.get('kt_scale_factor', 1.0)
+        # If this is not empty, scale/knowledge transfer is used.
+        self.scale_factors = params.get('kt_scale_factors', {})
 
     def generate(self):
         self.ensure_train_masks_dirs()
@@ -77,9 +77,10 @@ class DatasetGenerator(object):
         try:
             image = VipsImage.new_from_file(self.images[imageId])
 
-            if self.scale_factor != 1.0:
-                image = image.resize(self.scale_factor)
-                proposals = np.round(np.array(proposals, dtype=np.float32) * self.scale_factor).astype(int)
+            if bool(self.scale_factors) != False:
+                scale_factor = self.scale_factors[imageId]
+                image = image.resize(scale_factor)
+                proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
 
             masks = []
             for proposal in proposals:

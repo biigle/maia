@@ -131,7 +131,10 @@ class InstanceSegmentationRequestTest extends TestCase
 
         $params = [
             'training_data_method' => 'knowledge_transfer',
-            'kt_scale_factor' => 0.25,
+            'kt_scale_factors' => [
+                $otherImage->id => 0.25,
+                $otherImage2->id => 0.25,
+            ],
             'kt_volume_id' => $otherImage->volume_id,
             'is_train_scheme' => [
                 ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
@@ -161,7 +164,10 @@ class InstanceSegmentationRequestTest extends TestCase
         $inferenceInputJsonPath = "{$tmpDir}/input-inference.json";
 
         $expectDatasetJson = [
-            'kt_scale_factor' => 0.25,
+            'kt_scale_factors' => [
+                $otherImage->id => 0.25,
+                $otherImage2->id => 0.25,
+            ],
             'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,

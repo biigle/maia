@@ -52,8 +52,11 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($otherAnnotation->points, $proposal->points);
-        $this->assertArrayHasKey('kt_scale_factor', $job->fresh()->params);
-        $this->assertEquals(0.25, $job->fresh()->params['kt_scale_factor']);
+        $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
+        $expect = [
+            $otherImage->id => 0.25,
+        ];
+        $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
     }
 
     public function testHandleShapeConversion()

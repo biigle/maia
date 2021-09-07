@@ -46,20 +46,26 @@ class PrepareKnowledgeTransfer extends PrepareAnnotationsJob
         $column = DB::raw("cast(attrs->'metadata'->>'distance_to_ground' as real)");
         $ownDistance = floatval($this->job->volume->images()->avg($column));
 
-        if ($ownDistance == 0) {
-            $this->handleFailure('The average distance to ground of the volume of the MAIA job is zero.');
+        if ($ownDistance <= 0.0) {
+            $this->handleFailure('The average distance to ground of the volume of the MAIA job is non-positive.');
             return;
         }
 
-        $otherDistance = floatval($otherVolume->images()->avg($column));
+        $column = DB::raw("attrs->'metadata'->>'distance_to_ground' as distance");
+        $scaleFactors = $otherVolume->images()
+            ->select($column, 'id')
+            ->pluck('distance', 'id')
+            ->map(function ($item, $key) use ($ownDistance) {
+                return floatval($item) / $ownDistance;
+            });
 
-        if ($otherDistance == 0) {
-            $this->handleFailure('The average distance to ground of the volume that was selected for knowledge transfer is zero.');
+        if ($scaleFactors->min() <= 0) {
+            $this->handleFailure('The distances to ground of the volume that was selected for knowledge transfer include non-positive numbers.');
             return;
         }
 
         $params = $this->job->params;
-        $params['kt_scale_factor'] = $otherDistance / $ownDistance;
+        $params['kt_scale_factors'] = $scaleFactors;
         $this->job->params = $params;
 
 

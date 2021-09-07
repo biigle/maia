@@ -166,7 +166,7 @@ class InstanceSegmentationRequest extends JobRequest
         ];
 
         if ($this->shouldUseKnowledgeTransfer()) {
-            $content['kt_scale_factor'] = $this->jobParams['kt_scale_factor'];
+            $content['kt_scale_factors'] = $this->jobParams['kt_scale_factors'];
         }
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
