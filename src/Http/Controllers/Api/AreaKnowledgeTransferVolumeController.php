@@ -7,16 +7,16 @@ use Biigle\Volume;
 use DB;
 use Illuminate\Http\Request;
 
-class KnowledgeTransferVolumeController extends Controller
+class AreaKnowledgeTransferVolumeController extends Controller
 {
     /**
-     * List all volumes that can be accessed and used for knowledge transfer.
+     * List all volumes that can be accessed and used for knowledge transfer (using image area).
      *
-     * @api {get} volumes/filter/knowledge-transfer Get volumes for (distance) knowledge transfer
+     * @api {get} volumes/filter/knowledge-transfer Get volumes for (area) knowledge transfer
      * @apiGroup Maia
-     * @apiName IndexKnowledgeTransferVolumes
+     * @apiName IndexAreaKnowledgeTransferVolumes
      * @apiPermission user
-     * @apiDescription These are volumes where all images have `distance_to_ground` information.
+     * @apiDescription These are volumes where all images have area information.
      *
      * @apiSuccessExample {json} Success response:
      * [
@@ -44,7 +44,7 @@ class KnowledgeTransferVolumeController extends Controller
                 $query->select(DB::raw(1))
                     ->from('images')
                     ->whereRaw('images.volume_id = volumes.id')
-                    ->whereNull('attrs->metadata->distance_to_ground');
+                    ->whereNull(DB::raw("COALESCE(attrs->'metadata'->>'area', attrs->'laserpoints'->>'area')"));
             })
             ->with(['projects' => function ($query) {
                 $query->select('id', 'name');

@@ -10,6 +10,7 @@ use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Project;
 use Biigle\Role;
 use Biigle\Volume;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Storage;
@@ -73,6 +74,10 @@ class MaiaJobController extends Controller
             ->whereNull('attrs->metadata->distance_to_ground')
             ->exists();
 
+        $canUseAreaKnowledgeTransfer = !$volume->images()
+            ->whereNull(DB::raw("COALESCE(attrs->'metadata'->>'area', attrs->'laserpoints'->>'area')"))
+            ->exists();
+
         return view('maia::index', compact(
             'volume',
             'jobs',
@@ -81,7 +86,8 @@ class MaiaJobController extends Controller
             'newestJobHasFailed',
             'defaultTrainScheme',
             'canUseExistingAnnotations',
-            'canUseKnowledgeTransfer'
+            'canUseKnowledgeTransfer',
+            'canUseAreaKnowledgeTransfer'
         ));
     }
 

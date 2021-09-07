@@ -1,4 +1,5 @@
 <script>
+import areaKnowledgeTransferVolumeApi from './api/areaKnowledgeTransferVolume';
 import knowledgeTransferVolumeApi from './api/knowledgeTransferVolume';
 import {handleErrorResponse} from './import';
 import {LabelTypeahead} from './import';
@@ -22,9 +23,11 @@ export default {
             submitted: false,
             trainScheme: [],
             trainingDataMethod: '',
-            knowledgeTransferVolumes: [],
+            distanceKnowledgeTransferVolumes: [],
+            areaKnowledgeTransferVolumes: [],
             knowledgeTransferVolume: null,
-            shouldFetchKnowledgeTransferVolumes: false,
+            shouldFetchAreaKnowledgeTransferVolumes: false,
+            shouldFetchDistanceKnowledgeTransferVolumes: false,
             knowledgeTransferLabelCache: [],
             selectedKnowledgeTransferLabels: [],
         };
@@ -43,10 +46,20 @@ export default {
             return this.trainingDataMethod === 'novelty_detection';
         },
         useKnowledgeTransfer() {
-            return this.trainingDataMethod === 'knowledge_transfer';
+            return this.trainingDataMethod === 'knowledge_transfer' || this.trainingDataMethod === 'area_knowledge_transfer';
         },
         canSubmit() {
             return this.submitted || (this.useKnowledgeTransfer && !this.knowledgeTransferVolume);
+        },
+        knowledgeTransferVolumes() {
+            if (this.trainingDataMethod === 'area_knowledge_transfer') {
+                return this.areaKnowledgeTransferVolumes;
+            }
+
+            return this.distanceKnowledgeTransferVolumes;
+        },
+        shouldFetchKnowledgeTransferVolumes() {
+            return this.shouldFetchDistanceKnowledgeTransferVolumes || this.shouldFetchAreaKnowledgeTransferVolumes;
         },
         hasNoKnowledgeTransferVolumes() {
             return this.shouldFetchKnowledgeTransferVolumes && !this.loading && this.knowledgeTransferVolumes.length === 0;
@@ -106,8 +119,8 @@ export default {
             this.knowledgeTransferVolume = volume;
             this.selectedKnowledgeTransferLabels = [];
         },
-        setKnowledgeTransferVolumes(response) {
-            this.knowledgeTransferVolumes = response.body
+        parseKnowledgeTransferVolumes(response) {
+            return response.body
                 .filter(volume => volume.id !== this.volumeId)
                 .map(function (volume) {
                     volume.description = volume.projects
@@ -154,16 +167,34 @@ export default {
                     .then(this.setLabels, handleErrorResponse);
             }
         },
-        useKnowledgeTransfer(use) {
-            if (use) {
-                this.shouldFetchKnowledgeTransferVolumes = true;
+        trainingDataMethod(method, oldMethod) {
+            if (method === 'knowledge_transfer') {
+                this.shouldFetchDistanceKnowledgeTransferVolumes = true;
+            } else if (method === 'area_knowledge_transfer') {
+                this.shouldFetchAreaKnowledgeTransferVolumes = true;
+            }
+
+            if (oldMethod === 'knowledge_transfer' || oldMethod === 'area_knowledge_transfer') {
+                this.knowledgeTransferVolume = null;
+                this.selectedKnowledgeTransferLabels = [];
+                this.$refs.ktTypeahead.clear();
             }
         },
-        shouldFetchKnowledgeTransferVolumes(fetch) {
+        shouldFetchDistanceKnowledgeTransferVolumes(fetch) {
             if (fetch) {
                 this.startLoading();
                 knowledgeTransferVolumeApi.get()
-                    .then(this.setKnowledgeTransferVolumes, handleErrorResponse)
+                    .then(this.parseKnowledgeTransferVolumes, handleErrorResponse)
+                    .then((volumes) => this.distanceKnowledgeTransferVolumes = volumes)
+                    .finally(this.finishLoading);
+            }
+        },
+        shouldFetchAreaKnowledgeTransferVolumes(fetch) {
+            if (fetch) {
+                this.startLoading();
+                areaKnowledgeTransferVolumeApi.get()
+                    .then(this.parseKnowledgeTransferVolumes, handleErrorResponse)
+                    .then((volumes) => this.areaKnowledgeTransferVolumes = volumes)
                     .finally(this.finishLoading);
             }
         },

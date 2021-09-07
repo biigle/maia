@@ -44,4 +44,5 @@ $router->group([
     $router->get('maia-jobs/{id}/images/{id2}/annotation-candidates', 'MaiaJobImagesController@indexAnnotationCandidates');
 
     $router->get('volumes/filter/knowledge-transfer', 'KnowledgeTransferVolumeController@index');
+    $router->get('volumes/filter/area-knowledge-transfer', 'AreaKnowledgeTransferVolumeController@index');
 });

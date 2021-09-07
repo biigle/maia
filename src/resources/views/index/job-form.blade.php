@@ -33,12 +33,19 @@
             <div class="radio">
                 <label for="training_data_unknot" @if (!$canUseKnowledgeTransfer) class="text-muted" @endif>
                     <input type="radio" id="training_data_unknot" name="training_data_method" value="knowledge_transfer" v-model="trainingDataMethod" @if (!$canUseKnowledgeTransfer) disabled @endif>
-                    <strong>Knowledge transfer</strong>
+                    <strong>Knowledge transfer (using distance to ground)</strong>
                     @if (!$canUseKnowledgeTransfer)
                         <div class="text-warning">No distance to ground information available for this volume. <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}" title="Find out how to add distance to ground information"><i class="fa fa-question-circle"></i></a></div>
                     @endif
+                </label>
+                <label for="training_data_area_unknot" @if (!$canUseAreaKnowledgeTransfer) class="text-muted" @endif>
+                    <input type="radio" id="training_data_area_unknot" name="training_data_method" value="area_knowledge_transfer" v-model="trainingDataMethod" @if (!$canUseAreaKnowledgeTransfer) disabled @endif>
+                    <strong>Knowledge transfer (using image area)</strong>
+                    @if (!$canUseAreaKnowledgeTransfer)
+                        <div class="text-warning">No image area information available for this volume. <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}" title="Find out how to add image area information"><i class="fa fa-question-circle"></i></a></div>
+                    @endif
                     <div class="help-block">
-                        Knowlegde transfer uses existing annotations of another volume as training data. The images should be very similar to the ones of this volume and the classes of objects of interest should be the same. This method requires that the distance to ground metadata is present for every image of the two volumes. <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">More information.</a>
+                        Knowlegde transfer uses existing annotations of another volume as training data. The images should be very similar to the ones of this volume and the classes of objects of interest should be the same. This method requires that the distance to ground or image area metadata is present for every image of the two volumes. <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">More information.</a>
                     </div>
                 </label>
             </div>
@@ -194,7 +201,7 @@
             <div v-if="hasNoKnowledgeTransferVolumes" class="text-warning">
                 No suitable volumes were found!
             </div>
-            <typeahead class="typeahead--block" :items="knowledgeTransferVolumes" placeholder="Volume name" v-on:select="handleSelectedKnowledgeTransferVolume" more-info="description"></typeahead>
+            <typeahead ref="ktTypeahead" class="typeahead--block" :items="knowledgeTransferVolumes" placeholder="Volume name" v-on:select="handleSelectedKnowledgeTransferVolume" more-info="description"></typeahead>
             <span class="help-block">
                 The volume of which annotations should be used for knowledge transfer.
             </span>

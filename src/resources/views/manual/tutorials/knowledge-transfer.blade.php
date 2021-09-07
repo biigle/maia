@@ -9,8 +9,14 @@
         </p>
 
         <p>
-            This method allows you to choose existing annotations of another volume as training data for the instance segmentation stage. This is done using the "knowledge transfer" method UnKnoT <a href="#ref1">[1]</a>. All annotations will be converted to circles and the new MAIA job will immediately proceed to the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation stage</a>. This method can only be used if <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">distance to ground</a> information is available for all images of the volume of the MAIA job.
+            This method allows you to choose existing annotations of another volume as training data for the instance segmentation stage. This is done using the "knowledge transfer" method UnKnoT <a href="#ref1">[1]</a>. All annotations will be converted to circles and the new MAIA job will immediately proceed to the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation stage</a>. This method can only be used if <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">distance to ground</a> or <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">image area</a> information is available for all images of the volume of the MAIA job.
         </p>
+
+        <div class="panel panel-info">
+            <div class="panel-body text-info">
+                UnKnoT using the image area is an extension of the original method that offers an alternative to using the distance to ground information.
+            </div>
+        </div>
 
         <h3><a name="configurable-parameters"></a>Configurable parameters</h3>
 
@@ -21,7 +27,7 @@
         <h4>Volume</h4>
 
         <p>
-            The volume of which to use annotations as training data for the instance segmentation stage. Only volumes with <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">distance to ground</a> information for all images can be selected. The annotations should show the same or very similar object classes than those that should be found with the MAIA job.
+            The volume of which to use annotations as training data for the instance segmentation stage. Only volumes with <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">distance to ground</a> or <a href="{{route('manual-tutorials', ['volumes', 'image-metadata'])}}">image area</a> information for all images can be selected. The annotations should show the same or very similar object classes than those that should be found with the MAIA job.
         </p>
 
         <h4>Restrict to labels</h4>
