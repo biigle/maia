@@ -231,6 +231,78 @@ class InstanceSegmentationRequestTest extends TestCase
         }
     }
 
+    public function testHandleAreaKnowledgeTransfer()
+    {
+        Queue::fake();
+        FileCache::fake();
+
+        $otherImage = ImageTest::create();
+        $otherImage2 = ImageTest::create([
+            'volume_id' => $otherImage->volume_id,
+            'filename' => 'a',
+        ]);
+
+        $params = [
+            'training_data_method' => 'area_knowledge_transfer',
+            'kt_scale_factors' => [
+                $otherImage->id => 0.25,
+                $otherImage2->id => 0.25,
+            ],
+            'kt_volume_id' => $otherImage->volume_id,
+            'is_train_scheme' => [
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+            'available_bytes' => 8E+9,
+            'max_workers' => 2,
+        ];
+
+        $ownImage = ImageTest::create();
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => $params,
+        ]);
+        $trainingProposal = TrainingProposalTest::create([
+            'job_id' => $job->id,
+            'image_id' => $otherImage->id,
+            'points' => [10.5, 20.4, 30],
+            'selected' => true,
+        ]);
+        config(['maia.tmp_dir' => '/tmp']);
+        $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
+        $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
+
+        $expectDatasetJson = [
+            'kt_scale_factors' => [
+                $otherImage->id => 0.25,
+                $otherImage2->id => 0.25,
+            ],
+            'available_bytes' => 8E+9,
+            'max_workers' => 2,
+            'tmp_dir' => $tmpDir,
+            'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
+            'output_path' => "{$tmpDir}/output-dataset.json",
+        ];
+
+        try {
+            $request = new IsJobStub($job);
+            $request->handle();
+
+            $inputJson = json_decode(File::get($datasetInputJsonPath), true);
+            unset($inputJson['images']);
+            $this->assertEquals($expectDatasetJson, $inputJson);
+
+            Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $ownImage) {
+                return $response->jobId === $job->id
+                    && in_array([$ownImage->id, 10, 20, 30, 123], $response->annotations);
+            });
+
+            $this->assertTrue($request->cleanup);
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
     public function testFailed()
     {
         $job = MaiaJobTest::create();

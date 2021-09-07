@@ -23,7 +23,7 @@ class MaiaJobController extends Controller
      *
      * @apiParam {Number} id The volume ID.
      *
-     * @apiParam (Required parameters) {string} training_data_method One of `novelty_detection` (to perform novelty detection to generate training data), `own_annotations` (to use existing annotations of the same volume as training data) or `knowledge_transfer` (to use knowlegde transfer to get training data from another volume).
+     * @apiParam (Required parameters) {string} training_data_method One of `novelty_detection` (to perform novelty detection to generate training data), `own_annotations` (to use existing annotations of the same volume as training data), `knowledge_transfer` (to use knowlegde transfer based on distance to ground to get training data from another volume) or `area_knowledge_transfer` (to use knowlegde transfer based on image area to get training data from another volume).
      * @apiParam (Required parameters) {array} is_train_scheme An array containing objects with the following properties. `layers`: Either `heads` or `all`, `epochs`: Number of epochs to train this step, `learing_rate`: Learing rate to use in this step.
      *
      * @apiParam (Required parameters for novelty detection) {number} nd_clusters Number of different kinds of images to expect. Images are of the same kind if they have similar lighting conditions or show similar patterns (e.g. sea floor, habitat types). Increase this number if you expect many different kinds of images. Lower the number to 1 if you have very few images and/or the content is largely uniform.
@@ -57,7 +57,10 @@ class MaiaJobController extends Controller
             'is_train_scheme',
         ];
 
-        if ($request->input('training_data_method') === MaiaJob::TRAIN_OWN_ANNOTATIONS) {
+        // Assign this early so we can use the shouldUse* methods below.
+        $job->params = $request->only($paramKeys);
+
+        if ($job->shouldUseExistingAnnotations()) {
             if ($request->input('oa_show_training_proposals')) {
                 $job->state_id = State::noveltyDetectionId();
             } else {
@@ -67,7 +70,7 @@ class MaiaJobController extends Controller
                 'oa_restrict_labels',
                 'oa_show_training_proposals',
             ]);
-        } elseif ($request->input('training_data_method') === MaiaJob::TRAIN_KNOWLEDGE_TRANSFER) {
+        } elseif ($job->shouldUseKnowledgeTransfer()) {
             $job->state_id = State::instanceSegmentationId();
             $paramKeys = array_merge($paramKeys, [
                 'kt_volume_id',

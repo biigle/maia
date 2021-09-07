@@ -482,6 +482,190 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->assertEquals([$ia->label_id], $job->params['kt_restrict_labels']);
     }
 
+    public function testStoreAreaKnowledgeTransfer()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'training_data_method' => 'area_knowledge_transfer',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+        ];
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No volume specified.
+            ->assertStatus(422);
+
+        $params['kt_volume_id'] = $this->volume()->id;
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Cannot be the own volume.
+            ->assertStatus(422);
+
+
+        $volume = VolumeTest::create();
+        $params['kt_volume_id'] = $volume->id;
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No area in own volume.
+            ->assertStatus(422);
+
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'metadata' => ['area' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No area in other volume.
+            ->assertStatus(422);
+
+        $image = ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'metadata' => ['area' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No permission to access the volume.
+            ->assertStatus(422);
+
+        $this->project()->addVolumeId($volume->id);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No annotations in the volume.
+            ->assertStatus(422);
+
+        ImageAnnotationTest::create(['image_id' => $image->id]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertArrayHasKey('kt_volume_id', $job->params);
+        $this->assertEquals($volume->id, $job->params['kt_volume_id']);
+    }
+
+    public function testStoreAreaKnowledgeTransferLaserPointsFallback()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $volume = VolumeTest::create();
+        $params = [
+            'training_data_method' => 'area_knowledge_transfer',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+            'kt_volume_id' => $volume->id,
+        ];
+
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'laserpoints' => ['area' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+
+        $image = ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'laserpoints' => ['area' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+
+        $this->project()->addVolumeId($volume->id);
+
+        ImageAnnotationTest::create(['image_id' => $image->id]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+    }
+
+    public function testStoreAreaKnowledgeTransferRestrictLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $volume = VolumeTest::create();
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'metadata' => ['area' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+        $image = ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'metadata' => ['area' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+        $this->project()->addVolumeId($volume->id);
+        $ia = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => $image->id,
+            ])->id,
+        ]);
+        $ia2 = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => $image->id,
+            ])->id,
+        ]);
+
+        $params = [
+            'kt_volume_id' => $volume->id,
+            'kt_restrict_labels' => [999],
+            'training_data_method' => 'area_knowledge_transfer',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+        ];
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Label does not exist.
+            ->assertStatus(422);
+
+        $params['kt_restrict_labels'] = [$ia2->label_id];
+        $ia2->delete();
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // No annotations with the selected label.
+            ->assertStatus(422);
+
+        $params['kt_restrict_labels'] = [$ia->label_id];
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertArrayHasKey('kt_volume_id', $job->params);
+        $this->assertEquals($volume->id, $job->params['kt_volume_id']);
+        $this->assertArrayHasKey('kt_restrict_labels', $job->params);
+        $this->assertEquals([$ia->label_id], $job->params['kt_restrict_labels']);
+    }
+
     public function testDestroy()
     {
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);

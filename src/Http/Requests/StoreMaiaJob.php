@@ -4,6 +4,7 @@ namespace Biigle\Modules\Maia\Http\Requests;
 
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Rules\AreaKnowledgeTransferVolume;
 use Biigle\Modules\Maia\Rules\KnowledgeTransferVolume;
 use Biigle\Modules\Maia\Rules\OddNumber;
 use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
@@ -40,8 +41,8 @@ class StoreMaiaJob extends FormRequest
      */
     public function rules()
     {
-        return [
-            'training_data_method' => 'required|in:novelty_detection,own_annotations,knowledge_transfer',
+        $rules = [
+            'training_data_method' => 'required|in:novelty_detection,own_annotations,knowledge_transfer,area_knowledge_transfer',
 
             'nd_clusters' => 'required_if:training_data_method,novelty_detection|integer|min:1|max:100',
             'nd_patch_size' => ['required_if:training_data_method,novelty_detection', 'integer', 'min:3', 'max:99', new OddNumber],
@@ -56,7 +57,6 @@ class StoreMaiaJob extends FormRequest
             'oa_restrict_labels.*' => 'integer|exists:labels,id',
             'oa_show_training_proposals' => 'boolean',
 
-            'kt_volume_id' => ['required_if:training_data_method,knowledge_transfer', 'integer', 'exists:volumes,id', new KnowledgeTransferVolume],
             'kt_restrict_labels.*' => 'integer|exists:labels,id',
 
             'is_train_scheme' => 'required|array|min:1',
@@ -65,6 +65,14 @@ class StoreMaiaJob extends FormRequest
             'is_train_scheme.*.epochs' => 'required|integer|min:1',
             'is_train_scheme.*.learning_rate' => 'required|numeric|min:0|max:1',
         ];
+
+        if ($this->input('training_data_method') === 'knowledge_transfer') {
+            $rules['kt_volume_id'] = ['required', 'integer', 'exists:volumes,id', new KnowledgeTransferVolume];
+        } elseif ($this->input('training_data_method') === 'area_knowledge_transfer') {
+            $rules['kt_volume_id'] = ['required', 'integer', 'exists:volumes,id', new AreaKnowledgeTransferVolume];
+        }
+
+        return $rules;
     }
 
     /**
@@ -108,7 +116,7 @@ class StoreMaiaJob extends FormRequest
                 $validator->errors()->add('training_data_method', 'There are no existing annotations (with the chosen labels) in this volume.');
             }
 
-            if ($this->input('training_data_method') === MaiaJob::TRAIN_KNOWLEDGE_TRANSFER && $this->hasNoKnowledgeTransferAnnotations()) {
+            if (in_array($this->input('training_data_method'), [MaiaJob::TRAIN_KNOWLEDGE_TRANSFER, MaiaJob::TRAIN_AREA_KNOWLEDGE_TRANSFER]) && $this->hasNoKnowledgeTransferAnnotations()) {
                 $validator->errors()->add('training_data_method', 'There are no existing annotations (with the chosen labels) in the volume chosen for knowledge transfer.');
             }
         });

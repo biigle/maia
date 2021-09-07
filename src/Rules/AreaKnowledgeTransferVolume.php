@@ -6,7 +6,7 @@ use Biigle\Volume;
 use DB;
 use Illuminate\Contracts\Validation\Rule;
 
-class KnowledgeTransferVolume implements Rule
+class AreaKnowledgeTransferVolume implements Rule
 {
     /**
       * Determine if the validation rule passes.
@@ -24,7 +24,7 @@ class KnowledgeTransferVolume implements Rule
                 $query->select(DB::raw(1))
                     ->from('images')
                     ->whereRaw('images.volume_id = volumes.id')
-                    ->whereNull('attrs->metadata->distance_to_ground');
+                    ->whereNull(DB::raw("COALESCE(attrs->'metadata'->>'area', attrs->'laserpoints'->>'area')"));
             })
             ->exists();
     }
@@ -36,6 +36,6 @@ class KnowledgeTransferVolume implements Rule
      */
     public function message()
     {
-        return 'The :attribute is not suited for knowledge transfer using distance to ground. You must be authorized to access the volume, all images must have distance to ground information and there must be annotations.';
+        return 'The :attribute is not suited for knowledge transfer using the image area. You must be authorized to access the volume, all images must have area information and there must be annotations.';
     }
 }
