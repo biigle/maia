@@ -88,7 +88,7 @@ class InstanceSegmentationRequest extends JobRequest
      */
     protected function shouldUseKnowledgeTransfer()
     {
-        return array_key_exists('training_data_method', $this->jobParams) && $this->jobParams['training_data_method'] === 'knowledge_transfer';
+        return array_key_exists('training_data_method', $this->jobParams) && in_array($this->jobParams['training_data_method'], ['knowledge_transfer', 'area_knowledge_transfer']);
     }
 
     /**

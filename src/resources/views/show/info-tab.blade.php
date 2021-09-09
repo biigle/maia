@@ -80,6 +80,11 @@
                     <tr>
                         <th>
                             Knowledge transfer
+                            @if ($job->params['training_data_method'] === \Biigle\Modules\Maia\MaiaJob::TRAIN_AREA_KNOWLEDGE_TRANSFER)
+                                (area)
+                            @else
+                                <br>(distance to ground)
+                            @endif
                         </th>
                     </tr>
                 </thead>

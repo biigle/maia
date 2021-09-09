@@ -19,7 +19,7 @@ use TestCase;
 
 class PrepareKnowledgeTransferTest extends TestCase
 {
-    public function testHandle()
+    public function testHandleDistance()
     {
         $ownImage = ImageTest::create([
             'attrs' => ['metadata' => ['distance_to_ground' => 4]],
@@ -43,7 +43,10 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
-            'params' => ['kt_volume_id' => $otherImage->volume_id],
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
         ]);
 
         Event::fake();
@@ -53,9 +56,84 @@ class PrepareKnowledgeTransferTest extends TestCase
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($otherAnnotation->points, $proposal->points);
         $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
-        $expect = [
-            $otherImage->id => 0.25,
-        ];
+        $expect = [$otherImage->id => 0.25];
+        $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
+    }
+
+    public function testHandleArea()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 4]],
+        ]);
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 1]],
+        ]);
+
+        $ownAnnotation = ImageAnnotationTest::create([
+            'shape_id' => Shape::circleId(),
+            'points' => [1, 2, 3],
+            'image_id' => $ownImage->id,
+        ]);
+
+        $otherAnnotation = ImageAnnotationTest::create([
+            'shape_id' => Shape::circleId(),
+            'points' => [4, 5, 6],
+            'image_id' => $otherImage->id,
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'area_knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
+        ]);
+
+        Event::fake();
+        (new PrepareKnowledgeTransfer($job))->handle();
+        Event::assertDispatched(MaiaJobContinued::class);
+        $this->assertEquals(1, $job->trainingProposals()->selected()->count());
+        $proposal = $job->trainingProposals()->first();
+        $this->assertEquals($otherAnnotation->points, $proposal->points);
+        $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
+        $expect = [$otherImage->id => 0.25];
+        $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
+    }
+
+    public function testHandleAreaLaserpoints()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['laserpoints' => ['area' => 4]],
+        ]);
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['laserpoints' => ['area' => 1]],
+        ]);
+
+        $ownAnnotation = ImageAnnotationTest::create([
+            'shape_id' => Shape::circleId(),
+            'points' => [1, 2, 3],
+            'image_id' => $ownImage->id,
+        ]);
+
+        $otherAnnotation = ImageAnnotationTest::create([
+            'shape_id' => Shape::circleId(),
+            'points' => [4, 5, 6],
+            'image_id' => $otherImage->id,
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'area_knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
+        ]);
+
+        (new PrepareKnowledgeTransfer($job))->handle();
+        $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
+        $expect = [$otherImage->id => 0.25];
         $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
     }
 
@@ -101,7 +179,10 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
-            'params' => ['kt_volume_id' => $otherImage->volume_id],
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
         ]);
 
         (new PrepareKnowledgeTransfer($job))->handle();
@@ -125,7 +206,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertEquals([10, 15, 11.18], $proposals[4]->points);
     }
 
-    public function testHandleMissingOtherVolume()
+    public function testHandleDistanceMissingOtherVolume()
     {
         $ownImage = ImageTest::create([
             'attrs' => ['metadata' => ['distance_to_ground' => 4]],
@@ -137,7 +218,10 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
-            'params' => ['kt_volume_id' => $otherImage->volume_id],
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
         ]);
 
         $otherImage->volume->delete();
@@ -150,7 +234,35 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertNotEmpty($job->error['message']);
     }
 
-    public function testHandleMissingOwnMetadata()
+    public function testHandleAreaMissingOtherVolume()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 4]],
+        ]);
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 1]],
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'area_knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
+        ]);
+
+        $otherImage->volume->delete();
+
+        Notification::fake();
+        (new PrepareKnowledgeTransfer($job))->handle();
+        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        $this->assertEquals(0, $job->trainingProposals()->count());
+        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertNotEmpty($job->error['message']);
+    }
+
+    public function testHandleDistanceMissingOwnMetadata()
     {
         $ownImage = ImageTest::create();
 
@@ -160,7 +272,10 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
-            'params' => ['kt_volume_id' => $otherImage->volume_id],
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
         ]);
 
         Notification::fake();
@@ -170,7 +285,30 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertNotEmpty($job->error['message']);
     }
 
-    public function testHandleMissingOtherMetadata()
+    public function testHandleAreaMissingOwnMetadata()
+    {
+        $ownImage = ImageTest::create();
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 1]],
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'area_knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
+        ]);
+
+        Notification::fake();
+        (new PrepareKnowledgeTransfer($job))->handle();
+        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertNotEmpty($job->error['message']);
+    }
+
+    public function testHandleDistanceMissingOtherMetadata()
     {
         $ownImage = ImageTest::create([
             'attrs' => ['metadata' => ['distance_to_ground' => 4]],
@@ -180,7 +318,33 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
-            'params' => ['kt_volume_id' => $otherImage->volume_id],
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
+        ]);
+
+        Notification::fake();
+        (new PrepareKnowledgeTransfer($job))->handle();
+        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertNotEmpty($job->error['message']);
+    }
+
+    public function testHandleAreaMissingOtherMetadata()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 4]],
+        ]);
+
+        $otherImage = ImageTest::create();
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'area_knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
         ]);
 
         Notification::fake();
@@ -202,7 +366,35 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
-            'params' => ['kt_volume_id' => $otherImage->volume_id],
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
+        ]);
+
+        Notification::fake();
+        (new PrepareKnowledgeTransfer($job))->handle();
+        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertNotEmpty($job->error['message']);
+    }
+
+    public function testHandleOwnAreaZero()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 0]],
+        ]);
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 1]],
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'area_knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
         ]);
 
         Notification::fake();
@@ -224,7 +416,10 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
-            'params' => ['kt_volume_id' => $otherImage->volume_id],
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
         ]);
 
         Notification::fake();
@@ -234,7 +429,32 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertNotEmpty($job->error['message']);
     }
 
-    public function testHandleMissingOtherAnnotations()
+    public function testHandleOtherAreaZero()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 4]],
+        ]);
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 0]],
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'area_knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
+        ]);
+
+        Notification::fake();
+        (new PrepareKnowledgeTransfer($job))->handle();
+        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertNotEmpty($job->error['message']);
+    }
+
+    public function testHandleDistanceMissingOtherAnnotations()
     {
         $ownImage = ImageTest::create([
             'attrs' => ['metadata' => ['distance_to_ground' => 4]],
@@ -246,7 +466,35 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
-            'params' => ['kt_volume_id' => $otherImage->volume_id],
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
+        ]);
+
+        Notification::fake();
+        (new PrepareKnowledgeTransfer($job))->handle();
+        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertNotEmpty($job->error['message']);
+    }
+
+    public function testHandleAreaMissingOtherAnnotations()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 4]],
+        ]);
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['metadata' => ['area' => 1]],
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'area_knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+            ],
         ]);
 
         Notification::fake();
@@ -285,6 +533,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
             'params' => [
+                'training_data_method' => 'knowledge_transfer',
                 'kt_volume_id' => $otherImage->volume_id,
                 'kt_restrict_labels' => [$ia->label_id],
             ],

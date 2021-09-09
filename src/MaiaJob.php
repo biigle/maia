@@ -29,6 +29,11 @@ class MaiaJob extends Model
     const TRAIN_KNOWLEDGE_TRANSFER = 'knowledge_transfer';
 
     /**
+     * @var string
+     */
+    const TRAIN_AREA_KNOWLEDGE_TRANSFER = 'area_knowledge_transfer';
+
+    /**
      * The attributes that should be casted to native types.
      *
      * @var array
@@ -197,7 +202,8 @@ class MaiaJob extends Model
      */
     public function shouldUseKnowledgeTransfer()
     {
-        return $this->getJsonAttr('params.training_data_method') === self::TRAIN_KNOWLEDGE_TRANSFER;
+        $method = $this->getJsonAttr('params.training_data_method');
+        return $method === self::TRAIN_KNOWLEDGE_TRANSFER || $method === self::TRAIN_AREA_KNOWLEDGE_TRANSFER;
     }
 
     /**

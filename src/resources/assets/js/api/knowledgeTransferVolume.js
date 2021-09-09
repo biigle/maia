@@ -1,5 +1,5 @@
 /**
- * Resource for knowledge transfer volumes.
+ * Resource for (distance) knowledge transfer volumes.
  *
  * @type {Vue.resource}
  */

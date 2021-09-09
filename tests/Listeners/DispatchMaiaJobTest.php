@@ -50,6 +50,17 @@ class DispatchMaiaJobTest extends TestCase
         Bus::assertDispatched(PrepareKnowledgeTransfer::class);
     }
 
+    public function testHandleAreaKnowledgeTransfer()
+    {
+        $job = MaiaJobTest::create(['params' => ['training_data_method' => 'area_knowledge_transfer']]);
+        $event = new MaiaJobCreated($job);
+        $listener = new DispatchMaiaJob;
+
+        Bus::fake();
+        $listener->handle($event);
+        Bus::assertDispatched(PrepareKnowledgeTransfer::class);
+    }
+
     public function testFailed()
     {
         $job = MaiaJobTest::create();
