@@ -102,7 +102,7 @@ class DetectionRunner(object):
         binary_map = np.where(saliency_map > threshold, 255, 0).astype(np.uint8)
         # imsave(self.image_path(image, 'png'), binary_map)
         mask = np.zeros_like(binary_map)
-        _, contours, _ = cv2.findContours(binary_map, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(binary_map, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         points = []
         for c in contours:
             x, y, w, h = cv2.boundingRect(c)

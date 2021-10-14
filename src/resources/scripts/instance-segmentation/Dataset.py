@@ -1,5 +1,4 @@
 import mrcnn.utils
-import cv2
 import numpy as np
 import os.path
 from pyvips import Image as VipsImage
