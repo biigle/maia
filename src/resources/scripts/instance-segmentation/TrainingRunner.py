@@ -16,7 +16,9 @@ class TrainingRunner(object):
         # Path to store the trained Mask R-CNN model to.
         self.model_dir = os.path.join(self.tmp_dir, 'models')
 
-        self.max_workers = params['max_workers']
+        # Disable multiprocessing for training.
+        # See: https://github.com/biigle/maia/issues/87
+        self.max_workers = 1
         self.config = TrainingConfig(params, trainset)
         self.dataset = TrainingDataset(trainset)
 
