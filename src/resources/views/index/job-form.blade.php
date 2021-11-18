@@ -282,12 +282,25 @@
 
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
+    <div class="form-group">
+        <button v-on:click="toggle" type="button" class="btn btn-default"><span v-if="showAdvanced" v-cloak>Hide</span><span v-else>Show</span> advanced parameters</button>
+    </div>
     <div class="form-group{{ $errors->has('volume') ? ' has-error' : '' }}">
         @if($errors->has('volume'))
            <span class="help-block">{{ $errors->first('volume') }}</span>
         @endif
-        <button v-on:click="toggle" type="button" class="btn btn-default"><span v-if="showAdvanced" v-cloak>Hide</span><span v-else>Show</span> advanced parameters</button>
-        <button type="submit" class="btn btn-success pull-right" :disabled="canSubmit">Create job</button>
+        @if ($maintenanceMode)
+            <div class="panel panel-warning">
+                <div class="panel-body text-warning">
+                    MAIA is currently in maintenance mode and no new jobs can be submitted. Please come back later.
+                </div>
+            </div>
+        @endif
+        @if ($maintenanceMode && !$user->can('sudo'))
+            <button type="submit" class="btn btn-success pull-right" disabled>Create job</button>
+        @else
+            <button type="submit" class="btn btn-success pull-right" :disabled="canSubmit">Create job</button>
+        @endif
     </div>
 </form>
 

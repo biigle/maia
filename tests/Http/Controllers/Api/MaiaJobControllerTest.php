@@ -208,6 +208,29 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertStatus(422);
     }
 
+    public function testStoreMaintenanceMode()
+    {
+        config(['maia.maintenance_mode' => true]);
+        $id = $this->volume()->id;
+        ImageTest::create([
+            'volume_id' => $id,
+            'filename' => 'x',
+            'attrs' => [
+                'width' => 1000,
+                'height' => 1000,
+            ],
+        ]);
+
+        $this->beEditor();
+        // Jobs can only be submitted by global admins in mantenance mode.
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(403);
+
+        $this->beGlobalAdmin();
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
+            ->assertStatus(201);
+    }
+
     public function testStoreUseExistingAnnotations()
     {
         $id = $this->volume()->id;

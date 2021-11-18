@@ -9,6 +9,7 @@ use Biigle\Modules\Maia\Rules\KnowledgeTransferVolume;
 use Biigle\Modules\Maia\Rules\OddNumber;
 use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Volume;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMaiaJob extends FormRequest
@@ -30,6 +31,10 @@ class StoreMaiaJob extends FormRequest
     public function authorize()
     {
         $this->volume = Volume::findOrFail($this->route('id'));
+
+        if (config('maia.maintenance_mode')) {
+            return $this->user()->can('sudo');
+        }
 
         return $this->user()->can('edit-in', $this->volume);
     }
@@ -163,5 +168,21 @@ class StoreMaiaJob extends FormRequest
                 ->orWhereRaw('("attrs"->>\'height\')::int < 512');
             })
             ->exists();
+    }
+
+    /**
+     * Handle a failed authorization attempt.
+     *
+     * @return void
+     *
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    protected function failedAuthorization()
+    {
+        if (config('maia.maintenance_mode')) {
+            throw new AuthorizationException('MAIA is in maintenance mode and no new jobs can be submitted.');
+        }
+
+        return parent::failedAuthorization();
     }
 }

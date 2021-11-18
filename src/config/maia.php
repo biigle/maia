@@ -113,4 +113,9 @@ return [
      | Specifies which queue should be used for the job to convert annotation sessions.
      */
     'convert_annotations_queue' => env('MAIA_CONVERT_ANNOTATIONS_QUEUE', 'default'),
+
+    /*
+     | Enable to disallow submission of new jobs.
+     */
+    'maintenance_mode' => env('MAIA_MAINTENANCE_MODE', false),
 ];

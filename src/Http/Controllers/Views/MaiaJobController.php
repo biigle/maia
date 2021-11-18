@@ -78,6 +78,8 @@ class MaiaJobController extends Controller
             ->whereNull(DB::raw("COALESCE(attrs->'metadata'->>'area', attrs->'laserpoints'->>'area')"))
             ->exists();
 
+        $maintenanceMode = config('maia.maintenance_mode');
+
         return view('maia::index', compact(
             'volume',
             'jobs',
@@ -87,7 +89,8 @@ class MaiaJobController extends Controller
             'defaultTrainScheme',
             'canUseExistingAnnotations',
             'canUseKnowledgeTransfer',
-            'canUseAreaKnowledgeTransfer'
+            'canUseAreaKnowledgeTransfer',
+            'maintenanceMode'
         ));
     }
 
