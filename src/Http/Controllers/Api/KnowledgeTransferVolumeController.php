@@ -51,7 +51,7 @@ class KnowledgeTransferVolumeController extends Controller
             }])
             ->get()
             ->each(function ($volume) {
-                $volume->setHidden(['doi', 'video_link', 'gis_link']);
+                $volume->setHidden(['doi']);
             });
     }
 }
