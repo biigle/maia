@@ -53,7 +53,7 @@ class AnnotationCandidateController extends Controller
             ->with('label')
             ->get()
             ->each(function ($candidate) {
-                $candidate->addHidden('label_id');
+                $candidate->makeHidden('label_id');
             })
             ->toArray();
     }
