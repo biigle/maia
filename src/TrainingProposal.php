@@ -2,6 +2,8 @@
 
 namespace Biigle\Modules\Maia;
 
+use Biigle\Modules\Maia\Database\Factories\TrainingProposalFactory;
+
 class TrainingProposal extends MaiaAnnotation
 {
     /**
@@ -44,5 +46,15 @@ class TrainingProposal extends MaiaAnnotation
     public function scopeUnselected($query)
     {
         return $query->where('maia_training_proposals.selected', false);
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    protected static function newFactory()
+    {
+        return TrainingProposalFactory::new();
     }
 }

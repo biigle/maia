@@ -2,12 +2,14 @@
 
 namespace Biigle\Modules\Maia;
 
+use Biigle\Modules\Maia\Database\Factories\MaiaJobStateFactory;
 use Biigle\Traits\HasConstantInstances;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class MaiaJobState extends Model
 {
-    use HasConstantInstances;
+    use HasConstantInstances, HasFactory;
 
     /**
      * The constant instances of this model.
@@ -35,4 +37,14 @@ class MaiaJobState extends Model
      * @var bool
      */
     public $timestamps = false;
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    protected static function newFactory()
+    {
+        return MaiaJobStateFactory::new();
+    }
 }

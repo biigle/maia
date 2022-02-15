@@ -4,6 +4,7 @@ namespace Biigle\Modules\Maia;
 
 use Biigle\ImageAnnotation;
 use Biigle\Label;
+use Biigle\Modules\Maia\Database\Factories\AnnotationCandidateFactory;
 
 class AnnotationCandidate extends MaiaAnnotation
 {
@@ -32,5 +33,15 @@ class AnnotationCandidate extends MaiaAnnotation
     public function annotation()
     {
         return $this->belongsTo(ImageAnnotation::class);
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    protected static function newFactory()
+    {
+        return AnnotationCandidateFactory::new();
     }
 }

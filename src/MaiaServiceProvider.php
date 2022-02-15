@@ -12,7 +12,6 @@ use Biigle\Modules\Maia\Listeners\PrepareDeleteAnnotationPatches;
 use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
 use Biigle\Services\Modules;
 use Event;
-use Illuminate\Database\Eloquent\Factory as EloquentFactory;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -84,10 +83,6 @@ class MaiaServiceProvider extends ServiceProvider
             return new \Biigle\Modules\Maia\Console\Commands\MigratePatchStorage;
         });
         $this->commands('command.maia.migrate-patch-storage');
-
-        if (config('app.env') === 'testing') {
-            $this->registerEloquentFactoriesFrom(__DIR__.'/database/factories');
-        }
     }
 
     /**
@@ -101,16 +96,5 @@ class MaiaServiceProvider extends ServiceProvider
             'command.maia.publish',
             'command.maia.migrate-patch-storage',
         ];
-    }
-
-    /**
-     * Register factories.
-     *
-     * @param  string  $path
-     * @return void
-     */
-    protected function registerEloquentFactoriesFrom($path)
-    {
-        $this->app->make(EloquentFactory::class)->load($path);
     }
 }
