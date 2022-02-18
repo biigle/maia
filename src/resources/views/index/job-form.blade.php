@@ -178,7 +178,7 @@
         <div class="form-group{{ $errors->has('oa_show_training_proposals') ? ' has-error' : '' }}">
             <div class="checkbox">
                 <label for="oa_show_training_proposals">
-                    <input id="oa_show_training_proposals" type="checkbox" name="oa_show_training_proposals" value="1" @if(old('oa_show_training_proposals')) checked @endif>
+                    <input id="oa_show_training_proposals" type="checkbox" name="oa_show_training_proposals" value="1" @checked(old('oa_show_training_proposals'))>
                     Show training proposals
                 </label>
             </div>
