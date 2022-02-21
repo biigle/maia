@@ -10,7 +10,6 @@ use Biigle\Modules\Maia\Http\Requests\UpdateTrainingProposal;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\TrainingProposal;
-use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class TrainingProposalController extends Controller
 {

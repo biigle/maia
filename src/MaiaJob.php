@@ -2,16 +2,18 @@
 
 namespace Biigle\Modules\Maia;
 
+use Biigle\Modules\Maia\Database\Factories\MaiaJobFactory;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Traits\HasJsonAttributes;
 use Biigle\User;
 use Biigle\Volume;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class MaiaJob extends Model
 {
-    use HasJsonAttributes;
+    use HasJsonAttributes, HasFactory;
 
     /**
      * @var string
@@ -236,5 +238,15 @@ class MaiaJob extends Model
         return $this->shouldUseNoveltyDetection() ||
             ($this->shouldUseExistingAnnotations() &&
             $this->getJsonAttr('params.oa_show_training_proposals', false));
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    protected static function newFactory()
+    {
+        return MaiaJobFactory::new();
     }
 }

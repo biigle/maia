@@ -6,11 +6,12 @@ use Biigle\Contracts\Annotation as AnnotationContract;
 use Biigle\Image;
 use Biigle\Shape;
 use Biigle\Traits\HasPointsAttribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class MaiaAnnotation extends Model implements AnnotationContract
 {
-    use HasPointsAttribute;
+    use HasPointsAttribute, HasFactory;
 
     /**
      * Don't maintain timestamps for this model.
