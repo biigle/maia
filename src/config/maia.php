@@ -87,7 +87,7 @@ return [
     /*
     | URL from which to download the latest COCO trained weights for Mask R-CNN.
     */
-    'coco_model_url' => 'https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rcnn_coco.h5',
+    'coco_model_url' => env('COCO_MODEL_URL', 'https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rcnn_coco.h5'),
 
     /*
     | Path to the file to store the COCO trained weights to.
