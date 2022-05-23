@@ -21,6 +21,10 @@ class InstanceSegmentationRequestTest extends TestCase
     {
         Queue::fake();
         FileCache::fake();
+        config([
+            'maia.available_bytes' => 8E+9,
+            'maia.max_workers' => 2,
+        ]);
 
         $params = [
             'is_train_scheme' => [
@@ -122,6 +126,10 @@ class InstanceSegmentationRequestTest extends TestCase
     {
         Queue::fake();
         FileCache::fake();
+        config([
+            'maia.available_bytes' => 8E+9,
+            'maia.max_workers' => 2,
+        ]);
 
         $otherImage = ImageTest::create();
         $otherImage2 = ImageTest::create([
@@ -235,6 +243,10 @@ class InstanceSegmentationRequestTest extends TestCase
     {
         Queue::fake();
         FileCache::fake();
+        config([
+            'maia.available_bytes' => 8E+9,
+            'maia.max_workers' => 2,
+        ]);
 
         $otherImage = ImageTest::create();
         $otherImage2 = ImageTest::create([

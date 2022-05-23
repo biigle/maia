@@ -19,6 +19,10 @@ class NoveltyDetectionRequestTest extends TestCase
     {
         Queue::fake();
         FileCache::fake();
+        config([
+            'maia.available_bytes' => 8E+9,
+            'maia.max_workers' => 2,
+        ]);
 
         $params = [
             'nd_clusters' => 5,
