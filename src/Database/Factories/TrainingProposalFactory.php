@@ -32,6 +32,7 @@ class TrainingProposalFactory extends Factory
             'job_id' => MaiaJob::factory(),
             'score' => $this->faker->randomNumber(),
             'selected' => false,
+            'label_id' => null,
         ];
     }
 }
