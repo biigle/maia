@@ -79,10 +79,18 @@ class PrepareExistingAnnotationsTest extends TestCase
             'points' => [10, 20],
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a1->id,
+        ]);
+
         $a2 = ImageAnnotationTest::create([
             'shape_id' => Shape::rectangleId(),
             'points' => [10, 10, 100, 10, 100, 100, 10, 100],
             'image_id' => $a1->image_id,
+        ]);
+
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a2->id,
         ]);
 
         $a3 = ImageAnnotationTest::create([
@@ -91,16 +99,28 @@ class PrepareExistingAnnotationsTest extends TestCase
             'image_id' => $a1->image_id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a3->id,
+        ]);
+
         $a4 = ImageAnnotationTest::create([
             'shape_id' => Shape::lineId(),
             'points' => [10, 10, 20, 20],
             'image_id' => $a1->image_id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a4->id,
+        ]);
+
         $a5 = ImageAnnotationTest::create([
             'shape_id' => Shape::polygonId(),
             'points' => [10, 10, 20, 20, 0, 20],
             'image_id' => $a1->image_id,
+        ]);
+
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a5->id,
         ]);
 
         $job = MaiaJobTest::create([

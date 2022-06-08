@@ -246,14 +246,17 @@ class MaiaJobControllerTest extends ApiTestCase
             // No existing annotations.
             ->assertStatus(422);
 
-        ImageAnnotationTest::create([
-            'image_id' => ImageTest::create([
-                'volume_id' => $this->volume()->id,
-                'filename' => 'abc.jpg',
-                'attrs' => [
-                    'width' => 512,
-                    'height' => 512,
-                ],
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => ImageTest::create([
+                    'volume_id' => $this->volume()->id,
+                    'filename' => 'abc.jpg',
+                    'attrs' => [
+                        'width' => 512,
+                        'height' => 512,
+                    ],
+                ])->id,
             ])->id,
         ]);
 
@@ -328,14 +331,17 @@ class MaiaJobControllerTest extends ApiTestCase
             ],
         ];
 
-        ImageAnnotationTest::create([
-            'image_id' => ImageTest::create([
-                'volume_id' => $this->volume()->id,
-                'filename' => 'abc.jpg',
-                'attrs' => [
-                    'width' => 512,
-                    'height' => 512,
-                ],
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => ImageTest::create([
+                    'volume_id' => $this->volume()->id,
+                    'filename' => 'abc.jpg',
+                    'attrs' => [
+                        'width' => 512,
+                        'height' => 512,
+                    ],
+                ])->id,
             ])->id,
         ]);
 
@@ -424,7 +430,12 @@ class MaiaJobControllerTest extends ApiTestCase
             // No annotations in the volume.
             ->assertStatus(422);
 
-        ImageAnnotationTest::create(['image_id' => $image->id]);
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+              'image_id' => $image->id,
+            ])->id,
+        ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
@@ -567,7 +578,12 @@ class MaiaJobControllerTest extends ApiTestCase
             // No annotations in the volume.
             ->assertStatus(422);
 
-        ImageAnnotationTest::create(['image_id' => $image->id]);
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+              'image_id' => $image->id,
+            ])->id,
+        ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
@@ -614,7 +630,12 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $this->project()->addVolumeId($volume->id);
 
-        ImageAnnotationTest::create(['image_id' => $image->id]);
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+              'image_id' => $image->id,
+            ])->id,
+        ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
