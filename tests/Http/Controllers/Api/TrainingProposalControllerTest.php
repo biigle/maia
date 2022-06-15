@@ -36,6 +36,7 @@ class TrainingProposalControllerTest extends ApiTestCase
                 'id' => $annotation->id,
                 'selected' => $annotation->selected,
                 'image_id' => $annotation->image_id,
+                'label_id' => $annotation->label_id,
                 'uuid' => $annotation->image->uuid,
             ]]);
     }

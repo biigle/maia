@@ -47,6 +47,7 @@ class TrainingProposalController extends Controller
                 'maia_training_proposals.id',
                 'maia_training_proposals.selected',
                 'maia_training_proposals.image_id',
+                'maia_training_proposals.label_id',
                 'images.uuid as uuid'
             )
             ->orderBy('score', 'desc')
