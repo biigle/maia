@@ -41,7 +41,7 @@ class TrainingProposalController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
 
-        return $job->trainingProposals()
+        return $job->trainingProposals()->with("label")
             ->join('images', 'images.id', '=', 'maia_training_proposals.image_id')
             ->select(
                 'maia_training_proposals.id',
