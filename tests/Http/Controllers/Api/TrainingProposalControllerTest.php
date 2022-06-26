@@ -9,6 +9,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Biigle\Tests\LabelTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Event;
 use Queue;
@@ -21,7 +22,9 @@ class TrainingProposalControllerTest extends ApiTestCase
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
         $id = $job->id;
 
-        $annotation = TrainingProposalTest::create(['job_id' => $id]);
+        $label = LabelTest::create();
+
+        $annotation = TrainingProposalTest::create(['job_id' => $id, 'label_id' => $label->id]);
         AnnotationCandidateTest::create(['job_id' => $id]);
 
         $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/training-proposals");
@@ -34,9 +37,9 @@ class TrainingProposalControllerTest extends ApiTestCase
             ->assertStatus(200)
             ->assertExactJson([[
                 'id' => $annotation->id,
+                'label' => $annotation->$label,
                 'selected' => $annotation->selected,
                 'image_id' => $annotation->image_id,
-                'label_id' => $annotation->label_id,
                 'uuid' => $annotation->image->uuid,
             ]]);
     }
