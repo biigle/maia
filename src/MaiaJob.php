@@ -198,6 +198,16 @@ class MaiaJob extends Model
     }
 
     /**
+     * Determine if this job should Ignore Existing Labels.
+     *
+     * @return bool
+     */
+    public function shouldIgoreExistingLabel()
+    {
+        return $this->getJsonAttr('params.oa_ignore_existing_label') || $this->getJsonAttr('params.oa_ignore_existing_label', false);
+    }
+
+    /**
      * Determine if this job should use knowledge transfer to get training data.
      *
      * @return bool

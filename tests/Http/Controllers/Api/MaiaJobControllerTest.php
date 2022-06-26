@@ -359,6 +359,51 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->assertEquals(State::noveltyDetectionId(), $job->state_id);
     }
 
+    public function testStoreUseExistingAnnotationsIgnoreLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'training_data_method' => 'own_annotations',
+            'oa_show_training_proposals' => 'abc',
+            'oa_ignore_existing_label' => 'abc',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
+        ];
+
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => ImageTest::create([
+                    'volume_id' => $this->volume()->id,
+                    'filename' => 'abc.jpg',
+                    'attrs' => [
+                        'width' => 512,
+                        'height' => 512,
+                    ],
+                ])->id,
+            ])->id,
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            // Invalid argument.
+            ->assertStatus(422);
+
+        $params['oa_show_training_proposals'] = true;
+        $params['oa_ignore_existing_label'] = true;
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+        $job = MaiaJob::first();
+        dd(Arr::get($this->job->params, 'oa_ignore_existing_label', []));
+        $this->assertTrue($job->shouldUseExistingAnnotations());
+        $this->assertTrue($job->shouldShowTrainingProposals());
+        $this->assertTrue($job->shouldIgoreExistingLabel());
+        $this->assertEquals(State::noveltyDetectionId(), $job->state_id);
+    }
+
     public function testStoreNdClustersTooFewImages()
     {
         $id = $this->volume()->id;

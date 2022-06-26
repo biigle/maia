@@ -61,6 +61,7 @@ class StoreMaiaJob extends FormRequest
             'oa_restrict_labels' => 'array',
             'oa_restrict_labels.*' => 'integer|exists:labels,id',
             'oa_show_training_proposals' => 'boolean',
+            'oa_ignore_existing_label' => 'boolean',
 
             'kt_restrict_labels.*' => 'integer|exists:labels,id',
 

@@ -13,7 +13,7 @@ trait QueriesExistingAnnotations
      * @param array $restrictLabels
      * @return \Illuminate\Database\Query\Builder
      */
-    protected function getExistingAnnotationsQuery($volumeId, $restrictLabels = [])
+    protected function getExistingAnnotationsQuery($volumeId, $restrictLabels = [], $ignoreLabels)
     {
         return ImageAnnotation::join('images', 'image_annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $volumeId)
