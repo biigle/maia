@@ -64,6 +64,7 @@ class StoreMaiaJob extends FormRequest
             'oa_ignore_existing_label' => 'boolean',
 
             'kt_restrict_labels.*' => 'integer|exists:labels,id',
+            'kt_ignore_existing_label' => 'boolean',
 
             'is_train_scheme' => 'required|array|min:1',
             'is_train_scheme.*' => 'array',

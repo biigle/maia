@@ -71,6 +71,8 @@ class PrepareExistingAnnotationsTest extends TestCase
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a1->points, $proposal->points);
         $this->assertNull($proposal->score);
+        $this->assertNotNull($proposal->label_id);
+        $this->assertEquals($al1->label_id, $proposal->label_id);
     }
 
     public function testHandleIgnoreExistingLabel()
@@ -148,6 +150,7 @@ class PrepareExistingAnnotationsTest extends TestCase
         $proposal2 = $job2->trainingProposals()->first();
         $this->assertNotNull($proposal2->label_id);
         $this->assertEquals($a1->points, $proposal2->points);
+        $this->assertEquals($al1->label_id, $proposal2->label_id);
         $this->assertNull($proposal2->score);
     }
 

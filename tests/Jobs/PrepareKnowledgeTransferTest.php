@@ -657,5 +657,50 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals([1, 2, 3], $proposal->points);
+        $this->assertEquals($ia->label_id, $proposal->label_id);
+    }
+
+
+
+    public function testHandleIgnoreLabels()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['metadata' => ['distance_to_ground' => 4]],
+        ]);
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+
+        $ia = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'shape_id' => Shape::circleId(),
+                'points' => [1, 2, 3],
+                'image_id' => $otherImage->id,
+            ])->id,
+        ]);
+
+        $ia2 = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'shape_id' => Shape::circleId(),
+                'points' => [4, 5, 6],
+                'image_id' => $otherImage->id,
+            ])->id,
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+                'kt_ignore_existing_label' => true,
+            ],
+        ]);
+
+        (new PrepareKnowledgeTransfer($job))->handle();
+        $this->assertEquals(2, $job->trainingProposals()->get()->count());
+        $proposal = $job->trainingProposals()->get()->first();
+        $this->assertEquals([1,2,3], $proposal->points);
+        $this->assertNull($proposal->label_id);
     }
 }

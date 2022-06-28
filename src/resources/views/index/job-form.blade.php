@@ -240,23 +240,24 @@
                 </ul>
 
                 <input v-for="label in selectedKnowledgeTransferLabels" type="hidden" name="kt_restrict_labels[]" :value="label.id">
+
+                <div class="form-group{{ $errors->has('kt_ignore_existing_label') ? ' has-error' : '' }}">
+                  <div class="checkbox">
+                      <label for="kt_ignore_existing_label">
+                          <input id="kt_ignore_existing_label" type="checkbox" name="kt_ignore_existing_label" value="1" @checked(old('kt_ignore_existing_label'))>
+                          Ignore Existing Labels
+                      </label>
+                  </div>
+                  @if ($errors->has('kt_ignore_existing_label'))
+                     <span class="help-block">{{ $errors->first('kt_ignore_existing_label') }}</span>
+                  @else
+                      <span class="help-block">
+                          Ignore existing annotations label as labels for training proposals. By default, Existing annotations labels are used
+                      </span>
+                  @endif
+              </div>
             </div>
 
-        </div>
-        <div class="form-group{{ $errors->has('oa_ignore_existing_label') ? ' has-error' : '' }}">
-            <div class="checkbox">
-                <label for="oa_ignore_existing_label">
-                    <input id="oa_ignore_existing_label" type="checkbox" name="oa_ignore_existing_label" value="1" @checked(old('oa_ignore_existing_label'))>
-                    Ignore Existing Labels
-                </label>
-            </div>
-            @if ($errors->has('oa_ignore_existing_label'))
-               <span class="help-block">{{ $errors->first('oa_ignore_existing_label') }}</span>
-            @else
-                <span class="help-block">
-                    Ignore existing annotations label as labels for training proposals. By default, Existing annotations labels are used
-                </span>
-            @endif
         </div>
     </fieldset>
 

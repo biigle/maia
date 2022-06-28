@@ -82,8 +82,8 @@ class MaiaJobController extends Controller
                 'kt_restrict_labels',
             ]);
 
-            if ($request->input('oa_ignore_existing_label')) {
-              $paramKeys = array_merge($paramKeys, ['oa_ignore_existing_label']);
+            if ($request->input('kt_ignore_existing_label')) {
+              $paramKeys = array_merge($paramKeys, ['kt_ignore_existing_label']);
             }
 
         } else {
