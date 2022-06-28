@@ -4,7 +4,7 @@
             <i class="fas" :class="iconClass"></i>
         </div>
         <img @click="toggleSelect" :src="srcUrl" @error="showEmptyImage">
-        <div class="attached-label">
+        <div v-if="labelExists" class="attached-label">
             <span class="attached-label__color" :style="labelStyle"></span>
             <span class="attached-label__name" v-text="label.name"></span>
         </div>
@@ -29,6 +29,9 @@ export default {
         label() {
             return this.image.label;
         },
+        labelExists(){
+          this.label;
+        },
         selected() {
             return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);
         },
@@ -46,9 +49,7 @@ export default {
             return this.image.uuid;
         },
         labelStyle() {
-            return {
-                'background-color': '#' + this.label.color,
-            };
+          return {'background-color': '#' + this.label.color,};
         },
         urlTemplate() {
             // Usually this would be set in the created function but in this special
