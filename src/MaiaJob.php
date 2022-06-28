@@ -202,7 +202,7 @@ class MaiaJob extends Model
      *
      * @return bool
      */
-    public function shouldIgoreExistingLabel()
+    public function shouldIgnoreExistingLabel()
     {
         return $this->getJsonAttr('params.oa_ignore_existing_label') || $this->getJsonAttr('params.oa_ignore_existing_label', false);
     }

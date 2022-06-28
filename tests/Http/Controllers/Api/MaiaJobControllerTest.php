@@ -397,10 +397,9 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
         $job = MaiaJob::first();
-        dd(Arr::get($this->job->params, 'oa_ignore_existing_label', []));
         $this->assertTrue($job->shouldUseExistingAnnotations());
         $this->assertTrue($job->shouldShowTrainingProposals());
-        $this->assertTrue($job->shouldIgoreExistingLabel());
+        $this->assertTrue($job->shouldIgnoreExistingLabel());
         $this->assertEquals(State::noveltyDetectionId(), $job->state_id);
     }
 

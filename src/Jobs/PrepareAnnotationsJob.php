@@ -73,13 +73,24 @@ abstract class PrepareAnnotationsJob extends Job
     protected function convertAnnotations()
     {
         DB::transaction(function () {
-            $this->getAnnotationsQuery()
-                // Use DISTINCT ON to get only one result per annotation, no matter how
-                // many matching labels are attached to it. We can't simply use DISTINCT
-                // because the rows include JSON.
-                ->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotation_labels.id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id, image_annotation_labels.label_id'))
-                ->orderByRaw('image_annotations.id ASC')
-                ->orderByRaw("image_annotation_labels.id ASC")
+            $query = $this->getAnnotationsQuery();
+
+            // Check is ImageAnnotationLabel Table is joined from $this->getAnnotationsQuery(). Since, there might be the case in which both restricted labels and ignoreExistingLabel might exist.
+
+            $joins = collect($query->getQuery()->joins);
+            $containsImageAnnotationLabels = $joins->pluck('table')->contains('image_annotation_labels');
+
+            // Use DISTINCT ON to get only one result per annotation, no matter how
+            // many matching labels are attached to it. We can't simply use DISTINCT
+            // because the rows include JSON.
+
+            $query->when($containsImageAnnotationLabels, function($query, $containsImageAnnotationLabels){
+                  return $query->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotation_labels.id,image_annotations.points, image_annotations.image_id, image_annotations.shape_id, image_annotation_labels.label_id'))
+                  ->orderByRaw('image_annotations.id ASC')
+                  ->orderByRaw("image_annotation_labels.id ASC");
+                }, function($query) {
+                  return $query->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id, Null as label_id'));
+                })
                 ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'image_annotations.id', 'annotations_id');
         });
     }
