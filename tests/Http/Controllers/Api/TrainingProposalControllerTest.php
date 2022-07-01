@@ -28,20 +28,12 @@ class TrainingProposalControllerTest extends ApiTestCase
         AnnotationCandidateTest::create(['job_id' => $id]);
 
         $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/training-proposals");
-
         $this->beGuest();
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")->assertStatus(403);
-
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")
-            ->assertStatus(200)
-            ->assertExactJson([[
-                'id' => $annotation->id,
-                'label' => $annotation->$label,
-                'selected' => $annotation->selected,
-                'image_id' => $annotation->image_id,
-                'uuid' => $annotation->image->uuid,
-            ]]);
+             ->assertStatus(200)
+             ->assertExactJson([['id' => $annotation->id, 'selected' => $annotation->selected, 'image_id' => $annotation->image_id, 'uuid' => $annotation->image->uuid, 'label_id' => $label->id, 'label' => $label->select("color", "id", "label_tree_id", "name")->get()->first(),]]);
     }
 
     public function testIndexWithIgnoreLabels()
@@ -57,24 +49,18 @@ class TrainingProposalControllerTest extends ApiTestCase
 
         $label = LabelTest::create();
 
-        $annotation = TrainingProposalTest::create(['job_id' => $id, 'label_id' => $label->id]);
+        $annotation = TrainingProposalTest::create(['job_id' => $id,]);
         AnnotationCandidateTest::create(['job_id' => $id]);
 
         $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/training-proposals");
 
         $this->beGuest();
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")->assertStatus(403);
-
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")
             ->assertStatus(200)
             ->assertExactJson([[
-                'id' => $annotation->id,
-                'label' => Null,
-                'selected' => $annotation->selected,
-                'image_id' => $annotation->image_id,
-                'uuid' => $annotation->image->uuid,
-            ]]);
+                'id' => $annotation->id, 'selected' => $annotation->selected, 'image_id' => $annotation->image_id, 'uuid' => $annotation->image->uuid, 'label_id' => null, 'label'=> null,]]);
     }
 
     public function testIndexLabelNull()
@@ -94,12 +80,7 @@ class TrainingProposalControllerTest extends ApiTestCase
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")
             ->assertStatus(200)
             ->assertExactJson([[
-                'id' => $annotation->id,
-                'label' => Null,
-                'selected' => $annotation->selected,
-                'image_id' => $annotation->image_id,
-                'uuid' => $annotation->image->uuid,
-            ]]);
+                'id' => $annotation->id,'label' => Null,'selected' => $annotation->selected,'image_id' => $annotation->image_id, 'uuid' => $annotation->image->uuid, 'label_id'=>$annotation->label_id, 'label'=>null,]]);
     }
 
     public function testSubmit()
