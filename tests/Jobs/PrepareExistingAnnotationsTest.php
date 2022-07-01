@@ -148,9 +148,8 @@ class PrepareExistingAnnotationsTest extends TestCase
         (new PrepareExistingAnnotations($job2))->handle();
         $this->assertEquals(1, $job2->trainingProposals()->selected()->count());
         $proposal2 = $job2->trainingProposals()->first();
-        $this->assertNotNull($proposal2->label_id);
+        $this->assertNull($proposal2->label_id);
         $this->assertEquals($a1->points, $proposal2->points);
-        $this->assertEquals($al1->label_id, $proposal2->label_id);
         $this->assertNull($proposal2->score);
     }
 
