@@ -30,7 +30,7 @@ export default {
             return this.image.label;
         },
         labelExists(){
-          return this.label == NULL;
+          return this.image.label;
         },
         selected() {
             return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);
