@@ -156,8 +156,8 @@ class PrepareKnowledgeTransfer extends PrepareAnnotationsJob
     protected function getAnnotationsQuery()
     {
         $restrictLabels = Arr::get($this->job->params, 'kt_restrict_labels', []);
-
-        return $this->getExistingAnnotationsQuery($this->job->params['kt_volume_id'], $restrictLabels);
+        $ignoreLabels = $this->job->shouldIgnoreKnowledgeTransferLabel();
+        return $this->getExistingAnnotationsQuery($this->job->params['kt_volume_id'], $restrictLabels, $ignoreLabels);
     }
 
     /**

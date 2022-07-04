@@ -47,8 +47,12 @@ class TrainingProposalController extends Controller
                 'maia_training_proposals.id',
                 'maia_training_proposals.selected',
                 'maia_training_proposals.image_id',
-                'images.uuid as uuid'
+                'images.uuid as uuid',
+                'maia_training_proposals.label_id',
             )
+            ->with(["label"=>function($query){
+              $query->select("id", "name", "color", "label_tree_id");
+            }])
             ->orderBy('score', 'desc')
             ->get()
             ->toArray();

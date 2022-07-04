@@ -66,6 +66,11 @@ class MaiaJobController extends Controller
             } else {
                 $job->state_id = State::instanceSegmentationId();
             }
+
+            if ($request->input('oa_ignore_existing_label')) {
+              $paramKeys = array_merge($paramKeys, ['oa_ignore_existing_label']);
+            }
+
             $paramKeys = array_merge($paramKeys, [
                 'oa_restrict_labels',
                 'oa_show_training_proposals',
@@ -76,6 +81,11 @@ class MaiaJobController extends Controller
                 'kt_volume_id',
                 'kt_restrict_labels',
             ]);
+
+            if ($request->input('kt_ignore_existing_label')) {
+              $paramKeys = array_merge($paramKeys, ['kt_ignore_existing_label']);
+            }
+
         } else {
             $job->state_id = State::noveltyDetectionId();
             $paramKeys = array_merge($paramKeys, [

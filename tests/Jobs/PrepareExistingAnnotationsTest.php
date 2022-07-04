@@ -40,6 +40,7 @@ class PrepareExistingAnnotationsTest extends TestCase
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a->points, $proposal->points);
+        $this->assertNotNull($proposal->label_id);
     }
 
     public function testHandleRestrictLabels()
@@ -70,6 +71,118 @@ class PrepareExistingAnnotationsTest extends TestCase
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a1->points, $proposal->points);
         $this->assertNull($proposal->score);
+        $this->assertNotNull($proposal->label_id);
+        $this->assertEquals($al1->label_id, $proposal->label_id);
+    }
+
+    public function testHandleIgnoreExistingLabel()
+    {
+        $a1 = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
+        $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a1->id]);
+        // Create only one proposal even though the annotation has two matching labels.
+        $al2 = ImageAnnotationLabelTest::create([
+            'annotation_id' => $a1->id,
+            'label_id' => $al1->label_id,
+        ]);
+        $a2 = ImageAnnotationTest::create([
+            'shape_id' => Shape::circleId(),
+            'image_id' => $a1->image_id,
+        ]);
+        $al3 = ImageAnnotationLabelTest::create(['annotation_id' => $a2->id]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $a1->image->volume_id,
+            'params' => [
+                'training_data_method' => 'own_annotations',
+                'oa_ignore_existing_label' => true,
+            ],
+        ]);
+
+        (new PrepareExistingAnnotations($job))->handle();
+        $this->assertEquals(2, $job->trainingProposals()->selected()->count());
+        $proposal = $job->trainingProposals()->first();
+        $this->assertNull($proposal->label_id);
+        $this->assertEquals($a1->points, $proposal->points);
+        $this->assertNull($proposal->score);
+    }
+
+    public function testHandleBothIgnoreExistingLabelAndRestrictLabels()
+    {
+        $a1 = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
+        $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a1->id]);
+        // Create only one proposal even though the annotation has two matching labels.
+        $al2 = ImageAnnotationLabelTest::create([
+            'annotation_id' => $a1->id,
+            'label_id' => $al1->label_id,
+        ]);
+        $a2 = ImageAnnotationTest::create([
+            'shape_id' => Shape::circleId(),
+            'image_id' => $a1->image_id,
+        ]);
+        $al3 = ImageAnnotationLabelTest::create(['annotation_id' => $a2->id]);
+
+        $job1 = MaiaJobTest::create([
+            'volume_id' => $a1->image->volume_id,
+            'params' => [
+                'training_data_method' => 'own_annotations',
+                'oa_ignore_existing_label' => true,
+            ],
+        ]);
+
+        $job2 = MaiaJobTest::create([
+            'volume_id' => $a1->image->volume_id,
+            'params' => [
+                'training_data_method' => 'own_annotations',
+                'oa_restrict_labels' => [$al1->label_id],
+                'oa_ignore_existing_label' => true,
+            ],
+        ]);
+
+        (new PrepareExistingAnnotations($job1))->handle();
+        $this->assertEquals(2, $job1->trainingProposals()->selected()->count());
+        $proposal1 = $job1->trainingProposals()->first();
+        $this->assertNull($proposal1->label_id);
+        $this->assertEquals($a1->points, $proposal1->points);
+        $this->assertNull($proposal1->score);
+
+        (new PrepareExistingAnnotations($job2))->handle();
+        $this->assertEquals(1, $job2->trainingProposals()->selected()->count());
+        $proposal2 = $job2->trainingProposals()->first();
+        $this->assertNull($proposal2->label_id);
+        $this->assertEquals($a1->points, $proposal2->points);
+        $this->assertNull($proposal2->score);
+    }
+
+
+    public function testMultipleAnnotationLables()
+    {
+      $a1 = ImageAnnotationTest::create([
+            'shape_id' => Shape::pointId(),
+            'points' => [10, 20],
+        ]);
+
+      $l1 = ImageAnnotationLabelTest::create([
+          'annotation_id' => $a1->id
+        ]);
+
+      $l2 = ImageAnnotationLabelTest::create([
+          'annotation_id' => $a1->id
+        ]);
+
+      $job = MaiaJobTest::create([
+            'volume_id' => $a1->image->volume_id,
+            'params' => [
+                'training_data_method' => 'own_annotations'
+            ],
+        ]);
+
+      (new PrepareExistingAnnotations($job))->handle();
+      $this->assertEquals(1, $job->trainingProposals()->selected()->count());
+
+      $proposal = $job->trainingProposals()->first();
+
+      $this->assertNotNull($proposal->label_id);
+      $this->assertEquals($l1->label_id, $proposal->label_id);
     }
 
     public function testHandleShapeConversion()
@@ -79,10 +192,18 @@ class PrepareExistingAnnotationsTest extends TestCase
             'points' => [10, 20],
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a1->id,
+        ]);
+
         $a2 = ImageAnnotationTest::create([
             'shape_id' => Shape::rectangleId(),
             'points' => [10, 10, 100, 10, 100, 100, 10, 100],
             'image_id' => $a1->image_id,
+        ]);
+
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a2->id,
         ]);
 
         $a3 = ImageAnnotationTest::create([
@@ -91,16 +212,28 @@ class PrepareExistingAnnotationsTest extends TestCase
             'image_id' => $a1->image_id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a3->id,
+        ]);
+
         $a4 = ImageAnnotationTest::create([
             'shape_id' => Shape::lineId(),
             'points' => [10, 10, 20, 20],
             'image_id' => $a1->image_id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a4->id,
+        ]);
+
         $a5 = ImageAnnotationTest::create([
             'shape_id' => Shape::polygonId(),
             'points' => [10, 10, 20, 20, 0, 20],
             'image_id' => $a1->image_id,
+        ]);
+
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a5->id,
         ]);
 
         $job = MaiaJobTest::create([
