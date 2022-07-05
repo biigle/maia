@@ -137,8 +137,9 @@ class StoreMaiaJob extends FormRequest
     protected function hasNoExistingAnnotations()
     {
         $restrictLabels = $this->input('oa_restrict_labels', []);
+        $ignoreLabels = $this->input('oa_ignore_existing_label', false);
 
-        return !$this->getExistingAnnotationsQuery($this->volume->id, $restrictLabels)->exists();
+        return !$this->getExistingAnnotationsQuery($this->volume->id, $restrictLabels, $ignoreLabels)->exists();
     }
 
     /**

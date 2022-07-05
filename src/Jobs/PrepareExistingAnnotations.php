@@ -51,6 +51,7 @@ class PrepareExistingAnnotations extends PrepareAnnotationsJob
     {
         $restrictLabels = Arr::get($this->job->params, 'oa_restrict_labels', []);
         $ignoreLabels = $this->job->shouldIgnoreOwnExistingLabel();
+
         return $this->getExistingAnnotationsQuery($this->job->volume_id, $restrictLabels, $ignoreLabels);
     }
 }

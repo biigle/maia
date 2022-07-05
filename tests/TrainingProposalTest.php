@@ -23,6 +23,7 @@ class TrainingProposalTest extends ModelTestCase
         $this->assertNotNull($this->model->selected);
         $this->assertNull($this->model->created_at);
         $this->assertNull($this->model->updated_at);
+        $this->assertNull($this->model->label);
     }
 
     public function testCastPoints()

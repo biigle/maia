@@ -122,24 +122,24 @@ class PrepareKnowledgeTransferTest extends TestCase
 
     public function testMultipleAnnotationLables()
     {
-      $ownImage = ImageTest::create([
+      $Image1 = ImageTest::create([
           'attrs' => ['metadata' => ['area' => 4]],
       ]);
 
-      $otherImage = ImageTest::create([
+      $Image2 = ImageTest::create([
           'attrs' => ['metadata' => ['area' => 1]],
       ]);
 
       $ownAnnotation1 = ImageAnnotationTest::create([
           'shape_id' => Shape::circleId(),
           'points' => [1, 2, 3],
-          'image_id' => $ownImage->id,
+          'image_id' => $Image1->id,
       ]);
 
       $ownAnnotation2 = ImageAnnotationTest::create([
           'shape_id' => Shape::circleId(),
           'points' => [1, 2, 3],
-          'image_id' => $ownImage->id,
+          'image_id' => $Image1->id,
       ]);
 
       $ownAnnotationLabel1 = ImageAnnotationLabelTest::create([
@@ -153,13 +153,13 @@ class PrepareKnowledgeTransferTest extends TestCase
       $otherAnnotation1 = ImageAnnotationTest::create([
           'shape_id' => Shape::circleId(),
           'points' => [4, 5, 6],
-          'image_id' => $otherImage->id,
+          'image_id' => $Image2->id,
       ]);
 
       $otherAnnotation2 = ImageAnnotationTest::create([
           'shape_id' => Shape::circleId(),
           'points' => [4, 5, 6],
-          'image_id' => $otherImage->id,
+          'image_id' => $Image2->id,
       ]);
 
       $otherAnnotationLabel1 = ImageAnnotationLabelTest::create([
@@ -170,11 +170,15 @@ class PrepareKnowledgeTransferTest extends TestCase
         'annotation_id' => $otherAnnotation2->id,
       ]);
 
+      $otherAnnotationLabel3 = ImageAnnotationLabelTest::create([
+        'annotation_id' => $otherAnnotation2->id,
+      ]);
+
       $job = MaiaJobTest::create([
-          'volume_id' => $ownImage->volume_id,
+          'volume_id' => $Image1->volume_id,
           'params' => [
               'training_data_method' => 'area_knowledge_transfer',
-              'kt_volume_id' => $otherImage->volume_id,
+              'kt_volume_id' => $Image2->volume_id,
           ],
       ]);
 
@@ -672,21 +676,17 @@ class PrepareKnowledgeTransferTest extends TestCase
             'attrs' => ['metadata' => ['distance_to_ground' => 1]],
         ]);
 
-        $ia = ImageAnnotationLabelTest::create([
-            'annotation_id' => ImageAnnotationTest::create([
+        $ia = ImageAnnotationTest::create([
                 'shape_id' => Shape::circleId(),
                 'points' => [1, 2, 3],
                 'image_id' => $otherImage->id,
-            ])->id,
-        ]);
+              ]);
 
-        $ia2 = ImageAnnotationLabelTest::create([
-            'annotation_id' => ImageAnnotationTest::create([
+        $ia2 = ImageAnnotationTest::create([
                 'shape_id' => Shape::circleId(),
                 'points' => [4, 5, 6],
                 'image_id' => $otherImage->id,
-            ])->id,
-        ]);
+              ]);
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,

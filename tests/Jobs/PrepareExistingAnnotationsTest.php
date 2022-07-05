@@ -157,24 +157,24 @@ class PrepareExistingAnnotationsTest extends TestCase
     public function testMultipleAnnotationLables()
     {
       $a1 = ImageAnnotationTest::create([
-            'shape_id' => Shape::pointId(),
-            'points' => [10, 20],
-        ]);
+                'shape_id' => Shape::pointId(),
+                'points' => [10, 20],
+            ]);
 
       $l1 = ImageAnnotationLabelTest::create([
-          'annotation_id' => $a1->id
-        ]);
+              'annotation_id' => $a1->id
+            ]);
 
       $l2 = ImageAnnotationLabelTest::create([
-          'annotation_id' => $a1->id
-        ]);
+              'annotation_id' => $a1->id
+            ]);
 
       $job = MaiaJobTest::create([
-            'volume_id' => $a1->image->volume_id,
-            'params' => [
-                'training_data_method' => 'own_annotations'
-            ],
-        ]);
+                'volume_id' => $a1->image->volume_id,
+                'params' => [
+                    'training_data_method' => 'own_annotations'
+                ],
+            ]);
 
       (new PrepareExistingAnnotations($job))->handle();
       $this->assertEquals(1, $job->trainingProposals()->selected()->count());

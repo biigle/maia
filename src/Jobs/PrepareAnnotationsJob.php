@@ -81,12 +81,12 @@ abstract class PrepareAnnotationsJob extends Job
             // many matching labels are attached to it. We can't simply use DISTINCT
             // because the rows include JSON.
 
-            $query->when($ignoreExistingLabel, function($query, $ignoreExistingLabel){
-                  return $query->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id, Null as label_id'));
-                }, function($query) {
+            $query->when($ignoreExistingLabel, function ($query, $ignoreExistingLabel) {
+                  return $query->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id'));
+                }, function ($query) {
                   return $query->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotation_labels.id,image_annotations.points, image_annotations.image_id, image_annotations.shape_id, image_annotation_labels.label_id'))
-                  ->orderByRaw('image_annotations.id ASC')
-                  ->orderByRaw("image_annotation_labels.id ASC");
+                    ->orderByRaw('image_annotations.id ASC')
+                    ->orderByRaw("image_annotation_labels.id ASC");
                 })
                 ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'image_annotations.id', 'annotations_id');
         });
@@ -106,7 +106,7 @@ abstract class PrepareAnnotationsJob extends Job
                 'points' => $this->convertAnnotationPointsToCircle($annotation),
                 'image_id' => $annotation->image_id,
                 'shape_id' => Shape::circleId(),
-                'label_id' => $annotation->label_id,
+                'label_id' => $annotation->label_id ?? Null,
                 'job_id' => $this->job->id,
                 // All these proposals should be taken for instance segmentation unless
                 // the user chose to review them as training proposals first.
