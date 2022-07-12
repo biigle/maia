@@ -7,7 +7,10 @@ use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Biigle\Tests\ImageAnnotationTest;
+use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
+use Biigle\Shape;
 use Exception;
 use File;
 use FileCache;
@@ -37,11 +40,14 @@ class InstanceSegmentationRequestTest extends TestCase
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $image2 = ImageTest::create(['volume_id' => $job->volume_id, 'filename' => 'a']);
+        $a = ImageAnnotationTest::create(['image_id'=>$image->id, 'shape_id' => Shape::pointId(),]);
+        $l = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
         $trainingProposal = TrainingProposalTest::create([
             'job_id' => $job->id,
             'image_id' => $image->id,
             'points' => [10.5, 20.4, 30],
             'selected' => true,
+            'label_id' => $l->label_id,
         ]);
         // Not selected and should not be included.
         TrainingProposalTest::create([
@@ -58,10 +64,10 @@ class InstanceSegmentationRequestTest extends TestCase
         $inferenceInputJsonPath = "{$tmpDir}/input-inference.json";
 
         $expectDatasetJson = [
-            'available_bytes' => 8E+9,
+            'available_bytes' => intval(8E+9),
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
-            'training_proposals' => [$image->id => [[11, 20, 30]]],
+            'training_proposals' => [$image->id => [[11, 20, 30, $trainingProposal->label_id]]],
             'output_path' => "{$tmpDir}/output-dataset.json",
         ];
 
@@ -90,6 +96,7 @@ class InstanceSegmentationRequestTest extends TestCase
 
             $this->assertTrue(File::exists($datasetInputJsonPath));
             $inputJson = json_decode(File::get($datasetInputJsonPath), true);
+            // dd($inputJson);
             $this->assertArrayHasKey('images', $inputJson);
             $this->assertArrayHasKey($image->id, $inputJson['images']);
             $this->assertArrayNotHasKey($image2->id, $inputJson['images']);
@@ -152,6 +159,8 @@ class InstanceSegmentationRequestTest extends TestCase
         ];
 
         $ownImage = ImageTest::create();
+        $a = ImageAnnotationTest::create(['image_id'=>$otherImage2->id, 'shape_id' => Shape::pointId(),]);
+        $l = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
@@ -162,6 +171,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'image_id' => $otherImage->id,
             'points' => [10.5, 20.4, 30],
             'selected' => true,
+            'label_id' => $l->label_id,
         ]);
         config(['maia.tmp_dir' => '/tmp']);
         $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
@@ -176,10 +186,10 @@ class InstanceSegmentationRequestTest extends TestCase
                 $otherImage->id => 0.25,
                 $otherImage2->id => 0.25,
             ],
-            'available_bytes' => 8E+9,
+            'available_bytes' => intval(8E+9),
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
-            'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
+            'training_proposals' => [$otherImage->id => [[11, 20, 30, $trainingProposal->label_id]]],
             'output_path' => "{$tmpDir}/output-dataset.json",
         ];
 
@@ -269,6 +279,8 @@ class InstanceSegmentationRequestTest extends TestCase
         ];
 
         $ownImage = ImageTest::create();
+        $a = ImageAnnotationTest::create(['image_id'=>$otherImage->id, 'shape_id' => Shape::pointId(),]);
+        $l = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
@@ -279,6 +291,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'image_id' => $otherImage->id,
             'points' => [10.5, 20.4, 30],
             'selected' => true,
+            'label_id' => $l->label_id,
         ]);
         config(['maia.tmp_dir' => '/tmp']);
         $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
@@ -292,7 +305,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
-            'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
+            'training_proposals' => [$otherImage->id => [[11, 20, 30, $trainingProposal->label_id]]],
             'output_path' => "{$tmpDir}/output-dataset.json",
         ];
 
