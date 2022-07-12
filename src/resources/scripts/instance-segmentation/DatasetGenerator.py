@@ -85,8 +85,8 @@ class DatasetGenerator(object):
             masks = []
             for proposal in proposals:
                 mask = np.zeros((image.height, image.width), dtype=np.uint8)
-                cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], 1, -1)
-                masks.append(mask.astype(np.bool))
+                cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], proposal[3], -1)
+                masks.append(mask)
 
             image_paths = []
             mask_paths = []
