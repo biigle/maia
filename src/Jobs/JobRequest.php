@@ -236,7 +236,7 @@ class JobRequest extends Job implements ShouldQueue
         }
 
         // Each annotation is an array:
-        // [$imageId, $xCenter, $yCenter, $radius, $score]
+        // [$imageId, $xCenter, $yCenter, $radius, $score, $class_id]
         return $annotations;
     }
 }

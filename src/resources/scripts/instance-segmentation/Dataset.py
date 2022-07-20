@@ -44,9 +44,9 @@ class Dataset(mrcnn.utils.Dataset):
         classes = []
         masks = []
 
-        for mask in data['masks']:
+        for mask, klass in zip(data['masks'], data['classes']):
             # Only one class "Interesting" is supported for now.
-            source_class_id = 1
+            source_class_id = klass
             if source_class_id not in self.ignore_classes:
                 classes.append(self.map_source_class_id('{}.{}'.format(self.name, source_class_id)))
                 masks.append(mask)

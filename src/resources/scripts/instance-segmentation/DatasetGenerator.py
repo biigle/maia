@@ -52,6 +52,12 @@ class DatasetGenerator(object):
         # Discard additional channels (e.g. alpha)
         mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()[:3]
 
+        props = [prop for trainingprops in self.training_proposals.values() for prop in trainingprops]
+        classes = {}
+
+        for i, proposal in enumerate(props):
+            classes[proposal[-1]] = f"label-{i+1}"
+
         return {
             'training_images_path': self.training_images_path,
             'training_masks_path': self.training_masks_path,
@@ -61,9 +67,7 @@ class DatasetGenerator(object):
             'crop_dimension': self.crop_dimension,
             # For now all datasets are binary, i.e. only the classes "Background" and
             # "Interesting" are supported.
-            'classes': {
-                1: 'Interesting',
-            }
+            'classes': classes
         }
 
     def ensure_train_masks_dirs(self):
@@ -83,10 +87,12 @@ class DatasetGenerator(object):
                 proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
 
             masks = []
+            classes = []
             for proposal in proposals:
-                mask = np.zeros((image.height, image.width), dtype=np.uint8)
+                mask = np.zeros((image.height, image.width), dtype=np.int32)
                 cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], proposal[3], -1)
                 masks.append(mask)
+                classes.append(proposal[3])
 
             image_paths = []
             mask_paths = []
@@ -95,7 +101,7 @@ class DatasetGenerator(object):
             for i, proposal in enumerate(proposals):
                 image_file = '{}_{}.jpg'.format(imageId, i)
                 image_crop, mask_crops = self.generate_crop(image, masks, proposal)
-                mask_file = self.save_mask(mask_crops, image_file, self.training_masks_path)
+                mask_file = self.save_mask(mask_crops, image_file, self.training_masks_path, classes)
                 image_crop.write_to_file(os.path.join(self.training_images_path, image_file), strip=True, Q=95)
                 image_paths.append(image_file)
                 mask_paths.append(mask_file)
@@ -133,10 +139,10 @@ class DatasetGenerator(object):
 
         return image_crop, mask_crops
 
-    def save_mask(self, masks, filename, path):
+    def save_mask(self, masks, filename, path, classes):
         mask_store = [mask for mask in masks if np.any(mask)]
         mask_file = '{}.npz'.format(filename)
-        np.savez_compressed(os.path.join(path, mask_file), masks=mask_store)
+        np.savez_compressed(os.path.join(path, mask_file), masks=mask_store, classes=classes)
 
         return mask_file
 

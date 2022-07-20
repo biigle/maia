@@ -88,7 +88,7 @@ class InferenceRunner(object):
 
     def process_result(self, image_id, result):
         points = []
-        for roi, score in zip(result['rois'], result['scores']):
+        for roi, score, class_id in zip(result['rois'], result['scores'], result['class_ids']):
             # ROIs are stored as (y1, x1, y2, x2).
             y = min(roi[0], roi[2])
             x = min(roi[1], roi[3])
@@ -97,7 +97,7 @@ class InferenceRunner(object):
             rx = round(w / 2)
             ry = round(h / 2)
             r = max(rx, ry)
-            points.append([int(x + rx), int(y + ry), int(r), float(score)])
+            points.append([int(x + rx), int(y + ry), int(r), float(score), int(class_id)])
 
         path = os.path.join(self.tmp_dir, '{}.json'.format(image_id))
         with open(path, 'w') as outfile:
