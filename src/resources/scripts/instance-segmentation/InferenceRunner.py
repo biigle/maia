@@ -98,7 +98,8 @@ class InferenceRunner(object):
             rx = round(w / 2)
             ry = round(h / 2)
             r = max(rx, ry)
-            points.append([int(x + rx), int(y + ry), int(r), float(score), int(class_id)])
+            label = self.dataset.classes[int(class_id)]
+            points.append([int(x + rx), int(y + ry), int(r), float(score), int(label)])
 
         path = os.path.join(self.tmp_dir, '{}.json'.format(image_id))
         with open(path, 'w') as outfile:
