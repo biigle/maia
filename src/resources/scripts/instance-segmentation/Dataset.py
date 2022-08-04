@@ -43,10 +43,9 @@ class Dataset(mrcnn.utils.Dataset):
         data = np.load(file, allow_pickle=True)
         classes = []
         masks = []
-
-        for mask, klass in zip(data['masks'], data['classes']):
+        for mask in data['masks']:
             # Only one class "Interesting" is supported for now.
-            source_class_id = klass
+            source_class_id = image_index + 1
             if source_class_id not in self.ignore_classes:
                 classes.append(self.map_source_class_id('{}.{}'.format(self.name, source_class_id)))
                 masks.append(mask)
@@ -91,5 +90,5 @@ class TrainingDataset(Dataset):
         return [os.path.join(prefix, s) for s in suffixes]
 
 class InferenceDataset(Dataset):
-    def __init__(self, images):
-        super().__init__(images=images, name='maia_generic_inference')
+    def __init__(self, images, classes):
+        super().__init__(images=images, classes=classes, name='maia_generic_inference')

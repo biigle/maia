@@ -56,7 +56,7 @@ class DatasetGenerator(object):
         classes = {}
 
         for i, proposal in enumerate(props):
-            classes[proposal[-1]] = f"label-{i+1}"
+            classes[i+1] = f"{proposal[-1]}"
 
         return {
             'training_images_path': self.training_images_path,
@@ -88,9 +88,10 @@ class DatasetGenerator(object):
 
             masks = []
             classes = []
-            for proposal in proposals:
+
+            for i, proposal in enumerate(proposals):
                 mask = np.zeros((image.height, image.width), dtype=np.int32)
-                cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], proposal[3], -1)
+                cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], i+1, -1)
                 masks.append(mask)
                 classes.append(proposal[3])
 

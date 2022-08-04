@@ -21,7 +21,8 @@ class InferenceRunner(object):
         self.config = InferenceConfig(params, trainset)
         # Cast image ID to int.
         images = {int(k): v for k, v in params['images'].items()}
-        self.dataset = InferenceDataset(images)
+        classes = {int(k): v for k, v in trainset['classes'].items()}
+        self.dataset = InferenceDataset(images, classes)
 
     def run(self):
         self.config.display()
