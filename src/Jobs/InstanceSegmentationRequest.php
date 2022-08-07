@@ -59,7 +59,7 @@ class InstanceSegmentationRequest extends JobRequest
      */
     public function handle()
     {
-        $this->createTmpDir();
+        // $this->createTmpDir();
 
         try {
             $images = $this->getGenericImages();
@@ -69,15 +69,15 @@ class InstanceSegmentationRequest extends JobRequest
             } else {
                 $datasetImages = $images;
             }
-
-            $datasetOutputPath = $this->generateDataset($datasetImages);
-            $trainingOutputPath = $this->performTraining($datasetOutputPath);
-            $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
+            // $datasetOutputPath = $this->generateDataset($datasetImages);
+            // $trainingOutputPath = $this->performTraining($datasetOutputPath);
+            // $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
 
             $annotations = $this->parseAnnotations($images);
-            $this->dispatchResponse($annotations);
+            // $this->dispatchResponse($annotations);
+            return $annotations;
         } finally {
-            $this->cleanup();
+            // $this->cleanup();
         }
     }
 

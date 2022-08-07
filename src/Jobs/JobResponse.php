@@ -116,7 +116,7 @@ class JobResponse extends Job implements ShouldQueue
             'score' => $annotation[4],
             'image_id' => $annotation[0],
             'shape_id' => Shape::circleId(),
-            # add label_id here
+            'label_id' => $annotation[5]
         ];
     }
 

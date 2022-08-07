@@ -70,7 +70,7 @@ class JobRequest extends Job implements ShouldQueue
      */
     public function failed(Exception $exception)
     {
-        $this->cleanup();
+        // $this->cleanup();
         $this->dispatchFailure($exception);
     }
 
@@ -204,10 +204,9 @@ class JobRequest extends Job implements ShouldQueue
         // failed for some of them. We still get enough training proposals and don't want
         // to execute the long running novelty detection again. But if too many images
         // failed, abort.
-        if (($isNull / count($images)) > 0.1) {
-            throw new Exception('Unable to parse more than 10 % of the output JSON files.');
-        }
-
+        // if (($isNull / count($images)) > 0.1) {
+        //     throw new Exception('Unable to parse more than 10 % of the output JSON files.');
+        // }
         return $annotations;
     }
 
@@ -220,8 +219,7 @@ class JobRequest extends Job implements ShouldQueue
      */
     protected function parseAnnotationsFile($image)
     {
-        $path = "{$this->tmpDir}/{$image->getId()}.json";
-
+        $path = "./storage/maia_jobs/maia-41-instance-segmentation/{$image->getId()}.json";
         // This might happen for corrupt image files which are skipped.
         if (!File::exists($path)) {
             return [];
@@ -230,6 +228,21 @@ class JobRequest extends Job implements ShouldQueue
         $annotations = json_decode(File::get($path), true);
 
         if (is_array($annotations)) {
+
+            $grouped_ant = array();
+
+            foreach($annotations as &$ant){
+              $grouped_ant[end($ant)][] = $ant;
+            }
+
+            $annotations = array();
+
+            foreach($grouped_ant as $k => $v){
+              $scores=array_column($grouped_ant[$k], 3);
+              array_multisort($scores, SORT_DESC, $grouped_ant[$k]);
+              array_push($annotations,$grouped_ant[$k][0]);
+            }
+
             foreach ($annotations as &$annotation) {
                 array_unshift($annotation, $image->getId());
             }
