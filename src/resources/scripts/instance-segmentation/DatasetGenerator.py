@@ -31,7 +31,6 @@ class DatasetGenerator(object):
         self.ensure_train_masks_dirs()
         executor = ThreadPoolExecutor(max_workers=self.max_workers)
         jobs = []
-
         for imageId, proposals in self.training_proposals.items():
             jobs.append(executor.submit(self.process_image, imageId, proposals))
 
@@ -56,7 +55,10 @@ class DatasetGenerator(object):
         classes = {}
 
         for i, proposal in enumerate(props):
-            classes[i+1] = f"{proposal[-1]}"
+            if(proposal[-1] is not None):
+              classes[i+1] = f"{proposal[-1]}"
+            else:
+              classes[i+1] = "Interesting"
 
         return {
             'training_images_path': self.training_images_path,
@@ -93,7 +95,10 @@ class DatasetGenerator(object):
                 mask = np.zeros((image.height, image.width), dtype=np.int32)
                 cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], i+1, -1)
                 masks.append(mask)
-                classes.append(proposal[3])
+                if(proposal[3] is not None):
+                  classes.append(proposal[3])
+                else:
+                  classes.append("Interesting")
 
             image_paths = []
             mask_paths = []
