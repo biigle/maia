@@ -110,13 +110,15 @@ class JobResponse extends Job implements ShouldQueue
             return round($coordinate, 2);
         }, [$annotation[1], $annotation[2], $annotation[3]]);
 
+        $label_id = isset($annotation[4]) ? $annotation[4] : NULL;
+
         return [
             'job_id' => $this->jobId,
             'points' => json_encode($points),
             'score' => $annotation[4],
             'image_id' => $annotation[0],
             'shape_id' => Shape::circleId(),
-            'label_id' => $annotation[5]
+            'label_id' => $label_id
         ];
     }
 

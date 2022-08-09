@@ -55,7 +55,7 @@ class DatasetGenerator(object):
         classes = {}
 
         for i, proposal in enumerate(props):
-            if(proposal[-1] is not None):
+            if(len(proposal) == 4):
               classes[i+1] = f"{proposal[-1]}"
             else:
               classes[i+1] = "Interesting"
@@ -95,7 +95,7 @@ class DatasetGenerator(object):
                 mask = np.zeros((image.height, image.width), dtype=np.int32)
                 cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], i+1, -1)
                 masks.append(mask)
-                if(proposal[3] is not None):
+                if(len(proposal) == 4):
                   classes.append(proposal[3])
                 else:
                   classes.append("Interesting")

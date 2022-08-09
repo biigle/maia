@@ -6,7 +6,6 @@
         <img @click="toggleSelect" :src="srcUrl" @error="showEmptyImage">
         <div v-if="selected" class="attached-label">
             <span class="attached-label__color" :style="labelStyle"></span>
-            <span></span>
             <span class="attached-label__name" v-text="label.name"></span>
         </div>
     </figure>
@@ -29,7 +28,6 @@ export default {
     computed: {
         label() {
             if (this.selected) {
-                debugger;
                 return this.image.label;
             }
 

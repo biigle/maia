@@ -59,7 +59,7 @@ class InstanceSegmentationRequest extends JobRequest
      */
     public function handle()
     {
-        // $this->createTmpDir();
+        $this->createTmpDir();
 
         try {
             $images = $this->getGenericImages();
@@ -69,15 +69,15 @@ class InstanceSegmentationRequest extends JobRequest
             } else {
                 $datasetImages = $images;
             }
-            // $datasetOutputPath = $this->generateDataset($datasetImages);
-            // $trainingOutputPath = $this->performTraining($datasetOutputPath);
-            // $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
+            $datasetOutputPath = $this->generateDataset($datasetImages);
+            $trainingOutputPath = $this->performTraining($datasetOutputPath);
+            $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
 
             $annotations = $this->parseAnnotations($images);
-            // $this->dispatchResponse($annotations);
+            $this->dispatchResponse($annotations);
             return $annotations;
         } finally {
-            // $this->cleanup();
+            $this->cleanup();
         }
     }
 
@@ -113,7 +113,9 @@ class InstanceSegmentationRequest extends JobRequest
                     // script.
                     //[point1, point2, point3, label_id]
                     $result = array_map(function($value){return intval(round($value));}, $proposal->points);
-                    array_push($result, $proposal->label_id);
+                    if(isset($proposal->label_id)){
+                      array_push($result, $proposal->label_id);
+                    }
                     return $result;
                 });
             })
