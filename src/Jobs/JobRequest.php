@@ -220,6 +220,7 @@ class JobRequest extends Job implements ShouldQueue
     protected function parseAnnotationsFile($image)
     {
         $path = "{$this->tmpDir}/{$image->getId()}.json";
+
         // This might happen for corrupt image files which are skipped.
         if (!File::exists($path)) {
             return [];
@@ -228,36 +229,17 @@ class JobRequest extends Job implements ShouldQueue
         $annotations = json_decode(File::get($path), true);
 
         if (is_array($annotations)) {
-
-            $grouped_ant = array();
-
-            foreach($annotations as &$ant){
-              $grouped_ant[end($ant)][] = $ant;
-            }
-
-            $annotations = array();
-
-            foreach($grouped_ant as $k => $v){
-              $scores=array_column($grouped_ant[$k], 3);
-              array_multisort($scores, SORT_DESC, $grouped_ant[$k]);
-              if(isset($grouped_ant[$k][0][4])){
-                  if($grouped_ant[$k][0][4] == "Interesting"){
-                      $a = $grouped_ant[$k][0];
-                      unset($a[4]);
-                      $grouped_ant[$k][0] = $a;
-                  }else{
-                      $a = $grouped_ant[$k][0];
-                      $grouped_ant[$k][0][4] = intval($a[4]);
-                  }
-              }
-              array_push($annotations,$grouped_ant[$k][0]);
-            }
-
             foreach ($annotations as &$annotation) {
                 array_unshift($annotation, $image->getId());
+                if(isset($annotation[5])){
+                  if($annotation[5] == "Interesting"){
+                    unset($annotation[5]);
+                  }else{
+                    $annotation[5] = intval($annotation[5]);
+                  }
+                }
             }
         }
-
         // Each annotation is an array:
         // [$imageId, $xCenter, $yCenter, $radius, $score, $class_id]
         return $annotations;
