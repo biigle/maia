@@ -58,7 +58,8 @@ class DatasetGenerator(object):
             if(len(proposal) == 4):
               classes[i+1] = f"{proposal[-1]}"
             else:
-              classes[i+1] = "Interesting"
+              if "Interesting" not in classes.values():
+                classes[i+1] = "Interesting"
 
         return {
             'training_images_path': self.training_images_path,
