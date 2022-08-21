@@ -1,6 +1,6 @@
 <template>
     <figure class="image-grid__image image-grid__image--annotation-candidate" :class="classObject" :title="title">
-        <div v-if="showIcon" class="image-icon">
+        <div v-if="showIcon" class="image-icon top-left">
             <i class="fas" :class="iconClass"></i>
         </div>
         <img @click="toggleSelect" :src="srcUrl" @error="showEmptyImage">
@@ -43,7 +43,6 @@ export default {
             return {
                 'image-grid__image--selected': this.selected || this.converted,
                 'image-grid__image--selectable': this.selectable,
-                'image-grid__image--fade': this.selectedFade,
                 'image-grid__image--small-icon': this.smallIcon,
             };
         },
