@@ -252,7 +252,7 @@
                      <span class="help-block">{{ $errors->first('kt_ignore_existing_label') }}</span>
                   @else
                       <span class="help-block">
-                          Ignore existing annotations label as labels for training proposals. By default, Existing annotations labels are used
+                          Ignore labels of existing annotations. Training proposals will have no labels if this is enabled.
                       </span>
                   @endif
               </div>

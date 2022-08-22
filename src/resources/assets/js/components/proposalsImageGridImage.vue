@@ -1,5 +1,5 @@
 <template>
-    <figure class="image-grid__image image-grid__image--annotation-candidate" :class="classObject" :title="title">
+    <figure class="image-grid__image image-grid__image--annotation-proposal" :class="classObject" :title="title">
         <div v-if="showIcon" class="image-icon">
             <i class="fas" :class="iconClass"></i>
         </div>
@@ -30,7 +30,7 @@ export default {
             return this.image.label;
         },
         labelExists(){
-          return this.image.label;
+          return !(this.label === null || typeof this.label === undefined);
         },
         selected() {
             return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);

@@ -147,11 +147,6 @@ class MaiaJobTest extends ModelTestCase
 
     public function testShouldIgnoreOwnExistingLabel()
     {
-        $this->model->params = ['training_data_method' => 'novelty_detection'];
-        $this->assertFalse($this->model->shouldIgnoreOwnExistingLabel());
-        $this->model->params = ['training_data_method' => 'knowledge_transfer'];
-        $this->assertFalse($this->model->shouldIgnoreOwnExistingLabel());
-        $this->model->params = ['training_data_method' => 'own_annotations'];
         $this->assertFalse($this->model->shouldIgnoreOwnExistingLabel());
         $this->model->params = [
             'training_data_method' => 'own_annotations',
@@ -162,11 +157,6 @@ class MaiaJobTest extends ModelTestCase
 
     public function testShouldIgnoreKnowledgeTransferLabel()
     {
-        $this->model->params = ['training_data_method' => 'novelty_detection'];
-        $this->assertFalse($this->model->shouldIgnoreKnowledgeTransferLabel());
-        $this->model->params = ['training_data_method' => 'knowledge_transfer'];
-        $this->assertFalse($this->model->shouldIgnoreKnowledgeTransferLabel());
-        $this->model->params = ['training_data_method' => 'own_annotations'];
         $this->assertFalse($this->model->shouldIgnoreKnowledgeTransferLabel());
         $this->model->params = [
             'training_data_method' => 'knowledge_transfer',

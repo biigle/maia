@@ -43,9 +43,9 @@ class MaiaJobController extends Controller
      *
      * @apiParam (Optional parameters for knowledge transfer) {Array} kt_restrict_labels Array of label IDs to restrict the annotations of the other volume to, which should be used as training proposals.
      *
-     * @apiParam (Optional parameters for existing annotations) {Boolean} oa_ignore_existing_label If True, Ignores the Existing Labels to be attached to the corresponding training proposals. By default, if "Show training proposals" box is checked then the Existing Labels are attached to the training proposal and is visible in "Select Training Proposal" section.
+     * @apiParam (Optional parameters for existing annotations) {Boolean} oa_ignore_existing_label If `true`, ignores the labels of existing annotations to be attached to the corresponding training proposals. Default is `false`.
      *
-     * @apiParam (Optional parameters for knowledge transfer) {Boolean} oa_ignore_existing_label If True, Ignores the Existing Labels to be attached to the corresponding training proposals. By default, the Existing Labels are attached to the training proposal and is visible in "Select Training Proposal" section.
+     * @apiParam (Optional parameters for knowledge transfer) {Boolean} kt_ignore_existing_label If `true`, ignores the labels of existing annotations to be attached to the corresponding training proposals. Default is `false`.
      *
      * @param StoreMaiaJob $request
      * @return \Illuminate\Http\Response

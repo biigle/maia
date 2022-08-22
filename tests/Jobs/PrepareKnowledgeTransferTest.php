@@ -11,6 +11,7 @@ use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
+use Biigle\Tests\VolumeTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Event;
 use Illuminate\Support\Facades\Notification;
@@ -122,73 +123,53 @@ class PrepareKnowledgeTransferTest extends TestCase
 
     public function testMultipleAnnotationLables()
     {
-      $Image1 = ImageTest::create([
-          'attrs' => ['metadata' => ['area' => 4]],
-      ]);
-
-      $Image2 = ImageTest::create([
+      $image = ImageTest::create([
           'attrs' => ['metadata' => ['area' => 1]],
       ]);
 
-      $ownAnnotation1 = ImageAnnotationTest::create([
-          'shape_id' => Shape::circleId(),
-          'points' => [1, 2, 3],
-          'image_id' => $Image1->id,
-      ]);
-
-      $ownAnnotation2 = ImageAnnotationTest::create([
-          'shape_id' => Shape::circleId(),
-          'points' => [1, 2, 3],
-          'image_id' => $Image1->id,
-      ]);
-
-      $ownAnnotationLabel1 = ImageAnnotationLabelTest::create([
-        'annotation_id' => $ownAnnotation1->id,
-      ]);
-
-      $ownAnnotationLabel2 = ImageAnnotationLabelTest::create([
-        'annotation_id' => $ownAnnotation2->id,
-      ]);
-
-      $otherAnnotation1 = ImageAnnotationTest::create([
+      $annotation1 = ImageAnnotationTest::create([
           'shape_id' => Shape::circleId(),
           'points' => [4, 5, 6],
-          'image_id' => $Image2->id,
+          'image_id' => $image->id,
       ]);
 
-      $otherAnnotation2 = ImageAnnotationTest::create([
+      $annotation2 = ImageAnnotationTest::create([
           'shape_id' => Shape::circleId(),
           'points' => [4, 5, 6],
-          'image_id' => $Image2->id,
+          'image_id' => $image->id,
       ]);
 
-      $otherAnnotationLabel1 = ImageAnnotationLabelTest::create([
-        'annotation_id' => $otherAnnotation1->id,
+      $annotationLabel1 = ImageAnnotationLabelTest::create([
+        'annotation_id' => $annotation1->id,
       ]);
 
-      $otherAnnotationLabel2 = ImageAnnotationLabelTest::create([
-        'annotation_id' => $otherAnnotation2->id,
+      $annotationLabel2 = ImageAnnotationLabelTest::create([
+        'annotation_id' => $annotation2->id,
       ]);
 
-      $otherAnnotationLabel3 = ImageAnnotationLabelTest::create([
-        'annotation_id' => $otherAnnotation2->id,
+      $annotationLabel3 = ImageAnnotationLabelTest::create([
+        'annotation_id' => $annotation2->id,
       ]);
+
+      $volume_id = ImageTest::create(['attrs' => ['metadata' => ['area' => 1]]])->volume_id;
 
       $job = MaiaJobTest::create([
-          'volume_id' => $Image1->volume_id,
+          'volume_id' => $volume_id,
           'params' => [
               'training_data_method' => 'area_knowledge_transfer',
-              'kt_volume_id' => $Image2->volume_id,
+              'kt_volume_id' => $image->volume_id,
           ],
       ]);
 
       (new PrepareKnowledgeTransfer($job))->handle();
       $this->assertEquals(2, $job->trainingProposals()->selected()->count());
 
-      $proposal = $job->trainingProposals()->first();
+      $proposals = $job->trainingProposals()->get();
 
-      $this->assertNotNull($proposal->label_id);
-      $this->assertEquals($otherAnnotationLabel2->label_id, $proposal->label_id);
+      $this->assertNotNull($proposals[0]->label_id);
+      $this->assertNotNull($proposals[1]->label_id);
+      $this->assertEquals($annotationLabel1->label_id, $proposals[0]->label_id);
+      $this->assertEquals($annotationLabel2->label_id, $proposals[1]->label_id);
     }
 
     public function testHandleAreaLaserpoints()
@@ -677,16 +658,16 @@ class PrepareKnowledgeTransferTest extends TestCase
         ]);
 
         $ia = ImageAnnotationTest::create([
-                'shape_id' => Shape::circleId(),
-                'points' => [1, 2, 3],
-                'image_id' => $otherImage->id,
-              ]);
+            'shape_id' => Shape::circleId(),
+            'points' => [1, 2, 3],
+            'image_id' => $otherImage->id,
+        ]);
 
         $ia2 = ImageAnnotationTest::create([
-                'shape_id' => Shape::circleId(),
-                'points' => [4, 5, 6],
-                'image_id' => $otherImage->id,
-              ]);
+            'shape_id' => Shape::circleId(),
+            'points' => [4, 5, 6],
+            'image_id' => $otherImage->id,
+        ]);
 
         $job = MaiaJobTest::create([
             'volume_id' => $ownImage->volume_id,
