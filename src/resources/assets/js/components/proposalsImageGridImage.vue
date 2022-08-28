@@ -29,8 +29,8 @@ export default {
         label() {
             return this.image.label;
         },
-        labelExists(){
-          return !(this.label === null || typeof this.label === undefined);
+        labelExists() {
+          return this.label != undefined;
         },
         selected() {
             return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);

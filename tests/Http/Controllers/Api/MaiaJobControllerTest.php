@@ -519,11 +519,8 @@ class MaiaJobControllerTest extends ApiTestCase
         ]);
 
         $this->project()->addVolumeId($volume->id);
-
-        ImageAnnotationLabelTest::create([
-            'annotation_id' => ImageAnnotationTest::create([
-              'image_id' => $image->id,
-            ])->id,
+        ImageAnnotationTest::create([
+          'image_id' => $image->id,
         ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params);
@@ -534,7 +531,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
     public function testStoreKnowledgeTransferRestrictLabels()
     {
-         $id = $this->volume()->id;
+        $id = $this->volume()->id;
         $this->beEditor();
         $volume = VolumeTest::create();
         ImageTest::create([

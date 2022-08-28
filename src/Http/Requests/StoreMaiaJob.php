@@ -150,8 +150,9 @@ class StoreMaiaJob extends FormRequest
     protected function hasNoKnowledgeTransferAnnotations()
     {
         $restrictLabels = $this->input('kt_restrict_labels', []);
+        $ignoreLabels = $this->input('kt_ignore_existing_label', false);
 
-        return !$this->getExistingAnnotationsQuery($this->input('kt_volume_id'), $restrictLabels)->exists();
+        return !$this->getExistingAnnotationsQuery($this->input('kt_volume_id'), $restrictLabels, $ignoreLabels)->exists();
     }
 
     /**
