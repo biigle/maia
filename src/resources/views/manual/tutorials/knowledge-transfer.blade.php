@@ -40,6 +40,16 @@
             Use the input field to select one or more labels. If present, only annotations with the chosen labels are used as training data for the MAIA job. If no labels are chosen, all annotations are used.
         </p>
 
+        <h4>Ignore existing labels</h4>
+
+        <p class="text-muted">
+            Off by default.
+        </p>
+
+        <p>
+            If checked, the labels of existing annotations will not be attached to the corresponding training proposals.
+        </p>
+
         <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>

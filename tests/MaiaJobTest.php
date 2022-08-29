@@ -144,4 +144,24 @@ class MaiaJobTest extends ModelTestCase
         ];
         $this->assertTrue($this->model->shouldShowTrainingProposals());
     }
+
+    public function testShouldIgnoreOwnExistingLabel()
+    {
+        $this->assertFalse($this->model->shouldIgnoreOwnExistingLabel());
+        $this->model->params = [
+            'training_data_method' => 'own_annotations',
+            'oa_ignore_existing_label' => true,
+        ];
+        $this->assertTrue($this->model->shouldIgnoreOwnExistingLabel());
+    }
+
+    public function testShouldIgnoreKnowledgeTransferLabel()
+    {
+        $this->assertFalse($this->model->shouldIgnoreKnowledgeTransferLabel());
+        $this->model->params = [
+            'training_data_method' => 'knowledge_transfer',
+            'kt_ignore_existing_label' => true,
+        ];
+        $this->assertTrue($this->model->shouldIgnoreKnowledgeTransferLabel());
+    }
 }

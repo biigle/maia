@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia;
 
+use Biigle\Label;
 use Biigle\Modules\Maia\Database\Factories\TrainingProposalFactory;
 
 class TrainingProposal extends MaiaAnnotation
@@ -12,6 +13,16 @@ class TrainingProposal extends MaiaAnnotation
      * @var string
      */
     protected $table = 'maia_training_proposals';
+
+    /**
+     * The label that has been (maybe) attached to this candidate.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function label()
+    {
+        return $this->belongsTo(Label::class);
+    }
 
     /**
      * The attributes that should be casted to native types.

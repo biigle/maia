@@ -61,8 +61,10 @@ class StoreMaiaJob extends FormRequest
             'oa_restrict_labels' => 'array',
             'oa_restrict_labels.*' => 'integer|exists:labels,id',
             'oa_show_training_proposals' => 'boolean',
+            'oa_ignore_existing_label' => 'boolean',
 
             'kt_restrict_labels.*' => 'integer|exists:labels,id',
+            'kt_ignore_existing_label' => 'boolean',
 
             'is_train_scheme' => 'required|array|min:1',
             'is_train_scheme.*' => 'array',
@@ -135,8 +137,9 @@ class StoreMaiaJob extends FormRequest
     protected function hasNoExistingAnnotations()
     {
         $restrictLabels = $this->input('oa_restrict_labels', []);
+        $ignoreLabels = $this->input('oa_ignore_existing_label', false);
 
-        return !$this->getExistingAnnotationsQuery($this->volume->id, $restrictLabels)->exists();
+        return !$this->getExistingAnnotationsQuery($this->volume->id, $restrictLabels, $ignoreLabels)->exists();
     }
 
     /**
@@ -147,8 +150,9 @@ class StoreMaiaJob extends FormRequest
     protected function hasNoKnowledgeTransferAnnotations()
     {
         $restrictLabels = $this->input('kt_restrict_labels', []);
+        $ignoreLabels = $this->input('kt_ignore_existing_label', false);
 
-        return !$this->getExistingAnnotationsQuery($this->input('kt_volume_id'), $restrictLabels)->exists();
+        return !$this->getExistingAnnotationsQuery($this->input('kt_volume_id'), $restrictLabels, $ignoreLabels)->exists();
     }
 
     /**

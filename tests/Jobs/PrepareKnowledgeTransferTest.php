@@ -11,6 +11,7 @@ use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;
+use Biigle\Tests\VolumeTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Event;
 use Illuminate\Support\Facades\Notification;
@@ -35,10 +36,18 @@ class PrepareKnowledgeTransferTest extends TestCase
             'image_id' => $ownImage->id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $ownAnnotation->id,
+        ]);
+
         $otherAnnotation = ImageAnnotationTest::create([
             'shape_id' => Shape::circleId(),
             'points' => [4, 5, 6],
             'image_id' => $otherImage->id,
+        ]);
+
+        $annotationLabel = ImageAnnotationLabelTest::create([
+          'annotation_id' => $otherAnnotation->id,
         ]);
 
         $job = MaiaJobTest::create([
@@ -58,6 +67,8 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
         $expect = [$otherImage->id => 0.25];
         $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
+        $this->assertNotNull($proposal->label_id);
+        $this->assertEquals($annotationLabel->label_id, $proposal->label_id);
     }
 
     public function testHandleArea()
@@ -76,10 +87,18 @@ class PrepareKnowledgeTransferTest extends TestCase
             'image_id' => $ownImage->id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $ownAnnotation->id,
+        ]);
+
         $otherAnnotation = ImageAnnotationTest::create([
             'shape_id' => Shape::circleId(),
             'points' => [4, 5, 6],
             'image_id' => $otherImage->id,
+        ]);
+
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $otherAnnotation->id,
         ]);
 
         $job = MaiaJobTest::create([
@@ -96,9 +115,61 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($otherAnnotation->points, $proposal->points);
+        $this->assertNotNull($proposal->label_id);
         $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
         $expect = [$otherImage->id => 0.25];
         $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
+    }
+
+    public function testMultipleAnnotationLables()
+    {
+      $image = ImageTest::create([
+          'attrs' => ['metadata' => ['area' => 1]],
+      ]);
+
+      $annotation1 = ImageAnnotationTest::create([
+          'shape_id' => Shape::circleId(),
+          'points' => [4, 5, 6],
+          'image_id' => $image->id,
+      ]);
+
+      $annotation2 = ImageAnnotationTest::create([
+          'shape_id' => Shape::circleId(),
+          'points' => [4, 5, 6],
+          'image_id' => $image->id,
+      ]);
+
+      $annotationLabel1 = ImageAnnotationLabelTest::create([
+        'annotation_id' => $annotation1->id,
+      ]);
+
+      $annotationLabel2 = ImageAnnotationLabelTest::create([
+        'annotation_id' => $annotation2->id,
+      ]);
+
+      $annotationLabel3 = ImageAnnotationLabelTest::create([
+        'annotation_id' => $annotation2->id,
+      ]);
+
+      $volume_id = ImageTest::create(['attrs' => ['metadata' => ['area' => 1]]])->volume_id;
+
+      $job = MaiaJobTest::create([
+          'volume_id' => $volume_id,
+          'params' => [
+              'training_data_method' => 'area_knowledge_transfer',
+              'kt_volume_id' => $image->volume_id,
+          ],
+      ]);
+
+      (new PrepareKnowledgeTransfer($job))->handle();
+      $this->assertEquals(2, $job->trainingProposals()->selected()->count());
+
+      $proposals = $job->trainingProposals()->get();
+
+      $this->assertNotNull($proposals[0]->label_id);
+      $this->assertNotNull($proposals[1]->label_id);
+      $this->assertEquals($annotationLabel1->label_id, $proposals[0]->label_id);
+      $this->assertEquals($annotationLabel2->label_id, $proposals[1]->label_id);
     }
 
     public function testHandleAreaLaserpoints()
@@ -117,10 +188,18 @@ class PrepareKnowledgeTransferTest extends TestCase
             'image_id' => $ownImage->id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $ownAnnotation->id,
+        ]);
+
         $otherAnnotation = ImageAnnotationTest::create([
             'shape_id' => Shape::circleId(),
             'points' => [4, 5, 6],
             'image_id' => $otherImage->id,
+        ]);
+
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $otherAnnotation->id,
         ]);
 
         $job = MaiaJobTest::create([
@@ -153,10 +232,18 @@ class PrepareKnowledgeTransferTest extends TestCase
             'image_id' => $otherImage->id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a1->id,
+        ]);
+
         $a2 = ImageAnnotationTest::create([
             'shape_id' => Shape::rectangleId(),
             'points' => [10, 10, 100, 10, 100, 100, 10, 100],
             'image_id' => $a1->image_id,
+        ]);
+
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a2->id,
         ]);
 
         $a3 = ImageAnnotationTest::create([
@@ -165,16 +252,28 @@ class PrepareKnowledgeTransferTest extends TestCase
             'image_id' => $a1->image_id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a3->id,
+        ]);
+
         $a4 = ImageAnnotationTest::create([
             'shape_id' => Shape::lineId(),
             'points' => [10, 10, 20, 20],
             'image_id' => $a1->image_id,
         ]);
 
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a4->id,
+        ]);
+
         $a5 = ImageAnnotationTest::create([
             'shape_id' => Shape::polygonId(),
             'points' => [10, 10, 20, 20, 0, 20],
             'image_id' => $a1->image_id,
+        ]);
+
+        ImageAnnotationLabelTest::create([
+          'annotation_id' => $a5->id,
         ]);
 
         $job = MaiaJobTest::create([
@@ -543,5 +642,46 @@ class PrepareKnowledgeTransferTest extends TestCase
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals([1, 2, 3], $proposal->points);
+        $this->assertEquals($ia->label_id, $proposal->label_id);
+    }
+
+
+
+    public function testHandleIgnoreLabels()
+    {
+        $ownImage = ImageTest::create([
+            'attrs' => ['metadata' => ['distance_to_ground' => 4]],
+        ]);
+
+        $otherImage = ImageTest::create([
+            'attrs' => ['metadata' => ['distance_to_ground' => 1]],
+        ]);
+
+        $ia = ImageAnnotationTest::create([
+            'shape_id' => Shape::circleId(),
+            'points' => [1, 2, 3],
+            'image_id' => $otherImage->id,
+        ]);
+
+        $ia2 = ImageAnnotationTest::create([
+            'shape_id' => Shape::circleId(),
+            'points' => [4, 5, 6],
+            'image_id' => $otherImage->id,
+        ]);
+
+        $job = MaiaJobTest::create([
+            'volume_id' => $ownImage->volume_id,
+            'params' => [
+                'training_data_method' => 'knowledge_transfer',
+                'kt_volume_id' => $otherImage->volume_id,
+                'kt_ignore_existing_label' => true,
+            ],
+        ]);
+
+        (new PrepareKnowledgeTransfer($job))->handle();
+        $this->assertEquals(2, $job->trainingProposals()->get()->count());
+        $proposal = $job->trainingProposals()->get()->first();
+        $this->assertEquals([1,2,3], $proposal->points);
+        $this->assertNull($proposal->label_id);
     }
 }

@@ -9,6 +9,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
+use Biigle\Tests\LabelTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Event;
 use Queue;
@@ -17,6 +18,32 @@ use Response;
 class TrainingProposalControllerTest extends ApiTestCase
 {
     public function testIndex()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $id = $job->id;
+
+        $label = LabelTest::create();
+
+        $annotation = TrainingProposalTest::create(['job_id' => $id, 'label_id' => $label->id]);
+        AnnotationCandidateTest::create(['job_id' => $id]);
+
+        $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/training-proposals");
+        $this->beGuest();
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")->assertStatus(403);
+        $this->beEditor();
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")
+             ->assertStatus(200)
+             ->assertExactJson([[
+                  'id' => $annotation->id,
+                  'selected' => $annotation->selected,
+                  'image_id' => $annotation->image_id,
+                  'uuid' => $annotation->image->uuid,
+                  'label_id' => $label->id,
+                  'label' => $label->makeHidden('parent_id', 'label_tree_id')->toArray(),
+              ]]);
+    }
+
+    public function testIndexLabelNull()
     {
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
         $id = $job->id;
@@ -37,7 +64,9 @@ class TrainingProposalControllerTest extends ApiTestCase
                 'selected' => $annotation->selected,
                 'image_id' => $annotation->image_id,
                 'uuid' => $annotation->image->uuid,
-            ]]);
+                'label_id' => $annotation->label_id,
+                'label' => null,
+              ]]);
     }
 
     public function testSubmit()

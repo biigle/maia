@@ -246,14 +246,17 @@ class MaiaJobControllerTest extends ApiTestCase
             // No existing annotations.
             ->assertStatus(422);
 
-        ImageAnnotationTest::create([
-            'image_id' => ImageTest::create([
-                'volume_id' => $this->volume()->id,
-                'filename' => 'abc.jpg',
-                'attrs' => [
-                    'width' => 512,
-                    'height' => 512,
-                ],
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => ImageTest::create([
+                    'volume_id' => $this->volume()->id,
+                    'filename' => 'abc.jpg',
+                    'attrs' => [
+                        'width' => 512,
+                        'height' => 512,
+                    ],
+                ])->id,
             ])->id,
         ]);
 
@@ -262,6 +265,7 @@ class MaiaJobControllerTest extends ApiTestCase
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
         $this->assertFalse($job->shouldShowTrainingProposals());
+        $this->assertFalse($job->shouldIgnoreOwnExistingLabel());
         $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
     }
 
@@ -312,6 +316,7 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertArrayHasKey('oa_restrict_labels', $job->params);
+        $this->assertFalse($job->shouldIgnoreOwnExistingLabel());
         $this->assertEquals([$this->labelChild()->id], $job->params['oa_restrict_labels']);
     }
 
@@ -328,14 +333,17 @@ class MaiaJobControllerTest extends ApiTestCase
             ],
         ];
 
-        ImageAnnotationTest::create([
-            'image_id' => ImageTest::create([
-                'volume_id' => $this->volume()->id,
-                'filename' => 'abc.jpg',
-                'attrs' => [
-                    'width' => 512,
-                    'height' => 512,
-                ],
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => ImageTest::create([
+                    'volume_id' => $this->volume()->id,
+                    'filename' => 'abc.jpg',
+                    'attrs' => [
+                        'width' => 512,
+                        'height' => 512,
+                    ],
+                ])->id,
             ])->id,
         ]);
 
@@ -349,8 +357,40 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertSuccessful();
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
+        $this->assertFalse($job->shouldIgnoreOwnExistingLabel());
         $this->assertTrue($job->shouldShowTrainingProposals());
         $this->assertEquals(State::noveltyDetectionId(), $job->state_id);
+    }
+
+    public function testStoreUseExistingAnnotationsIgnoreLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'training_data_method' => 'own_annotations',
+            'oa_show_training_proposals' => true,
+            'oa_ignore_existing_label' => true,
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
+            ],
+        ];
+
+        ImageAnnotationTest::create([
+          'image_id' => ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'width' => 512,
+                'height' => 512,
+            ],
+          ])->id,
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+             ->assertSuccessful();
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldIgnoreOwnExistingLabel());
     }
 
     public function testStoreNdClustersTooFewImages()
@@ -424,16 +464,69 @@ class MaiaJobControllerTest extends ApiTestCase
             // No annotations in the volume.
             ->assertStatus(422);
 
-        ImageAnnotationTest::create(['image_id' => $image->id]);
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+              'image_id' => $image->id,
+            ])->id,
+        ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertFalse($job->shouldIgnoreKnowledgeTransferLabel());
         $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
+    }
+
+    public function testStoreKnowledgeTransferIgnoreLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $params = [
+            'training_data_method' => 'knowledge_transfer',
+            'kt_ignore_existing_label' => 'abc',
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+        ];
+
+        $volume = VolumeTest::create();
+        $params['kt_volume_id'] = $volume->id;
+        $params['kt_ignore_existing_label'] = true;
+
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'metadata' => ['distance_to_ground' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+
+        $image = ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'metadata' => ['distance_to_ground' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+
+        $this->project()->addVolumeId($volume->id);
+        ImageAnnotationTest::create([
+          'image_id' => $image->id,
+        ]);
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params);
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldIgnoreKnowledgeTransferLabel());
     }
 
     public function testStoreKnowledgeTransferRestrictLabels()
@@ -498,6 +591,65 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertFalse($job->shouldIgnoreKnowledgeTransferLabel());
+        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertArrayHasKey('kt_volume_id', $job->params);
+        $this->assertEquals($volume->id, $job->params['kt_volume_id']);
+        $this->assertArrayHasKey('kt_restrict_labels', $job->params);
+        $this->assertEquals([$ia->label_id], $job->params['kt_restrict_labels']);
+    }
+
+    public function testStoreKnowledgeTransferIgnoreLabelsAndRestrictLabels()
+    {
+        $id = $this->volume()->id;
+        $this->beEditor();
+        $volume = VolumeTest::create();
+
+        ImageTest::create([
+            'volume_id' => $this->volume()->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'metadata' => ['distance_to_ground' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+
+        $image = ImageTest::create([
+            'volume_id' => $volume->id,
+            'filename' => 'abc.jpg',
+            'attrs' => [
+                'metadata' => ['distance_to_ground' => 1],
+                'width' => 512,
+                'height' => 512,
+            ],
+        ]);
+
+        $this->project()->addVolumeId($volume->id);
+
+        $ia = ImageAnnotationLabelTest::create([
+            'annotation_id' => ImageAnnotationTest::create([
+                'image_id' => $image->id,
+            ])->id,
+        ]);
+
+        $params = [
+            'kt_volume_id' => $volume->id,
+            'kt_restrict_labels' => [999],
+            'training_data_method' => 'knowledge_transfer',
+            'kt_ignore_existing_label' => true,
+            'kt_restrict_labels' => [$ia->label_id],
+            'is_train_scheme' => [
+                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+        ];
+
+        $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
+            ->assertSuccessful();
+
+        $job = MaiaJob::first();
+        $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertTrue($job->shouldIgnoreKnowledgeTransferLabel());
         $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
@@ -567,13 +719,19 @@ class MaiaJobControllerTest extends ApiTestCase
             // No annotations in the volume.
             ->assertStatus(422);
 
-        ImageAnnotationTest::create(['image_id' => $image->id]);
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+              'image_id' => $image->id,
+            ])->id,
+        ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertFalse($job->shouldIgnoreKnowledgeTransferLabel());
         $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
@@ -614,7 +772,12 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $this->project()->addVolumeId($volume->id);
 
-        ImageAnnotationTest::create(['image_id' => $image->id]);
+        ImageAnnotationLabelTest::create([
+            'label_id' => $this->labelChild()->id,
+            'annotation_id' => ImageAnnotationTest::create([
+              'image_id' => $image->id,
+            ])->id,
+        ]);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             ->assertSuccessful();
@@ -682,12 +845,14 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
+        $this->assertFalse($job->shouldIgnoreKnowledgeTransferLabel());
         $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
         $this->assertArrayHasKey('kt_restrict_labels', $job->params);
         $this->assertEquals([$ia->label_id], $job->params['kt_restrict_labels']);
     }
+
 
     public function testDestroy()
     {

@@ -37,6 +37,16 @@
             Show the existing annotations as selectable training proposals before continuing to the instance segmentation stage. This allows you to select only a subset of the existing annotations as training data (regardless their label).
         </p>
 
+        <h4>Ignore existing labels</h4>
+
+        <p class="text-muted">
+            Off by default.
+        </p>
+
+        <p>
+             If checked, the labels of existing annotations will not be attached to the corresponding training proposals.
+        </p>
+
         <h3>Further reading</h3>
         <ul>
             <li><a href="{{route('manual-tutorials', ['maia', 'about'])}}">An introduction to the Machine Learning Assisted Image Annotation method (MAIA).</a></li>
