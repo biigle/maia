@@ -15,7 +15,7 @@ trait QueriesExistingAnnotations
      */
     protected function getExistingAnnotationsQuery($volumeId, $restrictLabels = [], $ignoreLabels = false)
     {
-        $includeImageAnnotationLabel = (!$ignoreLabels or !empty($restrictLabels));
+        $includeImageAnnotationLabel = !$ignoreLabels || !empty($restrictLabels);
 
         return ImageAnnotation::join('images', 'image_annotations.image_id', '=', 'images.id')
             ->where('images.volume_id', $volumeId)

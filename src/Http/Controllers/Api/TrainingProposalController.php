@@ -51,7 +51,7 @@ class TrainingProposalController extends Controller
                 'maia_training_proposals.label_id',
             )
             ->with(["label" => function($query){
-              $query->select("id", "name", "color", "label_tree_id");
+              $query->select("id", "name", "color");
             }])
             ->orderBy('score', 'desc')
             ->get()

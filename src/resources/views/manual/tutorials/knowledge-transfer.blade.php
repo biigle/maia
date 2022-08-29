@@ -40,14 +40,14 @@
             Use the input field to select one or more labels. If present, only annotations with the chosen labels are used as training data for the MAIA job. If no labels are chosen, all annotations are used.
         </p>
 
-        <h4>Ignore Existing Labels</h4>
+        <h4>Ignore existing labels</h4>
 
         <p class="text-muted">
             Off by default.
         </p>
 
         <p>
-            Ignores the Existing Labels to be attached to the corresponding training proposals. By default, the Existing Labels are attached to the training proposal and is visible in "Select Training Proposal" section.
+            If checked, the labels of existing annotations will not be attached to the corresponding training proposals.
         </p>
 
         <h3>Further reading</h3>

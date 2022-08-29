@@ -106,7 +106,7 @@ abstract class PrepareAnnotationsJob extends Job
                 'points' => $this->convertAnnotationPointsToCircle($annotation),
                 'image_id' => $annotation->image_id,
                 'shape_id' => Shape::circleId(),
-                'label_id' => $annotation->label_id ?? Null,
+                'label_id' => $annotation->label_id ?? null,
                 'job_id' => $this->job->id,
                 // All these proposals should be taken for instance segmentation unless
                 // the user chose to review them as training proposals first.

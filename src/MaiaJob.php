@@ -204,7 +204,7 @@ class MaiaJob extends Model
      */
     public function shouldIgnoreOwnExistingLabel()
     {
-        return $this->getJsonAttr('params.oa_ignore_existing_label') || $this->getJsonAttr('params.oa_ignore_existing_label', false);
+        return $this->getJsonAttr('params.oa_ignore_existing_label', false);
     }
 
     /**
@@ -214,7 +214,7 @@ class MaiaJob extends Model
      */
     public function shouldIgnoreKnowledgeTransferLabel()
     {
-        return $this->getJsonAttr('params.kt_ignore_existing_label') || $this->getJsonAttr('params.kt_ignore_existing_label', false);
+        return $this->getJsonAttr('params.kt_ignore_existing_label', false);
     }
 
     /**

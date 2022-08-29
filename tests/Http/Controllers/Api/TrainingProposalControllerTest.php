@@ -34,41 +34,13 @@ class TrainingProposalControllerTest extends ApiTestCase
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")
              ->assertStatus(200)
              ->assertExactJson([[
-                'id' => $annotation->id,
-                'selected' => $annotation->selected,
-                'image_id' => $annotation->image_id,
-                'uuid' => $annotation->image->uuid,
-                'label_id' => $label->id,
-                'label' => $label->makeHidden('parent_id')->toArray(),
+                  'id' => $annotation->id,
+                  'selected' => $annotation->selected,
+                  'image_id' => $annotation->image_id,
+                  'uuid' => $annotation->image->uuid,
+                  'label_id' => $label->id,
+                  'label' => $label->makeHidden('parent_id', 'label_tree_id')->toArray(),
               ]]);
-    }
-
-    public function testIndexWithIgnoreLabels()
-    {
-        $job = MaiaJobTest::create([
-                'volume_id' => $this->volume()->id,
-                'params' => [
-                  'training_data_method' => 'own_annotations',
-                  'oa_ignore_existing_label' => true,
-                ],
-              ]);
-        $id = $job->id;
-
-        $label = LabelTest::create();
-
-        $annotation = TrainingProposalTest::create(['job_id' => $id,]);
-        AnnotationCandidateTest::create(['job_id' => $id]);
-
-        $this->beEditor();
-        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals")
-             ->assertExactJson([[
-                 'id' => $annotation->id,
-                 'selected' => $annotation->selected,
-                 'image_id' => $annotation->image_id,
-                 'uuid' => $annotation->image->uuid,
-                 'label_id' => null,
-                 'label'=> null,
-                ]]);
     }
 
     public function testIndexLabelNull()
@@ -89,12 +61,11 @@ class TrainingProposalControllerTest extends ApiTestCase
             ->assertStatus(200)
             ->assertExactJson([[
                 'id' => $annotation->id,
-                'label' => Null,
                 'selected' => $annotation->selected,
                 'image_id' => $annotation->image_id,
                 'uuid' => $annotation->image->uuid,
-                'label_id'=>$annotation->label_id,
-                'label'=>Null,
+                'label_id' => $annotation->label_id,
+                'label' => null,
               ]]);
     }
 
