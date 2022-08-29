@@ -39,7 +39,7 @@ class Image(object):
 
     def _get_resized_image(self):
         img = PilImage.open(self.path)
-        return img.resize((256, 256), PilImage.BILINEAR)
+        return img.convert('RGB').resize((256, 256), PilImage.BILINEAR)
 
     def extract_pca_features(self):
         return np.array(self._get_resized_image()).flatten()
