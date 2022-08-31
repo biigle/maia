@@ -43,11 +43,9 @@ class Dataset(mrcnn.utils.Dataset):
         data = np.load(file, allow_pickle=True)
         classes = []
         masks = []
-        for mask in data['masks']:
-            # Only one class "Interesting" is supported for now.
-            source_class_id = image_index + 1
-            if source_class_id not in self.ignore_classes:
-                classes.append(self.map_source_class_id('{}.{}'.format(self.name, source_class_id)))
+        for mask, class_id in zip(data['masks'], data['classes']):
+            if class_id not in self.ignore_classes:
+                classes.append(self.map_source_class_id('{}.{}'.format(self.name, class_id)))
                 masks.append(mask)
 
         if len(classes) == 0:
