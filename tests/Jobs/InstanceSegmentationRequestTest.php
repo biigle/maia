@@ -40,11 +40,11 @@ class InstanceSegmentationRequestTest extends TestCase
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $image2 = ImageTest::create(['volume_id' => $job->volume_id, 'filename' => 'a']);
-        $a = ImageAnnotationTest::create(['image_id'=>$image->id, 'shape_id' => Shape::pointId(),]);
+        $a = ImageAnnotationTest::create(['image_id'=>$image->id, 'shape_id' => Shape::pointId()]);
         $l = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
-        $a2 = ImageAnnotationTest::create(['image_id'=>$image2->id, 'shape_id' => Shape::pointId(),]);
+        $a2 = ImageAnnotationTest::create(['image_id'=>$image2->id, 'shape_id' => Shape::pointId()]);
         $l2 = ImageAnnotationLabelTest::create(['annotation_id' => $a2->id]);
-        $a3 = ImageAnnotationTest::create(['image_id'=>$image2->id, 'shape_id' => Shape::pointId(),]);
+        $a3 = ImageAnnotationTest::create(['image_id'=>$image2->id, 'shape_id' => Shape::pointId()]);
         $l3 = ImageAnnotationLabelTest::create(['annotation_id' => $a3->id]);
         $trainingProposal = TrainingProposalTest::create([
             'job_id' => $job->id,
@@ -82,7 +82,10 @@ class InstanceSegmentationRequestTest extends TestCase
             'available_bytes' => intval(8E+9),
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
-            'training_proposals' => [$image->id => [[11, 20, 30, $trainingProposal->label_id]], $image2->id =>[[14, 22, 33, $trainingProposal2->label_id], [15, 30, 20, $trainingProposal3->label_id]]],
+            'training_proposals' => [ $image->id => [[11, 20, 30, $trainingProposal->label_id]],
+                                      $image2->id =>[[14, 22, 33, $trainingProposal2->label_id],
+                                      [15, 30, 20, $trainingProposal3->label_id]]
+                                    ],
             'output_path' => "{$tmpDir}/output-dataset.json",
         ];
 
@@ -105,42 +108,31 @@ class InstanceSegmentationRequestTest extends TestCase
         try{
             $request = new IsJobStub($job);
             $annotations = $request->handle();
-            $this->assertTrue(File::isDirectory($tmpDir));
 
-            $this->assertTrue(File::exists($datasetInputJsonPath));
             $inputJson = json_decode(File::get($datasetInputJsonPath), true);
-            $this->assertArrayHasKey('images', $inputJson);
-            $this->assertArrayHasKey($image->id, $inputJson['images']);
-            $this->assertArrayHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertEquals($expectDatasetJson, $inputJson);
             $this->assertStringContainsString("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
 
-            $this->assertTrue(File::exists($trainingInputJsonPath));
             $inputJson = json_decode(File::get($trainingInputJsonPath), true);
             $this->assertEquals($expectTrainingJson, $inputJson);
             $this->assertStringContainsString("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
 
-            $this->assertTrue(File::exists($inferenceInputJsonPath));
             $inputJson = json_decode(File::get($inferenceInputJsonPath), true);
-            $this->assertArrayHasKey('images', $inputJson);
-            $this->assertArrayHasKey($image->id, $inputJson['images']);
-            $this->assertArrayHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertEquals($expectInferenceJson, $inputJson);
+
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
             Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $image, $image2, $trainingProposal, $trainingProposal2, $trainingProposal3) {
                 return $response->jobId === $job->id
                     && in_array([$image->id, 11, 20, 30, 123, $trainingProposal->label_id], $response->annotations) && in_array([$image2->id, 14, 22, 33, 123, $trainingProposal2->label_id], $response->annotations) && in_array([$image2->id, 15, 30, 20, 123, $trainingProposal3->label_id], $response->annotations);
             });
-
-            $this->assertTrue($request->cleanup);
         } finally {
             File::deleteDirectory($tmpDir);
         }
     }
-    public function testHandleTrainingProposalWithoutLabelID()
+    public function testHandleTrainingProposalWithAndWithoutLabelID()
     {
         Queue::fake();
         FileCache::fake();
@@ -222,27 +214,17 @@ class InstanceSegmentationRequestTest extends TestCase
         try{
             $request = new IsJobStub($job);
             $annotations = $request->handle();
-            $this->assertTrue(File::isDirectory($tmpDir));
 
-            $this->assertTrue(File::exists($datasetInputJsonPath));
             $inputJson = json_decode(File::get($datasetInputJsonPath), true);
-            $this->assertArrayHasKey('images', $inputJson);
-            $this->assertArrayHasKey($image->id, $inputJson['images']);
-            $this->assertArrayHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertEquals($expectDatasetJson, $inputJson);
             $this->assertStringContainsString("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
 
-            $this->assertTrue(File::exists($trainingInputJsonPath));
             $inputJson = json_decode(File::get($trainingInputJsonPath), true);
             $this->assertEquals($expectTrainingJson, $inputJson);
             $this->assertStringContainsString("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
 
-            $this->assertTrue(File::exists($inferenceInputJsonPath));
             $inputJson = json_decode(File::get($inferenceInputJsonPath), true);
-            $this->assertArrayHasKey('images', $inputJson);
-            $this->assertArrayHasKey($image->id, $inputJson['images']);
-            $this->assertArrayHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertEquals($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
@@ -251,8 +233,6 @@ class InstanceSegmentationRequestTest extends TestCase
                 return $response->jobId === $job->id
                     && in_array([$image->id, 11, 20, 30, 123, $trainingProposal->label_id], $response->annotations) && in_array([$image2->id, 14, 22, 33, 123, $trainingProposal2->label_id], $response->annotations) && in_array([$image2->id, 15, 30, 20, 123], $response->annotations);
             });
-
-            $this->assertTrue($request->cleanup);
         } finally {
             File::deleteDirectory($tmpDir);
         }
