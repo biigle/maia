@@ -111,7 +111,7 @@ class InstanceSegmentationRequest extends JobRequest
                     // way, we parse the coordinates here instead of in the Python
                     // script.
                     //[point1, point2, point3, label_id]
-                    $result = array_map(function($value){return intval(round($value));}, $proposal->points);
+                    $result = array_map(fn($value) => intval(round($value)), $proposal->points);
                     if(isset($proposal->label_id)){
                       array_push($result, $proposal->label_id);
                     }

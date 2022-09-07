@@ -51,8 +51,6 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $label = LabelTest::create(["label_source_id"=>null, "source_id" => null]);
         $annotation = AnnotationCandidateTest::create(['job_id' => $id, 'label_id' => $label->id]);
 
-        TrainingProposalTest::create(['job_id' => $id]);
-
         $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/annotation-candidates");
 
         $this->beGuest();
@@ -60,7 +58,6 @@ class AnnotationCandidateControllerTest extends ApiTestCase
 
         $this->beEditor();
         $label = $label->toArray();
-        ksort($label);
         $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates")
             ->assertStatus(200)
             ->assertExactJson([[
