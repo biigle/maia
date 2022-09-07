@@ -75,7 +75,6 @@ class InstanceSegmentationRequest extends JobRequest
 
             $annotations = $this->parseAnnotations($images);
             $this->dispatchResponse($annotations);
-            return $annotations;
         } finally {
             $this->cleanup();
         }

@@ -94,7 +94,7 @@ class DatasetGenerator(object):
                 proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
 
             # Swap dict keys and values. Values are unique because they use the label IDs.
-            classes_dict = d{v: k for k, v in classes_dict.items()}
+            classes_dict = {v: k for k, v in classes_dict.items()}
             masks = []
             classes = []
 
