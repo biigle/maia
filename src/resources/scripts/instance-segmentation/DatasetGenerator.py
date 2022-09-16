@@ -155,9 +155,11 @@ class DatasetGenerator(object):
         return image_crop, mask_crops
 
     def save_mask(self, masks, filename, path, classes):
-        mask_store = [mask for mask in masks if np.any(mask)]
+        combined = [(mask, class_id) for mask, class_id in zip(masks, classes) if np.any(mask)]
+        mask_store = [mask for mask, class_id in combined]
+        class_store = [class_id for mask, class_id in combined]
         mask_file = '{}.npz'.format(filename)
-        np.savez_compressed(os.path.join(path, mask_file), masks=mask_store, classes=classes)
+        np.savez_compressed(os.path.join(path, mask_file), masks=mask_store, classes=class_store)
 
         return mask_file
 
