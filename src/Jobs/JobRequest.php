@@ -207,7 +207,6 @@ class JobRequest extends Job implements ShouldQueue
         if (($isNull / count($images)) > 0.1) {
             throw new Exception('Unable to parse more than 10 % of the output JSON files.');
         }
-
         return $annotations;
     }
 
@@ -232,11 +231,17 @@ class JobRequest extends Job implements ShouldQueue
         if (is_array($annotations)) {
             foreach ($annotations as &$annotation) {
                 array_unshift($annotation, $image->getId());
+                if(isset($annotation[5])){
+                  if($annotation[5] == "Interesting"){
+                    unset($annotation[5]);
+                  }else{
+                    $annotation[5] = intval($annotation[5]);
+                  }
+                }
             }
         }
-
         // Each annotation is an array:
-        // [$imageId, $xCenter, $yCenter, $radius, $score]
+        // [$imageId, $xCenter, $yCenter, $radius, $score, $class_id]
         return $annotations;
     }
 }

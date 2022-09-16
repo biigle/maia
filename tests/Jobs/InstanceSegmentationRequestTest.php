@@ -5,7 +5,11 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
 use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
+use Biigle\Tests\ImageAnnotationTest;
+use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageTest;
+use Biigle\Tests\LabelTest;
+use Biigle\Shape;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Exception;
@@ -121,6 +125,74 @@ class InstanceSegmentationRequestTest extends TestCase
             File::deleteDirectory($tmpDir);
         }
     }
+
+    public function testHandleTrainingProposalWithLabelId()
+    {
+        Queue::fake();
+        FileCache::fake();
+        config([
+            'maia.available_bytes' => 8E+9,
+            'maia.max_workers' => 2,
+        ]);
+
+        $params = [
+            'is_train_scheme' => [
+                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
+            ],
+            'available_bytes' => 8E+9,
+            'max_workers' => 2,
+        ];
+
+        $job = MaiaJobTest::create(['params' => $params]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+        $image2 = ImageTest::create(['volume_id' => $job->volume_id, 'filename' => 'a']);
+
+        $trainingProposal = TrainingProposalTest::create([
+            'job_id' => $job->id,
+            'image_id' => $image->id,
+            'points' => [10.5, 20.4, 30],
+            'selected' => true,
+            'label_id' => LabelTest::create()->id,
+        ]);
+
+        $trainingProposal2 = TrainingProposalTest::create([
+            'job_id' => $job->id,
+            'image_id' => $image->id,
+            'points' => [13.5, 22.4, 33.1],
+            'selected' => true,
+        ]);
+
+        config(['maia.tmp_dir' => '/tmp']);
+        $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
+        $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
+        $datasetOutputJsonPath = "{$tmpDir}/output-dataset.json";
+
+        $expectDatasetJson = [
+            'available_bytes' => intval(8E+9),
+            'max_workers' => 2,
+            'tmp_dir' => $tmpDir,
+            'training_proposals' => [
+                $image->id => [
+                    [11, 20, 30, $trainingProposal->label_id],
+                    [14, 22, 33],
+                ],
+            ],
+            'output_path' => "{$tmpDir}/output-dataset.json",
+        ];
+
+        try {
+            $request = new IsJobStub($job);
+            $annotations = $request->handle();
+
+            $inputJson = json_decode(File::get($datasetInputJsonPath), true);
+            unset($inputJson['images']);
+            $this->assertEquals($expectDatasetJson, $inputJson);
+            $this->assertStringContainsString("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
 
     public function testHandleKnowledgeTransfer()
     {

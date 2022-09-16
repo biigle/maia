@@ -29,11 +29,23 @@ class DatasetGenerator(object):
 
     def generate(self):
         self.ensure_train_masks_dirs()
+
+        props = [prop for trainingprops in self.training_proposals.values() for prop in trainingprops]
+        classes = {
+            1: 'Interesting',
+        }
+
+        i = 2
+        for proposal in props:
+            value = f"{proposal[-1]}"
+            if len(proposal) == 4 and value not in classes.values():
+                classes[i] = value
+                i += 1
+
         executor = ThreadPoolExecutor(max_workers=self.max_workers)
         jobs = []
-
         for imageId, proposals in self.training_proposals.items():
-            jobs.append(executor.submit(self.process_image, imageId, proposals))
+            jobs.append(executor.submit(self.process_image, imageId, proposals, classes))
 
         images = []
         masks = []
@@ -52,6 +64,7 @@ class DatasetGenerator(object):
         # Discard additional channels (e.g. alpha)
         mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()[:3]
 
+
         return {
             'training_images_path': self.training_images_path,
             'training_masks_path': self.training_masks_path,
@@ -61,9 +74,7 @@ class DatasetGenerator(object):
             'crop_dimension': self.crop_dimension,
             # For now all datasets are binary, i.e. only the classes "Background" and
             # "Interesting" are supported.
-            'classes': {
-                1: 'Interesting',
-            }
+            'classes': classes
         }
 
     def ensure_train_masks_dirs(self):
@@ -73,9 +84,25 @@ class DatasetGenerator(object):
         if not os.path.exists(self.training_masks_path):
            os.makedirs(self.training_masks_path)
 
-    def process_image(self, imageId, proposals):
+    def process_image(self, imageId, proposals, classes_dict):
         try:
             image = VipsImage.new_from_file(self.images[imageId])
+
+            # Swap dict keys and values. Values are unique because they use the label IDs.
+            classes_dict = {v: k for k, v in classes_dict.items()}
+            classes = []
+
+            for proposal in proposals:
+                if len(proposal) == 4:
+                    # This is the ID of the class that is assigned in generate() above.
+                    classes.append(classes_dict[f"{proposal[3]}"])
+                else:
+                    # The ID of the interesting class is always 1.
+                  classes.append(1)
+
+            # Remove the class IDs (if they exist) because they would be "scaled" as well below.
+            # They were only needed to determine the classes list above.
+            proposals = [p[:3] for p in proposals]
 
             if bool(self.scale_factors) != False:
                 scale_factor = self.scale_factors[imageId]
@@ -83,6 +110,7 @@ class DatasetGenerator(object):
                 proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
 
             masks = []
+
             for proposal in proposals:
                 mask = np.zeros((image.height, image.width), dtype=np.uint8)
                 cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], 1, -1)
@@ -95,7 +123,7 @@ class DatasetGenerator(object):
             for i, proposal in enumerate(proposals):
                 image_file = '{}_{}.jpg'.format(imageId, i)
                 image_crop, mask_crops = self.generate_crop(image, masks, proposal)
-                mask_file = self.save_mask(mask_crops, image_file, self.training_masks_path)
+                mask_file = self.save_mask(mask_crops, image_file, self.training_masks_path, classes)
                 image_crop.write_to_file(os.path.join(self.training_images_path, image_file), strip=True, Q=95)
                 image_paths.append(image_file)
                 mask_paths.append(mask_file)
@@ -133,10 +161,12 @@ class DatasetGenerator(object):
 
         return image_crop, mask_crops
 
-    def save_mask(self, masks, filename, path):
-        mask_store = [mask for mask in masks if np.any(mask)]
+    def save_mask(self, masks, filename, path, classes):
+        combined = [(mask, class_id) for mask, class_id in zip(masks, classes) if np.any(mask)]
+        mask_store = [mask for mask, class_id in combined]
+        class_store = [class_id for mask, class_id in combined]
         mask_file = '{}.npz'.format(filename)
-        np.savez_compressed(os.path.join(path, mask_file), masks=mask_store)
+        np.savez_compressed(os.path.join(path, mask_file), masks=mask_store, classes=class_store)
 
         return mask_file
 

@@ -69,7 +69,6 @@ class InstanceSegmentationRequest extends JobRequest
             } else {
                 $datasetImages = $images;
             }
-
             $datasetOutputPath = $this->generateDataset($datasetImages);
             $trainingOutputPath = $this->performTraining($datasetOutputPath);
             $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
@@ -102,18 +101,21 @@ class InstanceSegmentationRequest extends JobRequest
     {
         return $job->trainingProposals()
             ->selected()
-            ->select('image_id', 'points')
+            ->select('image_id', 'points', 'label_id')
             ->get()
             ->groupBy('image_id')
             ->map(function ($proposals) {
-                return $proposals->pluck('points')->map(function ($proposal) {
+                return $proposals->map(function ($proposal) {
                     // The circles of the proposals are drawn by OpenCV and this expects
                     // integers. As we can shave off a few bytes of job payload this
                     // way, we parse the coordinates here instead of in the Python
                     // script.
-                    return array_map(function ($value) {
-                        return intval(round($value));
-                    }, $proposal);
+                    //[point1, point2, point3, label_id]
+                    $result = array_map(fn($value) => intval(round($value)), $proposal->points);
+                    if (isset($proposal->label_id)){
+                      array_push($result, $proposal->label_id);
+                    }
+                    return $result;
                 });
             })
             ->toArray();

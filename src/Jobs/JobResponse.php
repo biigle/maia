@@ -81,6 +81,7 @@ class JobResponse extends Job implements ShouldQueue
         // Chunk the insert because PDO's maximum number of query parameters is
         // 65535. Each annotation has 7 parameters so we can store roughly 9000
         // annotations in one call.
+
         $maiaAnnotations = array_chunk($maiaAnnotations, 9000);
         array_walk($maiaAnnotations, function ($chunk) {
             $this->insertAnnotationChunk($chunk);
@@ -110,12 +111,15 @@ class JobResponse extends Job implements ShouldQueue
             return round($coordinate, 2);
         }, [$annotation[1], $annotation[2], $annotation[3]]);
 
+        $label_id = isset($annotation[5]) ? $annotation[5] : NULL;
+
         return [
             'job_id' => $this->jobId,
             'points' => json_encode($points),
             'score' => $annotation[4],
             'image_id' => $annotation[0],
             'shape_id' => Shape::circleId(),
+            'label_id' => $label_id
         ];
     }
 

@@ -52,9 +52,6 @@ class AnnotationCandidateController extends Controller
             ->orderBy('score', 'desc')
             ->with('label')
             ->get()
-            ->each(function ($candidate) {
-                $candidate->makeHidden('label_id');
-            })
             ->toArray();
     }
 

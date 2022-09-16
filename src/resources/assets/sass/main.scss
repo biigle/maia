@@ -77,3 +77,12 @@
         vertical-align: middle;
     }
 }
+
+.image-grid__image--annotation-candidate{
+  .image-icon.top-left{
+    font-size: 2em;
+    align-items: unset;
+    justify-content: right;
+    padding: 0.25em 0.25em;
+  }
+}

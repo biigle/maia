@@ -37,6 +37,34 @@ class AnnotationCandidateControllerTest extends ApiTestCase
                 'id' => $annotation->id,
                 'image_id' => $annotation->image_id,
                 'label' => null,
+                'label_id' => null,
+                'annotation_id' => null,
+                'uuid' => $annotation->image->uuid,
+            ]]);
+    }
+
+    public function testIndexWithLabelId()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $id = $job->id;
+
+        $label = LabelTest::create(["label_source_id"=>null, "source_id" => null]);
+        $annotation = AnnotationCandidateTest::create(['job_id' => $id, 'label_id' => $label->id]);
+
+        $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/annotation-candidates");
+
+        $this->beGuest();
+        $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates")->assertStatus(403);
+
+        $this->beEditor();
+        $label = $label->toArray();
+        $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates")
+            ->assertStatus(200)
+            ->assertExactJson([[
+                'id' => $annotation->id,
+                'image_id' => $annotation->image_id,
+                'label_id' => $annotation->label_id,
+                'label' => $label,
                 'annotation_id' => null,
                 'uuid' => $annotation->image->uuid,
             ]]);
