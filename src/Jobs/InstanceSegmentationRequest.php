@@ -112,7 +112,7 @@ class InstanceSegmentationRequest extends JobRequest
                     // script.
                     //[point1, point2, point3, label_id]
                     $result = array_map(fn($value) => intval(round($value)), $proposal->points);
-                    if(isset($proposal->label_id)){
+                    if (isset($proposal->label_id)){
                       array_push($result, $proposal->label_id);
                     }
                     return $result;

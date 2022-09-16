@@ -88,26 +88,33 @@ class DatasetGenerator(object):
         try:
             image = VipsImage.new_from_file(self.images[imageId])
 
-            if bool(self.scale_factors) != False:
-                scale_factor = self.scale_factors[imageId]
-                image = image.resize(scale_factor)
-                proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
-
             # Swap dict keys and values. Values are unique because they use the label IDs.
             classes_dict = {v: k for k, v in classes_dict.items()}
-            masks = []
             classes = []
 
-            for i, proposal in enumerate(proposals):
-                mask = np.zeros((image.height, image.width), dtype=np.int32)
-                cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], i+1, -1)
-                masks.append(mask)
+            for proposal in proposals:
                 if len(proposal) == 4:
                     # This is the ID of the class that is assigned in generate() above.
                     classes.append(classes_dict[f"{proposal[3]}"])
                 else:
                     # The ID of the interesting class is always 1.
                   classes.append(1)
+
+            # Remove the class IDs (if they exist) because they would be "scaled" as well below.
+            # They were only needed to determine the classes list above.
+            proposals = [p[:3] for p in proposals]
+
+            if bool(self.scale_factors) != False:
+                scale_factor = self.scale_factors[imageId]
+                image = image.resize(scale_factor)
+                proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
+
+            masks = []
+
+            for proposal in proposals:
+                mask = np.zeros((image.height, image.width), dtype=np.int8)
+                cv2.circle(mask, (proposal[0], proposal[1]), proposal[2], 1, -1)
+                masks.append(mask.astype(np.bool))
 
             image_paths = []
             mask_paths = []
