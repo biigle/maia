@@ -20,7 +20,6 @@ class NoveltyDetectionRequestTest extends TestCase
         Queue::fake();
         FileCache::fake();
         config([
-            'maia.available_bytes' => 8E+9,
             'maia.max_workers' => 2,
         ]);
 
@@ -33,7 +32,6 @@ class NoveltyDetectionRequestTest extends TestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
         ];
         $job = MaiaJobTest::create(['params' => $params]);
@@ -82,7 +80,6 @@ class NoveltyDetectionRequestTest extends TestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
         ];
         $job = MaiaJobTest::create(['params' => $params]);

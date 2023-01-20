@@ -71,7 +71,6 @@ class NoveltyDetectionRequest extends JobRequest
             'nd_ignore_radius' => intval($this->jobParams['nd_ignore_radius']),
             'images' => $imagesMap,
             'tmp_dir' => $this->tmpDir,
-            'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),
         ];
 
