@@ -3,7 +3,7 @@ from Image import Image
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import minmax_scale
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 def extract_image_pca_features(image):
     return image.extract_pca_features()
@@ -31,6 +31,20 @@ class ImageCollection(object):
 
     def set_executor(self, executor):
         self.executor = executor
+
+    def random_patches(self, number=10000, size=29):
+        per_image = int(np.ceil(float(number) / len(self.images)))
+
+        jobs = [self.executor.submit(image.random_patches, per_image, size) for image in self.images]
+
+        patches = []
+        for job in as_completed(jobs):
+            patches.extend(job.result())
+        patches = np.array(patches)
+
+        np.random.shuffle(patches)
+        # Remove random elements so the exact number is returned.
+        return patches[:number]
 
     def make_clusters(self, number=5):
         pca_features = self.executor.map(extract_image_pca_features, self.images)

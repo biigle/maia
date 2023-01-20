@@ -4,67 +4,27 @@ import numpy as np
 from PIL import Image
 from torch import nn
 from torch import optim
-from torch.utils.data import Dataset
+from torch.utils.data import TensorDataset
 from torchvision.transforms import functional as F
-import multiprocessing
-import random
-import ctypes
-
-class RandomPatches(Dataset):
-    def __init__(self, images, patch_size, count, transform=None):
-        self.images = images
-        self.patch_size = patch_size
-        self.count = count
-        self.transform = transform
-        # Shared array implementation, see: https://github.com/ptrblck/pytorch_misc/blob/master/shared_array.py
-        shared_array_base = multiprocessing.Array(ctypes.c_float, count * 3 * patch_size * patch_size)
-        shared_array = np.ctypeslib.as_array(shared_array_base.get_obj())
-        shared_array = shared_array.reshape(count, 3, patch_size, patch_size)
-        self.shared_array = torch.from_numpy(shared_array)
-        self.use_cache = False
-
-    def set_use_cache(self, use_cache):
-        self.use_cache = use_cache
-
-    def __len__(self):
-        return self.count
-
-    def __getitem__(self, x):
-        if not self.use_cache:
-            image = random.choice(self.images).pil_image()
-            x_pos = random.randint(0, image.width - self.patch_size)
-            y_pos = random.randint(0, image.width - self.patch_size)
-            patch = image.crop((x_pos, y_pos, x_pos + self.patch_size, y_pos + self.patch_size))
-
-            if self.transform is not None:
-                patch = self.transform(patch)
-
-            image.close()
-            self.shared_array[x] = patch
-
-        return self.shared_array[x]
 
 class Autoencoder(nn.Module):
     def __init__(self, kernel_size, channels = 3, stride = 2, hidden_factor = 0.1):
         super().__init__()
-        hidden_shape = int(np.round(kernel_size**2 * channels * hidden_factor))
+        input_features = kernel_size**2 * channels
+        hidden_features = int(np.round(input_features * hidden_factor))
 
-        self.encoder_layer = nn.Conv2d(
-            in_channels=channels, out_channels=hidden_shape, kernel_size=kernel_size, stride=stride, padding_mode='replicate'
+        self.encoder_layer = nn.Linear(
+            in_features=input_features, out_features=hidden_features
         )
 
-        # Set stride=kernel_size to produce an output image without overlaps. Each
-        # (overlapping) patch of the previous layer should produce a discrete patch in the
-        # output.
-        self.decoder_layer = nn.ConvTranspose2d(
-            in_channels=hidden_shape, out_channels=channels, kernel_size=kernel_size, stride=kernel_size
+        self.decoder_layer = nn.Linear(
+            in_features=hidden_features, out_features=input_features
         )
 
     def forward(self, x):
         x = self.encoder_layer(x)
         x = torch.relu(x)
         x = self.decoder_layer(x)
-        x = torch.relu(x)
 
         return x
 
@@ -79,8 +39,7 @@ class NoveltyMap(nn.Module):
         self.kernel_size = kernel_size
         self.stride = stride
 
-    # x is the original image, y is the patch-reconstruction.
-    def forward(self, x, y):
+    def forward(self, ae_model, x):
         height = x.size(2)
         width = x.size(3)
 
@@ -92,16 +51,12 @@ class NoveltyMap(nn.Module):
         # Move the unfold dimensions forward to get (..., C, H, W) at the end again.
         x = torch.permute(x, (0, 2, 3, 1, 4, 5))
         # Flatten to (..., C * H * W).
-        x = x.reshape(-1, patch_no_y, patch_no_x, self.kernel_size**2 * self.channels)
+        x = x.reshape(-1, self.kernel_size**2 * self.channels)
 
-        y = y.unfold(2, self.kernel_size, self.kernel_size).unfold(3, self.kernel_size, self.kernel_size)
-        # Move the unfold dimensions forward to get (..., C, H, W) at the end again.
-        y = torch.permute(y, (0, 2, 3, 1, 4, 5))
-        # Flatten to (..., C * H * W).
-        y = y.reshape(-1, patch_no_y, patch_no_x, self.kernel_size**2 * self.channels)
+        y = ae_model(x)
 
         # Mean square error between (flattened) original and reconstruction.
-        x = torch.mean(torch.square(torch.sub(x, y)), 3)
+        x = torch.mean(torch.square(torch.sub(x, y)), 1)
 
         x = x.view(-1, patch_no_y, patch_no_x)
         x = F.resize(x, (height, width))
@@ -109,7 +64,6 @@ class NoveltyMap(nn.Module):
         return x
 
 class NoveltyDetector(object):
-
     def __init__(self, patch_size, stride = 2, hidden = 0.1):
         self.patch_size = patch_size
         self.stride = stride
@@ -124,15 +78,18 @@ class NoveltyDetector(object):
         self.ae_model = Autoencoder(kernel_size=self.patch_size, stride=self.stride).to(self.device)
         optimizer = optim.Adam(self.ae_model.parameters(), lr=1e-3)
         criterion = nn.MSELoss()
-        train_dataset = RandomPatches(images, self.patch_size, number, transform=self.transform)
-        train_loader = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True
-        )
+
+        train_patches = images.random_patches(number, self.patch_size)
+        train_patches = np.moveaxis(train_patches, -1, 1).reshape(number, -1)
+        train_patches = torch.tensor(train_patches.astype(np.float32) / 255, device=self.device)
+
+        train_dataset = TensorDataset(train_patches)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
         for epoch in range(epochs):
             loss = 0
             for batch_features in train_loader:
-                batch_features = batch_features.to(self.device)
+                batch_features = batch_features[0]
 
                 # reset the gradients back to zero
                 # PyTorch accumulates gradients on subsequent backward passes
@@ -144,12 +101,6 @@ class NoveltyDetector(object):
                 optimizer.step()
 
                 loss += train_loss.item()
-
-            if epoch == 0:
-                # Use training data cache once it is filled after the first epoch.
-                train_loader.dataset.set_use_cache(True)
-                # No need for so many workers once the patches are cached.
-                train_loader.num_workers = min(4, num_workers)
 
             # compute the epoch training loss
             loss = loss / len(train_loader)
@@ -180,8 +131,7 @@ class NoveltyDetector(object):
         with torch.no_grad():
             for chunk_index, chunk in enumerate(chunks):
                 chunk_image = image[:, :, chunk[0]:chunk[1], chunk[2]:chunk[3]]
-                outputs = self.ae_model(chunk_image)
-                novmap = self.novmap_model(chunk_image, outputs)
+                novmap = self.novmap_model(self.ae_model, chunk_image)
                 novelty_map[chunk[0]:chunk[1], chunk[2]:chunk[3]] += novmap[0]
                 chunk_count_map[chunk[0]:chunk[1], chunk[2]:chunk[3]] += 1.0
 

@@ -11,6 +11,11 @@ class Image(object):
         self.id = id
         self.path = path
 
+    def random_patches(self, number, size):
+        image = np.array(self.pil_image())
+
+        return extract_patches_2d(image, (size, size), max_patches=number)
+
     def is_corrupt(self):
         image = self.pil_image()
         try:
