@@ -5,7 +5,8 @@ import cv2
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, wait
 from ImageCollection import ImageCollection
-from AutoencoderSaliencyDetector import AutoencoderSaliencyDetector
+from NoveltyDetector import NoveltyDetector
+from PIL import Image
 
 class DetectionRunner(object):
 
@@ -27,8 +28,6 @@ class DetectionRunner(object):
         self.images = params['images']
         # Path to the directory to store temporary files.
         self.tmp_dir = params['tmp_dir']
-        # Estimated available GPU memory in bytes.
-        self.available_bytes = params['available_bytes']
 
         self.max_workers = params['max_workers']
         # Percentage of worker threads to use for training data preparation. The rest is
@@ -68,7 +67,7 @@ class DetectionRunner(object):
         else:
             clusters = [images]
 
-        detector = AutoencoderSaliencyDetector(self.patch_size, stride=self.detector_stride, hidden=self.latent_size)
+        detector = NoveltyDetector(self.patch_size, stride=self.detector_stride, hidden=self.latent_size)
 
         jobs = []
 
@@ -82,14 +81,14 @@ class DetectionRunner(object):
 
     def process_cluster(self, detector, cluster):
         print("  Training")
-        detector.train(cluster, reset=True, number=self.trainset_size, epochs=self.epochs, display_step=1, batch_size=128)
+        detector.train(cluster, number=self.trainset_size, epochs=self.epochs, display_step=1, batch_size=128, num_workers=self.max_workers)
 
         total_images = len(cluster)
         thresholds = []
 
         for i, image in enumerate(cluster):
             print("  Image {} of {} (#{})".format(i + 1, total_images, image.id))
-            saliency_map = detector.apply(image.path, available_bytes=self.available_bytes)
+            saliency_map = detector.apply(image.path)
             saliency_map = cv2.filter2D(saliency_map, -1, self.region_vote_mask)
             saliency_map = saliency_map.astype(np.float32)
             thresholds.append(np.percentile(saliency_map, self.threshold))
@@ -100,7 +99,7 @@ class DetectionRunner(object):
     def postprocess_map(self, image, threshold):
         saliency_map = np.load(self.image_path(image, 'npy'))
         binary_map = np.where(saliency_map > threshold, 255, 0).astype(np.uint8)
-        # imsave(self.image_path(image, 'png'), binary_map)
+        # Image.fromarray(binary_map).save(self.image_path(image, 'png'))
         mask = np.zeros_like(binary_map)
         contours, _ = cv2.findContours(binary_map, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         points = []
