@@ -17,7 +17,7 @@ class DatasetGenerator(object):
 
         self.max_workers = params['max_workers']
 
-        self.training_images_path = '{}/training_images'.format(self.tmp_dir)
+        self.training_images_path = os.path.join(self.tmp_dir, 'training_images')
         self.crop_dimension = 512
 
         # If this is not empty, scale/knowledge transfer is used.
@@ -33,30 +33,25 @@ class DatasetGenerator(object):
         for imageId, proposals in self.training_proposals.items():
             jobs.append(executor.submit(self.process_image, imageId, proposals))
 
-        dataset = []
-        mean_pixels = []
+        ann_list = []
 
         for job in as_completed(jobs):
-            d, p = job.result()
-            if d is not False:
-                dataset.extend(d)
-                mean_pixels.extend(p)
+            a = job.result()
+            if a is not False:
+                ann_list.extend(a)
 
-        if len(dataset) == 0:
+        if len(ann_list) == 0:
             raise Exception('No images in dataset. All corrupt?')
 
-        # Discard additional channels (e.g. alpha)
-        mean_pixel = np.array(mean_pixels).mean(axis = 0).tolist()[:3]
-
-        return {
-            'dataset': dataset,
-            'mean_pixel': mean_pixel,
-            # For now all datasets are binary, i.e. only the classes "Background" and
-            # "Interesting" are supported.
-            'classes': {
-                1: 'Interesting',
-            }
+        data_dict = {
+            'img_prefix': self.training_images_path,
+            'ann_file': os.path.join(self.tmp_dir, 'train_dataset.json'),
+            # For now all datasets are binary, i.e. only the class "Interesting"
+            # is distinguished from the background.
+            'classes': ('interesting', )
         }
+
+        return data_dict, ann_list
 
     def process_image(self, imageId, proposals):
         try:
@@ -68,16 +63,15 @@ class DatasetGenerator(object):
                 proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
 
             output = []
-            mean_pixels = []
 
             for i, proposal in enumerate(proposals):
                 image_crop, bboxes, labels = self.generate_crop(image, proposal, proposals)
                 image_file = '{}_{}.jpg'.format(imageId, i)
-                filename = os.path.join(self.training_images_path, image_file)
-                image_crop.write_to_file(filename, strip=True, Q=95)
+                path = os.path.join(self.training_images_path, image_file)
+                image_crop.write_to_file(path, strip=True, Q=95)
 
                 output.append({
-                    'filename': filename,
+                    'filename': image_file,
                     'width': image_crop.width,
                     'height': image_crop.height,
                     'ann': {
@@ -86,15 +80,12 @@ class DatasetGenerator(object):
                     },
                 })
 
-                np_crop = np.ndarray(buffer=image_crop.write_to_memory(), shape=[image_crop.height, image_crop.width, image_crop.bands], dtype=np.uint8)
-                mean_pixels.append(np_crop.reshape((-1, image.bands)).mean(axis = 0))
-
         except VipsError as e:
             print('Image #{} is corrupt! Skipping...'.format(imageId))
 
-            return False, False, False
+            return False
 
-        return output, mean_pixels
+        return output
 
     def generate_crop(self, image, proposal, proposals):
         width, height = image.width, image.height
@@ -120,7 +111,7 @@ class DatasetGenerator(object):
 
         bboxes = self.determine_crop_bboxes(topLeft, current_crop_dimension, proposals)
         # Only label "interesting""
-        labels = [1 for b in bboxes]
+        labels = [0 for b in bboxes]
 
         image_crop = image.extract_area(topLeft[0], topLeft[1], current_crop_dimension[0], current_crop_dimension[1])
 
@@ -149,10 +140,15 @@ class DatasetGenerator(object):
 
         return bboxes
 
-with open(sys.argv[1]) as f:
-    params = json.load(f)
 
-runner = DatasetGenerator(params)
-output = runner.generate()
-with open(params['output_path'], 'w') as f:
-    json.dump(output, f)
+if __name__ == '__main__':
+    with open(sys.argv[1]) as f:
+        params = json.load(f)
+
+    runner = DatasetGenerator(params)
+    data_dict, ann_list = runner.generate()
+    with open(params['output_path'], 'w') as f:
+        json.dump(output, f)
+
+    with open(data_dict['ann_file'], 'w') as f:
+        json.dump(ann_list, f)
