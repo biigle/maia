@@ -1,7 +1,9 @@
 import sys
 import os
 import json
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+from concurrent.futures import ThreadPoolExecutor
+from mmdet.apis import init_detector, inference_detector
+from mmdet.utils import get_device
 
 class InferenceRunner(object):
 
@@ -42,7 +44,6 @@ class InferenceRunner(object):
             },
         }
 
-        # Cast image ID to int.
         self.images = {k: v for k, v in params['images'].items()}
 
     def run(self):
@@ -55,10 +56,9 @@ class InferenceRunner(object):
         for index, (image_id, image_path) in enumerate(self.images.items()):
             print('Image {} of {} (#{})'.format(index + 1, total_images, image_id))
             result = inference_detector(model, image_path)
-            # Postprocess ansynchronously but independent of the "queue".
             executor.submit(self.process_result, image_id, result)
 
-        # Wait for pending jobs (of the postprocessing).
+        # Wait for pending jobs of the postprocessing.
         executor.shutdown(True)
 
     def process_result(self, image_id, result):
@@ -77,17 +77,18 @@ class InferenceRunner(object):
         with open(path, 'w') as outfile:
             json.dump(points, outfile)
 
-with open(sys.argv[1]) as f:
-    params = json.load(f)
+if __name__ == '__main__':
+    with open(sys.argv[1]) as f:
+        params = json.load(f)
 
-with open(sys.argv[2]) as f:
-    trainset = json.load(f)
+    with open(sys.argv[2]) as f:
+        trainset = json.load(f)
 
-with open(sys.argv[3]) as f:
-    train_params = json.load(f)
+    with open(sys.argv[3]) as f:
+        train_params = json.load(f)
 
-params['checkpoint_path'] = train_params['checkpoint_path']
-params['config_path'] = train_params['config_path']
+    params['checkpoint_path'] = train_params['checkpoint_path']
+    params['config_path'] = train_params['config_path']
 
-runner = InferenceRunner(params, trainset)
-runner.run()
+    runner = InferenceRunner(params, trainset)
+    runner.run()
