@@ -120,7 +120,7 @@ class InstanceSegmentationRequest extends JobRequest
     }
 
     /**
-     * Generate the training dataset for Mask R-CNN.
+     * Generate the training dataset for the object detection model.
      *
      * @param array $images GenericImage instances.
      *
@@ -138,7 +138,7 @@ class InstanceSegmentationRequest extends JobRequest
         FileCache::batch($relevantImages, function ($images, $paths) use ($outputPath) {
             $imagesMap = $this->buildImagesMap($images, $paths);
             $inputPath = $this->createDatasetJson($imagesMap, $outputPath);
-            $script = config('maia.mrcnn_dataset_script');
+            $script = config('maia.mmdet_dataset_script');
             $this->python("{$script} {$inputPath}", 'dataset-log.txt');
         });
 
@@ -159,7 +159,6 @@ class InstanceSegmentationRequest extends JobRequest
         $content = [
             'images' => $imagesMap,
             'tmp_dir' => $this->tmpDir,
-            'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),
             'training_proposals' => $this->trainingProposals,
             'output_path' => $outputJsonPath,
@@ -175,7 +174,7 @@ class InstanceSegmentationRequest extends JobRequest
     }
 
     /**
-     * Perform training of Mask R-CNN.
+     * Perform training of object detection model.
      *
      * @param string $datasetOutputPath Path to the JSON output of the dataset generator.
      *
@@ -184,27 +183,30 @@ class InstanceSegmentationRequest extends JobRequest
     protected function performTraining($datasetOutputPath)
     {
         $outputPath = "{$this->tmpDir}/output-training.json";
-        $this->maybeDownloadCocoModel();
+        $this->maybeDownloadWeights(config('maia.backbone_model_url'), config('maia.backbone_model_path'));
+        $this->maybeDownloadWeights(config('maia.model_url'), config('maia.model_path'));
         $inputPath = $this->createTrainingJson($outputPath);
-        $script = config('maia.mrcnn_training_script');
+        $script = config('maia.mmdet_training_script');
         $this->python("{$script} {$inputPath} {$datasetOutputPath}", 'training-log.txt');
 
         return $outputPath;
     }
 
     /**
-     * Downloads the Mask R-CNN COCO pretrained weights if they weren't downloaded yet.
+     * Downloads the model pretrained weights if they weren't downloaded yet.
+     *
+     * @param string $from
+     * @param string $to
+     *
      */
-    protected function maybeDownloadCocoModel()
+    protected function maybeDownloadWeights($from, $to)
     {
-        $path = config('maia.coco_model_path');
-        if (!File::exists($path)) {
-            $this->ensureDirectory(dirname($path));
-            $url = config('maia.coco_model_url');
-            $success = @copy($url, $path);
+        if (!File::exists($to)) {
+            $this->ensureDirectory(dirname($to));
+            $success = @copy($from, $to);
 
             if (!$success) {
-                throw new Exception("Failed to download Mask R-CNN weights from '{$url}'.");
+                throw new Exception("Failed to download model weights from '{$from}'.");
             }
         }
     }
@@ -222,10 +224,12 @@ class InstanceSegmentationRequest extends JobRequest
         $content = [
             'is_train_scheme' => $this->jobParams['is_train_scheme'],
             'tmp_dir' => $this->tmpDir,
-            'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),
             'output_path' => $outputJsonPath,
-            'coco_model_path' => config('maia.coco_model_path'),
+            'base_config' => config('maia.mmdet_base_config'),
+            'batch_size' => config('maia.mmdet_train_batch_size'),
+            'backbone_model_path' => config('maia.backbone_model_path'),
+            'model_path' => config('maia.model_path'),
         ];
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
@@ -234,7 +238,7 @@ class InstanceSegmentationRequest extends JobRequest
     }
 
     /**
-     * Perform inference with the trained Mask R-CNN.
+     * Perform inference with the trained object detection model.
      *
      * @param array $images GenericImage instances.
      * @param string $datasetOutputPath Path to the JSON output of the dataset generator.
@@ -245,7 +249,7 @@ class InstanceSegmentationRequest extends JobRequest
         FileCache::batch($images, function ($images, $paths) use ($datasetOutputPath, $trainingOutputPath) {
             $imagesMap = $this->buildImagesMap($images, $paths);
             $inputPath = $this->createInferenceJson($imagesMap);
-            $script = config('maia.mrcnn_inference_script');
+            $script = config('maia.mmdet_inference_script');
             $this->python("{$script} {$inputPath} {$datasetOutputPath} {$trainingOutputPath}", 'inference-log.txt');
         });
     }
@@ -263,7 +267,6 @@ class InstanceSegmentationRequest extends JobRequest
         $content = [
             'images' => $imagesMap,
             'tmp_dir' => $this->tmpDir,
-            'available_bytes' => intval(config('maia.available_bytes')),
             'max_workers' => intval(config('maia.max_workers')),
         ];
 

@@ -22,7 +22,7 @@ class InstanceSegmentationRequestTest extends TestCase
         Queue::fake();
         FileCache::fake();
         config([
-            'maia.available_bytes' => 8E+9,
+            'maia.mmdet_train_batch_size' => 12,
             'maia.max_workers' => 2,
         ]);
 
@@ -30,7 +30,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'is_train_scheme' => [
                 ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
             ],
-            'available_bytes' => 8E+9,
+            'batch_size' => 12,
             'max_workers' => 2,
         ];
 
@@ -58,7 +58,6 @@ class InstanceSegmentationRequestTest extends TestCase
         $inferenceInputJsonPath = "{$tmpDir}/input-inference.json";
 
         $expectDatasetJson = [
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
             'training_proposals' => [$image->id => [[11, 20, 30]]],
@@ -69,15 +68,16 @@ class InstanceSegmentationRequestTest extends TestCase
             'is_train_scheme' => [
                 ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
             ],
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
+            'batch_size' => 12,
             'tmp_dir' => $tmpDir,
             'output_path' => "{$tmpDir}/output-training.json",
-            'coco_model_path' => config('maia.coco_model_path'),
+            'base_config' => config('maia.mmdet_base_config'),
+            'backbone_model_path' => config('maia.backbone_model_path'),
+            'model_path' => config('maia.model_path'),
         ];
 
         $expectInferenceJson = [
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
         ];
@@ -127,7 +127,7 @@ class InstanceSegmentationRequestTest extends TestCase
         Queue::fake();
         FileCache::fake();
         config([
-            'maia.available_bytes' => 8E+9,
+            'maia.mmdet_train_batch_size' => 12,
             'maia.max_workers' => 2,
         ]);
 
@@ -147,7 +147,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'is_train_scheme' => [
                 ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
             ],
-            'available_bytes' => 8E+9,
+            'batch_size' => 12,
             'max_workers' => 2,
         ];
 
@@ -176,7 +176,6 @@ class InstanceSegmentationRequestTest extends TestCase
                 $otherImage->id => 0.25,
                 $otherImage2->id => 0.25,
             ],
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
             'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
@@ -187,15 +186,16 @@ class InstanceSegmentationRequestTest extends TestCase
             'is_train_scheme' => [
                 ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
             ],
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
+            'batch_size' => 12,
             'tmp_dir' => $tmpDir,
             'output_path' => "{$tmpDir}/output-training.json",
-            'coco_model_path' => config('maia.coco_model_path'),
+            'base_config' => config('maia.mmdet_base_config'),
+            'backbone_model_path' => config('maia.backbone_model_path'),
+            'model_path' => config('maia.model_path'),
         ];
 
         $expectInferenceJson = [
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
         ];
@@ -244,7 +244,7 @@ class InstanceSegmentationRequestTest extends TestCase
         Queue::fake();
         FileCache::fake();
         config([
-            'maia.available_bytes' => 8E+9,
+            'maia.mmdet_train_batch_size' => 12,
             'maia.max_workers' => 2,
         ]);
 
@@ -264,7 +264,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'is_train_scheme' => [
                 ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
             ],
-            'available_bytes' => 8E+9,
+            'batch_size' => 12,
             'max_workers' => 2,
         ];
 
@@ -289,7 +289,6 @@ class InstanceSegmentationRequestTest extends TestCase
                 $otherImage->id => 0.25,
                 $otherImage2->id => 0.25,
             ],
-            'available_bytes' => 8E+9,
             'max_workers' => 2,
             'tmp_dir' => $tmpDir,
             'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
@@ -331,7 +330,7 @@ class IsJobStub extends InstanceSegmentationRequest
     public $commands = [];
     public $cleanup = false;
 
-    protected function maybeDownloadCocoModel()
+    protected function maybeDownloadWeights($from, $to)
     {
         // do nothing
     }
