@@ -84,12 +84,12 @@ return [
     /*
     | URL from which to download the pretrained weights for the model backbone.
     */
-    'backbone_model_url' => env('BACKBONE_MODEL_URL', 'https://download.pytorch.org/models/resnet50-11ad3fa6.pth'),
+    'backbone_model_url' => env('MAIA_BACKBONE_MODEL_URL', 'https://download.pytorch.org/models/resnet50-11ad3fa6.pth'),
 
     /*
     | URL from which to download the trained weights for the model.
     */
-    'model_url' => env('MODEL_URL', 'https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'),
+    'model_url' => env('MAIA_MODEL_URL', 'https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'),
 
     /*
     | Path to the file to store the pretrained backbone weights to.
