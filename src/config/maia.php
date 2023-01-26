@@ -107,7 +107,7 @@ return [
     |
     | Default is 12.
     */
-    'mmdet_train_batch_size' => env('MAIA_FRCNN_TRAIN_BATCH_SIZE', 12),
+    'mmdet_train_batch_size' => env('MAIA_MMDET_TRAIN_BATCH_SIZE', 12),
 
 
     'notifications' => [
