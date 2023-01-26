@@ -184,4 +184,3 @@ auto_scale_lr = dict(enable=False, base_batch_size=16)
 
 work_dir = ''
 auto_resume = False
-gpu_ids = [0]

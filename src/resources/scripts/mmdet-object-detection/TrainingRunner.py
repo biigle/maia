@@ -129,6 +129,7 @@ class TrainingRunner(object):
         return {
             'work_dir': cfg.work_dir,
             'checkpoint_path': osp.join(cfg.work_dir, 'latest.pth'),
+            'config_path': osp.join(cfg.work_dir, self.dump_config_name),
         }
 
 if __name__ == '__main__':
