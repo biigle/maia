@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import pickle
 from pyvips import Image as VipsImage
 from pyvips.error import Error as VipsError
 import numpy as np
@@ -45,7 +46,7 @@ class DatasetGenerator(object):
 
         data_dict = {
             'img_prefix': self.training_images_path,
-            'ann_file': os.path.join(self.tmp_dir, 'train_dataset.json'),
+            'ann_file': os.path.join(self.tmp_dir, 'train_dataset.pkl'),
             # For now all datasets are binary, i.e. only the class "Interesting"
             # is distinguished from the background.
             'classes': ('interesting', )
@@ -105,13 +106,9 @@ class DatasetGenerator(object):
 
         topLeft += offset
 
-        # Convert to regular Python data types so the computed values will be JSON serializable.
-        topLeft = topLeft.tolist()
-        current_crop_dimension = current_crop_dimension.tolist()
-
         bboxes = self.determine_crop_bboxes(topLeft, current_crop_dimension, proposals)
         # Only label "interesting""
-        labels = [0 for b in bboxes]
+        labels = np.array([0 for b in bboxes], dtype=np.int64)
 
         image_crop = image.extract_area(topLeft[0], topLeft[1], current_crop_dimension[0], current_crop_dimension[1])
 
@@ -138,8 +135,7 @@ class DatasetGenerator(object):
                     min(y2, py2),
                 ])
 
-        return bboxes
-
+        return np.array(bboxes, dtype=np.float32)
 
 if __name__ == '__main__':
     with open(sys.argv[1]) as f:
@@ -148,7 +144,7 @@ if __name__ == '__main__':
     runner = DatasetGenerator(params)
     data_dict, ann_list = runner.generate()
     with open(params['output_path'], 'w') as f:
-        json.dump(output, f)
+        json.dump(data_dict, f)
 
-    with open(data_dict['ann_file'], 'w') as f:
-        json.dump(ann_list, f)
+    with open(data_dict['ann_file'], 'wb') as f:
+        pickle.dump(ann_list, f)
