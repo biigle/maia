@@ -70,9 +70,21 @@ class InstanceSegmentationRequest extends JobRequest
                 $datasetImages = $images;
             }
 
-            $datasetOutputPath = $this->generateDataset($datasetImages);
-            $trainingOutputPath = $this->performTraining($datasetOutputPath);
-            $this->performInference($images, $datasetOutputPath, $trainingOutputPath);
+            // All images that contain selected training proposals.
+            $relevantImages = array_filter($datasetImages, function ($image) {
+                return array_key_exists($image->getId(), $this->trainingProposals);
+            });
+
+            $output = FileCache::batch($relevantImages, function ($images, $paths) {
+                $datasetOutputPath = $this->generateDataset($images, $paths);
+                // Training doesn't need the images and paths directly but expects the
+                // files to be there in the cache.
+                $trainingOutputPath = $this->performTraining($datasetOutputPath);
+
+                return [$datasetOutputPath, $trainingOutputPath];
+            });
+
+            $this->performInference($images, $output[0], $output[1]);
 
             $annotations = $this->parseAnnotations($images);
             $this->dispatchResponse($annotations);
@@ -123,24 +135,18 @@ class InstanceSegmentationRequest extends JobRequest
      * Generate the training dataset for the object detection model.
      *
      * @param array $images GenericImage instances.
+     * @param array $paths Paths to the cached image files.
      *
      * @return string Path to the JSON output file.
      */
-    protected function generateDataset($images)
+    protected function generateDataset($images, $paths)
     {
         $outputPath = "{$this->tmpDir}/output-dataset.json";
 
-        // All images that contain selected training proposals.
-        $relevantImages = array_filter($images, function ($image) {
-            return array_key_exists($image->getId(), $this->trainingProposals);
-        });
-
-        FileCache::batch($relevantImages, function ($images, $paths) use ($outputPath) {
-            $imagesMap = $this->buildImagesMap($images, $paths);
-            $inputPath = $this->createDatasetJson($imagesMap, $outputPath);
-            $script = config('maia.mmdet_dataset_script');
-            $this->python("{$script} {$inputPath}", 'dataset-log.txt');
-        });
+        $imagesMap = $this->buildImagesMap($images, $paths);
+        $inputPath = $this->createDatasetJson($imagesMap, $outputPath);
+        $script = config('maia.mmdet_dataset_script');
+        $this->python("{$script} {$inputPath}", 'dataset-log.txt');
 
         return $outputPath;
     }
