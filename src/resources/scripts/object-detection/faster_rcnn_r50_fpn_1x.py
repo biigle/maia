@@ -141,7 +141,7 @@ train_pipeline = [
                     dict(type='Flip'),
                     dict(type='RandomRotate90'),
                     dict(type='GaussianBlur', sigma_limit=[1.0, 2.0]),
-                    dict(type='JpegCompression', quality_lower=25, quality_upper=50),
+                    dict(type='ImageCompression', quality_lower=25, quality_upper=50),
                 ])
         ]),
     dict(
