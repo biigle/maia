@@ -79,7 +79,7 @@ return [
     /*
     | Path to the MMDetection base config file.
     */
-    'mmdet_base_config' => __DIR__.'/../resources/scripts/object-detection/faster_rcnn_r50_fpn_1x_coco.py',
+    'mmdet_base_config' => __DIR__.'/../resources/scripts/object-detection/faster_rcnn_r50_fpn_1x.py',
 
     /*
     | URL from which to download the pretrained weights for the model backbone.

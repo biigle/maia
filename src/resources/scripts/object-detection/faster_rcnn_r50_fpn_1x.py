@@ -104,13 +104,43 @@ model = dict(
             score_thr=0.05,
             nms=dict(type='nms', iou_threshold=0.5),
             max_per_img=100)))
+
 dataset_type = 'CustomDataset'
+
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='RandomFlip', flip_ratio=0.5),
+    # Example: https://github.com/open-mmlab/mmdetection/blob/master/configs/albu_example/mask_rcnn_r50_fpn_albu_1x_coco.py#L44
+    dict(
+        type='Albu',
+        skip_img_without_anno=True,
+        bbox_params=dict(
+            type='BboxParams',
+            format='pascal_voc',
+            label_fields=['gt_labels'],
+            filter_lost_elements=True,
+            min_area=100),
+        keymap=dict(
+            img='image',
+            gt_masks='masks',
+            gt_bboxes='bboxes'),
+        transforms=[
+            dict(
+                type='SomeOf',
+                # Choose each element with equal probability.
+                n=4,
+                p=0.25,
+                replace=False,
+                transforms=[
+                    dict(type='Flip'),
+                    dict(type='RandomRotate90'),
+                    dict(type='GaussianBlur', sigma_limit=[1.0, 2.0]),
+                    dict(type='JpegCompression', quality_lower=25, quality_upper=50),
+                ])
+        ]),
     dict(
         type='Normalize',
         mean=[123.675, 116.28, 103.53],
@@ -118,17 +148,20 @@ train_pipeline = [
         to_rgb=True),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+    dict(
+        type='Collect',
+        keys=['img', 'gt_bboxes', 'gt_labels'],
+        meta_keys=['filename', 'ori_filename', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'img_norm_cfg'])
 ]
+
+# Disable scaling/augmentation during inference.
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(1333, 800),
+        scale_factor=1,
         flip=False,
         transforms=[
-            dict(type='Resize', keep_ratio=True),
-            dict(type='RandomFlip'),
             dict(
                 type='Normalize',
                 mean=[123.675, 116.28, 103.53],
@@ -139,6 +172,7 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
+
 data = dict(
     samples_per_gpu=12,
     workers_per_gpu=4,
@@ -160,27 +194,44 @@ data = dict(
         img_prefix='',
         pipeline=test_pipeline,
         classes=classes))
+
 evaluation = dict(interval=1, metric=['mAP'])
+
 optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
+
 optimizer_config = dict(grad_clip=None)
+
 lr_config = dict(
     policy='step',
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
     step=[8, 11])
+
 runner = dict(type='EpochBasedRunner', max_epochs=12)
+
 checkpoint_config = dict(interval=1)
+
 log_config = dict(interval=1, hooks=[dict(type='TextLoggerHook')])
+
 custom_hooks = [dict(type='NumClassCheckHook')]
+
 dist_params = dict(backend='nccl')
+
 log_level = 'INFO'
+
 load_from = ''
+
 resume_from = None
+
 workflow = [('train', 1)]
+
 opencv_num_threads = 0
+
 mp_start_method = 'fork'
+
 auto_scale_lr = dict(enable=False, base_batch_size=16)
 
 work_dir = ''
+
 auto_resume = False

@@ -50,6 +50,7 @@ class TrainingRunner(object):
                 },
             },
             'classes': trainset['classes'],
+            'gpu_ids': [0],
         }
 
     # Based on: https://github.com/open-mmlab/mmdetection/blob/master/tools/train.py

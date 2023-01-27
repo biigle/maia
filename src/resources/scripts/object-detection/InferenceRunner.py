@@ -17,31 +17,8 @@ class InferenceRunner(object):
         # We need at least one worker thread here.
         self.max_workers = max(params['max_workers'], 1)
 
-        # Disable scaling/augmentation during inference.
-        test_pipeline = [
-            {'type': 'LoadImageFromFile'},
-            {
-                'type': 'MultiScaleFlipAug',
-                'scale_factor': 1,
-                'flip': False,
-                'transforms': [
-                    {
-                        'type': 'Normalize',
-                        'mean': [123.675, 116.28, 103.53],
-                        'std': [58.395, 57.12, 57.375],
-                        'to_rgb': True,
-                    },
-                    {'type': 'Pad', 'size_divisor': 32},
-                    {'type': 'ImageToTensor', 'keys': ['img']},
-                    {'type': 'Collect', 'keys': ['img']},
-                ],
-            },
-        ]
-
         self.cfg_options = {
-            'data': {
-                'test': {'pipeline': test_pipeline},
-            },
+            'gpu_ids': [0],
         }
 
         self.images = {k: v for k, v in params['images'].items()}
