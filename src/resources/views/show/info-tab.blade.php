@@ -103,47 +103,6 @@
                 </tbody>
             </table>
         @endif
-        @if (Arr::has($job->params, 'is_train_scheme'))
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th colspan="3">Instance Segmentation<br>Training scheme</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Layers</td>
-                        <td>Epochs</td>
-                        <td>Learning rate</td>
-                    </tr>
-                    @foreach(Arr::get($job->params, 'is_train_scheme', []) as $index => $step)
-                        <tr>
-                            <td><code>{{$step['layers']}}</code></td>
-                            <td class="text-right"><code>{{$step['epochs']}}</code></td>
-                            <td><code>{{$step['learning_rate']}}</code></td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th colspan="2">Instance Segmentation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Training epochs (head)</td>
-                        <td class="text-right"><code>{{Arr::get($job->params, 'is_epochs_head')}}</code></td>
-                    </tr>
-                    <tr>
-                        <td>Training epochs (all)</td>
-                        <td class="text-right"><code>{{Arr::get($job->params, 'is_epochs_all')}}</code></td>
-                    </tr>
-                </tbody>
-            </table>
-        @endif
     </div>
     <div class="maia-tab-content__bottom">
         <form class="text-right" action="{{ url("api/v1/maia-jobs/{$job->id}") }}" method="POST" onsubmit="return confirm('Are you sure that you want to delete this job?')">
@@ -151,8 +110,9 @@
             <input type="hidden" name="_method" value="DELETE">
             @if ($job->state_id === $states['novelty-detection'])
                 <button class="btn btn-danger" type="button" title="The job cannot be deleted while the novelty detection is running" disabled>Delete this job</button>
+            {{-- The array key is instance-segmentation for legacy reasons --}}
             @elseif ($job->state_id === $states['instance-segmentation'])
-                <button class="btn btn-danger" type="button" title="The job cannot be deleted while the instance segmentation is running" disabled>Delete this job</button>
+                <button class="btn btn-danger" type="button" title="The job cannot be deleted while the object detection is running" disabled>Delete this job</button>
             @else
                 <button class="btn btn-danger" type="submit">Delete this job</button>
             @endif

@@ -7,7 +7,7 @@ use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Exceptions\PrepareKnowledgeTransferException;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionFailed;
 use Biigle\Volume;
 use DB;
 
@@ -168,8 +168,8 @@ class PrepareKnowledgeTransfer extends PrepareAnnotationsJob
     protected function handleFailure($message)
     {
         $this->job->error = ['message' => $message];
-        $this->job->state_id = State::failedInstanceSegmentationId();
+        $this->job->state_id = State::failedObjectDetectionId();
         $this->job->save();
-        $this->job->user->notify(new InstanceSegmentationFailed($this->job));
+        $this->job->user->notify(new ObjectDetectionFailed($this->job));
     }
 }

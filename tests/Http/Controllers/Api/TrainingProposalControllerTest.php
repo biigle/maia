@@ -69,7 +69,7 @@ class TrainingProposalControllerTest extends ApiTestCase
         Event::fake();
         $this->postJson("/api/v1/maia-jobs/{$job->id}/training-proposals")->assertStatus(200);
         Event::assertDispatched(MaiaJobContinued::class);
-        $this->assertEquals(State::instanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertEquals(State::objectDetectionId(), $job->fresh()->state_id);
 
         // Job is no longer in training proposal state.
         $this->postJson("/api/v1/maia-jobs/{$job->id}/training-proposals")->assertStatus(422);
@@ -122,7 +122,7 @@ class TrainingProposalControllerTest extends ApiTestCase
     {
         $job = MaiaJobTest::create([
             'volume_id' => $this->volume()->id,
-            'state_id' => State::instanceSegmentationId(),
+            'state_id' => State::objectDetectionId(),
         ]);
         $a = TrainingProposalTest::create(['job_id' => $job->id]);
         $this->beEditor();

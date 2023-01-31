@@ -8,7 +8,6 @@ use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Shape;
@@ -97,7 +96,7 @@ abstract class PrepareAnnotationsJob extends Job
                 'image_id' => $annotation->image_id,
                 'shape_id' => Shape::circleId(),
                 'job_id' => $this->job->id,
-                // All these proposals should be taken for instance segmentation unless
+                // All these proposals should be taken for object detection unless
                 // the user chose to review them as training proposals first.
                 'selected' => $this->selectTrainingProposals,
                 // score should be null in this case.

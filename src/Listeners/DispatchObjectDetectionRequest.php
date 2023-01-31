@@ -3,13 +3,13 @@
 namespace Biigle\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionRequest;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Queue;
 
-class DispatchInstanceSegmentationRequest implements ShouldQueue
+class DispatchObjectDetectionRequest implements ShouldQueue
 {
     /**
       * Handle the event.
@@ -19,7 +19,7 @@ class DispatchInstanceSegmentationRequest implements ShouldQueue
       */
     public function handle(MaiaJobContinued $event)
     {
-        $request = new InstanceSegmentationRequest($event->job);
+        $request = new ObjectDetectionRequest($event->job);
         Queue::connection(config('maia.request_connection'))
             ->pushOn(config('maia.request_queue'), $request);
     }
@@ -33,7 +33,7 @@ class DispatchInstanceSegmentationRequest implements ShouldQueue
      */
     public function failed(MaiaJobContinued $event, $exception)
     {
-        $e = new Exception('The instance segmentation request could not be submitted.');
-        Queue::push(new InstanceSegmentationFailure($event->job->id, $e));
+        $e = new Exception('The object detection request could not be submitted.');
+        Queue::push(new ObjectDetectionFailure($event->job->id, $e));
     }
 }

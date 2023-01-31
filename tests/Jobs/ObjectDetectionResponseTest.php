@@ -3,11 +3,11 @@
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionResponse;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\InstanceSegmentationComplete;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionComplete;
 use Biigle\Shape;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
@@ -16,16 +16,16 @@ use Illuminate\Support\Facades\Notification;
 use Queue;
 use TestCase;
 
-class InstanceSegmentationResponseTest extends TestCase
+class ObjectDetectionResponseTest extends TestCase
 {
     public function testHandle()
     {
-        $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
+        $job = MaiaJobTest::create(['state_id' => State::objectDetectionId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
         $candidates = [[$image->id, 100, 200, 20, 0]];
 
-        $response = new InstanceSegmentationResponse($job->id, $candidates);
+        $response = new ObjectDetectionResponse($job->id, $candidates);
         Queue::fake();
         Notification::fake();
         $response->handle();
@@ -42,21 +42,21 @@ class InstanceSegmentationResponseTest extends TestCase
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
         Queue::assertPushed(GenerateImageAnnotationPatch::class);
-        Notification::assertSentTo($job->user, InstanceSegmentationComplete::class);
+        Notification::assertSentTo($job->user, ObjectDetectionComplete::class);
     }
 
     public function testHandleWrongState()
     {
-        $job = MaiaJobTest::create(['state_id' => State::failedInstanceSegmentationId()]);
+        $job = MaiaJobTest::create(['state_id' => State::failedObjectDetectionId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
         $candidates = [[$image->id, 100, 200, 20, 0]];
 
-        $response = new InstanceSegmentationResponse($job->id, $candidates);
+        $response = new ObjectDetectionResponse($job->id, $candidates);
         Queue::fake();
         $response->handle();
 
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
 
         $this->assertFalse($job->annotationCandidates()->exists());
         Queue::assertNotPushed(GenerateImageAnnotationPatch::class);
@@ -64,12 +64,12 @@ class InstanceSegmentationResponseTest extends TestCase
 
     public function testHandleRollback()
     {
-        $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
+        $job = MaiaJobTest::create(['state_id' => State::objectDetectionId()]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
 
         $proposals = [[$image->id, 100, 200, 20, 0.9]];
 
-        $response = new InstanceSegmentationResponseStub($job->id, $proposals);
+        $response = new ObjectDetectionResponseStub($job->id, $proposals);
         try {
             $response->handle();
             $this->assertFalse(true);
@@ -78,22 +78,22 @@ class InstanceSegmentationResponseTest extends TestCase
         }
 
         $this->assertFalse($job->annotationCandidates()->exists());
-        $this->assertEquals(State::instanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertEquals(State::objectDetectionId(), $job->fresh()->state_id);
     }
 
     public function testFailed()
     {
-        $job = MaiaJobTest::create(['state_id' => State::instanceSegmentationId()]);
+        $job = MaiaJobTest::create(['state_id' => State::objectDetectionId()]);
         $proposals = [[1, 100, 200, 20, 0.9]];
 
-        $response = new InstanceSegmentationResponse($job->id, $proposals);
+        $response = new ObjectDetectionResponse($job->id, $proposals);
         Queue::fake();
         $response->failed(new Exception);
-        Queue::assertPushed(InstanceSegmentationFailure::class);
+        Queue::assertPushed(ObjectDetectionFailure::class);
     }
 }
 
-class InstanceSegmentationResponseStub extends InstanceSegmentationResponse
+class ObjectDetectionResponseStub extends ObjectDetectionResponse
 {
     protected function updateJobState(MaiaJob $job)
     {

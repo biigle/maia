@@ -40,18 +40,10 @@ return [
     'response_connection' => env('MAIA_RESPONSE_CONNECTION', 'gpu-response'),
 
     /*
-    | Directory where the temporary files of novelty detection or instance segmentation
+    | Directory where the temporary files of novelty detection or object detection
     | should be stored.
     */
     'tmp_dir' => env('MAIA_TMP_DIR', storage_path('maia_jobs')),
-
-    /*
-    | Estimated available GPU memory in bytes. The Python scripts use this to determine
-    | their memory load to get the best performance (or work at all in low memory cases).
-    |
-    | Default is 8 GB.
-    */
-    'available_bytes' => env('MAIA_AVAILABLE_BYTES', 8E+9),
 
     /*
     | Path to the Python executable.
@@ -59,7 +51,7 @@ return [
     'python' => '/usr/bin/python3',
 
     /*
-    | Number of worker threads to use during novelty detection or instance segmentation.
+    | Number of worker threads to use during novelty detection or object detection.
     | Set this to the number of available CPU cores.
     */
     'max_workers' => env('MAIA_MAX_WORKERS', 2),
@@ -70,29 +62,53 @@ return [
     'novelty_detection_script' => __DIR__.'/../resources/scripts/novelty-detection/DetectionRunner.py',
 
     /*
-    | Path to the script that generates the training dataset for Mask R-CNN.
+    | Path to the script that generates the training dataset for MMDetection.
     */
-    'mrcnn_dataset_script' => __DIR__.'/../resources/scripts/instance-segmentation/DatasetGenerator.py',
+    'mmdet_dataset_script' => __DIR__.'/../resources/scripts/object-detection/DatasetGenerator.py',
 
     /*
-    | Path to the script that trains Mask R-CNN.
+    | Path to the script that trains the MMDetection model.
     */
-    'mrcnn_training_script' => __DIR__.'/../resources/scripts/instance-segmentation/TrainingRunner.py',
+    'mmdet_training_script' => __DIR__.'/../resources/scripts/object-detection/TrainingRunner.py',
 
     /*
-    | Path to the script that performs inference with the trained Mask R-CNN.
+    | Path to the script that performs inference with the trained MMDetection model.
     */
-    'mrcnn_inference_script' => __DIR__.'/../resources/scripts/instance-segmentation/InferenceRunner.py',
+    'mmdet_inference_script' => __DIR__.'/../resources/scripts/object-detection/InferenceRunner.py',
 
     /*
-    | URL from which to download the latest COCO trained weights for Mask R-CNN.
+    | Path to the MMDetection base config file.
     */
-    'coco_model_url' => env('COCO_MODEL_URL', 'https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rcnn_coco.h5'),
+    'mmdet_base_config' => __DIR__.'/../resources/scripts/object-detection/faster_rcnn_r50_fpn_1x.py',
 
     /*
-    | Path to the file to store the COCO trained weights to.
+    | URL from which to download the pretrained weights for the model backbone.
     */
-    'coco_model_path' => storage_path('maia_jobs').'/mask_rcnn_coco.h5',
+    'backbone_model_url' => env('MAIA_BACKBONE_MODEL_URL', 'https://download.pytorch.org/models/resnet50-11ad3fa6.pth'),
+
+    /*
+    | URL from which to download the trained weights for the model.
+    */
+    'model_url' => env('MAIA_MODEL_URL', 'https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'),
+
+    /*
+    | Path to the file to store the pretrained backbone weights to.
+    */
+    'backbone_model_path' => storage_path('maia_jobs').'/resnet50-11ad3fa6.pth',
+
+    /*
+    | Path to the file to store the pretrained model weights to.
+    */
+    'model_path' => storage_path('maia_jobs').'/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',
+
+    /*
+    | Number of 512x512 px images in a training batch of MMDetection.
+    | This can be increased with larger GPU memory to achieve faster training.
+    |
+    | Default is 12.
+    */
+    'mmdet_train_batch_size' => env('MAIA_MMDET_TRAIN_BATCH_SIZE', 12),
+
 
     'notifications' => [
         /*

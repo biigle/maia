@@ -138,7 +138,7 @@ export default {
                 });
         },
         // The thumbnails of unselected proposals are deleted when the job advances
-        // to instance segmentation so we only want to show the selected proposals
+        // to object detection so we only want to show the selected proposals
         // when this happened.
         proposalsForSelectView() {
             if (this.isInTrainingProposalState) {

@@ -23,9 +23,12 @@ class InitializeMaiaTables extends Migration
             ['name' => 'novelty-detection'],
             ['name' => 'failed-novelty-detection'],
             ['name' => 'training-proposals'],
+            ['name' => 'annotation-candidates'],
+            // NOTE: These are incorrectly called instance segmentation. But they are
+            // left that way for backwards compatibility. Everywhere else, it's called
+            // object detection.
             ['name' => 'instance-segmentation'],
             ['name' => 'failed-instance-segmentation'],
-            ['name' => 'annotation-candidates'],
         ]);
 
         /*

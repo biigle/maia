@@ -23,10 +23,14 @@ class MaiaJobState extends Model
         'failedNoveltyDetection' => 'failed-novelty-detection',
         // The manual selection and refinement of training proposals stage.
         'trainingProposals' => 'training-proposals',
-        // The instance segmentation stage.
-        'instanceSegmentation' => 'instance-segmentation',
-        // A failure during instance segmentation.
-        'failedInstanceSegmentation' => 'failed-instance-segmentation',
+        // The object detection stage.
+        // NOTE: This was incorrectly called instance segmentation before and the
+        // entry in the DB still uses this term.
+        'objectDetection' => 'instance-segmentation',
+        // A failure during object detection.
+        // NOTE: This was incorrectly called instance segmentation before and the
+        // entry in the DB still uses this term.
+        'failedObjectDetection' => 'failed-instance-segmentation',
         // The manual review of annotation candidates stage.
         'annotationCandidates' => 'annotation-candidates',
     ];

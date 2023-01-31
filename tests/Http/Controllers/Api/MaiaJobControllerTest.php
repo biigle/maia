@@ -4,7 +4,7 @@ namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
 use Biigle\MediaType;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionRequest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\ImageAnnotationLabelTest;
@@ -31,10 +31,6 @@ class MaiaJobControllerTest extends ApiTestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
-            ],
         ];
         ImageTest::create([
             'volume_id' => $this->volume()->id,
@@ -68,10 +64,6 @@ class MaiaJobControllerTest extends ApiTestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
-            ],
         ])->assertStatus(422);
 
         // empty train scheme
@@ -85,7 +77,6 @@ class MaiaJobControllerTest extends ApiTestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'is_train_scheme' => [],
         ])->assertStatus(422);
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $this->defaultParams)
@@ -116,11 +107,11 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertSuccessful();
     }
 
-    public function testStoreFailedInstanceSegmentation()
+    public function testStoreFailedObjectDetection()
     {
         $id = $this->volume()->id;
         $job = MaiaJobTest::create([
-            'state_id' => State::failedInstanceSegmentationId(),
+            'state_id' => State::failedObjectDetectionId(),
             'volume_id' => $this->volume()->id,
         ]);
 
@@ -237,10 +228,6 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->beEditor();
         $params = [
             'training_data_method' => 'own_annotations',
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
-            ],
         ];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             // No existing annotations.
@@ -262,7 +249,7 @@ class MaiaJobControllerTest extends ApiTestCase
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
         $this->assertFalse($job->shouldShowTrainingProposals());
-        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertEquals(State::objectDetectionId(), $job->state_id);
     }
 
     public function testStoreExistingAnnotationsRestrictLabels()
@@ -272,10 +259,6 @@ class MaiaJobControllerTest extends ApiTestCase
         $params = [
             'training_data_method' => 'novelty_detection',
             'oa_restrict_labels' => [$this->labelChild()->id],
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
-            ],
         ];
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
@@ -322,10 +305,6 @@ class MaiaJobControllerTest extends ApiTestCase
         $params = [
             'training_data_method' => 'own_annotations',
             'oa_show_training_proposals' => 'abc',
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.0001],
-            ],
         ];
 
         ImageAnnotationTest::create([
@@ -368,9 +347,6 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->beEditor();
         $params = [
             'training_data_method' => 'knowledge_transfer',
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
         ];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             // No volume specified.
@@ -431,7 +407,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
-        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertEquals(State::objectDetectionId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
     }
@@ -475,9 +451,6 @@ class MaiaJobControllerTest extends ApiTestCase
             'kt_volume_id' => $volume->id,
             'kt_restrict_labels' => [999],
             'training_data_method' => 'knowledge_transfer',
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
         ];
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
@@ -498,7 +471,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
-        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertEquals(State::objectDetectionId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
         $this->assertArrayHasKey('kt_restrict_labels', $job->params);
@@ -511,9 +484,6 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->beEditor();
         $params = [
             'training_data_method' => 'area_knowledge_transfer',
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
         ];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             // No volume specified.
@@ -574,7 +544,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
-        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertEquals(State::objectDetectionId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
     }
@@ -586,9 +556,6 @@ class MaiaJobControllerTest extends ApiTestCase
         $volume = VolumeTest::create();
         $params = [
             'training_data_method' => 'area_knowledge_transfer',
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
             'kt_volume_id' => $volume->id,
         ];
 
@@ -659,9 +626,6 @@ class MaiaJobControllerTest extends ApiTestCase
             'kt_volume_id' => $volume->id,
             'kt_restrict_labels' => [999],
             'training_data_method' => 'area_knowledge_transfer',
-            'is_train_scheme' => [
-                ['layers' => 'heads', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
         ];
 
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
@@ -682,7 +646,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
-        $this->assertEquals(State::instanceSegmentationId(), $job->state_id);
+        $this->assertEquals(State::objectDetectionId(), $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertEquals($volume->id, $job->params['kt_volume_id']);
         $this->assertArrayHasKey('kt_restrict_labels', $job->params);

@@ -5,7 +5,7 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Jobs\PrepareKnowledgeTransfer;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionFailed;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
@@ -228,9 +228,9 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
         $this->assertEquals(0, $job->trainingProposals()->count());
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -256,9 +256,9 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
         $this->assertEquals(0, $job->trainingProposals()->count());
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -280,8 +280,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -303,8 +303,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -326,8 +326,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -349,8 +349,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -374,8 +374,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -399,8 +399,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -424,8 +424,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -449,8 +449,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -474,8 +474,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -499,8 +499,8 @@ class PrepareKnowledgeTransferTest extends TestCase
 
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 

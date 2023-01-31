@@ -5,18 +5,18 @@ namespace Biigle\Modules\Maia\Jobs;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\InstanceSegmentationComplete;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionComplete;
 use Exception;
 use Queue;
 
-class InstanceSegmentationResponse extends JobResponse
+class ObjectDetectionResponse extends JobResponse
 {
     /**
      * {@inheritdoc}
      */
     protected function getExpectedJobStateId()
     {
-        return State::instanceSegmentationId();
+        return State::objectDetectionId();
     }
 
     /**
@@ -27,7 +27,7 @@ class InstanceSegmentationResponse extends JobResponse
      */
     public function failed(Exception $exception)
     {
-        Queue::push(new InstanceSegmentationFailure($this->jobId, $exception));
+        Queue::push(new ObjectDetectionFailure($this->jobId, $exception));
     }
 
     /**
@@ -60,7 +60,7 @@ class InstanceSegmentationResponse extends JobResponse
      */
     protected function sendNotification(MaiaJob $job)
     {
-        $job->user->notify(new InstanceSegmentationComplete($job));
+        $job->user->notify(new ObjectDetectionComplete($job));
     }
 
     /**

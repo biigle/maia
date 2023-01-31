@@ -21,7 +21,6 @@ export default {
             labels: [],
             selectedLabels: [],
             submitted: false,
-            trainScheme: [],
             trainingDataMethod: '',
             distanceKnowledgeTransferVolumes: [],
             areaKnowledgeTransferVolumes: [],
@@ -101,19 +100,6 @@ export default {
         },
         submit() {
             this.submitted = true;
-        },
-        removeTrainStep(index) {
-            this.trainScheme.splice(index, 1);
-        },
-        addTrainStep() {
-            let step = {layers: 'heads', epochs: 10, learning_rate: 0.001};
-            if (this.trainScheme.length > 0) {
-                let last = this.trainScheme[this.trainScheme.length - 1];
-                step.layers = last.layers;
-                step.epochs = last.epochs;
-                step.learning_rate = last.learning_rate;
-            }
-            this.trainScheme.push(step);
         },
         handleSelectedKnowledgeTransferVolume(volume) {
             this.knowledgeTransferVolume = volume;
@@ -201,7 +187,6 @@ export default {
     },
     created() {
         this.volumeId = biigle.$require('maia.volumeId');
-        this.trainScheme = biigle.$require('maia.trainScheme');
         this.showAdvanced = biigle.$require('maia.hasErrors');
         this.trainingDataMethod = biigle.$require('maia.trainingDataMethod');
 

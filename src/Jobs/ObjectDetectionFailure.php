@@ -4,16 +4,16 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionFailed;
 
-class InstanceSegmentationFailure extends JobFailure
+class ObjectDetectionFailure extends JobFailure
 {
     /**
      * {@inheritdoc}
      */
     protected function updateJobState(MaiaJob $job)
     {
-        $job->state_id = State::failedInstanceSegmentationId();
+        $job->state_id = State::failedObjectDetectionId();
     }
 
     /**
@@ -21,6 +21,6 @@ class InstanceSegmentationFailure extends JobFailure
      */
     protected function sendNotification(MaiaJob $job)
     {
-        $job->user->notify(new InstanceSegmentationFailed($job));
+        $job->user->notify(new ObjectDetectionFailed($job));
     }
 }

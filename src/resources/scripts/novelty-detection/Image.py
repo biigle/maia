@@ -11,16 +11,13 @@ class Image(object):
         self.id = id
         self.path = path
 
-    def random_patch(self, size, vectorize=True):
-        return self.random_patches(1, size=size, vectorize=vectorize)[0]
+    def random_patches(self, number, size):
+        image = np.array(self.pil_image())
 
-    def random_patches(self, number, size, vectorize=True):
-        patches = extract_patches_2d(self.image(), (size, size), max_patches=number)
-
-        return np.reshape(patches, (number, size * size * 3)) if vectorize else patches
+        return extract_patches_2d(image, (size, size), max_patches=number)
 
     def is_corrupt(self):
-        image = PilImage.open(self.path)
+        image = self.pil_image()
         try:
             image.load()
         except (IOError, OSError) as e:
@@ -29,17 +26,18 @@ class Image(object):
 
         return False
 
-    def image(self):
-        image = np.array(PilImage.open(self.path))
-        # Remove alpha channel if present.
-        if image.shape[2] == 4:
-            image = np.delete(image, 3, axis=2)
+    def pil_image(self):
+        image = PilImage.open(self.path)
+        if image.mode == 'RGBA':
+            image = image.convert('RGB')
+        elif image.mode == 'LA':
+            image = image.convert('L')
 
         return image
 
     def _get_resized_image(self):
-        img = PilImage.open(self.path)
-        return img.convert('RGB').resize((256, 256), PilImage.BILINEAR)
+        image = self.pil_image()
+        return image.resize((256, 256), PilImage.BILINEAR)
 
     def extract_pca_features(self):
         return np.array(self._get_resized_image()).flatten()

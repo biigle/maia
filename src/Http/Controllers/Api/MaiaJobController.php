@@ -24,7 +24,6 @@ class MaiaJobController extends Controller
      * @apiParam {Number} id The volume ID.
      *
      * @apiParam (Required parameters) {string} training_data_method One of `novelty_detection` (to perform novelty detection to generate training data), `own_annotations` (to use existing annotations of the same volume as training data), `knowledge_transfer` (to use knowlegde transfer based on distance to ground to get training data from another volume) or `area_knowledge_transfer` (to use knowlegde transfer based on image area to get training data from another volume).
-     * @apiParam (Required parameters) {array} is_train_scheme An array containing objects with the following properties. `layers`: Either `heads` or `all`, `epochs`: Number of epochs to train this step, `learing_rate`: Learing rate to use in this step.
      *
      * @apiParam (Required parameters for novelty detection) {number} nd_clusters Number of different kinds of images to expect. Images are of the same kind if they have similar lighting conditions or show similar patterns (e.g. sea floor, habitat types). Increase this number if you expect many different kinds of images. Lower the number to 1 if you have very few images and/or the content is largely uniform.
      * @apiParam (Required parameters for novelty detection) {number} nd_patch_size Size in pixels of the image patches used determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
@@ -37,7 +36,7 @@ class MaiaJobController extends Controller
      *
      *
      * @apiParam (Optional parameters for existing annotations) {Array} oa_restrict_labels Array of label IDs to restrict the existing annotations to, which should be used as training proposals.
-     * @apiParam (Optional parameters for existing annotations) {Boolean} oa_show_training_proposals If `true`, show the select training proposals stage with the existing annotations before continuing to the instance segmentation stage.
+     * @apiParam (Optional parameters for existing annotations) {Boolean} oa_show_training_proposals If `true`, show the select training proposals stage with the existing annotations before continuing to the object detection stage.
      *
      * @apiParam (Required parameters for knowledge transfer) {number} kt_volume_id The ID of the volume from which to get the annotations for knowledge transfer.
      *
@@ -53,8 +52,6 @@ class MaiaJobController extends Controller
         $job->user_id = $request->user()->id;
         $paramKeys = [
             'training_data_method',
-            // is_* are parameters for instance segmentation.
-            'is_train_scheme',
         ];
 
         // Assign this early so we can use the shouldUse* methods below.
@@ -64,14 +61,14 @@ class MaiaJobController extends Controller
             if ($request->input('oa_show_training_proposals')) {
                 $job->state_id = State::noveltyDetectionId();
             } else {
-                $job->state_id = State::instanceSegmentationId();
+                $job->state_id = State::objectDetectionId();
             }
             $paramKeys = array_merge($paramKeys, [
                 'oa_restrict_labels',
                 'oa_show_training_proposals',
             ]);
         } elseif ($job->shouldUseKnowledgeTransfer()) {
-            $job->state_id = State::instanceSegmentationId();
+            $job->state_id = State::objectDetectionId();
             $paramKeys = array_merge($paramKeys, [
                 'kt_volume_id',
                 'kt_restrict_labels',

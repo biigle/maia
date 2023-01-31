@@ -6,7 +6,7 @@ use Biigle\Http\Requests\UpdateUserSettings;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
-use Biigle\Modules\Maia\Listeners\DispatchInstanceSegmentationRequest;
+use Biigle\Modules\Maia\Listeners\DispatchObjectDetectionRequest;
 use Biigle\Modules\Maia\Listeners\DispatchMaiaJob;
 use Biigle\Modules\Maia\Listeners\PrepareDeleteAnnotationPatches;
 use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
@@ -60,7 +60,7 @@ class MaiaServiceProvider extends ServiceProvider
         Gate::policy(TrainingProposal::class, Policies\TrainingProposalPolicy::class);
         Gate::policy(AnnotationCandidate::class, Policies\AnnotationCandidatePolicy::class);
         Event::listen(MaiaJobCreated::class, DispatchMaiaJob::class);
-        Event::listen(MaiaJobContinued::class, DispatchInstanceSegmentationRequest::class);
+        Event::listen(MaiaJobContinued::class, DispatchObjectDetectionRequest::class);
         Event::listen(MaiaJobContinued::class, PruneTrainingProposalPatches::class);
         Event::listen(MaiaJobDeleting::class, PrepareDeleteAnnotationPatches::class);
     }
