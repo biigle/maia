@@ -11,8 +11,7 @@ model = dict(
         norm_cfg=dict(type='BN', requires_grad=True),
         norm_eval=True,
         style='pytorch',
-        init_cfg=dict(type='Pretrained',
-                      checkpoint='torchvision://resnet50')),
+        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],
@@ -126,10 +125,7 @@ train_pipeline = [
             label_fields=['gt_labels'],
             filter_lost_elements=True,
             min_area=100),
-        keymap=dict(
-            img='image',
-            gt_masks='masks',
-            gt_bboxes='bboxes'),
+        keymap=dict(img='image', gt_masks='masks', gt_bboxes='bboxes'),
         transforms=[
             dict(
                 type='SomeOf',
@@ -154,7 +150,10 @@ train_pipeline = [
     dict(
         type='Collect',
         keys=['img', 'gt_bboxes', 'gt_labels'],
-        meta_keys=['filename', 'ori_filename', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'img_norm_cfg'])
+        meta_keys=[
+            'filename', 'ori_filename', 'ori_shape', 'img_shape', 'pad_shape',
+            'scale_factor', 'img_norm_cfg'
+        ])
 ]
 
 test_pipeline = [
@@ -181,7 +180,7 @@ test_pipeline = [
 
 data = dict(
     samples_per_gpu=12,
-    workers_per_gpu=4,
+    workers_per_gpu=2,
     train=dict(
         type=dataset_type,
         ann_file='',
