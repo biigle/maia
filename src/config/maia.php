@@ -48,7 +48,7 @@ return [
     /*
     | Path to the Python executable.
     */
-    'python' => '/usr/bin/python3',
+    'python' => env('MAIA_PYTHON', '/usr/bin/python3'),
 
     /*
     | Number of worker threads to use during novelty detection or object detection.
