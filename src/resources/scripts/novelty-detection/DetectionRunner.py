@@ -6,7 +6,6 @@ import numpy as np
 from concurrent.futures import ThreadPoolExecutor, wait
 from ImageCollection import ImageCollection
 from NoveltyDetector import NoveltyDetector
-from PIL import Image
 
 class DetectionRunner(object):
 
@@ -99,7 +98,6 @@ class DetectionRunner(object):
     def postprocess_map(self, image, threshold):
         saliency_map = np.load(self.image_path(image, 'npy'))
         binary_map = np.where(saliency_map > threshold, 255, 0).astype(np.uint8)
-        # Image.fromarray(binary_map).save(self.image_path(image, 'png'))
         mask = np.zeros_like(binary_map)
         contours, _ = cv2.findContours(binary_map, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         points = []
