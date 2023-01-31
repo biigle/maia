@@ -179,7 +179,7 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=12,
+    samples_per_gpu=16,
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
@@ -235,7 +235,9 @@ opencv_num_threads = 0
 
 mp_start_method = 'fork'
 
-auto_scale_lr = dict(enable=False, base_batch_size=16)
+# Don't change the base_batch_size.
+# See: https://mmdetection.readthedocs.io/en/dev/1_exist_data_model.html#learning-rate-automatically-scale
+auto_scale_lr = dict(enable=True, base_batch_size=16)
 
 work_dir = ''
 

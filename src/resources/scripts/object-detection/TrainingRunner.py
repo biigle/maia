@@ -42,6 +42,8 @@ class TrainingRunner(object):
             # Path to the pretrained weights for the rest of the network
             'load_from': params['model_path'],
             'data': {
+                # If multi-GPU training is implemented at some point, divide this by the
+                # number of GPUs!
                 'samples_per_gpu': params['batch_size'],
                 'workers_per_gpu': params['max_workers'],
                 'train': {

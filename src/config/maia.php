@@ -105,9 +105,9 @@ return [
     | Number of 512x512 px images in a training batch of MMDetection.
     | This can be increased with larger GPU memory to achieve faster training.
     |
-    | Default is 12.
+    | Default is 16.
     */
-    'mmdet_train_batch_size' => env('MAIA_MMDET_TRAIN_BATCH_SIZE', 12),
+    'mmdet_train_batch_size' => env('MAIA_MMDET_TRAIN_BATCH_SIZE', 16),
 
 
     'notifications' => [
