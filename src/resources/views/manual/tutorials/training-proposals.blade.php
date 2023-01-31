@@ -125,7 +125,7 @@
         </p>
 
         <p>
-            When the training proposals have been submitted, the MAIA job automatically proceeds to the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation</a> stage.
+            When the training proposals have been submitted, the MAIA job automatically proceeds to the <a href="{{route('manual-tutorials', ['maia', 'object-detection'])}}">object detection</a> stage.
         </p>
        <h3>Further reading</h3>
         <ul>
@@ -133,8 +133,8 @@
             <li><a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">Using novelty detection to obtain training data.</a></li>
             <li><a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Using existing annotations to obtain training data.</a></li>
             <li><a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Using knowledge transfer to obtain training data.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">The automatic instance segmentation.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'object-detection'])}}">The automatic object detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from object detection.</a></li>
         </ul>
     </div>
 @endsection

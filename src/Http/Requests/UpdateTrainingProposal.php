@@ -72,8 +72,8 @@ class UpdateTrainingProposal extends FormRequest
     }
 
     /**
-     * Do not allow updating of training proposals if the MAIA job is running instance
-     * segmentation or is finished.
+     * Do not allow updating of training proposals if the MAIA job is running object
+     * detection or is finished.
      *
      * @param  \Illuminate\Validation\Validator  $validator
      */

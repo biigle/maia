@@ -91,7 +91,7 @@ class StoreMaiaJob extends FormRequest
                 ->whereIn('state_id', [
                     State::noveltyDetectionId(),
                     State::trainingProposalsId(),
-                    State::instanceSegmentationId(),
+                    State::objectDetectionId(),
                 ])
                 ->exists();
 

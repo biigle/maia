@@ -20,7 +20,7 @@
             @if ($job->state_id === $states['failed-novelty-detection'])
                 The job has failed during novelty detection.
             @else
-                The job has failed during instance segmentation.
+                The job has failed during object detection.
             @endif
         </p>
         @if (($user->can('sudo') || config('app.debug')) && array_key_exists('message', $job->error))
@@ -46,9 +46,10 @@
             <p class="text-warning lead">
                 Please select <i class="fas fa-plus-square"></i> and refine <i class="fas fa-pen-square"></i> the training proposals.
             </p>
+        {{-- The array key is instance-segmentation for legacy reasons --}}
         @elseif ($job->state_id === $states['instance-segmentation'])
             <p class="text-warning text-center lead">
-                Instance segmentation in progress.<br>Please come back later.
+                Object detection in progress.<br>Please come back later.
             </p>
         @endif
     @endif

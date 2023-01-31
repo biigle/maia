@@ -5,11 +5,11 @@
 @section('manual-content')
     <div class="row">
         <p class="lead">
-            Reviewing the annotation candidates from instance segmentation.
+            Reviewing the annotation candidates from object detection.
         </p>
 
         <p>
-            A MAIA job is finished when it proceeded from the <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation</a> to the annotation candidates stage. In this stage you can review the annotation candidates that were generated in the previous stage and convert them to real annotations. Similar to the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">training proposals</a> stage of novelty detection, this is done in two steps the <a href="#selection-of-annotation-candidates">selection of annotation candidates</a> and the <a href="#refinement-of-annotation-candidates">refinement of annotation candidates</a>.
+            A MAIA job is finished when it proceeded from the <a href="{{route('manual-tutorials', ['maia', 'object-detection'])}}">object detection</a> to the annotation candidates stage. In this stage you can review the annotation candidates that were generated in the previous stage and convert them to real annotations. Similar to the <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">training proposals</a> stage of novelty detection, this is done in two steps the <a href="#selection-of-annotation-candidates">selection of annotation candidates</a> and the <a href="#refinement-of-annotation-candidates">refinement of annotation candidates</a>.
         </p>
 
         <h3><a name="selection-of-annotation-candidates"></a>Selection of annotation candidates</h3>
@@ -71,7 +71,7 @@
             <li><a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Using existing annotations to obtain training data.</a></li>
             <li><a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Using knowledge transfer to obtain training data.</a></li>
             <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">Reviewing the training proposals from novelty detection.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">The automatic instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'object-detection'])}}">The automatic object detection.</a></li>
         </ul>
     </div>
 @endsection

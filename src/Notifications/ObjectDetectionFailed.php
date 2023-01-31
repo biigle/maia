@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia\Notifications;
 
-class InstanceSegmentationFailed extends JobStateChanged
+class ObjectDetectionFailed extends JobStateChanged
 {
     /**
      * Get the title for the state change.
@@ -23,6 +23,6 @@ class InstanceSegmentationFailed extends JobStateChanged
      */
     protected function getMessage($job)
     {
-        return "MAIA job {$job->id} failed during instance segmentation.";
+        return "MAIA job {$job->id} failed during object detection.";
     }
 }

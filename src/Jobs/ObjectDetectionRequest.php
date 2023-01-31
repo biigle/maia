@@ -9,7 +9,7 @@ use Exception;
 use File;
 use FileCache;
 
-class InstanceSegmentationRequest extends JobRequest
+class ObjectDetectionRequest extends JobRequest
 {
     /**
      * Selected training proposals.
@@ -299,13 +299,13 @@ class InstanceSegmentationRequest extends JobRequest
     }
 
     /**
-     * Dispatch the job to store the instance segmentation results.
+     * Dispatch the job to store the object detection results.
      *
      * @param array $annotations
      */
     protected function dispatchResponse($annotations)
     {
-        $this->dispatch(new InstanceSegmentationResponse($this->jobId, $annotations));
+        $this->dispatch(new ObjectDetectionResponse($this->jobId, $annotations));
     }
 
     /**
@@ -313,7 +313,7 @@ class InstanceSegmentationRequest extends JobRequest
      */
     protected function dispatchFailure(Exception $e)
     {
-        $this->dispatch(new InstanceSegmentationFailure($this->jobId, $e));
+        $this->dispatch(new ObjectDetectionFailure($this->jobId, $e));
     }
 
     /**
@@ -321,7 +321,7 @@ class InstanceSegmentationRequest extends JobRequest
      */
     protected function getTmpDirPath()
     {
-        return parent::getTmpDirPath()."-instance-segmentation";
+        return parent::getTmpDirPath()."-object-detection";
     }
 
     /**

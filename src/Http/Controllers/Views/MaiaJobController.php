@@ -44,14 +44,14 @@ class MaiaJobController extends Controller
             ->whereIn('state_id', [
                 State::noveltyDetectionId(),
                 State::trainingProposalsId(),
-                State::instanceSegmentationId(),
+                State::objectDetectionId(),
             ])
             ->count() > 0;
 
         $hasJobsRunning = $jobs
             ->whereIn('state_id', [
                 State::noveltyDetectionId(),
-                State::instanceSegmentationId(),
+                State::objectDetectionId(),
             ])
             ->count() > 0;
 

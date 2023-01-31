@@ -26,7 +26,7 @@
         </p>
 
         <p>
-            In the third step (instance segmentation), the manually filtered or automatically obtained set of training proposals is used to train a machine learning model for the automatic detection of the selected interesting objects. The model is highly specialized for this task and can usually detect most (if not all) instances of the interesting objects in the images. In the tests reported by the MAIA paper, 84% of the interesting objects were detected on average <a href="#ref1">[1]</a>. The detections are passed on as "annotation candidates" to the fourth step.
+            In the third step, object detection (called "instance segmentation" in the MAIA paper <a href="#ref1">[1]</a>), the manually filtered or automatically obtained set of training proposals is used to train a machine learning model for the automatic detection of the selected interesting objects. The model is highly specialized for this task and can usually detect most (if not all) instances of the interesting objects in the images. In the tests reported by the MAIA paper, 84% of the interesting objects were detected on average <a href="#ref1">[1]</a>. The detections are passed on as "annotation candidates" to the fourth step.
         </p>
 
         <p>
@@ -43,7 +43,7 @@
             To create new annotations with MAIA in BIIGLE, project editors, experts or admins can start a new MAIA "job" for a volume of a project. To start a new MAIA job, click on the <button class="btn btn-default btn-xs"><i class="fas fa-robot"></i></button> button in the sidebar of the volume overview. This will open up the MAIA overview for the volume, which lists any running or finished jobs, as well as a form to create a new MAIA job for the volume. New jobs can only be created when no other job is currently running for the volume.
         </p>
         <p>
-            The form to create a new MAIA job presents you a choice between several methods to obtain training data (training proposals). Choose one that best fits to your use case. The form initially shows only the parameters that are most likely to be modified for each job. To show all available parameters, click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form. There can be quite a lot parameters that can be configured for a MAIA job. Although sensible defaults are set, a careful configuration may be crucial for a good quality of the resulting annotations. You can read more on the configuration parameters for <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>, <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">existing annotations</a>, <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">knowledge transfer</a> and <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">instance segmentation</a> in the respective articles.
+            The form to create a new MAIA job presents you a choice between several methods to obtain training data (training proposals). Choose one that best fits to your use case. The form initially shows only the parameters that are most likely to be modified for each job. To show all available parameters, click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form. There can be quite a lot parameters that can be configured for a MAIA job. Although sensible defaults are set, a careful configuration may be crucial for a good quality of the resulting annotations. You can read more on the configuration parameters for <a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>, <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">existing annotations</a>, <a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">knowledge transfer</a> and <a href="{{route('manual-tutorials', ['maia', 'object-detection'])}}">object detection</a> in the respective articles.
         </p>
         <div class="panel panel-warning">
             <div class="panel-body text-warning">
@@ -65,8 +65,8 @@
             <li><a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">Using existing annotations to obtain training data.</a></li>
             <li><a href="{{route('manual-tutorials', ['maia', 'knowledge-transfer'])}}">Using knowledge transfer to obtain training data.</a></li>
             <li><a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}">Reviewing the training proposals from novelty detection.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">The automatic instance segmentation.</a></li>
-            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from instance segmentation.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'object-detection'])}}">The automatic object detection.</a></li>
+            <li><a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Reviewing the annotation candidates from object detection.</a></li>
         </ul>
     </div>
     <div class="row">

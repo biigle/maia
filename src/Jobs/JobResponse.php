@@ -11,7 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
  * This job is executed on the machine running BIIGLE to store the results of novelty
- * detection or instance segmentation.
+ * detection or object detection.
  */
 class JobResponse extends Job implements ShouldQueue
 {

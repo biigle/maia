@@ -35,15 +35,15 @@
 </p>
 
 <h4>
-    <a href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}">Instance segmentation</a>
+    <a href="{{route('manual-tutorials', ['maia', 'object-detection'])}}">Object detection</a>
 </h4>
 <p>
-    The automatic instance segmentation.
+    The automatic object detection.
 </p>
 
 <h4>
     <a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">Annotation candidates</a>
 </h4>
 <p>
-    Reviewing the annotation candidates from instance segmentation.
+    Reviewing the annotation candidates from object detection.
 </p>

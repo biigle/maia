@@ -2,9 +2,9 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationFailure;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationRequest;
-use Biigle\Modules\Maia\Jobs\InstanceSegmentationResponse;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionRequest;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionResponse;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
@@ -15,7 +15,7 @@ use Queue;
 use Str;
 use TestCase;
 
-class InstanceSegmentationRequestTest extends TestCase
+class ObjectDetectionRequestTest extends TestCase
 {
     public function testHandle()
     {
@@ -47,7 +47,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'selected' => false,
         ]);
         config(['maia.tmp_dir' => '/tmp']);
-        $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
+        $tmpDir = "/tmp/maia-{$job->id}-object-detection";
         $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
         $datasetOutputJsonPath = "{$tmpDir}/output-dataset.json";
         $trainingInputJsonPath = "{$tmpDir}/input-training.json";
@@ -105,7 +105,7 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertEquals($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-            Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $image) {
+            Queue::assertPushed(ObjectDetectionResponse::class, function ($response) use ($job, $image) {
                 return $response->jobId === $job->id
                     && in_array([$image->id, 10, 20, 30, 123], $response->annotations);
             });
@@ -155,7 +155,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'selected' => true,
         ]);
         config(['maia.tmp_dir' => '/tmp']);
-        $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
+        $tmpDir = "/tmp/maia-{$job->id}-object-detection";
         $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
         $datasetOutputJsonPath = "{$tmpDir}/output-dataset.json";
         $trainingInputJsonPath = "{$tmpDir}/input-training.json";
@@ -216,7 +216,7 @@ class InstanceSegmentationRequestTest extends TestCase
             $this->assertEquals($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-            Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $ownImage) {
+            Queue::assertPushed(ObjectDetectionResponse::class, function ($response) use ($job, $ownImage) {
                 return $response->jobId === $job->id
                     && in_array([$ownImage->id, 10, 20, 30, 123], $response->annotations);
             });
@@ -266,7 +266,7 @@ class InstanceSegmentationRequestTest extends TestCase
             'selected' => true,
         ]);
         config(['maia.tmp_dir' => '/tmp']);
-        $tmpDir = "/tmp/maia-{$job->id}-instance-segmentation";
+        $tmpDir = "/tmp/maia-{$job->id}-object-detection";
         $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
 
         $expectDatasetJson = [
@@ -288,7 +288,7 @@ class InstanceSegmentationRequestTest extends TestCase
             unset($inputJson['images']);
             $this->assertEquals($expectDatasetJson, $inputJson);
 
-            Queue::assertPushed(InstanceSegmentationResponse::class, function ($response) use ($job, $ownImage) {
+            Queue::assertPushed(ObjectDetectionResponse::class, function ($response) use ($job, $ownImage) {
                 return $response->jobId === $job->id
                     && in_array([$ownImage->id, 10, 20, 30, 123], $response->annotations);
             });
@@ -306,11 +306,11 @@ class InstanceSegmentationRequestTest extends TestCase
 
         Queue::fake();
         $request->failed(new Exception);
-        Queue::assertPushed(InstanceSegmentationFailure::class);
+        Queue::assertPushed(ObjectDetectionFailure::class);
     }
 }
 
-class IsJobStub extends InstanceSegmentationRequest
+class IsJobStub extends ObjectDetectionRequest
 {
     public $commands = [];
     public $cleanup = false;

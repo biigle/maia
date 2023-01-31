@@ -45,7 +45,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
     public function testSubmit()
     {
         $job = MaiaJobTest::create([
-            'state_id' => State::instanceSegmentationId(),
+            'state_id' => State::objectDetectionId(),
             'volume_id' => $this->volume()->id,
             'attrs' => ['converting_candidates' => true],
         ]);

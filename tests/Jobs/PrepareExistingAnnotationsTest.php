@@ -7,7 +7,7 @@ use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Maia\Jobs\PrepareExistingAnnotations;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionFailed;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
@@ -137,9 +137,9 @@ class PrepareExistingAnnotationsTest extends TestCase
 
         Notification::fake();
         (new PrepareExistingAnnotations($job))->handle();
-        Notification::assertSentTo($job->user, InstanceSegmentationFailed::class);
+        Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
         $this->assertEquals(0, $job->trainingProposals()->count());
-        $this->assertEquals(State::failedInstanceSegmentationId(), $job->fresh()->state_id);
+        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 

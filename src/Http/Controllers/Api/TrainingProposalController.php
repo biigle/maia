@@ -55,7 +55,7 @@ class TrainingProposalController extends Controller
     }
 
     /**
-     * Continue a MAIA job from training proposal selection and refinement to instance segmentation.
+     * Continue a MAIA job from training proposal selection and refinement to object detection.
      *
      * @api {post} maia-jobs/:id/training-proposals Submit training proposals
      * @apiGroup Maia
@@ -70,7 +70,7 @@ class TrainingProposalController extends Controller
      */
     public function submit(ContinueMaiaJob $request)
     {
-        $request->job->state_id = State::instanceSegmentationId();
+        $request->job->state_id = State::objectDetectionId();
         $request->job->save();
         event(new MaiaJobContinued($request->job));
 

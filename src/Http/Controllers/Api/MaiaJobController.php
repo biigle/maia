@@ -36,7 +36,7 @@ class MaiaJobController extends Controller
      *
      *
      * @apiParam (Optional parameters for existing annotations) {Array} oa_restrict_labels Array of label IDs to restrict the existing annotations to, which should be used as training proposals.
-     * @apiParam (Optional parameters for existing annotations) {Boolean} oa_show_training_proposals If `true`, show the select training proposals stage with the existing annotations before continuing to the instance segmentation stage.
+     * @apiParam (Optional parameters for existing annotations) {Boolean} oa_show_training_proposals If `true`, show the select training proposals stage with the existing annotations before continuing to the object detection stage.
      *
      * @apiParam (Required parameters for knowledge transfer) {number} kt_volume_id The ID of the volume from which to get the annotations for knowledge transfer.
      *
@@ -61,14 +61,14 @@ class MaiaJobController extends Controller
             if ($request->input('oa_show_training_proposals')) {
                 $job->state_id = State::noveltyDetectionId();
             } else {
-                $job->state_id = State::instanceSegmentationId();
+                $job->state_id = State::objectDetectionId();
             }
             $paramKeys = array_merge($paramKeys, [
                 'oa_restrict_labels',
                 'oa_show_training_proposals',
             ]);
         } elseif ($job->shouldUseKnowledgeTransfer()) {
-            $job->state_id = State::instanceSegmentationId();
+            $job->state_id = State::objectDetectionId();
             $paramKeys = array_merge($paramKeys, [
                 'kt_volume_id',
                 'kt_restrict_labels',

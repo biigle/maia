@@ -105,25 +105,25 @@ class MaiaJob extends Model
     }
 
     /**
-     * Determine if the job is currently running novelty detection or instance segmentation.
+     * Determine if the job is currently running novelty detection or object detection.
      *
      * @return boolean
      */
     public function isRunning()
     {
         return $this->state_id === MaiaJobState::noveltyDetectionId()
-            || $this->state_id === MaiaJobState::instanceSegmentationId();
+            || $this->state_id === MaiaJobState::objectDetectionId();
     }
 
     /**
-     * Determine if the job failed during novelty detection or instance segmentation.
+     * Determine if the job failed during novelty detection or object detection.
      *
      * @return boolean
      */
     public function hasFailed()
     {
         return $this->state_id === MaiaJobState::failedNoveltyDetectionId()
-            || $this->state_id === MaiaJobState::failedInstanceSegmentationId();
+            || $this->state_id === MaiaJobState::failedObjectDetectionId();
     }
 
     /**

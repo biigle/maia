@@ -6,7 +6,7 @@
     <fieldset>
         <legend>Training data method</legend>
         <div>
-            The instance segmentation stage of MAIA requires training data with objects of interest. You can choose from several methods to obtain the training data:
+            The object detection stage of MAIA requires training data with objects of interest. You can choose from several methods to obtain the training data:
         </div>
         <div class="form-group">
             <div class="radio">
@@ -186,7 +186,7 @@
                <span class="help-block">{{ $errors->first('oa_show_training_proposals') }}</span>
             @else
                 <span class="help-block">
-                    Show the existing annotations as selectable training proposals before continuing to the instance segmentation stage.
+                    Show the existing annotations as selectable training proposals before continuing to the object detection stage.
                 </span>
             @endif
         </div>

@@ -110,8 +110,9 @@
             <input type="hidden" name="_method" value="DELETE">
             @if ($job->state_id === $states['novelty-detection'])
                 <button class="btn btn-danger" type="button" title="The job cannot be deleted while the novelty detection is running" disabled>Delete this job</button>
+            {{-- The array key is instance-segmentation for legacy reasons --}}
             @elseif ($job->state_id === $states['instance-segmentation'])
-                <button class="btn btn-danger" type="button" title="The job cannot be deleted while the instance segmentation is running" disabled>Delete this job</button>
+                <button class="btn btn-danger" type="button" title="The job cannot be deleted while the object detection is running" disabled>Delete this job</button>
             @else
                 <button class="btn btn-danger" type="submit">Delete this job</button>
             @endif

@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia\Notifications;
 
-class InstanceSegmentationComplete extends JobStateChanged
+class ObjectDetectionComplete extends JobStateChanged
 {
     /**
      * Get the title for the state change.

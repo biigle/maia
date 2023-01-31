@@ -5,7 +5,7 @@ namespace Biigle\Modules\Maia\Jobs;
 use Arr;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\InstanceSegmentationFailed;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionFailed;
 use Queue;
 
 class PrepareExistingAnnotations extends PrepareAnnotationsJob
@@ -19,9 +19,9 @@ class PrepareExistingAnnotations extends PrepareAnnotationsJob
     {
         if (!$this->hasAnnotations()) {
             $this->job->error = ['message' => 'Existing annotations should be used but there are no existing annotations to take as training proposals.'];
-            $this->job->state_id = State::failedInstanceSegmentationId();
+            $this->job->state_id = State::failedObjectDetectionId();
             $this->job->save();
-            $this->job->user->notify(new InstanceSegmentationFailed($this->job));
+            $this->job->user->notify(new ObjectDetectionFailed($this->job));
 
             return;
         }
@@ -38,7 +38,7 @@ class PrepareExistingAnnotations extends PrepareAnnotationsJob
             Queue::connection(config('maia.response_connection'))
                 ->pushOn(config('maia.response_queue'), new NoveltyDetectionResponse($this->job->id, []));
         } else {
-            // Continue with instance segmentation using all existing annotations as
+            // Continue with object detection using all existing annotations as
             // training data.
             event(new MaiaJobContinued($this->job));
         }

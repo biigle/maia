@@ -9,7 +9,7 @@ use Log;
 
 /**
  * This job is executed on the machine running BIIGLE to store the error state of a
- * failed novelty detection or instance segmentation.
+ * failed novelty detection or object detection.
  */
 class JobFailure extends Job implements ShouldQueue
 {
