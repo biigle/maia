@@ -24,7 +24,6 @@ class MaiaJobController extends Controller
      * @apiParam {Number} id The volume ID.
      *
      * @apiParam (Required parameters) {string} training_data_method One of `novelty_detection` (to perform novelty detection to generate training data), `own_annotations` (to use existing annotations of the same volume as training data), `knowledge_transfer` (to use knowlegde transfer based on distance to ground to get training data from another volume) or `area_knowledge_transfer` (to use knowlegde transfer based on image area to get training data from another volume).
-     * @apiParam (Required parameters) {array} is_train_scheme An array containing objects with the following properties. `layers`: Either `heads` or `all`, `epochs`: Number of epochs to train this step, `learing_rate`: Learing rate to use in this step.
      *
      * @apiParam (Required parameters for novelty detection) {number} nd_clusters Number of different kinds of images to expect. Images are of the same kind if they have similar lighting conditions or show similar patterns (e.g. sea floor, habitat types). Increase this number if you expect many different kinds of images. Lower the number to 1 if you have very few images and/or the content is largely uniform.
      * @apiParam (Required parameters for novelty detection) {number} nd_patch_size Size in pixels of the image patches used determine the training proposals. Increase the size if the images contain larger objects of interest, decrease the size if the objects are smaller. Larger patch sizes take longer to compute. Must be an odd number.
@@ -53,8 +52,6 @@ class MaiaJobController extends Controller
         $job->user_id = $request->user()->id;
         $paramKeys = [
             'training_data_method',
-            // is_* are parameters for instance segmentation.
-            'is_train_scheme',
         ];
 
         // Assign this early so we can use the shouldUse* methods below.

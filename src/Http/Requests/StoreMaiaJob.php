@@ -63,12 +63,6 @@ class StoreMaiaJob extends FormRequest
             'oa_show_training_proposals' => 'boolean',
 
             'kt_restrict_labels.*' => 'integer|exists:labels,id',
-
-            'is_train_scheme' => 'required|array|min:1',
-            'is_train_scheme.*' => 'array',
-            'is_train_scheme.*.layers' => 'required|in:heads,all',
-            'is_train_scheme.*.epochs' => 'required|integer|min:1',
-            'is_train_scheme.*.learning_rate' => 'required|numeric|min:0|max:1',
         ];
 
         if ($this->input('training_data_method') === 'knowledge_transfer') {

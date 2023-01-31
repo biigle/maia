@@ -228,7 +228,6 @@ class InstanceSegmentationRequest extends JobRequest
     {
         $path = "{$this->tmpDir}/input-training.json";
         $content = [
-            'is_train_scheme' => $this->jobParams['is_train_scheme'],
             'tmp_dir' => $this->tmpDir,
             'max_workers' => intval(config('maia.max_workers')),
             'output_path' => $outputJsonPath,

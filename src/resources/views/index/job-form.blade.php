@@ -229,57 +229,6 @@
         </div>
     </fieldset>
 
-    <fieldset v-cloak v-show="showAdvanced">
-        <legend>Instance Segmentation <a class="btn btn-default btn-xs pull-right" href="{{route('manual-tutorials', ['maia', 'instance-segmentation'])}}#configurable-parameters" title="More information on the configurable parameters for instance segmentation" target="_blank"><i class="fas fa-info-circle"></i></a></legend>
-
-        <div class="form-group{{ $errors->has('is_train_scheme') ? ' has-error' : '' }}">
-            <label for="is_train_scheme">Training scheme</label>
-            <div class="row" v-for="(step, index) in trainScheme">
-                <span class="col-xs-1">
-                    <button type="button" class="btn btn-default" title="Remove this step from the scheme" v-on:click="removeTrainStep(index)"><i class="fa fa-minus"></i></button>
-                </span>
-                <span class="col-xs-3">
-                    <select class="form-control" required v-model="step['layers']">
-                        <option value="heads">heads</option>
-                        <option value="all">all</option>
-                    </select>
-                </span>
-                <span class="col-xs-4">
-                    <input type="number" class="form-control" required min="1" step="1" v-model="step['epochs']">
-                </span>
-                <span class="col-xs-4">
-                    <input type="number" class="form-control" required min="0.00001" max="1" step="0.00001" v-model="step['learning_rate']">
-                </span>
-            </div>
-            <div class="row">
-                <span class="col-xs-1">
-                    <button type="button" class="btn btn-default" title="Add a new step to the scheme" v-on:click="addTrainStep"><i class="fa fa-plus"></i></button>
-                </span>
-                <span class="col-xs-3">
-                    <select class="form-control" disabled></select>
-                </span>
-                <span class="col-xs-4">
-                    <input type="number" class="form-control" disabled>
-                </span>
-                <span class="col-xs-4">
-                    <input type="number" class="form-control" disabled>
-                </span>
-            </div>
-            <div v-for="(step, index) in trainScheme">
-                <input type="hidden" :name="`is_train_scheme[${index}][layers]`" :value="step['layers']">
-                <input type="hidden" :name="`is_train_scheme[${index}][epochs]`" :value="step['epochs']">
-                <input type="hidden" :name="`is_train_scheme[${index}][learning_rate]`" :value="step['learning_rate']">
-            </div>
-            @if($errors->has('is_train_scheme'))
-               <span class="help-block">{{ $errors->first('is_train_scheme') }}</span>
-            @else
-                <span class="help-block">
-                    The scheme to use for training of Mask R-CNN for instance segmentation. The learning rate should decrease with subsequent steps.
-                </span>
-            @endif
-        </div>
-    </fieldset>
-
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
     <div class="form-group">
@@ -307,7 +256,6 @@
 @push('scripts')
 <script type="text/javascript">
     biigle.$declare('maia.volumeId', {!! $volume->id !!});
-    biigle.$declare('maia.trainScheme', {!! collect(old('is_train_scheme', $defaultTrainScheme)) !!});
     biigle.$declare('maia.hasErrors', {!! $errors->any() ? 'true' : 'false' !!});
     biigle.$declare('maia.trainingDataMethod', '{!! old('training_data_method', 'novelty_detection') !!}');
 </script>

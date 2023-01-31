@@ -27,9 +27,6 @@ class InstanceSegmentationRequestTest extends TestCase
         ]);
 
         $params = [
-            'is_train_scheme' => [
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
             'batch_size' => 12,
             'max_workers' => 2,
         ];
@@ -65,9 +62,6 @@ class InstanceSegmentationRequestTest extends TestCase
         ];
 
         $expectTrainingJson = [
-            'is_train_scheme' => [
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
             'max_workers' => 2,
             'batch_size' => 12,
             'tmp_dir' => $tmpDir,
@@ -144,9 +138,6 @@ class InstanceSegmentationRequestTest extends TestCase
                 $otherImage2->id => 0.25,
             ],
             'kt_volume_id' => $otherImage->volume_id,
-            'is_train_scheme' => [
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
             'batch_size' => 12,
             'max_workers' => 2,
         ];
@@ -183,9 +174,6 @@ class InstanceSegmentationRequestTest extends TestCase
         ];
 
         $expectTrainingJson = [
-            'is_train_scheme' => [
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
             'max_workers' => 2,
             'batch_size' => 12,
             'tmp_dir' => $tmpDir,
@@ -261,9 +249,6 @@ class InstanceSegmentationRequestTest extends TestCase
                 $otherImage2->id => 0.25,
             ],
             'kt_volume_id' => $otherImage->volume_id,
-            'is_train_scheme' => [
-                ['layers' => 'all', 'epochs' => 10, 'learning_rate' => 0.001],
-            ],
             'batch_size' => 12,
             'max_workers' => 2,
         ];

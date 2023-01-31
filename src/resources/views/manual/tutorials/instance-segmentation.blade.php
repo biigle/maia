@@ -8,27 +8,11 @@
             The automatic instance segmentation.
         </p>
         <p>
-            The third stage of a MAIA job processes all images of a volume with a supervised instance segmentation method (Mask&nbsp;R-CNN). This method uses the training proposals that were obtained with one of the three methods (<a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>, <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">existing annotations</a> or <a href="{{route('manual-tutorials', ['maia', 'knowledge transfer'])}}">knowledge transfer</a>) to learn a model for what you determined to be interesting objects or regions in the images. The instance segmentation method produces a set of "annotation candidates", which are image regions that the method found to be interesting based on your provided training proposals. When the instance segmentation is finished, the MAIA job will continue to the <a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">next stage</a> in which you can manually review the annotation candidates.
+            The third stage of a MAIA job processes all images of a volume with a supervised instance segmentation method (Faster&nbsp;R-CNN). This method uses the training proposals that were obtained with one of the three methods (<a href="{{route('manual-tutorials', ['maia', 'novelty-detection'])}}">novelty detection</a>, <a href="{{route('manual-tutorials', ['maia', 'existing-annotations'])}}">existing annotations</a> or <a href="{{route('manual-tutorials', ['maia', 'knowledge transfer'])}}">knowledge transfer</a>) to learn a model for what you determined to be interesting objects or regions in the images. The instance segmentation method produces a set of "annotation candidates", which are image regions that the method found to be interesting based on your provided training proposals. When the instance segmentation is finished, the MAIA job will continue to the <a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">next stage</a> in which you can manually review the annotation candidates.
         </p>
 
         <p>
-            The instance segmentation stage of a MAIA job can take many hours to complete. In the MAIA paper <a href="#ref1">[1]</a> we found that a total of 30 training epochs takes about eleven hours to complete training. This duration can be influenced by the <a href="#configurable-parameters">configurable parameters</a> of this stage that you define when you initially submit the new MAIA job. Be careful not to choose too low numbers for the training epochs, else the quality of the annotation candidates might suffer greatly.
-        </p>
-
-        <h3><a name="configurable-parameters"></a>Configurable parameters</h3>
-
-        <p>
-            The configurable parameters for this stage are not shown by default in the form to submit a new MAIA job. Click on the <button class="btn btn-default btn-xs">Show advanced parameters</button> button below the form to show the parameters for the instance segmentation stage.
-        </p>
-
-        <h4><a name="training-scheme"></a>Training scheme</h4>
-
-        <p class="text-muted">
-            By default, the training scheme of UnKnoT <a href="#ref2">[2]</a> is used.
-        </p>
-
-        <p>
-            A series of training steps consisting of layers to train, the number of epochs and the learning rate to use. Training should begin with the <code>heads</code> layers. The learning rate should decrease with subsequent steps.
+            The instance segmentation stage of a MAIA job can take many hours to complete. The exact runtime depends on the size of the dataset and the capabilities of the computing hardware. But generally, more training data results in a better object detector, so don't hold back your annotated data to reduce the training time.
         </p>
 
         <h3>Further reading</h3>
