@@ -46,6 +46,12 @@ return [
     'tmp_dir' => env('MAIA_TMP_DIR', storage_path('maia_jobs')),
 
     /*
+    | Keep the temporary files of a MAIA job in case of a failure.
+    | For debugging purposes only.
+    */
+    'debug_keep_files' => env('MAIA_DEBUG_KEEP_FILES', false),
+
+    /*
     | Path to the Python executable.
     */
     'python' => env('MAIA_PYTHON', '/usr/bin/python3'),

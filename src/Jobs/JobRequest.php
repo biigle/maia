@@ -70,7 +70,10 @@ class JobRequest extends Job implements ShouldQueue
      */
     public function failed(Exception $exception)
     {
-        $this->cleanup();
+        if (!config('maia.debug_keep_files')) {
+            $this->cleanup();
+        }
+
         $this->dispatchFailure($exception);
     }
 

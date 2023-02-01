@@ -77,7 +77,7 @@ class ObjectDetectionRequestTest extends TestCase
         ];
 
         try {
-            $request = new IsJobStub($job);
+            $request = new OdJobStub($job);
             $request->handle();
 
             $this->assertTrue(File::isDirectory($tmpDir));
@@ -189,7 +189,7 @@ class ObjectDetectionRequestTest extends TestCase
         ];
 
         try {
-            $request = new IsJobStub($job);
+            $request = new OdJobStub($job);
             $request->handle();
 
             $this->assertTrue(File::isDirectory($tmpDir));
@@ -281,7 +281,7 @@ class ObjectDetectionRequestTest extends TestCase
         ];
 
         try {
-            $request = new IsJobStub($job);
+            $request = new OdJobStub($job);
             $request->handle();
 
             $inputJson = json_decode(File::get($datasetInputJsonPath), true);
@@ -302,15 +302,28 @@ class ObjectDetectionRequestTest extends TestCase
     public function testFailed()
     {
         $job = MaiaJobTest::create();
-        $request = new IsJobStub($job);
+        $request = new OdJobStub($job);
 
         Queue::fake();
         $request->failed(new Exception);
         Queue::assertPushed(ObjectDetectionFailure::class);
     }
+
+    public function testFailedDebug()
+    {
+        config(['maia.debug_keep_files' => true]);
+
+        $job = MaiaJobTest::create();
+        $request = new OdJobStub($job);
+
+        Queue::fake();
+        $request->failed(new Exception);
+        Queue::assertPushed(ObjectDetectionFailure::class);
+        $this->assertFalse($request->cleanup);
+    }
 }
 
-class IsJobStub extends ObjectDetectionRequest
+class OdJobStub extends ObjectDetectionRequest
 {
     public $commands = [];
     public $cleanup = false;

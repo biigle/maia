@@ -113,6 +113,19 @@ class NoveltyDetectionRequestTest extends TestCase
         Queue::assertPushed(NoveltyDetectionFailure::class);
         $this->assertTrue($request->cleanup);
     }
+
+    public function testFailedDebug()
+    {
+        config(['maia.debug_keep_files' => true]);
+
+        $job = MaiaJobTest::create();
+        $request = new NdJobStub($job);
+
+        Queue::fake();
+        $request->failed(new Exception);
+        Queue::assertPushed(NoveltyDetectionFailure::class);
+        $this->assertFalse($request->cleanup);
+    }
 }
 
 class NdJobStub extends NoveltyDetectionRequest
