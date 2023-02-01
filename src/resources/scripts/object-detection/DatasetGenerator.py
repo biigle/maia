@@ -2,8 +2,7 @@ import os
 import sys
 import json
 import pickle
-from pyvips import Image as VipsImage
-from pyvips.error import Error as VipsError
+from PIL import Image as PilImage
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -58,17 +57,24 @@ class DatasetGenerator(object):
             source_path = os.path.abspath(self.images[imageId])
             target_name = os.path.basename(self.images[imageId])
             target_path = os.path.join(self.training_images_path, target_name)
-            image = VipsImage.new_from_file(source_path)
+            image = PilImage.open(source_path)
 
             if bool(self.scale_factors) != False:
                 # If scale transfer should be performed, scale the image and proposals.
                 scale_factor = self.scale_factors[imageId]
-                image = image.resize(scale_factor)
+                width = int(round(image.width * scale_factor))
+                height = int(round(image.height * scale_factor))
+                image_format = image.format
+                image = image.resize((width, height))
                 proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
-                image.write_to_file(target_path, strip=True, Q=95)
+                image.save(target_path, format=image_format, quality=95)
             else:
+                # Load image to check if it is corrupt.
+                image.load()
                 # Without scale transfer, just make a link to the original image in the cache.
                 os.symlink(source_path, target_path)
+
+            image.close()
 
             bboxes = []
             labels = []
@@ -83,7 +89,7 @@ class DatasetGenerator(object):
                 labels.append(0)
 
 
-        except VipsError as e:
+        except (IOError, OSError) as e:
             print('Image #{} is corrupt! Skipping...'.format(imageId))
 
             return False
