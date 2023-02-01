@@ -61,38 +61,33 @@ class ObjectDetectionRequest extends JobRequest
     {
         $this->createTmpDir();
 
-        try {
-            $images = $this->getGenericImages();
+        $images = $this->getGenericImages();
 
-            if ($this->shouldUseKnowledgeTransfer()) {
-                $datasetImages = $this->getKnowledgeTransferImages();
-            } else {
-                $datasetImages = $images;
-            }
-
-            // All images that contain selected training proposals.
-            $relevantImages = array_filter($datasetImages, function ($image) {
-                return array_key_exists($image->getId(), $this->trainingProposals);
-            });
-
-            $output = FileCache::batch($relevantImages, function ($images, $paths) {
-                $datasetOutputPath = $this->generateDataset($images, $paths);
-                // Training doesn't need the images and paths directly but expects the
-                // files to be there in the cache.
-                $trainingOutputPath = $this->performTraining($datasetOutputPath);
-
-                return [$datasetOutputPath, $trainingOutputPath];
-            });
-
-            $this->performInference($images, $output[0], $output[1]);
-
-            $annotations = $this->parseAnnotations($images);
-            $this->dispatchResponse($annotations);
-        } finally {
-            if (!config('maia.debug_keep_files')) {
-                $this->cleanup();
-            }
+        if ($this->shouldUseKnowledgeTransfer()) {
+            $datasetImages = $this->getKnowledgeTransferImages();
+        } else {
+            $datasetImages = $images;
         }
+
+        // All images that contain selected training proposals.
+        $relevantImages = array_filter($datasetImages, function ($image) {
+            return array_key_exists($image->getId(), $this->trainingProposals);
+        });
+
+        $output = FileCache::batch($relevantImages, function ($images, $paths) {
+            $datasetOutputPath = $this->generateDataset($images, $paths);
+            // Training doesn't need the images and paths directly but expects the
+            // files to be there in the cache.
+            $trainingOutputPath = $this->performTraining($datasetOutputPath);
+
+            return [$datasetOutputPath, $trainingOutputPath];
+        });
+
+        $this->performInference($images, $output[0], $output[1]);
+
+        $annotations = $this->parseAnnotations($images);
+        $this->dispatchResponse($annotations);
+        $this->cleanup();
     }
 
     /**

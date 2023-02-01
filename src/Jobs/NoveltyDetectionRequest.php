@@ -27,24 +27,19 @@ class NoveltyDetectionRequest extends JobRequest
     {
         $this->createTmpDir();
 
-        try {
-            $images = $this->getGenericImages();
+        $images = $this->getGenericImages();
 
-            FileCache::batch($images, function ($images, $paths) {
-                $script = config('maia.novelty_detection_script');
-                $path = $this->createInputJson($images, $paths);
-                $this->python("{$script} {$path}");
-            });
+        FileCache::batch($images, function ($images, $paths) {
+            $script = config('maia.novelty_detection_script');
+            $path = $this->createInputJson($images, $paths);
+            $this->python("{$script} {$path}");
+        });
 
-            $annotations = $this->parseAnnotations($images);
-            $limit = config('maia.training_proposal_limit');
-            $annotations = $this->maybeLimitAnnotations($annotations, $limit);
-            $this->dispatchResponse($annotations);
-        } finally {
-            if (!config('maia.debug_keep_files')) {
-                $this->cleanup();
-            }
-        }
+        $annotations = $this->parseAnnotations($images);
+        $limit = config('maia.training_proposal_limit');
+        $annotations = $this->maybeLimitAnnotations($annotations, $limit);
+        $this->dispatchResponse($annotations);
+        $this->cleanup();
     }
 
     /**
