@@ -89,7 +89,9 @@ class ObjectDetectionRequest extends JobRequest
             $annotations = $this->parseAnnotations($images);
             $this->dispatchResponse($annotations);
         } finally {
-            $this->cleanup();
+            if (!config('maia.debug_keep_files')) {
+                $this->cleanup();
+            }
         }
     }
 

@@ -21,6 +21,7 @@ class NoveltyDetectionRequestTest extends TestCase
         FileCache::fake();
         config([
             'maia.max_workers' => 2,
+            'maia.debug_keep_files' => false,
         ]);
 
         $params = [
@@ -69,7 +70,10 @@ class NoveltyDetectionRequestTest extends TestCase
     {
         Queue::fake();
         FileCache::fake();
-        config(['maia.training_proposal_limit' => 2]);
+        config([
+            'maia.training_proposal_limit' => 2,
+            'maia.debug_keep_files' => false,
+        ]);
 
         $params = [
             'nd_clusters' => 5,
@@ -103,8 +107,42 @@ class NoveltyDetectionRequestTest extends TestCase
         }
     }
 
+    public function testHandleDebug()
+    {
+        try {
+            $params = [
+                'nd_clusters' => 5,
+                'nd_patch_size' => 39,
+                'nd_threshold' => 99,
+                'nd_latent_size' => 0.1,
+                'nd_trainset_size' => 10000,
+                'nd_epochs' => 100,
+                'nd_stride' => 2,
+                'nd_ignore_radius' => 5,
+                'max_workers' => 2,
+            ];
+            config([
+                'maia.tmp_dir' => '/tmp',
+                'maia.debug_keep_files' => true,
+            ]);
+            $image = ImageTest::create();
+            $job = MaiaJobTest::create([
+                'volume_id' => $image->volume_id,
+                'params' => $params,
+            ]);
+            $tmpDir = "/tmp/maia-{$job->id}-novelty-detection";
+            $request = new NdJobStub($job);
+            $request->handle();
+            $this->assertFalse($request->cleanup);
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
     public function testFailed()
     {
+        config(['maia.debug_keep_files' => false]);
+
         $job = MaiaJobTest::create();
         $request = new NdJobStub($job);
 

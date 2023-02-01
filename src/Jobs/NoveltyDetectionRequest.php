@@ -41,7 +41,9 @@ class NoveltyDetectionRequest extends JobRequest
             $annotations = $this->maybeLimitAnnotations($annotations, $limit);
             $this->dispatchResponse($annotations);
         } finally {
-            $this->cleanup();
+            if (!config('maia.debug_keep_files')) {
+                $this->cleanup();
+            }
         }
     }
 

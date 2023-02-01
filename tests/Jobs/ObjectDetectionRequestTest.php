@@ -24,6 +24,7 @@ class ObjectDetectionRequestTest extends TestCase
         config([
             'maia.mmdet_train_batch_size' => 12,
             'maia.max_workers' => 2,
+            'maia.debug_keep_files' => false,
         ]);
 
         $params = [
@@ -123,6 +124,7 @@ class ObjectDetectionRequestTest extends TestCase
         config([
             'maia.mmdet_train_batch_size' => 12,
             'maia.max_workers' => 2,
+            'maia.debug_keep_files' => false,
         ]);
 
         $otherImage = ImageTest::create();
@@ -234,6 +236,7 @@ class ObjectDetectionRequestTest extends TestCase
         config([
             'maia.mmdet_train_batch_size' => 12,
             'maia.max_workers' => 2,
+            'maia.debug_keep_files' => false,
         ]);
 
         $otherImage = ImageTest::create();
@@ -299,14 +302,35 @@ class ObjectDetectionRequestTest extends TestCase
         }
     }
 
+    public function testHandleDebug()
+    {
+        try {
+            config([
+                'maia.tmp_dir' => '/tmp',
+                'maia.debug_keep_files' => true,
+            ]);
+            $image = ImageTest::create();
+            $job = MaiaJobTest::create(['volume_id' => $image->volume_id]);
+            $tmpDir = "/tmp/maia-{$job->id}-object-detection";
+            $request = new OdJobStub($job);
+            $request->handle();
+            $this->assertFalse($request->cleanup);
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
     public function testFailed()
     {
+        config(['maia.debug_keep_files' => false]);
+
         $job = MaiaJobTest::create();
         $request = new OdJobStub($job);
 
         Queue::fake();
         $request->failed(new Exception);
         Queue::assertPushed(ObjectDetectionFailure::class);
+        $this->assertTrue($request->cleanup);
     }
 
     public function testFailedDebug()
