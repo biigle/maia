@@ -97,11 +97,15 @@ model = dict(
         rpn=dict(
             nms_pre=1000,
             max_per_img=1000,
-            nms=dict(type='nms', iou_threshold=0.7),
+            # The original config had iou_threshold=0.7.
+            # Lowered, because of many overlapping boxes for the same objects in tests.
+            nms=dict(type='nms', iou_threshold=0.2),
             min_bbox_size=0),
         rcnn=dict(
             score_thr=0.05,
-            nms=dict(type='nms', iou_threshold=0.5),
+            # The original config had iou_threshold=0.5.
+            # Lowered, because of many overlapping boxes for the same objects in tests.
+            nms=dict(type='nms', iou_threshold=0.2),
             max_per_img=100)))
 
 dataset_type = 'CustomDataset'
