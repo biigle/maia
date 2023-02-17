@@ -44,8 +44,8 @@ class TrainingRunner(object):
             'data': {
                 # If multi-GPU training is implemented at some point, divide this by the
                 # number of GPUs!
-                'samples_per_gpu': params['batch_size'],
-                'workers_per_gpu': params['max_workers'],
+                'samples_per_gpu': int(params['batch_size']),
+                'workers_per_gpu': int(params['max_workers']),
                 'train': {
                     'ann_file': trainset['ann_file'],
                     'img_prefix': trainset['img_prefix'],

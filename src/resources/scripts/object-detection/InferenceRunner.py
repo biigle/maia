@@ -15,7 +15,7 @@ class InferenceRunner(object):
         # Path to the MMDetection config.
         self.config_path = params['config_path']
         # We need at least one worker thread here.
-        self.max_workers = max(params['max_workers'], 1)
+        self.max_workers = max(int(params['max_workers']), 1)
 
         self.cfg_options = {
             'gpu_ids': [0],
