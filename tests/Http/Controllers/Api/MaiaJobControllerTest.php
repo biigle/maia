@@ -266,7 +266,7 @@ class MaiaJobControllerTest extends ApiTestCase
             ->assertStatus(422);
 
         $params['training_data_method'] = 'own_annotations';
-        $params['oa_restrict_labels'] = [999];
+        $params['oa_restrict_labels'] = [0];
         $this->postJson("/api/v1/volumes/{$id}/maia-jobs", $params)
             // Must contain valid label IDs.
             ->assertStatus(422);
@@ -449,7 +449,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $params = [
             'kt_volume_id' => $volume->id,
-            'kt_restrict_labels' => [999],
+            'kt_restrict_labels' => [0],
             'training_data_method' => 'knowledge_transfer',
         ];
 
@@ -624,7 +624,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $params = [
             'kt_volume_id' => $volume->id,
-            'kt_restrict_labels' => [999],
+            'kt_restrict_labels' => [0],
             'training_data_method' => 'area_knowledge_transfer',
         ];
 
