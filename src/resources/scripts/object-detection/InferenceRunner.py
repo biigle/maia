@@ -1,9 +1,9 @@
 import sys
 import os
 import json
+from torch import cuda
 from concurrent.futures import ThreadPoolExecutor
 from mmdet.apis import init_detector, inference_detector
-from mmdet.utils import get_device
 
 class InferenceRunner(object):
 
@@ -24,7 +24,7 @@ class InferenceRunner(object):
         self.images = {k: v for k, v in params['images'].items()}
 
     def run(self):
-        device = get_device()
+        device = 'cuda:0' if cuda.is_available() else 'cpu'
         model = init_detector(self.config_path, checkpoint=self.checkpoint_path, device=device, cfg_options=self.cfg_options)
 
         executor = ThreadPoolExecutor(max_workers=self.max_workers)
