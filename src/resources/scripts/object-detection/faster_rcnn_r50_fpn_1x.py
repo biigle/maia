@@ -254,3 +254,6 @@ auto_scale_lr = dict(enable=True, base_batch_size=16)
 work_dir = ''
 
 auto_resume = False
+
+# See: https://github.com/open-mmlab/mmdetection/issues/10052#issuecomment-1607320127
+default_scope = 'mmdet'

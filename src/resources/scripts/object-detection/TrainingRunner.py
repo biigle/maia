@@ -1,5 +1,5 @@
 import os
-import os.path as osp
+import os.path as os
 import sys
 import json
 
@@ -62,16 +62,19 @@ class TrainingRunner(object):
 
         cfg.merge_from_dict(self.cfg_options)
 
+        if not os.path.exists(cfg.work_dir):
+            os.makedirs(cfg.work_dir)
+
         # dump config
-        cfg.dump(osp.join(cfg.work_dir, self.dump_config_name))
+        cfg.dump(os.path.join(cfg.work_dir, self.dump_config_name))
 
         runner = Runner.from_cfg(cfg)
         runner.train()
 
         return {
             'work_dir': cfg.work_dir,
-            'checkpoint_path': osp.join(cfg.work_dir, 'latest.pth'),
-            'config_path': osp.join(cfg.work_dir, self.dump_config_name),
+            'checkpoint_path': os.path.join(cfg.work_dir, 'latest.pth'),
+            'config_path': os.path.join(cfg.work_dir, self.dump_config_name),
         }
 
 if __name__ == '__main__':
