@@ -21,7 +21,7 @@ class TrainingRunner(object):
 
         self.cfg_options = {
             # Path to store the logfiles and final checkpoint to.
-            'work_dir': osp.join(self.tmp_dir, 'work_dir'),
+            'work_dir': os.path.join(self.tmp_dir, 'work_dir'),
             'model': {
                 'backbone': {
                     'init_cfg': {
