@@ -114,7 +114,7 @@ model = dict(
             nms=dict(type='nms', iou_threshold=0.2),
             max_per_img=100)))
 
-dataset_type = 'CustomDataset'
+dataset_type = 'CocoDataset'
 
 train_pipeline = [
     # Use color_type unchanged to ignore EXIF orientation!
@@ -129,7 +129,7 @@ train_pipeline = [
         bbox_params=dict(
             type='BboxParams',
             format='pascal_voc',
-            label_fields=['gt_labels'],
+            label_fields=['gt_bboxes_labels', 'gt_ignore_flags'],
             filter_lost_elements=True,
             min_area=100),
         keymap=dict(img='image', gt_masks='masks', gt_bboxes='bboxes'),
@@ -147,18 +147,14 @@ train_pipeline = [
                     dict(type='ImageCompression', quality_lower=25, quality_upper=50),
                 ])
         ]),
-    dict(type='PackDetInputs')
+    dict(type='PackDetInputs', meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape'))
 ]
 
 test_pipeline = [
     # Use color_type unchanged to ignore EXIF orientation!
     # See: https://github.com/open-mmlab/mmcv/blob/0b005c52b4571f7cd1a7a882a5acecef6357ef0f/mmcv/image/io.py#L145
     dict(type='LoadImageFromFile', color_type='unchanged'),
-    dict(
-        type='PackDetInputs',
-        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
-                   'scale_factor')
-    )
+    dict(type='PackDetInputs', meta_keys=('img'))
 ]
 
 train_dataloader = dict(
@@ -169,6 +165,7 @@ train_dataloader = dict(
     batch_sampler=dict(type='AspectRatioBatchSampler'),  # Default batch_sampler, used to ensure that images in the batch have similar aspect ratios, so as to better utilize graphics memory
     dataset=dict(
         type=dataset_type,
+        metainfo=dict(classes=classes),
         ann_file='',
         data_prefix=dict(img=''),
         filter_cfg=dict(filter_empty_gt=True, min_size=16),
@@ -182,6 +179,7 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
+        metainfo=dict(classes=classes),
         ann_file='',
         data_prefix=dict(img=''),
         test_mode=True,
@@ -192,7 +190,7 @@ test_dataloader = val_dataloader
 val_evaluator = dict(
     type='CocoMetric',
     ann_file='',
-    metric=['mAP'],
+    metric=['bbox'],
     format_only=False)
 
 test_evaluator = val_evaluator

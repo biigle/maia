@@ -1,5 +1,4 @@
 import os
-import os.path as os
 import sys
 import json
 
@@ -44,7 +43,26 @@ class TrainingRunner(object):
                     },
                 },
             },
+            'val_dataloader': {
+                'dataset': {
+                    'ann_file': trainset['ann_file'],
+                    'data_prefix': {
+                        'img': trainset['img_prefix'],
+                    },
+                },
+            },
+            'test_dataloader': {
+                'dataset': {
+                    'ann_file': trainset['ann_file'],
+                    'data_prefix': {
+                        'img': trainset['img_prefix'],
+                    },
+                },
+            },
             'val_evaluator': {
+                'ann_file': trainset['ann_file'],
+            },
+            'test_evaluator': {
                 'ann_file': trainset['ann_file'],
             },
             'classes': trainset['classes'],
