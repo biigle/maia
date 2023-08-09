@@ -41,7 +41,7 @@ class InferenceRunner(object):
     def process_result(self, image_id, pred):
         points = []
         for bbox, score, label in zip(pred.bboxes, pred.scores, pred.labels):
-            x1, y1, x2, y2, score = bbox.detach().cpu().numpy()
+            x1, y1, x2, y2 = bbox.detach().cpu().numpy()
             r = round(max(x2 - x1, y2 - y1) / 2, 2)
             x = round((x1 + x2) / 2, 2)
             y = round((y1 + y2) / 2, 2)
