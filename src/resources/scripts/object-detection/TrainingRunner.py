@@ -1,21 +1,12 @@
 import os
-import os.path as osp
 import sys
 import json
 
 import time
 
-import mmcv
-import torch
-from mmcv import Config
-
-from mmdet import __version__
-from mmdet.apis import init_random_seed, set_random_seed, train_detector
-from mmdet.datasets import build_dataset
-from mmdet.models import build_detector
-from mmdet.utils import (collect_env, get_device, get_root_logger,
-                         replace_cfg_vals, setup_multi_processes,
-                         update_data_root)
+from mmengine.config import Config
+from mmengine.runner import Runner
+from mmdet.utils import setup_cache_size_limit_of_dynamo
 
 class TrainingRunner(object):
 
@@ -26,11 +17,10 @@ class TrainingRunner(object):
         self.base_config = params['base_config']
 
         self.dump_config_name = 'mmdet_config.py'
-        self.deterministic = False
 
         self.cfg_options = {
             # Path to store the logfiles and final checkpoint to.
-            'work_dir': osp.join(self.tmp_dir, 'work_dir'),
+            'work_dir': os.path.join(self.tmp_dir, 'work_dir'),
             'model': {
                 'backbone': {
                     'init_cfg': {
@@ -41,15 +31,39 @@ class TrainingRunner(object):
             },
             # Path to the pretrained weights for the rest of the network
             'load_from': params['model_path'],
-            'data': {
+            'train_dataloader': {
                 # If multi-GPU training is implemented at some point, divide this by the
                 # number of GPUs!
-                'samples_per_gpu': int(params['batch_size']),
-                'workers_per_gpu': int(params['max_workers']),
-                'train': {
+                'batch_size': int(params['batch_size']),
+                'num_workers': int(params['max_workers']),
+                'dataset': {
                     'ann_file': trainset['ann_file'],
-                    'img_prefix': trainset['img_prefix'],
+                    'data_prefix': {
+                        'img': trainset['img_prefix'],
+                    },
                 },
+            },
+            'val_dataloader': {
+                'dataset': {
+                    'ann_file': trainset['ann_file'],
+                    'data_prefix': {
+                        'img': trainset['img_prefix'],
+                    },
+                },
+            },
+            'test_dataloader': {
+                'dataset': {
+                    'ann_file': trainset['ann_file'],
+                    'data_prefix': {
+                        'img': trainset['img_prefix'],
+                    },
+                },
+            },
+            'val_evaluator': {
+                'ann_file': trainset['ann_file'],
+            },
+            'test_evaluator': {
+                'ann_file': trainset['ann_file'],
             },
             'classes': trainset['classes'],
             'gpu_ids': [0],
@@ -57,79 +71,28 @@ class TrainingRunner(object):
 
     # Based on: https://github.com/open-mmlab/mmdetection/blob/master/tools/train.py
     def run(self):
+        # Reduce the number of repeated compilations and improve
+        # training speed.
+        setup_cache_size_limit_of_dynamo()
 
+        # load config
         cfg = Config.fromfile(self.base_config)
-
-        # replace the ${key} with the value of cfg.key
-        cfg = replace_cfg_vals(cfg)
-
-        # update data root according to MMDET_DATASETS
-        update_data_root(cfg)
 
         cfg.merge_from_dict(self.cfg_options)
 
-        # set multi-process settings
-        setup_multi_processes(cfg)
+        if not os.path.exists(cfg.work_dir):
+            os.makedirs(cfg.work_dir)
 
-        mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
         # dump config
-        cfg.dump(osp.join(cfg.work_dir, self.dump_config_name))
-        # init the logger before other steps
-        timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
-        log_file = osp.join(cfg.work_dir, f'{timestamp}.log')
-        logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
+        cfg.dump(os.path.join(cfg.work_dir, self.dump_config_name))
 
-        # init the meta dict to record some important information such as
-        # environment info and seed, which will be logged
-        meta = dict()
-        # log env info
-        env_info_dict = collect_env()
-        env_info = '\n'.join([(f'{k}: {v}') for k, v in env_info_dict.items()])
-        dash_line = '-' * 60 + '\n'
-        logger.info('Environment info:\n' + dash_line + env_info + '\n' +
-                    dash_line)
-        meta['env_info'] = env_info
-        meta['config'] = cfg.pretty_text
-        # log some basic info
-        logger.info(f'Config:\n{cfg.pretty_text}')
-
-        cfg.device = get_device()
-        # set random seeds
-        seed = init_random_seed(device=cfg.device)
-        logger.info(f'Set random seed to {seed}, '
-                    f'deterministic: {self.deterministic}')
-        set_random_seed(seed, deterministic=self.deterministic)
-        cfg.seed = seed
-        meta['seed'] = seed
-        meta['exp_name'] = self.dump_config_name
-
-        model = build_detector(
-            cfg.model,
-            train_cfg=cfg.get('train_cfg'),
-            test_cfg=cfg.get('test_cfg'))
-        model.init_weights()
-
-        datasets = [build_dataset(cfg.data.train)]
-
-        if cfg.checkpoint_config is not None:
-            # save mmdet version, config file content and class names in
-            # checkpoints as meta data
-            cfg.checkpoint_config.meta = dict(
-                mmdet_version=__version__,
-                CLASSES=datasets[0].CLASSES)
-
-        train_detector(
-            model,
-            datasets,
-            cfg,
-            validate=False,
-            timestamp=timestamp,
-            meta=meta)
+        runner = Runner.from_cfg(cfg)
+        runner.train()
 
         return {
             'work_dir': cfg.work_dir,
-            'checkpoint_path': osp.join(cfg.work_dir, 'latest.pth'),
-            'config_path': osp.join(cfg.work_dir, self.dump_config_name),
+            'checkpoint_path': os.path.join(cfg.work_dir, 'latest.pth'),
+            'config_path': os.path.join(cfg.work_dir, self.dump_config_name),
         }
 
 if __name__ == '__main__':

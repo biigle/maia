@@ -2,6 +2,12 @@ classes = ('interesting', )
 
 model = dict(
     type='FasterRCNN',
+    data_preprocessor=dict(
+        type='DetDataPreprocessor',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        bgr_to_rgb=True,
+        pad_size_divisor=32),
     backbone=dict(
         type='ResNet',
         depth=50,
@@ -108,10 +114,7 @@ model = dict(
             nms=dict(type='nms', iou_threshold=0.2),
             max_per_img=100)))
 
-dataset_type = 'CustomDataset'
-
-img_norm_cfg = dict(
-    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+dataset_type = 'CocoDataset'
 
 train_pipeline = [
     # Use color_type unchanged to ignore EXIF orientation!
@@ -126,7 +129,7 @@ train_pipeline = [
         bbox_params=dict(
             type='BboxParams',
             format='pascal_voc',
-            label_fields=['gt_labels'],
+            label_fields=['gt_bboxes_labels', 'gt_ignore_flags'],
             filter_lost_elements=True,
             min_area=100),
         keymap=dict(img='image', gt_masks='masks', gt_bboxes='bboxes'),
@@ -144,86 +147,87 @@ train_pipeline = [
                     dict(type='ImageCompression', quality_lower=25, quality_upper=50),
                 ])
         ]),
-    dict(
-        type='Normalize',
-        mean=[123.675, 116.28, 103.53],
-        std=[58.395, 57.12, 57.375],
-        to_rgb=True),
-    dict(type='Pad', size_divisor=32),
-    dict(type='DefaultFormatBundle'),
-    dict(
-        type='Collect',
-        keys=['img', 'gt_bboxes', 'gt_labels'],
-        meta_keys=[
-            'filename', 'ori_filename', 'ori_shape', 'img_shape', 'pad_shape',
-            'scale_factor', 'img_norm_cfg'
-        ])
+    dict(type='PackDetInputs', meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape'))
 ]
 
 test_pipeline = [
     # Use color_type unchanged to ignore EXIF orientation!
     # See: https://github.com/open-mmlab/mmcv/blob/0b005c52b4571f7cd1a7a882a5acecef6357ef0f/mmcv/image/io.py#L145
     dict(type='LoadImageFromFile', color_type='unchanged'),
-    # Disable scaling/augmentation during inference. But we still need MultiScaleFlipAug
-    # somehow, otherwise there are errors.
-    dict(
-        type='MultiScaleFlipAug',
-        scale_factor=1,
-        flip=False,
-        transforms=[
-            dict(
-                type='Normalize',
-                mean=[123.675, 116.28, 103.53],
-                std=[58.395, 57.12, 57.375],
-                to_rgb=True),
-            dict(type='Pad', size_divisor=32),
-            dict(type='ImageToTensor', keys=['img']),
-            dict(type='Collect', keys=['img'])
-        ])
+    dict(type='PackDetInputs', meta_keys=('img'))
 ]
 
-data = dict(
-    samples_per_gpu=16,
-    workers_per_gpu=2,
-    train=dict(
+train_dataloader = dict(
+    batch_size=16,
+    num_workers=2,
+    persistent_workers=True,  # Avoid recreating subprocesses after each iteration
+    sampler=dict(type='DefaultSampler', shuffle=True),  # Default sampler, supports both distributed and non-distributed training
+    batch_sampler=dict(type='AspectRatioBatchSampler'),  # Default batch_sampler, used to ensure that images in the batch have similar aspect ratios, so as to better utilize graphics memory
+    dataset=dict(
         type=dataset_type,
+        metainfo=dict(classes=classes),
         ann_file='',
-        img_prefix='',
-        pipeline=train_pipeline,
-        classes=classes),
-    val=dict(
+        data_prefix=dict(img=''),
+        filter_cfg=dict(filter_empty_gt=True, min_size=16),
+        pipeline=train_pipeline))
+
+val_dataloader = dict(
+    batch_size=1,
+    num_workers=2,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
         type=dataset_type,
+        metainfo=dict(classes=classes),
         ann_file='',
-        img_prefix='',
-        pipeline=test_pipeline,
-        classes=classes),
-    test=dict(
-        type=dataset_type,
-        ann_file='',
-        img_prefix='',
-        pipeline=test_pipeline,
-        classes=classes))
+        data_prefix=dict(img=''),
+        test_mode=True,
+        pipeline=test_pipeline))
 
-evaluation = dict(interval=1, metric=['mAP'])
+test_dataloader = val_dataloader
 
-optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
+val_evaluator = dict(
+    type='CocoMetric',
+    ann_file='',
+    metric=['bbox'],
+    format_only=False)
 
-optimizer_config = dict(grad_clip=None)
+test_evaluator = val_evaluator
 
-lr_config = dict(
-    policy='step',
-    warmup='linear',
-    warmup_iters=500,
-    warmup_ratio=0.001,
-    step=[8, 11])
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(
+        type='SGD',
+        lr=0.02,
+        momentum=0.9,
+        weight_decay=0.0001),
+    clip_grad=None)
 
 epochs = 12
 
-runner = dict(type='EpochBasedRunner', max_epochs=epochs)
+param_scheduler = [
+    dict(
+        type='LinearLR',  # Use linear learning rate warmup
+        start_factor=0.001,
+        by_epoch=False,
+        begin=0,
+        end=500),
+    dict(
+        type='MultiStepLR',  # Use multi-step learning rate strategy during training
+        by_epoch=True,
+        begin=0,
+        end=epochs,
+        milestones=[8, 11])
+]
 
-checkpoint_config = dict(interval=epochs)
+train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=epochs, val_interval=1)
+val_cfg = dict(type='ValLoop')
+test_cfg = dict(type='TestLoop')
 
-log_config = dict(interval=1, hooks=[dict(type='TextLoggerHook')])
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=epochs),
+    logger=dict(type='LoggerHook', interval=1))
 
 custom_hooks = [dict(type='NumClassCheckHook')]
 
@@ -233,13 +237,13 @@ log_level = 'INFO'
 
 load_from = ''
 
-resume_from = None
+resume = None
 
 workflow = [('train', 1)]
 
-opencv_num_threads = 0
-
-mp_start_method = 'fork'
+env_cfg = dict(
+    mp_cfg=dict(mp_start_method='fork',
+                opencv_num_threads=0))
 
 # Don't change the base_batch_size.
 # See: https://mmdetection.readthedocs.io/en/dev/1_exist_data_model.html#learning-rate-automatically-scale
@@ -248,3 +252,6 @@ auto_scale_lr = dict(enable=True, base_batch_size=16)
 work_dir = ''
 
 auto_resume = False
+
+# See: https://github.com/open-mmlab/mmdetection/issues/10052#issuecomment-1607320127
+default_scope = 'mmdet'

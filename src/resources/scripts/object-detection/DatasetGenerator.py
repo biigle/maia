@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import pickle
 from PIL import Image as PilImage
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -32,25 +31,46 @@ class DatasetGenerator(object):
         for imageId, proposals in self.training_proposals.items():
             jobs.append(executor.submit(self.process_image, imageId, proposals))
 
-        ann_list = []
+        image_list = []
 
         for job in as_completed(jobs):
             a = job.result()
             if a is not False:
-                ann_list.append(a)
+                image_list.append(a)
 
-        if len(ann_list) == 0:
+        annotation_list = []
+        annotation_id = 0
+        for image in image_list:
+            annotations = image.pop('annotations')
+            for annotation in annotations:
+                annotation['id'] = annotation_id
+                annotation_id += 1
+                annotation_list.append(annotation)
+
+        if len(image_list) == 0:
             raise Exception('No images in dataset. All corrupt?')
 
         data_dict = {
             'img_prefix': self.training_images_path,
-            'ann_file': os.path.join(self.tmp_dir, 'train_dataset.pkl'),
+            'ann_file': os.path.join(self.tmp_dir, 'train_dataset.json'),
             # For now all datasets are binary, i.e. only the class "Interesting"
             # is distinguished from the background.
             'classes': ('interesting', )
         }
 
-        return data_dict, ann_list
+        # COCO format.
+        # See: https://mmdetection.readthedocs.io/en/latest/user_guides/train.html#coco-annotation-format
+        ann_file = {
+            'images': image_list,
+            'annotations': annotation_list,
+            'categories': [{
+                'id': 0,
+                'name': 'interesting',
+                'supercategory': 'interesting',
+            }],
+        }
+
+        return data_dict, ann_file
 
     def process_image(self, imageId, proposals):
         try:
@@ -76,17 +96,21 @@ class DatasetGenerator(object):
 
             image.close()
 
-            bboxes = []
-            labels = []
+            annotations = []
 
             for p in proposals:
-                bboxes.append([
-                    p[0] - p[2], # px1
-                    p[1] - p[2], # py1
-                    p[0] + p[2], # px2
-                    p[1] + p[2], # py2
-                ])
-                labels.append(0)
+                annotations.append({
+                    'id': 0, # Placeholder, will be updated to an uniwue ID later.
+                    'image_id': int(imageId),
+                    'category_id': 0, # There is only one category.
+                    'bbox': [
+                        p[0] - p[2], # px
+                        p[1] - p[2], # py
+                        p[2] * 2, # width
+                        p[2] * 2, # height
+                    ],
+                    'area': (p[2] * 2)**2,
+                })
 
 
         except (IOError, OSError) as e:
@@ -95,15 +119,11 @@ class DatasetGenerator(object):
             return False
 
         return {
-            'filename': target_name,
+            'id': int(imageId),
             'width': image.width,
             'height': image.height,
-            'ann': {
-                # These must be np.ndarray with the correct data type.
-                # See: https://mmdetection.readthedocs.io/en/latest/tutorials/customize_dataset.html#reorganize-new-data-format-to-middle-format
-                'bboxes': np.array(bboxes, dtype=np.float32),
-                'labels': np.array(labels, dtype=np.int64),
-            },
+            'file_name': target_name,
+            'annotations': annotations,
         }
 
 if __name__ == '__main__':
@@ -111,8 +131,8 @@ if __name__ == '__main__':
         params = json.load(f)
 
     runner = DatasetGenerator(params)
-    data_dict, ann_list = runner.generate()
+    data_dict, ann_file = runner.generate()
     with open(params['output_path'], 'w') as f:
         json.dump(data_dict, f)
-    with open(data_dict['ann_file'], 'wb') as f:
-        pickle.dump(ann_list, f)
+    with open(data_dict['ann_file'], 'w') as f:
+        json.dump(ann_file, f)
