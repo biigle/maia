@@ -110,6 +110,7 @@ class DatasetGenerator(object):
                         p[2] * 2, # height
                     ],
                     'area': (p[2] * 2)**2,
+                    'iscrowd': 0,
                 })
 
 

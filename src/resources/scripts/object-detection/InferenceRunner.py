@@ -33,22 +33,19 @@ class InferenceRunner(object):
         for index, (image_id, image_path) in enumerate(self.images.items()):
             print('Image {} of {} (#{})'.format(index + 1, total_images, image_id))
             result = inference_detector(model, image_path)
-            executor.submit(self.process_result, image_id, result)
+            executor.submit(self.process_result, image_id, result.pred_instances)
 
         # Wait for pending jobs of the postprocessing.
         executor.shutdown(True)
 
-    def process_result(self, image_id, result):
+    def process_result(self, image_id, pred):
         points = []
-        # I just suspect that the class index is the first dimension. At least it's not
-        # stored anywhere else.
-        for class_index, bboxes in enumerate(result):
-            for bbox in bboxes:
-                x1, y1, x2, y2, score = bbox
-                r = round(max(x2 - x1, y2 - y1) / 2, 2)
-                x = round((x1 + x2) / 2, 2)
-                y = round((y1 + y2) / 2, 2)
-                points.append([float(x), float(y), float(r), float(score)])
+        for bbox, score, label in zip(pred.bboxes, pred.scores, pred.labels):
+            x1, y1, x2, y2, score = bbox.detach().cpu().numpy()
+            r = round(max(x2 - x1, y2 - y1) / 2, 2)
+            x = round((x1 + x2) / 2, 2)
+            y = round((y1 + y2) / 2, 2)
+            points.append([float(x), float(y), float(r), float(score)])
 
         path = os.path.join(self.tmp_dir, '{}.json'.format(image_id))
         with open(path, 'w') as outfile:

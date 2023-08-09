@@ -91,7 +91,7 @@ class TrainingRunner(object):
 
         return {
             'work_dir': cfg.work_dir,
-            'checkpoint_path': os.path.join(cfg.work_dir, 'latest.pth'),
+            'checkpoint_path': os.path.join(cfg.work_dir, 'epoch_12.pth'),
             'config_path': os.path.join(cfg.work_dir, self.dump_config_name),
         }
 
