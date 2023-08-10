@@ -86,7 +86,7 @@ class DatasetGenerator(object):
                 height = int(round(image.height * scale_factor))
                 image_format = image.format
                 image = image.resize((width, height))
-                proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor).astype(int)
+                proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor)
                 image.save(target_path, format=image_format, quality=95)
             else:
                 # Load image to check if it is corrupt.
@@ -104,12 +104,12 @@ class DatasetGenerator(object):
                     'image_id': int(imageId),
                     'category_id': 0, # There is only one category.
                     'bbox': [
-                        p[0] - p[2], # px
-                        p[1] - p[2], # py
-                        p[2] * 2, # width
-                        p[2] * 2, # height
+                        int(p[0] - p[2]), # px
+                        int(p[1] - p[2]), # py
+                        int(p[2] * 2), # width
+                        int(p[2] * 2), # height
                     ],
-                    'area': (p[2] * 2)**2,
+                    'area': int((p[2] * 2)**2),
                     'iscrowd': 0,
                 })
 
