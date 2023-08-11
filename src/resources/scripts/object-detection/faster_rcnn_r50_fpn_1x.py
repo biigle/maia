@@ -173,7 +173,8 @@ train_dataloader = dict(
         filter_cfg=dict(filter_empty_gt=True, min_size=16),
         pipeline=train_pipeline))
 
-val_dataloader = dict(
+val_dataloader = None
+test_dataloader = dict(
     batch_size=1,
     num_workers=2,
     persistent_workers=True,
@@ -187,15 +188,12 @@ val_dataloader = dict(
         test_mode=True,
         pipeline=test_pipeline))
 
-test_dataloader = val_dataloader
-
-val_evaluator = dict(
+val_evaluator = None
+test_evaluator = dict(
     type='CocoMetric',
     ann_file='',
     metric=['bbox'],
     format_only=False)
-
-test_evaluator = val_evaluator
 
 optim_wrapper = dict(
     type='OptimWrapper',
@@ -224,7 +222,7 @@ param_scheduler = [
 ]
 
 train_cfg = dict(type='EpochBasedTrainLoop', max_epochs=epochs, val_interval=1)
-val_cfg = dict(type='ValLoop')
+val_cfg = None
 test_cfg = dict(type='TestLoop')
 
 default_hooks = dict(
