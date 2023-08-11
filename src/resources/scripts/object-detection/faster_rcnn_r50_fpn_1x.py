@@ -154,9 +154,9 @@ test_pipeline = [
     # Use color_type unchanged to ignore EXIF orientation!
     # See: https://github.com/open-mmlab/mmcv/blob/0b005c52b4571f7cd1a7a882a5acecef6357ef0f/mmcv/image/io.py#L145
     dict(type='LoadImageFromFile', color_type='unchanged'),
-    # Required to add the scale_factor to the meta keys.
-    dict(type='Resize', scale=1),
-    dict(type='PackDetInputs', meta_keys=('img', 'img_id', 'ori_shape', 'img_shape', 'scale_factor'))
+    # Required to add the scale_factor to the meta keys. Some action needs this value in the pipeline.
+    dict(type='Resize', scale_factor=1.0),
+    dict(type='PackDetInputs', meta_keys=('img_id', 'ori_shape', 'img_shape', 'scale_factor'))
 ]
 
 train_dataloader = dict(
