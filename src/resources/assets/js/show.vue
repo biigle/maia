@@ -268,7 +268,7 @@ export default {
             return this.candidateImageIds[this.nextCandidateImageIndex];
         },
         previousCandidateImageIndex() {
-          return (this.currentCandidateImageIndex - 1 + this.candidateImageIds.length) % this.candidateImageIds.length;
+            return (this.currentCandidateImageIndex - 1 + this.candidateImageIds.length) % this.candidateImageIds.length;
         },
         previousCandidateImageId() {
             return this.candidateImageIds[this.previousCandidateImageIndex];

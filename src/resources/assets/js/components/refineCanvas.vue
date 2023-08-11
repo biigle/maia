@@ -22,6 +22,10 @@ export default {
                 return [];
             },
         },
+        // This is required by the AnnotationCanvas but we don't need it here.
+        userId: {
+            default: null,
+        },
     },
     data() {
         return {
