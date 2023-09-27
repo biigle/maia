@@ -26,13 +26,15 @@
         <div v-show="infoTabOpen" class="maia-content">
             @include('maia::show.info-content')
         </div>
-        @if ($job->state_id >= $states['training-proposals'])
-            <div v-show="selectProposalsTabOpen" v-cloak class="maia-content">
-                @include('maia::show.select-proposals-content')
-            </div>
-            <div v-show="refineProposalsTabOpen" v-cloak class="maia-content">
-                @include('maia::show.refine-proposals-content')
-            </div>
+        @if ($job->shouldShowTrainingProposals())
+            @if ($job->state_id >= $states['training-proposals'])
+                <div v-show="selectProposalsTabOpen" v-cloak class="maia-content">
+                    @include('maia::show.select-proposals-content')
+                </div>
+                <div v-show="refineProposalsTabOpen" v-cloak class="maia-content">
+                    @include('maia::show.refine-proposals-content')
+                </div>
+            @endif
         @endif
         @if ($job->state_id >= $states['annotation-candidates'])
             <div v-show="selectCandidatesTabOpen" v-cloak class="maia-content">
