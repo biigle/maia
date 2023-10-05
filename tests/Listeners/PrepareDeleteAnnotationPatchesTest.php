@@ -13,7 +13,6 @@ class PrepareDeleteAnnotationPatchesTest extends TestCase
 {
     public function testHandle()
     {
-        Queue::fake();
         $event = new MaiaJobDeleting(MaiaJobTest::create());
         (new PrepareDeleteAnnotationPatches)->handle($event);
         Queue::assertPushed(DeleteAnnotationPatches::class);
