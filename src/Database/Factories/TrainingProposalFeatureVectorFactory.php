@@ -2,20 +2,18 @@
 
 namespace Biigle\Modules\Maia\Database\Factories;
 
-use Biigle\Image;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Modules\Maia\TrainingProposalEmbedding;
-use Biigle\Shape;
+use Biigle\Modules\Maia\TrainingProposalFeatureVector;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class TrainingProposalEmbeddingFactory extends Factory
+class TrainingProposalFeatureVectorFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = TrainingProposalEmbedding::class;
+    protected $model = TrainingProposalFeatureVector::class;
 
     /**
      * Define the model's default state.
@@ -26,7 +24,8 @@ class TrainingProposalEmbeddingFactory extends Factory
     {
         return [
             'id' => $this->faker->unique()->randomDigit(),
-            'embedding' => range(0, 383),
+            'job_id' => MaiaJob::factory(),
+            'vector' => range(0, 383),
         ];
     }
 }

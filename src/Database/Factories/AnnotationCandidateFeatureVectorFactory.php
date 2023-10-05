@@ -2,20 +2,18 @@
 
 namespace Biigle\Modules\Maia\Database\Factories;
 
-use Biigle\Image;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Modules\Maia\AnnotationCandidateEmbedding;
-use Biigle\Shape;
+use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AnnotationCandidateEmbeddingFactory extends Factory
+class AnnotationCandidateFeatureVectorFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = AnnotationCandidateEmbedding::class;
+    protected $model = AnnotationCandidateFeatureVector::class;
 
     /**
      * Define the model's default state.
@@ -26,7 +24,8 @@ class AnnotationCandidateEmbeddingFactory extends Factory
     {
         return [
             'id' => $this->faker->unique()->randomDigit(),
-            'embedding' => range(0, 383),
+            'job_id' => MaiaJob::factory(),
+            'vector' => range(0, 383),
         ];
     }
 }
