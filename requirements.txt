@@ -8,3 +8,5 @@ mmdet==3.1.*
 albumentations
 scikit-learn
 scikit-image
+Pillow==10.0.1
+xformers==0.0.18
