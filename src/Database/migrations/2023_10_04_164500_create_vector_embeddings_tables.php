@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::connection('pgvector')
             ->create('maia_training_proposal_embeddings', function (Blueprint $table) {
                 // Don't use increments() because it should throw an error if this is not
-                // provided.
+                // manually provided. It should be the ID of the model in the main DB.
                 $table->unsignedInteger('id');
                 $table->vector('embedding', 384);
 
@@ -26,7 +26,7 @@ return new class extends Migration
         Schema::connection('pgvector')
             ->create('maia_annotation_candidate_embeddings', function (Blueprint $table) {
                 // Don't use increments() because it should throw an error if this is not
-                // provided.
+                // manually provided. It should be the ID of the model in the main DB.
                 $table->unsignedInteger('id');
                 $table->vector('embedding', 384);
 
@@ -46,4 +46,4 @@ return new class extends Migration
         Schema::connection('pgvector')
             ->dropIfExists('maia_annotation_candidate_embeddings');
     }
-}
+};

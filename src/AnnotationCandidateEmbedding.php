@@ -2,13 +2,13 @@
 
 namespace Biigle\Modules\Maia;
 
-use Biigle\Modules\Maia\Database\Factories\TrainingProposalEmbeddingFactory;
+use Biigle\Modules\Maia\Database\Factories\AnnotationCandidateEmbeddingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Pgvector\Laravel\HasNeighbors;
 use Pgvector\Laravel\Vector;
 
-class TrainingProposalEmbedding extends Model
+class AnnotationCandidateEmbedding extends Model
 {
     use HasFactory, HasNeighbors;
 
@@ -24,7 +24,7 @@ class TrainingProposalEmbedding extends Model
      *
      * @var string
      */
-    protected $table = 'maia_training_proposal_embeddings';
+    protected $table = 'maia_annotation_candidate_embeddings';
 
     /**
      * Don't maintain timestamps for this model.
@@ -59,6 +59,6 @@ class TrainingProposalEmbedding extends Model
      */
     protected static function newFactory()
     {
-        return TrainingProposalEmbeddingFactory::new();
+        return AnnotationCandidateEmbeddingFactory::new();
     }
 }
