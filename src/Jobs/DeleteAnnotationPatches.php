@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Image;
+use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Modules\Maia\MaiaJob;
 use Queue;

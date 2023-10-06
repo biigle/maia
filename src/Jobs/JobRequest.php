@@ -6,14 +6,17 @@ use Biigle\Modules\Maia\GenericImage;
 use Biigle\Modules\Maia\MaiaJob;
 use Exception;
 use File;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Queue;
 
 /**
  * This job is executed on a machine with GPU access.
  */
-class JobRequest extends Job implements ShouldQueue
+class JobRequest implements ShouldQueue
 {
+    use Queueable;
+
     /**
      * ID of the MAIA job.
      *
@@ -148,9 +151,9 @@ class JobRequest extends Job implements ShouldQueue
     /**
      * Dispatch a response (success or failure) to the BIIGLE instance.
      *
-     * @param Job $job The job to be sent to the BIIGLE instance.
+     * @param $job The job to be sent to the BIIGLE instance.
      */
-    protected function dispatch(Job $job)
+    protected function dispatch($job)
     {
         Queue::connection(config('maia.response_connection'))
             ->pushOn(config('maia.response_queue'), $job);

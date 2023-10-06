@@ -4,6 +4,7 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\ImageAnnotation;
 use Biigle\ImageAnnotationLabel;
+use Biigle\Jobs\Job;
 use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\User;
