@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Modules\Maia\AnnotationCandidate;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\ObjectDetectionComplete;
@@ -69,5 +70,15 @@ class ObjectDetectionResponse extends JobResponse
     protected function getPatchStorageDisk()
     {
         return config('maia.annotation_candidate_storage_disk');
+    }
+
+    /**
+     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
+     *
+     * @param MaiaJob $job
+     */
+    protected function dispatchAnnotationFeatureVectorsJob(MaiaJob $job)
+    {
+        Queue::push(new GenerateAnnotationCandidateFeatureVectors($job));
     }
 }
