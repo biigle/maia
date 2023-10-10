@@ -155,4 +155,9 @@ return [
     | Path to the extract features script.
     */
     'extract_features_script' => __DIR__.'/../resources/scripts/ExtractFeatures.py',
+
+    /*
+    | Path to the directory to use as Torch Hub cache.
+    */
+    'torch_hub_path' => storage_path('maia_cache'),
 ];

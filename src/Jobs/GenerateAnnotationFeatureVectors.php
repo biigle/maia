@@ -270,10 +270,17 @@ abstract class GenerateAnnotationFeatureVectors extends Job
     protected function python(array $input, string $outputPath)
     {
         $python = config('maia.python');
-        $result = Process::forever()
-            ->quietly()
-            ->run("{$python} -u {$command}")
-            ->throw();
+        $script = config('maia.extract_features_script');
+        $inputPath = tempnam(sys_get_temp_dir(), 'maia_feature_vector_input');
+        File::put($inputPath, json_encode($input));
+        try {
+            $result = Process::forever()
+                ->env(['TORCH_HOME' => config('maia.torch_hub_path')])
+                ->run("{$python} -u {$script} {$inputPath} {$outputPath}")
+                ->throw();
+        } finally {
+            File::delete($inputPath);
+        }
     }
 
     /**
