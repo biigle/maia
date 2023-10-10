@@ -209,6 +209,39 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
+        $this->assertEquals([0, 0, 30, 30], $box);
+    }
+
+    public function testHandleCoodinatesOutsideImageNegativeProblematic()
+    {
+        FileCache::fake();
+        $j = MaiaJob::factory()->create();
+        $image = Image::factory()->create([
+            'attrs' => ['width' => 25, 'height' => 25],
+            'volume_id' => $j->volume_id,
+        ]);
+        $tp = TrainingProposal::factory()->create([
+            'job_id' => $j->id,
+            'shape_id' => Shape::circleId(),
+            'points' => [10, 10, 15],
+            'image_id' => $image->id,
+        ]);
+
+        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        try {
+            $job->handle();
+        } finally {
+            if (isset($job->outputPath) && File::exists($job->outputPath)) {
+                File::delete($job->outputPath);
+            }
+        }
+
+        $input = $job->input;
+        $this->assertCount(1, $input);
+        $filename = array_keys($input)[0];
+        $this->assertArrayHasKey($tp->id, $input[$filename]);
+        $box = $input[$filename][$tp->id];
+        // Moving the box outside negative space makes it overflow in the positive space.
         $this->assertEquals([0, 0, 25, 25], $box);
     }
 
@@ -241,7 +274,72 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([75, 75, 100, 100], $box);
+        $this->assertEquals([70, 70, 100, 100], $box);
+    }
+
+    public function testHandleCoodinatesOutsideImagePositiveProblematic()
+    {
+        FileCache::fake();
+        $j = MaiaJob::factory()->create();
+        $image = Image::factory()->create([
+            'attrs' => ['width' => 25, 'height' => 25],
+            'volume_id' => $j->volume_id,
+        ]);
+        $tp = TrainingProposal::factory()->create([
+            'job_id' => $j->id,
+            'shape_id' => Shape::circleId(),
+            'points' => [15, 15, 15],
+            'image_id' => $image->id,
+        ]);
+
+        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        try {
+            $job->handle();
+        } finally {
+            if (isset($job->outputPath) && File::exists($job->outputPath)) {
+                File::delete($job->outputPath);
+            }
+        }
+
+        $input = $job->input;
+        $this->assertCount(1, $input);
+        $filename = array_keys($input)[0];
+        $this->assertArrayHasKey($tp->id, $input[$filename]);
+        $box = $input[$filename][$tp->id];
+        // Moving the box outside positive space makes it overflow in the negative space.
+        $this->assertEquals([0, 0, 25, 25], $box);
+    }
+
+    public function testHandleCoodinatesOutsideImageBoth()
+    {
+        FileCache::fake();
+        $j = MaiaJob::factory()->create();
+        $image = Image::factory()->create([
+            'attrs' => ['width' => 100, 'height' => 100],
+            'volume_id' => $j->volume_id,
+        ]);
+        $tp = TrainingProposal::factory()->create([
+            'job_id' => $j->id,
+            'shape_id' => Shape::circleId(),
+            'points' => [50, 50, 55],
+            'image_id' => $image->id,
+        ]);
+
+        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        try {
+            $job->handle();
+        } finally {
+            if (isset($job->outputPath) && File::exists($job->outputPath)) {
+                File::delete($job->outputPath);
+            }
+        }
+
+        $input = $job->input;
+        $this->assertCount(1, $input);
+        $filename = array_keys($input)[0];
+        $this->assertArrayHasKey($tp->id, $input[$filename]);
+        $box = $input[$filename][$tp->id];
+        $this->assertEquals([0, 0, 100, 100], $box);
     }
 
     public function testHandleCoodinatesSkipZero()

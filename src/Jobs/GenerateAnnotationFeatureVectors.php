@@ -145,14 +145,75 @@ abstract class GenerateAnnotationFeatureVectors extends Job
             default => $this->getPolygonBoundingBox($annotation),
         };
 
-        $box = array_map(fn ($p) => max(0, $p), $box);
+        // Now move the box if it overflows the image boundaries.
+
+        if ($box[2] <= 0) {
+            return [0, 0, 0, 0];
+        }
+
+        if ($box[3] <= 0) {
+            return [0, 0, 0, 0];
+        }
+
+        $delta = [0, 0, 0, 0];
+
+        if ($box[0] <= 0) {
+            $delta[0] = -$box[0];
+        }
+
+        if ($box[1] <= 0) {
+            $delta[1] = -$box[1];
+        }
+
         if (!is_null($image->width)) {
-            $box[0] = min($image->width, $box[0]);
+            if ($box[0] >= $image->width) {
+                return [0, 0, 0, 0];
+            }
+
+            if ($box[2] >= $image->width) {
+                $delta[2] = $box[2] - $image->width;
+            }
+        }
+
+        if (!is_null($image->height)) {
+            if ($box[1] >= $image->height) {
+                return [0, 0, 0, 0];
+            }
+
+            if ($box[3] >= $image->height) {
+                $delta[3] = $box[3] - $image->height;
+            }
+        }
+
+        // The case of both delta values being >0 is handled below.
+        if ($delta[0] > 0) {
+            $box[0] += $delta[0];
+            $box[2] += $delta[0];
+        } elseif ($delta[2] > 0) {
+            $box[0] -= $delta[2];
+            $box[2] -= $delta[2];
+        }
+
+        // The case of both delta values being >0 is handled below.
+        if ($delta[1] > 0) {
+            $box[1] += $delta[1];
+            $box[3] += $delta[1];
+        } elseif ($delta[3] > 0) {
+            $box[1] -= $delta[3];
+            $box[3] -= $delta[3];
+        }
+
+        // Moving the box could have make it overflow on the "other" side.
+        // Shrink the box in this case.
+
+        $box[0] = max(0, $box[0]);
+        $box[1] = max(0, $box[1]);
+
+        if (!is_null($image->width)) {
             $box[2] = min($image->width, $box[2]);
         }
 
         if (!is_null($image->height)) {
-            $box[1] = min($image->height, $box[1]);
             $box[3] = min($image->height, $box[3]);
         }
 
