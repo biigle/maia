@@ -79,6 +79,8 @@ class ObjectDetectionResponse extends JobResponse
      */
     protected function dispatchAnnotationFeatureVectorsJob(MaiaJob $job)
     {
-        Queue::push(new GenerateAnnotationCandidateFeatureVectors($job));
+        $queue = config('maia.feature_vector_queue');
+        Queue::connection(config('maia.feature_vector_connection'))
+            ->pushOn($queue, new GenerateAnnotationCandidateFeatureVectors($job));
     }
 }

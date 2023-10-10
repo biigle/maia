@@ -45,8 +45,7 @@ abstract class GenerateAnnotationFeatureVectors extends Job
      */
     public function __construct(public MaiaJob $job)
     {
-        $this->queue = config('maia.feature_vector_queue');
-        $this->connection = config('maia.feature_vector_connection');
+        //
     }
 
     /**
