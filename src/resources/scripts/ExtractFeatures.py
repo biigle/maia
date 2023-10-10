@@ -34,10 +34,13 @@ transform = T.Compose([
 
 with open(sys.argv[2], 'w') as f:
     writer = csv.writer(f)
-    for image_path, annotations in input_json.items():
-        image = Image.open(image_path)
-        for model_id, box in annotations.items():
-            image_crop = image.crop(box)
-            image_crop_t = transform(image_crop).unsqueeze(0).to(device)
-            features = dinov2_vits14(image_crop_t)
-            writer.writerow([model_id, json.dumps(features.tolist())])
+    with torch.no_grad():
+        for image_path, annotations in input_json.items():
+            image = Image.open(image_path)
+            for model_id, box in annotations.items():
+                image_crop = image.crop(box)
+                print('size', image_crop.size)
+                image_crop_t = transform(image_crop).unsqueeze(0).to(device)
+                print('shape', image_crop_t.shape)
+                features = dinov2_vits14(image_crop_t)
+                writer.writerow([model_id, json.dumps(features[0].tolist())])
