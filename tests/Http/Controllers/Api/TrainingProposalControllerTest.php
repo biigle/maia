@@ -7,6 +7,7 @@ use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\TrainingProposalFeatureVector;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
@@ -153,5 +154,42 @@ class TrainingProposalControllerTest extends ApiTestCase
             ->assertStatus(200);
 
         Queue::assertPushed(GenerateImageAnnotationPatch::class);
+
+        $this->markTestIncomplete('also push a job to regenerate the feature vector');
+    }
+
+    public function testIndexSimilarity()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $id = $job->id;
+
+        $tp1 = TrainingProposalTest::create(['job_id' => $id]);
+        TrainingProposalFeatureVector::factory()->create([
+            'id' => $tp1->id,
+            'job_id' => $id,
+            'vector' => range(0, 383),
+        ]);
+        $tp2 = TrainingProposalTest::create(['job_id' => $id]);
+        TrainingProposalFeatureVector::factory()->create([
+            'id' => $tp2->id,
+            'job_id' => $id,
+            'vector' => range(10, 393),
+        ]);
+        $tp3 = TrainingProposalTest::create(['job_id' => $id]);
+        TrainingProposalFeatureVector::factory()->create([
+            'id' => $tp3->id,
+            'job_id' => $id,
+            'vector' => range(1, 384),
+        ]);
+
+        $this->doTestApiRoute('GET', "/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}");
+
+        $this->beGuest();
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")->assertStatus(403);
+
+        $this->beEditor();
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
+            ->assertStatus(200)
+            ->assertExactJson([$tp3->id, $tp2->id]);
     }
 }

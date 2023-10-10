@@ -33,10 +33,12 @@ $router->group([
     $router->get('maia-jobs/{id}/training-proposals', 'TrainingProposalController@index');
     $router->post('maia-jobs/{id}/training-proposals', 'TrainingProposalController@submit');
     $router->put('maia/training-proposals/{id}', 'TrainingProposalController@update');
+    $router->get('maia-jobs/{id}/training-proposals/similar-to/{id2}', 'TrainingProposalController@indexSimilar');
 
     $router->get('maia-jobs/{id}/annotation-candidates', 'AnnotationCandidateController@index');
     $router->post('maia-jobs/{id}/annotation-candidates', 'AnnotationCandidateController@submit');
     $router->put('maia/annotation-candidates/{id}', 'AnnotationCandidateController@update');
+    $router->get('maia-jobs/{id}/annotation-candidates/similar-to/{id2}', 'AnnotationCandidateController@indexSimilar');
 
     $router->get('maia-jobs/{id}/converting-candidates', 'MaiaJobConvertingCandidatesController@get');
 
