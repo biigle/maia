@@ -50,6 +50,17 @@
     }
 }
 
+.image-grid__image--pinned {
+    border-color: $brand-info;
+    border-width: 4px;
+
+    .image-button__pin {
+        background-color: $brand-info;
+        color: white;
+        opacity: 1;
+    }
+}
+
 .image-grid__image--annotation-candidate {
     .attached-label {
         position: absolute;

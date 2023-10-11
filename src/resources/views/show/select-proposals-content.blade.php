@@ -1,15 +1,19 @@
 <proposals-image-grid
-    v-show="hasProposals"
-    :images="proposalsForSelectView"
-    :selected-proposal-ids="selectedProposalIds"
-    empty-url="{{ asset(config('thumbnails.empty_url')) }}"
-    :width="{{config('thumbnails.width')}}"
     :height="{{config('thumbnails.height')}}"
+    :images="proposalsForSelectView"
+    :pinned-image="referenceProposal"
     :selectable="isInTrainingProposalState"
-    selected-icon="plus"
+    :selected-proposal-ids="selectedProposalIds"
+    :pinnable="isInTrainingProposalState"
+    :width="{{config('thumbnails.width')}}"
+    empty-url="{{ asset(config('thumbnails.empty_url')) }}"
     listener-set="select-proposals"
+    ref="proposalsImageGrid"
+    selected-icon="plus"
+    v-on:pin="handleSelectedReferenceProposal"
     v-on:select="handleSelectedProposal"
-    ref="proposalsImageGrid"></proposals-image-grid>
+    v-show="hasProposals"
+    ></proposals-image-grid>
 <div v-if="!loading && !hasProposals" class="maia-content-message">
     <div class="text-warning">
         There are no training proposals.

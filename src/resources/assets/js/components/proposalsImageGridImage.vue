@@ -1,9 +1,25 @@
 <template>
-    <figure class="image-grid__image" :class="classObject" :title="title">
+    <figure
+        class="image-grid__image"
+        :class="customClassObject"
+        :title="title"
+        >
         <div v-if="showIcon" class="image-icon">
             <i class="fas" :class="iconClass"></i>
         </div>
         <img @click="toggleSelect" :src="srcUrl" @error="showEmptyImage">
+        <div
+            v-if="pinnable"
+            class="image-buttons"
+            >
+            <button
+                class="image-button image-button__pin"
+                :title="pinButtonTitle"
+                @click="emitPin"
+                >
+                <span class="fa fa-thumbtack fa-fw"></span>
+            </button>
+        </div>
     </figure>
 </template>
 
@@ -21,6 +37,16 @@ export default {
         ImageGridImage,
         AnnotationPatch,
     ],
+    props: {
+        isPinned: {
+            type: Boolean,
+            default: false,
+        },
+        pinnable: {
+            type: Boolean,
+            default: false,
+        },
+    },
     computed: {
         selected() {
             return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);
@@ -43,7 +69,26 @@ export default {
             // case this is not possible.
             return biigle.$require('maia.tpUrlTemplate');
         },
+        customClassObject() {
+            let obj = Object.assign({}, this.classObject);
+            obj['image-grid__image--pinned'] = this.isPinned;
+            obj['image-grid__image--small-icon'] ||= this.isPinned;
+            obj['image-grid__image--fade'] &&= !this.isPinned;
+
+            return obj;
+        },
+        pinButtonTitle() {
+            if (this.isPinned) {
+                return 'Unselect reference';
+            }
+
+            return 'Select as reference (sort by similarity)';
+        },
+    },
+    methods: {
+        emitPin() {
+            this.$emit('pin', this.image.id);
+        },
     },
 };
 </script>
-

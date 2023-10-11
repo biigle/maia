@@ -70,6 +70,8 @@ export default {
             currentProposalsById: {},
             focussedProposal: null,
             proposalAnnotationCache: {},
+            sortedIdsForReferenceProposal: [],
+            referenceProposal: null,
 
             fetchCandidatesPromise: null,
             hasCandidates: false,
@@ -142,6 +144,11 @@ export default {
         // when this happened.
         proposalsForSelectView() {
             if (this.isInTrainingProposalState) {
+                if (this.sortedIdsForReferenceProposal.length > 0) {
+                    return this.sortedIdsForReferenceProposal
+                        .map(id => PROPOSALS_BY_ID[id]);
+                }
+
                 return this.proposals;
             } else {
                 return this.selectedProposals;
@@ -483,12 +490,37 @@ export default {
                 this.unselectProposal(proposal);
             } else {
                 if (event.shiftKey && this.lastSelectedProposal) {
-                    this.doForEachBetween(this.proposals, proposal, this.lastSelectedProposal, this.selectProposal);
+                    this.doForEachBetween(
+                        this.proposalsForSelectView,
+                        proposal,
+                        this.lastSelectedProposal,
+                        this.selectProposal
+                    );
                 } else {
                     this.lastSelectedProposal = proposal;
                     this.selectProposal(proposal);
                 }
             }
+        },
+        handleSelectedReferenceProposal(id) {
+            if (this.loading) {
+                return;
+            }
+
+            if (this.referenceProposal?.id === id) {
+                this.referenceProposal = null;
+                this.sortedIdsForReferenceProposal = [];
+
+                return;
+            }
+
+            this.startLoading();
+            JobApi.getSimilarTrainingProposals({jobId: this.job.id, proposalId: id})
+                .then((response) => {
+                    this.sortedIdsForReferenceProposal = response.body;
+                    this.referenceProposal = PROPOSALS_BY_ID[id];
+                }, handleErrorResponse)
+                .finally(this.finishLoading);
         },
         selectProposal(proposal) {
             this.updateSelectProposal(proposal, true)
