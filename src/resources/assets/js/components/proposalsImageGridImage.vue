@@ -72,8 +72,8 @@ export default {
         customClassObject() {
             let obj = Object.assign({}, this.classObject);
             obj['image-grid__image--pinned'] = this.isPinned;
-            obj['image-grid__image--small-icon'] ||= this.isPinned;
-            obj['image-grid__image--fade'] &&= !this.isPinned;
+            obj['image-grid__image--small-icon'] = obj['image-grid__image--small-icon'] || this.isPinned;
+            obj['image-grid__image--fade'] = obj['image-grid__image--fade'] && !this.isPinned;
 
             return obj;
         },
