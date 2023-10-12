@@ -13,7 +13,7 @@ class GenerateAnnotationCandidateFeatureVectors extends GenerateAnnotationFeatur
      */
     protected function getAnnotations()
     {
-        return $this->job->trainingProposals;
+        return $this->job->annotationCandidates;
     }
 
     /**

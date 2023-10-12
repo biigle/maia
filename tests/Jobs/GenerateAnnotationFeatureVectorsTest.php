@@ -3,8 +3,11 @@
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Biigle\Image;
-use Biigle\Modules\Maia\Jobs\GenerateAnnotationFeatureVectors;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
+use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalFeatureVectors;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\AnnotationCandidate;
+use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\TrainingProposalFeatureVector;
 use Biigle\Shape;
@@ -15,7 +18,7 @@ use TestCase;
 
 class GenerateAnnotationFeatureVectorsTest extends TestCase
 {
-    public function testHandle()
+    public function testHandleTrainingProposals()
     {
         FileCache::fake();
         $j = MaiaJob::factory()->create();
@@ -25,7 +28,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'points' => [10, 10, 5],
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         $job->output = [[$tp->id, '"'.json_encode(range(0, 383)).'"']];
         try {
             $job->handle();
@@ -50,6 +53,41 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $this->assertEquals(range(0, 383), $vectors[0]->vector->toArray());
     }
 
+    public function testHandleAnnotationCandidates()
+    {
+        FileCache::fake();
+        $j = MaiaJob::factory()->create();
+        $ac = AnnotationCandidate::factory()->create([
+            'job_id' => $j->id,
+            'shape_id' => Shape::circleId(),
+            'points' => [10, 10, 5],
+        ]);
+
+        $job = new GenerateCandidateFeatureVectorsStub($j);
+        $job->output = [[$ac->id, '"'.json_encode(range(0, 383)).'"']];
+        try {
+            $job->handle();
+
+            $this->assertFalse(File::exists($job->outputPath));
+        } finally {
+            if (isset($job->outputPath) && File::exists($job->outputPath)) {
+                File::delete($job->outputPath);
+            }
+        }
+
+        $input = $job->input;
+        $this->assertCount(1, $input);
+        $filename = array_keys($input)[0];
+        $this->assertArrayHasKey($ac->id, $input[$filename]);
+        $box = $input[$filename][$ac->id];
+        $this->assertEquals([5, 5, 15, 15], $box);
+
+        $vectors = AnnotationCandidateFeatureVector::where('job_id', $j->id)->get();
+        $this->assertCount(1, $vectors);
+        $this->assertEquals($ac->id, $vectors[0]->id);
+        $this->assertEquals(range(0, 383), $vectors[0]->vector->toArray());
+    }
+
     public function testHandleConvertPoint()
     {
         FileCache::fake();
@@ -60,7 +98,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'points' => [300, 300],
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -87,7 +125,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'points' => [10, 10, 20, 10, 20, 20, 10, 20],
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -114,7 +152,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'points' => [10, 10, 20, 20],
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -141,7 +179,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'points' => [10, 10, 20, 10, 20, 20, 10, 20],
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -168,7 +206,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'points' => [10, 10, 20, 10, 15, 20, 10, 10],
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -195,7 +233,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'points' => [10, 10, 15],
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -227,7 +265,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'image_id' => $image->id,
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -260,7 +298,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'image_id' => $image->id,
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -292,7 +330,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'image_id' => $image->id,
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -325,7 +363,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'image_id' => $image->id,
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -352,7 +390,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
             'points' => [10, 10, 0],
         ]);
 
-        $job = new GenerateAnnotationFeatureVectorsStub($j);
+        $job = new GenerateProposalFeatureVectorsStub($j);
         try {
             $job->handle();
         } finally {
@@ -367,16 +405,11 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
 }
 
 
-class GenerateAnnotationFeatureVectorsStub extends GenerateAnnotationFeatureVectors
+class GenerateProposalFeatureVectorsStub extends GenerateTrainingProposalFeatureVectors
 {
     public $input;
     public $outputPath;
     public $output = [];
-
-    protected function getAnnotations()
-    {
-        return $this->job->trainingProposals;
-    }
 
     protected function python(array $input, string $outputPath)
     {
@@ -385,9 +418,19 @@ class GenerateAnnotationFeatureVectorsStub extends GenerateAnnotationFeatureVect
         $csv = implode("\n", array_map(fn ($row) => implode(',', $row), $this->output));
         File::put($outputPath, $csv);
     }
+}
 
-    protected function insertFeatureVectorModelChunk(array $chunk): void
+class GenerateCandidateFeatureVectorsStub extends GenerateAnnotationCandidateFeatureVectors
+{
+    public $input;
+    public $outputPath;
+    public $output = [];
+
+    protected function python(array $input, string $outputPath)
     {
-        TrainingProposalFeatureVector::insert($chunk);
+        $this->input = $input;
+        $this->outputPath = $outputPath;
+        $csv = implode("\n", array_map(fn ($row) => implode(',', $row), $this->output));
+        File::put($outputPath, $csv);
     }
 }
