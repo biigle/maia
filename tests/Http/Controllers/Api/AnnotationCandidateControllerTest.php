@@ -182,11 +182,6 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $id = $job->id;
 
         $ac1 = AnnotationCandidateTest::create(['job_id' => $id]);
-        AnnotationCandidateFeatureVector::factory()->create([
-            'id' => $ac1->id,
-            'job_id' => $id,
-            'vector' => range(0, 383),
-        ]);
         $ac2 = AnnotationCandidateTest::create(['job_id' => $id]);
         AnnotationCandidateFeatureVector::factory()->create([
             'id' => $ac2->id,
@@ -207,7 +202,61 @@ class AnnotationCandidateControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
+            ->assertStatus(404);
+
+        AnnotationCandidateFeatureVector::factory()->create([
+            'id' => $ac1->id,
+            'job_id' => $id,
+            'vector' => range(0, 383),
+        ]);
+
+        $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
             ->assertStatus(200)
             ->assertExactJson([$ac3->id, $ac2->id]);
+    }
+
+    public function testIndexSimilarityMissing()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $id = $job->id;
+
+        $ac1 = AnnotationCandidateTest::create(['job_id' => $id]);
+        AnnotationCandidateFeatureVector::factory()->create([
+            'id' => $ac1->id,
+            'job_id' => $id,
+            'vector' => range(0, 383),
+        ]);
+        $ac2 = AnnotationCandidateTest::create(['job_id' => $id]);
+        AnnotationCandidateFeatureVector::factory()->create([
+            'id' => $ac2->id,
+            'job_id' => $id,
+            'vector' => range(10, 393),
+        ]);
+        $ac3 = AnnotationCandidateTest::create(['job_id' => $id]);
+
+        $this->beEditor();
+        $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
+            ->assertStatus(200)
+            ->assertExactJson([$ac2->id, $ac3->id]);
+    }
+
+    public function testIndexSimilarityEmpty()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $id = $job->id;
+
+        $ac1 = AnnotationCandidateTest::create(['job_id' => $id]);
+        AnnotationCandidateFeatureVector::factory()->create([
+            'id' => $ac1->id,
+            'job_id' => $id,
+            'vector' => range(0, 383),
+        ]);
+        $ac2 = AnnotationCandidateTest::create(['job_id' => $id]);
+        $ac3 = AnnotationCandidateTest::create(['job_id' => $id]);
+
+        $this->beEditor();
+        $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
+            ->assertStatus(200)
+            ->assertExactJson([]);
     }
 }

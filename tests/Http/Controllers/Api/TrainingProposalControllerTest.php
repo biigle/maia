@@ -164,11 +164,6 @@ class TrainingProposalControllerTest extends ApiTestCase
         $id = $job->id;
 
         $tp1 = TrainingProposalTest::create(['job_id' => $id]);
-        TrainingProposalFeatureVector::factory()->create([
-            'id' => $tp1->id,
-            'job_id' => $id,
-            'vector' => range(0, 383),
-        ]);
         $tp2 = TrainingProposalTest::create(['job_id' => $id]);
         TrainingProposalFeatureVector::factory()->create([
             'id' => $tp2->id,
@@ -189,7 +184,61 @@ class TrainingProposalControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
+            ->assertStatus(404);
+
+        TrainingProposalFeatureVector::factory()->create([
+            'id' => $tp1->id,
+            'job_id' => $id,
+            'vector' => range(0, 383),
+        ]);
+
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
             ->assertStatus(200)
             ->assertExactJson([$tp3->id, $tp2->id]);
+    }
+
+    public function testIndexSimilarityMissing()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $id = $job->id;
+
+        $tp1 = TrainingProposalTest::create(['job_id' => $id]);
+        TrainingProposalFeatureVector::factory()->create([
+            'id' => $tp1->id,
+            'job_id' => $id,
+            'vector' => range(0, 383),
+        ]);
+        $tp2 = TrainingProposalTest::create(['job_id' => $id]);
+        TrainingProposalFeatureVector::factory()->create([
+            'id' => $tp2->id,
+            'job_id' => $id,
+            'vector' => range(10, 393),
+        ]);
+        $tp3 = TrainingProposalTest::create(['job_id' => $id]);
+
+        $this->beEditor();
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
+            ->assertStatus(200)
+            ->assertExactJson([$tp2->id, $tp3->id]);
+    }
+
+    public function testIndexSimilarityEmpty()
+    {
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $id = $job->id;
+
+        $tp1 = TrainingProposalTest::create(['job_id' => $id]);
+        TrainingProposalFeatureVector::factory()->create([
+            'id' => $tp1->id,
+            'job_id' => $id,
+            'vector' => range(0, 383),
+        ]);
+        $tp2 = TrainingProposalTest::create(['job_id' => $id]);
+        $tp3 = TrainingProposalTest::create(['job_id' => $id]);
+
+        $this->beEditor();
+        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
+            ->assertStatus(200)
+            ->assertExactJson([]);
     }
 }

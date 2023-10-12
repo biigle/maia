@@ -62,7 +62,7 @@ class TrainingProposalController extends Controller
      * @apiGroup Maia
      * @apiName IndexSimilarMaiaTrainingProposals
      * @apiPermission projectEditor
-     * @apiDescription This endpoints returns the ordered training proposal IDs (except the ID of the reference training proposal).
+     * @apiDescription This endpoints returns the ordered training proposal IDs (except the ID of the reference training proposal). Proposals without feature vectors for similarity computation are appended at the end.
      *
      * @apiParam {Number} id The job ID.
      * @apiParam {Number} id2 The "reference" training proposal ID.
@@ -79,9 +79,24 @@ class TrainingProposalController extends Controller
         $feature = TrainingProposalFeatureVector::where('job_id', $id)
             ->findOrFail($id2);
 
-        return $feature->nearestNeighbors('vector', Distance::Cosine)
+        $ids = $feature->nearestNeighbors('vector', Distance::Cosine)
             ->where('job_id', $id)
             ->pluck('id');
+
+        $count = $ids->count();
+        if ($count === 0 || $count === ($job->trainingProposals()->count() - 1)) {
+            return $ids;
+        }
+
+        // Add IDs of proposals without feature vectors at the end.
+        $ids = $ids->concat(
+            $job->trainingProposals()
+                ->whereNotIn('id', $ids)
+                ->whereNot('id', $id2)
+                ->pluck('id')
+        );
+
+        return $ids;
     }
 
     /**

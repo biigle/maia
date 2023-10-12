@@ -67,7 +67,7 @@ class AnnotationCandidateController extends Controller
      * @apiGroup Maia
      * @apiName IndexSimilarMaiaAnnotationCandidates
      * @apiPermission projectEditor
-     * @apiDescription This endpoints returns the ordered annotation candidate IDs (except the ID of the reference annotation candidate).
+     * @apiDescription This endpoints returns the ordered annotation candidate IDs (except the ID of the reference annotation candidate). Candidates without feature vectors for similarity computation are appended at the end.
      *
      * @apiParam {Number} id The job ID.
      * @apiParam {Number} id2 The "reference" annotation candidate ID.
@@ -84,9 +84,24 @@ class AnnotationCandidateController extends Controller
         $feature = AnnotationCandidateFeatureVector::where('job_id', $id)
             ->findOrFail($id2);
 
-        return $feature->nearestNeighbors('vector', Distance::Cosine)
+        $ids = $feature->nearestNeighbors('vector', Distance::Cosine)
             ->where('job_id', $id)
             ->pluck('id');
+
+        $count = $ids->count();
+        if ($count === 0 || $count === ($job->annotationCandidates()->count() - 1)) {
+            return $ids;
+        }
+
+        // Add IDs of candidates without feature vectors at the end.
+        $ids = $ids->concat(
+            $job->annotationCandidates()
+                ->whereNotIn('id', $ids)
+                ->whereNot('id', $id2)
+                ->pluck('id')
+        );
+
+        return $ids;
     }
 
     /**
