@@ -1,16 +1,20 @@
 <candidates-image-grid
-    v-show="hasCandidates"
-    :images="candidates"
-    :selected-candidate-ids="selectedCandidateIds"
     :converted-candidate-ids="convertedCandidateIds"
-    empty-url="{{ asset(config('thumbnails.empty_url')) }}"
-    :width="{{config('thumbnails.width')}}"
     :height="{{config('thumbnails.height')}}"
+    :images="candidates"
+    :pinned-image="referenceCandidate"
     :selectable="isInAnnotationCandidateState"
-    selected-icon="check"
+    :selected-candidate-ids="selectedCandidateIds"
+    :pinnable="isInAnnotationCandidateState"
+    :width="{{config('thumbnails.width')}}"
+    empty-url="{{ asset(config('thumbnails.empty_url')) }}"
     listener-set="select-candidates"
+    ref="candidatesImageGrid"
+    selected-icon="check"
+    v-on:pin="handleSelectedReferenceCandidate"
     v-on:select="handleSelectedCandidate"
-    ref="candidatesImageGrid"></candidates-image-grid>
+    v-show="hasCandidates"
+    ></candidates-image-grid>
 <div v-if="!loading && !hasCandidates" class="maia-content-message">
     <div class="text-warning">
         There are no annotation candidates.

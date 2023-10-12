@@ -85,6 +85,8 @@ export default {
             focussedCandidate: null,
             candidateAnnotationCache: {},
             selectedLabel: null,
+            sortedIdsForReferenceCandidate: [],
+            referenceCandidate: null,
 
             // Increasing counter to use for sorting of selected proposals and
             // candidates. If a proposal/candidate is selected it should always be sorted
@@ -235,6 +237,11 @@ export default {
 
         candidates() {
             if (this.hasCandidates) {
+                if (this.sortedIdsForReferenceCandidate.length > 0) {
+                    return this.sortedIdsForReferenceCandidate
+                        .map(id => CANDIDATES_BY_ID[id]);
+                }
+
                 return CANDIDATES;
             }
 
@@ -260,10 +267,14 @@ export default {
             return this.selectedCandidates.length > 0;
         },
         candidateImageIds() {
-            let tmp = {};
-            this.candidates.forEach((p) => tmp[p.image_id] = undefined);
+            if (this.hasCandidates) {
+                let tmp = {};
+                CANDIDATES.forEach((p) => tmp[p.image_id] = undefined);
 
-            return Object.keys(tmp).map((id) => parseInt(id, 10));
+                return Object.keys(tmp).map((id) => parseInt(id, 10));
+            }
+
+            return [];
         },
         currentCandidateImageId() {
             return this.candidateImageIds[this.currentCandidateImageIndex];
@@ -502,12 +513,12 @@ export default {
                 }
             }
         },
-        handleSelectedReferenceProposal(id) {
+        handleSelectedReferenceProposal(proposal) {
             if (this.loading) {
                 return;
             }
 
-            if (this.referenceProposal?.id === id) {
+            if (this.referenceProposal?.id === proposal.id) {
                 this.referenceProposal = null;
                 this.sortedIdsForReferenceProposal = [];
 
@@ -515,10 +526,13 @@ export default {
             }
 
             this.startLoading();
-            JobApi.getSimilarTrainingProposals({jobId: this.job.id, proposalId: id})
+            JobApi.getSimilarTrainingProposals({
+                    jobId: this.job.id,
+                    proposalId: proposal.id,
+                })
                 .then((response) => {
                     this.sortedIdsForReferenceProposal = response.body;
-                    this.referenceProposal = PROPOSALS_BY_ID[id];
+                    this.referenceProposal = proposal;
                 }, handleErrorResponse)
                 .finally(this.finishLoading);
         },
@@ -643,6 +657,29 @@ export default {
             });
 
             return promise;
+        },
+        handleSelectedReferenceCandidate(candidate) {
+            if (this.loading) {
+                return;
+            }
+
+            if (this.referenceCandidate?.id === candidate.id) {
+                this.referenceCandidate = null;
+                this.sortedIdsForReferenceCandidate = [];
+
+                return;
+            }
+
+            this.startLoading();
+            JobApi.getSimilarAnnotationCandidates({
+                    jobId: this.job.id,
+                    candidateId: candidate.id,
+                })
+                .then((response) => {
+                    this.sortedIdsForReferenceCandidate = response.body;
+                    this.referenceCandidate = candidate;
+                }, handleErrorResponse)
+                .finally(this.finishLoading);
         },
         fetchCandidateAnnotations(id) {
             if (!this.candidateAnnotationCache.hasOwnProperty(id)) {

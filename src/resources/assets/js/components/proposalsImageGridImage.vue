@@ -1,7 +1,7 @@
 <template>
     <figure
         class="image-grid__image"
-        :class="customClassObject"
+        :class="classObject"
         :title="title"
         >
         <div v-if="showIcon" class="image-icon">
@@ -38,18 +38,14 @@ export default {
         AnnotationPatch,
     ],
     props: {
-        isPinned: {
-            type: Boolean,
-            default: false,
-        },
-        pinnable: {
-            type: Boolean,
-            default: false,
+        selectedProposalIds: {
+            type: Object,
+            required: true,
         },
     },
     computed: {
         selected() {
-            return this.$parent.selectedProposalIds.hasOwnProperty(this.image.id);
+            return this.selectedProposalIds.hasOwnProperty(this.image.id);
         },
         title() {
             if (this.selectable) {
@@ -69,25 +65,12 @@ export default {
             // case this is not possible.
             return biigle.$require('maia.tpUrlTemplate');
         },
-        customClassObject() {
-            let obj = Object.assign({}, this.classObject);
-            obj['image-grid__image--pinned'] = this.isPinned;
-            obj['image-grid__image--small-icon'] = obj['image-grid__image--small-icon'] || this.isPinned;
-            obj['image-grid__image--fade'] = obj['image-grid__image--fade'] && !this.isPinned;
-
-            return obj;
-        },
         pinButtonTitle() {
             if (this.isPinned) {
                 return 'Unselect reference';
             }
 
             return 'Select as reference (sort by similarity)';
-        },
-    },
-    methods: {
-        emitPin() {
-            this.$emit('pin', this.image.id);
         },
     },
 };
