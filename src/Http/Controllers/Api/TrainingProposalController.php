@@ -10,6 +10,7 @@ use Biigle\Modules\Maia\Http\Requests\UpdateTrainingProposal;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\TrainingProposalFeatureVector;
+use Illuminate\Http\Response;
 use Pgvector\Laravel\Distance;
 
 class TrainingProposalController extends Controller
@@ -84,17 +85,19 @@ class TrainingProposalController extends Controller
             ->pluck('id');
 
         $count = $ids->count();
-        if ($count === 0 || $count === ($job->trainingProposals()->count() - 1)) {
-            return $ids;
+        if ($count === 0) {
+            abort(Response::HTTP_NOT_FOUND);
         }
 
-        // Add IDs of proposals without feature vectors at the end.
-        $ids = $ids->concat(
-            $job->trainingProposals()
-                ->whereNotIn('id', $ids)
-                ->whereNot('id', $id2)
-                ->pluck('id')
-        );
+        if ($count !== ($job->trainingProposals()->count() - 1)) {
+            // Add IDs of proposals without feature vectors at the end.
+            $ids = $ids->concat(
+                $job->trainingProposals()
+                    ->whereNotIn('id', $ids)
+                    ->whereNot('id', $id2)
+                    ->pluck('id')
+            );
+        }
 
         return $ids;
     }

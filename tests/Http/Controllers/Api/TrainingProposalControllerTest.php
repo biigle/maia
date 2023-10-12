@@ -238,7 +238,6 @@ class TrainingProposalControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
-            ->assertStatus(200)
-            ->assertExactJson([]);
+            ->assertStatus(404);
     }
 }

@@ -678,7 +678,13 @@ export default {
                 .then((response) => {
                     this.sortedIdsForReferenceCandidate = response.body;
                     this.referenceCandidate = candidate;
-                }, handleErrorResponse)
+                }, (response) => {
+                    if (response.status === 404) {
+                        Messages.warning('No sorting information available yet. Please try again later.');
+                    } else {
+                        handleErrorResponse(response);
+                    }
+                })
                 .finally(this.finishLoading);
         },
         fetchCandidateAnnotations(id) {

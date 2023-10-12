@@ -9,6 +9,7 @@ use Biigle\Modules\Maia\Http\Requests\SubmitAnnotationCandidates;
 use Biigle\Modules\Maia\Http\Requests\UpdateAnnotationCandidate;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
 use Biigle\Modules\Maia\MaiaJob;
+use Illuminate\Http\Response;
 use Pgvector\Laravel\Distance;
 use Queue;
 
@@ -89,17 +90,19 @@ class AnnotationCandidateController extends Controller
             ->pluck('id');
 
         $count = $ids->count();
-        if ($count === 0 || $count === ($job->annotationCandidates()->count() - 1)) {
-            return $ids;
+        if ($count === 0) {
+            abort(Response::HTTP_NOT_FOUND);
         }
 
-        // Add IDs of candidates without feature vectors at the end.
-        $ids = $ids->concat(
-            $job->annotationCandidates()
-                ->whereNotIn('id', $ids)
-                ->whereNot('id', $id2)
-                ->pluck('id')
-        );
+        if ($count !== ($job->annotationCandidates()->count() - 1)) {
+            // Add IDs of candidates without feature vectors at the end.
+            $ids = $ids->concat(
+                $job->annotationCandidates()
+                    ->whereNotIn('id', $ids)
+                    ->whereNot('id', $id2)
+                    ->pluck('id')
+            );
+        }
 
         return $ids;
     }

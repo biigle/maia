@@ -256,7 +256,6 @@ class AnnotationCandidateControllerTest extends ApiTestCase
 
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
-            ->assertStatus(200)
-            ->assertExactJson([]);
+            ->assertStatus(404);
     }
 }
