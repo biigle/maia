@@ -1,7 +1,7 @@
 from PIL import Image
 import csv
 import json
-import numpy
+import numpy as np
 import sys
 import torch
 import torchvision.transforms as T
@@ -30,17 +30,24 @@ transform = T.Compose([
     T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
 ])
 
-# TODO: in PHP, move box with negative coordinates into positive
+def normalize_image_mode(image):
+    if image.mode == 'RGBA' or image.mode == 'L' or image.mode == 'P':
+        image = image.convert('RGB')
+
+    if image.mode =='I':
+        # I images (32 bit signed integer) need to be rescaled manually before converting.
+        image = Image.fromarray(((np.array(image)/(2**16))*2**8).astype(np.uint8)).convert('RGB')
+
+    return image
 
 with open(sys.argv[2], 'w') as f:
     writer = csv.writer(f)
     with torch.no_grad():
         for image_path, annotations in input_json.items():
             image = Image.open(image_path)
+            image = normalize_image_mode(image)
             for model_id, box in annotations.items():
                 image_crop = image.crop(box)
-                print('size', image_crop.size)
                 image_crop_t = transform(image_crop).unsqueeze(0).to(device)
-                print('shape', image_crop_t.shape)
                 features = dinov2_vits14(image_crop_t)
                 writer.writerow([model_id, json.dumps(features[0].tolist())])
