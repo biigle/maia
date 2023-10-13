@@ -3,6 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionResponse;
 use Biigle\Modules\Maia\MaiaJob;
@@ -26,7 +27,6 @@ class ObjectDetectionResponseTest extends TestCase
         $candidates = [[$image->id, 100, 200, 20, 0]];
 
         $response = new ObjectDetectionResponse($job->id, $candidates);
-        Queue::fake();
         Notification::fake();
         $response->handle();
 
@@ -42,6 +42,7 @@ class ObjectDetectionResponseTest extends TestCase
         $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
         Queue::assertPushed(GenerateImageAnnotationPatch::class);
+        Queue::assertPushed(GenerateAnnotationCandidateFeatureVectors::class);
         Notification::assertSentTo($job->user, ObjectDetectionComplete::class);
     }
 
@@ -53,13 +54,13 @@ class ObjectDetectionResponseTest extends TestCase
         $candidates = [[$image->id, 100, 200, 20, 0]];
 
         $response = new ObjectDetectionResponse($job->id, $candidates);
-        Queue::fake();
         $response->handle();
 
         $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
 
         $this->assertFalse($job->annotationCandidates()->exists());
         Queue::assertNotPushed(GenerateImageAnnotationPatch::class);
+        Queue::assertNotPushed(GenerateAnnotationCandidateFeatureVectors::class);
     }
 
     public function testHandleRollback()
@@ -87,7 +88,6 @@ class ObjectDetectionResponseTest extends TestCase
         $proposals = [[1, 100, 200, 20, 0.9]];
 
         $response = new ObjectDetectionResponse($job->id, $proposals);
-        Queue::fake();
         $response->failed(new Exception);
         Queue::assertPushed(ObjectDetectionFailure::class);
     }

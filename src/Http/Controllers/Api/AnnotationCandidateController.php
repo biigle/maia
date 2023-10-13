@@ -4,10 +4,13 @@ namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
 use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Biigle\Modules\Maia\Http\Requests\SubmitAnnotationCandidates;
 use Biigle\Modules\Maia\Http\Requests\UpdateAnnotationCandidate;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
 use Biigle\Modules\Maia\MaiaJob;
+use Illuminate\Http\Response;
+use Pgvector\Laravel\Distance;
 use Queue;
 
 class AnnotationCandidateController extends Controller
@@ -56,6 +59,52 @@ class AnnotationCandidateController extends Controller
                 $candidate->makeHidden('label_id');
             })
             ->toArray();
+    }
+
+    /**
+     * Get annotation candidates ordered by similarity to a specific proposal.
+     *
+     * @api {get} maia-jobs/:id/annotation-candidates/similar-to/:id2 Get similar annotation candidates
+     * @apiGroup Maia
+     * @apiName IndexSimilarMaiaAnnotationCandidates
+     * @apiPermission projectEditor
+     * @apiDescription This endpoints returns the ordered annotation candidate IDs (except the ID of the reference annotation candidate). Candidates without feature vectors for similarity computation are appended at the end.
+     *
+     * @apiParam {Number} id The job ID.
+     * @apiParam {Number} id2 The "reference" annotation candidate ID.
+     *
+     * @param int $id Job ID
+     * @param int $id2 Training proposal ID
+     * @return \Illuminate\Http\Response
+     */
+    public function indexSimilar($id, $id2)
+    {
+        $job = MaiaJob::findOrFail($id);
+        $this->authorize('access', $job);
+
+        $feature = AnnotationCandidateFeatureVector::where('job_id', $id)
+            ->findOrFail($id2);
+
+        $ids = $feature->nearestNeighbors('vector', Distance::Cosine)
+            ->where('job_id', $id)
+            ->pluck('id');
+
+        $count = $ids->count();
+        if ($count === 0) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        if ($count !== ($job->annotationCandidates()->count() - 1)) {
+            // Add IDs of candidates without feature vectors at the end.
+            $ids = $ids->concat(
+                $job->annotationCandidates()
+                    ->whereNotIn('id', $ids)
+                    ->whereNot('id', $id2)
+                    ->pluck('id')
+            );
+        }
+
+        return $ids;
     }
 
     /**

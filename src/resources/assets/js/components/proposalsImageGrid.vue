@@ -1,9 +1,47 @@
 <template>
     <div class="image-grid" @wheel.prevent="scroll">
         <div class="image-grid__images" ref="images">
-            <image-grid-image v-for="image in displayedImages" :key="image.id" :image="image" :empty-url="emptyUrl" :selectable="selectable" :selected-fade="selectable" :small-icon="!selectable" :selected-icon="selectedIcon" @select="emitSelect"></image-grid-image>
+            <image-grid-image
+                :empty-url="emptyUrl"
+                :image="pinnedImage"
+                :is-pinned="true"
+                :key="pinnedImage.id"
+                :pinnable="pinnable"
+                :selectable="selectable"
+                :selected-fade="false"
+                :selected-icon="selectedIcon"
+                :small-icon="true"
+                :selected-proposal-ids="selectedProposalIds"
+                v-if="hasPinnedImage"
+                @select="emitSelect"
+                @pin="emitPin"
+                ></image-grid-image>
+            <image-grid-image
+                v-for="image in displayedImages"
+                :empty-url="emptyUrl"
+                :image="image"
+                :key="image.id"
+                :pinnable="pinnable"
+                :selectable="selectable"
+                :selected-fade="selectable"
+                :selected-icon="selectedIcon"
+                :small-icon="!selectable"
+                :selected-proposal-ids="selectedProposalIds"
+                @select="emitSelect"
+                @pin="emitPin"
+                ></image-grid-image>
         </div>
-        <image-grid-progress v-if="canScroll" :progress="progress" @top="jumpToStart" @prev-page="reversePage" @prev-row="reverseRow" @jump="jumpToPercent" @next-row="advanceRow" @next-page="advancePage" @bottom="jumpToEnd"></image-grid-progress>
+        <image-grid-progress
+            v-if="canScroll"
+            :progress="progress"
+            @top="jumpToStart"
+            @prev-page="reversePage"
+            @prev-row="reverseRow"
+            @jump="jumpToPercent"
+            @next-row="advanceRow"
+            @next-page="advancePage"
+            @bottom="jumpToEnd"
+            ></image-grid-progress>
     </div>
 </template>
 

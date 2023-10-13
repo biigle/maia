@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Biigle\Jobs\Job;
 use Storage;
 
 class DeleteAnnotationPatchChunk extends Job

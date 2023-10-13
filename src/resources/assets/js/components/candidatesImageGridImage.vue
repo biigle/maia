@@ -1,5 +1,9 @@
 <template>
-    <figure class="image-grid__image image-grid__image--annotation-candidate" :class="classObject" :title="title">
+    <figure
+        class="image-grid__image image-grid__image--annotation-candidate"
+        :class="customClassObject"
+        :title="title"
+        >
         <div v-if="showIcon" class="image-icon">
             <i class="fas" :class="iconClass"></i>
         </div>
@@ -7,6 +11,18 @@
         <div v-if="selected" class="attached-label">
             <span class="attached-label__color" :style="labelStyle"></span>
             <span class="attached-label__name" v-text="label.name"></span>
+        </div>
+        <div
+            v-if="pinnable"
+            class="image-buttons"
+            >
+            <button
+                class="image-button image-button__pin"
+                :title="pinButtonTitle"
+                @click="emitPin"
+                >
+                <span class="fa fa-thumbtack fa-fw"></span>
+            </button>
         </div>
     </figure>
 </template>
@@ -25,6 +41,16 @@ export default {
         ImageGridImage,
         AnnotationPatch,
     ],
+    props: {
+        selectedCandidateIds: {
+            type: Object,
+            required: true,
+        },
+        convertedCandidateIds: {
+            type: Object,
+            required: true,
+        },
+    },
     computed: {
         label() {
             if (this.selected) {
@@ -34,18 +60,16 @@ export default {
             return null;
         },
         selected() {
-            return this.$parent.isSelected(this.image);
+            return this.selectedCandidateIds.hasOwnProperty(this.image.id);
         },
         converted() {
-            return this.$parent.isConverted(this.image);
+            return this.convertedCandidateIds.hasOwnProperty(this.image.id);
         },
-        classObject() {
-            return {
-                'image-grid__image--selected': this.selected || this.converted,
-                'image-grid__image--selectable': this.selectable,
-                'image-grid__image--fade': this.selectedFade,
-                'image-grid__image--small-icon': this.smallIcon,
-            };
+        customClassObject() {
+            const obj = Object.assign({}, this.classObject);
+            obj['image-grid__image--selected'] = this.selected || this.converted;
+
+            return obj;
         },
         iconClass() {
             if (this.converted) {
@@ -79,6 +103,13 @@ export default {
             // Usually this would be set in the created function but in this special
             // case this is not possible.
             return biigle.$require('maia.acUrlTemplate');
+        },
+        pinButtonTitle() {
+            if (this.isPinned) {
+                return 'Unselect reference';
+            }
+
+            return 'Select as reference (sort by similarity)';
         },
     },
 };

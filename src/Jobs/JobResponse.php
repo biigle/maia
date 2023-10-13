@@ -2,18 +2,20 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Biigle\Jobs\Job;
 use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\MaiaAnnotation;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Shape;
 use DB;
+use Queue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
  * This job is executed on the machine running BIIGLE to store the results of novelty
  * detection or object detection.
  */
-class JobResponse extends Job implements ShouldQueue
+abstract class JobResponse extends Job implements ShouldQueue
 {
     /**
      * ID of the MAIA job.
@@ -66,6 +68,7 @@ class JobResponse extends Job implements ShouldQueue
         });
 
         $this->dispatchAnnotationPatchJobs($job);
+        $this->dispatchAnnotationFeatureVectorsJob($job);
         $this->sendNotification($job);
     }
 
@@ -124,10 +127,7 @@ class JobResponse extends Job implements ShouldQueue
      *
      * @param array $chunk
      */
-    protected function insertAnnotationChunk(array $chunk)
-    {
-        //
-    }
+    abstract protected function insertAnnotationChunk(array $chunk);
 
     /**
      * Dispatches the jobs to generate annotation patches for the MAIA annotations.
@@ -146,41 +146,36 @@ class JobResponse extends Job implements ShouldQueue
     }
 
     /**
+     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
+     *
+     * @param MaiaJob $job
+     */
+    abstract protected function dispatchAnnotationFeatureVectorsJob(MaiaJob $job);
+
+    /**
      * Get a query for the annotations that have been created by this job.
      *
      * @param MaiaJob $job
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    protected function getCreatedAnnotations(MaiaJob $job)
-    {
-        return $job->annotations();
-    }
+    abstract protected function getCreatedAnnotations(MaiaJob $job);
 
     /**
      * Update the state of the MAIA job after processing the response.
      *
      * @param MaiaJob $job
      */
-    protected function updateJobState(MaiaJob $job)
-    {
-        //
-    }
+    abstract protected function updateJobState(MaiaJob $job);
 
     /**
      * Send the notification about the completion to the creator of the job.
      *
      * @param MaiaJob $job
      */
-    protected function sendNotification(MaiaJob $job)
-    {
-        //
-    }
+    abstract protected function sendNotification(MaiaJob $job);
 
     /**
      * Get the storage disk to store the annotation patches to.
      */
-    protected function getPatchStorageDisk()
-    {
-        //
-    }
+    abstract protected function getPatchStorageDisk();
 }

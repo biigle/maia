@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalFeatureVectors;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
@@ -107,5 +108,17 @@ class NoveltyDetectionResponse extends JobResponse
         });
 
         return array_slice($annotations, 0, $limit);
+    }
+
+    /**
+     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
+     *
+     * @param MaiaJob $job
+     */
+    protected function dispatchAnnotationFeatureVectorsJob(MaiaJob $job)
+    {
+        $queue = config('maia.feature_vector_queue');
+        Queue::connection(config('maia.feature_vector_connection'))
+            ->pushOn($queue, new GenerateTrainingProposalFeatureVectors($job));
     }
 }

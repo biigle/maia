@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\MaiaJob;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;

@@ -40,6 +40,16 @@ return [
     'response_connection' => env('MAIA_RESPONSE_CONNECTION', 'gpu-response'),
 
     /*
+    | Queue to submit the jobs to generate feature vectors to.
+    */
+    'feature_vector_queue' => env('MAIA_FEATURE_VECTOR_QUEUE', 'default'),
+
+    /*
+    | Queue connection to submit the jobs to generate feature vectors to.
+    */
+    'feature_vector_connection' => env('MAIA_FEATURE_VECTOR_CONNECTION', 'gpu'),
+
+    /*
     | Directory where the temporary files of novelty detection or object detection
     | should be stored.
     */
@@ -140,4 +150,14 @@ return [
      | Enable to disallow submission of new jobs.
      */
     'maintenance_mode' => env('MAIA_MAINTENANCE_MODE', false),
+
+    /*
+    | Path to the extract features script.
+    */
+    'extract_features_script' => __DIR__.'/../resources/scripts/ExtractFeatures.py',
+
+    /*
+    | Path to the directory to use as Torch Hub cache.
+    */
+    'torch_hub_path' => storage_path('maia_cache'),
 ];

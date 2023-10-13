@@ -9,7 +9,9 @@ use Biigle\Modules\Maia\Http\Requests\ContinueMaiaJob;
 use Biigle\Modules\Maia\Http\Requests\UpdateTrainingProposal;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\TrainingProposal;
+use Biigle\Modules\Maia\TrainingProposalFeatureVector;
+use Illuminate\Http\Response;
+use Pgvector\Laravel\Distance;
 
 class TrainingProposalController extends Controller
 {
@@ -52,6 +54,52 @@ class TrainingProposalController extends Controller
             ->orderBy('score', 'desc')
             ->get()
             ->toArray();
+    }
+
+    /**
+     * Get training proposals ordered by similarity to a specific proposal.
+     *
+     * @api {get} maia-jobs/:id/training-proposals/similar-to/:id2 Get similar training proposals
+     * @apiGroup Maia
+     * @apiName IndexSimilarMaiaTrainingProposals
+     * @apiPermission projectEditor
+     * @apiDescription This endpoints returns the ordered training proposal IDs (except the ID of the reference training proposal). Proposals without feature vectors for similarity computation are appended at the end.
+     *
+     * @apiParam {Number} id The job ID.
+     * @apiParam {Number} id2 The "reference" training proposal ID.
+     *
+     * @param int $id Job ID
+     * @param int $id2 Annotation candidate ID
+     * @return \Illuminate\Http\Response
+     */
+    public function indexSimilar($id, $id2)
+    {
+        $job = MaiaJob::findOrFail($id);
+        $this->authorize('access', $job);
+
+        $feature = TrainingProposalFeatureVector::where('job_id', $id)
+            ->findOrFail($id2);
+
+        $ids = $feature->nearestNeighbors('vector', Distance::Cosine)
+            ->where('job_id', $id)
+            ->pluck('id');
+
+        $count = $ids->count();
+        if ($count === 0) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        if ($count !== ($job->trainingProposals()->count() - 1)) {
+            // Add IDs of proposals without feature vectors at the end.
+            $ids = $ids->concat(
+                $job->trainingProposals()
+                    ->whereNotIn('id', $ids)
+                    ->whereNot('id', $id2)
+                    ->pluck('id')
+            );
+        }
+
+        return $ids;
     }
 
     /**

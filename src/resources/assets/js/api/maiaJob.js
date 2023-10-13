@@ -13,6 +13,9 @@
  * Get all training proposals of a job:
  * resource.getTrainingProposals({id: 1}).then(...);
  *
+ * Get training proposal IDs sorted by similarity to a reference proposal:
+ * resource.getSimilarTrainingProposals({jobId: 1, proposalId: 2}).then(...);
+ *
  * Get coordinates of training proposals for an image belonging to the job:
  * resource.getTrainingProposalPoints({jobId: 1, imageId: 2}).then(...);
  *
@@ -30,6 +33,10 @@ export default Vue.resource('api/v1/maia-jobs{/id}', {}, {
         method: 'GET',
         url: 'api/v1/maia-jobs{/id}/training-proposals',
     },
+    getSimilarTrainingProposals: {
+        method: 'GET',
+        url: 'api/v1/maia-jobs{/jobId}/training-proposals/similar-to{/proposalId}',
+    },
     getTrainingProposalPoints: {
         method: 'GET',
         url: 'api/v1/maia-jobs{/jobId}/images{/imageId}/training-proposals',
@@ -37,6 +44,10 @@ export default Vue.resource('api/v1/maia-jobs{/id}', {}, {
     getAnnotationCandidates: {
         method: 'GET',
         url: 'api/v1/maia-jobs{/id}/annotation-candidates',
+    },
+    getSimilarAnnotationCandidates: {
+        method: 'GET',
+        url: 'api/v1/maia-jobs{/jobId}/annotation-candidates/similar-to{/candidateId}',
     },
     getAnnotationCandidatePoints: {
         method: 'GET',

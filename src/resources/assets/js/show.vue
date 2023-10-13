@@ -70,6 +70,8 @@ export default {
             currentProposalsById: {},
             focussedProposal: null,
             proposalAnnotationCache: {},
+            sortedIdsForReferenceProposal: [],
+            referenceProposal: null,
 
             fetchCandidatesPromise: null,
             hasCandidates: false,
@@ -83,6 +85,8 @@ export default {
             focussedCandidate: null,
             candidateAnnotationCache: {},
             selectedLabel: null,
+            sortedIdsForReferenceCandidate: [],
+            referenceCandidate: null,
 
             // Increasing counter to use for sorting of selected proposals and
             // candidates. If a proposal/candidate is selected it should always be sorted
@@ -142,6 +146,11 @@ export default {
         // when this happened.
         proposalsForSelectView() {
             if (this.isInTrainingProposalState) {
+                if (this.sortedIdsForReferenceProposal.length > 0) {
+                    return this.sortedIdsForReferenceProposal
+                        .map(id => PROPOSALS_BY_ID[id]);
+                }
+
                 return this.proposals;
             } else {
                 return this.selectedProposals;
@@ -228,6 +237,11 @@ export default {
 
         candidates() {
             if (this.hasCandidates) {
+                if (this.sortedIdsForReferenceCandidate.length > 0) {
+                    return this.sortedIdsForReferenceCandidate
+                        .map(id => CANDIDATES_BY_ID[id]);
+                }
+
                 return CANDIDATES;
             }
 
@@ -253,10 +267,14 @@ export default {
             return this.selectedCandidates.length > 0;
         },
         candidateImageIds() {
-            let tmp = {};
-            this.candidates.forEach((p) => tmp[p.image_id] = undefined);
+            if (this.hasCandidates) {
+                let tmp = {};
+                CANDIDATES.forEach((p) => tmp[p.image_id] = undefined);
 
-            return Object.keys(tmp).map((id) => parseInt(id, 10));
+                return Object.keys(tmp).map((id) => parseInt(id, 10));
+            }
+
+            return [];
         },
         currentCandidateImageId() {
             return this.candidateImageIds[this.currentCandidateImageIndex];
@@ -483,12 +501,40 @@ export default {
                 this.unselectProposal(proposal);
             } else {
                 if (event.shiftKey && this.lastSelectedProposal) {
-                    this.doForEachBetween(this.proposals, proposal, this.lastSelectedProposal, this.selectProposal);
+                    this.doForEachBetween(
+                        this.proposalsForSelectView,
+                        proposal,
+                        this.lastSelectedProposal,
+                        this.selectProposal
+                    );
                 } else {
                     this.lastSelectedProposal = proposal;
                     this.selectProposal(proposal);
                 }
             }
+        },
+        handleSelectedReferenceProposal(proposal) {
+            if (this.loading) {
+                return;
+            }
+
+            if (this.referenceProposal?.id === proposal.id) {
+                this.referenceProposal = null;
+                this.sortedIdsForReferenceProposal = [];
+
+                return;
+            }
+
+            this.startLoading();
+            JobApi.getSimilarTrainingProposals({
+                    jobId: this.job.id,
+                    proposalId: proposal.id,
+                })
+                .then((response) => {
+                    this.sortedIdsForReferenceProposal = response.body;
+                    this.referenceProposal = proposal;
+                }, handleErrorResponse)
+                .finally(this.finishLoading);
         },
         selectProposal(proposal) {
             this.updateSelectProposal(proposal, true)
@@ -611,6 +657,35 @@ export default {
             });
 
             return promise;
+        },
+        handleSelectedReferenceCandidate(candidate) {
+            if (this.loading) {
+                return;
+            }
+
+            if (this.referenceCandidate?.id === candidate.id) {
+                this.referenceCandidate = null;
+                this.sortedIdsForReferenceCandidate = [];
+
+                return;
+            }
+
+            this.startLoading();
+            JobApi.getSimilarAnnotationCandidates({
+                    jobId: this.job.id,
+                    candidateId: candidate.id,
+                })
+                .then((response) => {
+                    this.sortedIdsForReferenceCandidate = response.body;
+                    this.referenceCandidate = candidate;
+                }, (response) => {
+                    if (response.status === 404) {
+                        Messages.warning('No sorting information available yet. Please try again later.');
+                    } else {
+                        handleErrorResponse(response);
+                    }
+                })
+                .finally(this.finishLoading);
         },
         fetchCandidateAnnotations(id) {
             if (!this.candidateAnnotationCache.hasOwnProperty(id)) {
