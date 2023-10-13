@@ -10,6 +10,7 @@ use Biigle\Modules\Maia\Listeners\DeleteAnnotationFeatureVectors;
 use Biigle\Modules\Maia\Listeners\DispatchMaiaJob;
 use Biigle\Modules\Maia\Listeners\DispatchObjectDetectionRequest;
 use Biigle\Modules\Maia\Listeners\PrepareDeleteAnnotationPatches;
+use Biigle\Modules\Maia\Listeners\PruneTrainingProposalFeatureVectors;
 use Biigle\Modules\Maia\Listeners\PruneTrainingProposalPatches;
 use Biigle\Services\Modules;
 use Event;
@@ -63,6 +64,7 @@ class MaiaServiceProvider extends ServiceProvider
         Event::listen(MaiaJobCreated::class, DispatchMaiaJob::class);
         Event::listen(MaiaJobContinued::class, DispatchObjectDetectionRequest::class);
         Event::listen(MaiaJobContinued::class, PruneTrainingProposalPatches::class);
+        Event::listen(MaiaJobContinued::class, PruneTrainingProposalFeatureVectors::class);
         Event::listen(MaiaJobDeleting::class, PrepareDeleteAnnotationPatches::class);
         Event::listen(MaiaJobDeleting::class, DeleteAnnotationFeatureVectors::class);
     }
