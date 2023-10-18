@@ -29,7 +29,7 @@
         </p>
 
         <p>
-            We recommend you to go multiple times through the process of selecting annotation candidates, each time with a different label. It is much faster to review all image thumbnails of the annotation candidates and look only for a single class of objects or image regions than to switch frequently between many different classes.
+            We recommend you to go multiple times through the process of selecting annotation candidates, each time with a different label. It is much faster to review all image thumbnails of the annotation candidates and look only for a single class of objects or image regions than to switch frequently between many different classes. Remember that you can bulk-select annotation candidates with the <kbd>Shift</kbd> key and sort by similarity with the <button class="btn btn-default btn-xs"><i class="fa fa-thumbtack"></i></button> button (described <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#selection-of-training-proposals">previously</a>)!
         </p>
 
         <p>

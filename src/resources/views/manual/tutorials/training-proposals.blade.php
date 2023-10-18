@@ -75,6 +75,27 @@
         </p>
 
         <p>
+            To facilitate bulk-selection of training proposals you can pin one training proposal as a reference by clicking on the <button class="btn btn-default btn-xs"><i class="fa fa-thumbtack"></i></button> button that appears when you hover the mouse over the thumbnail of the training proposal. The reference proposal will now be pinned to the top left of the image grid and the remaining proposals will be sorted by their visual similarity to the reference. This will often group similar objects together, which can then be bulk-selected. A reference can be un-pinned with another click on the button or a different training proposal can be pinned directly.
+        </p>
+
+        <div style="display: flex; justify-content: space-between; flex-wrap: nowrap;">
+            <figure class="text-center">
+                <a href="{{asset('vendor/maia/images/select_tp_sort_1.jpg')}}">
+                    <img src="{{asset('vendor/maia/images/select_tp_sort_1.jpg')}}" width="95%">
+                </a>
+                <br>
+                <caption>Default image grid</caption>
+            </figure>
+            <figure class="text-center">
+                <a href="{{asset('vendor/maia/images/select_tp_sort_2.jpg')}}">
+                    <img src="{{asset('vendor/maia/images/select_tp_sort_2.jpg')}}" width="95%">
+                </a>
+                <br>
+                <caption>Sorted image grid</caption>
+            </figure>
+        </div>
+
+        <p style="margin-top: 1em;">
             Please note that the quality of <a href="{{route('manual-tutorials', ['maia', 'annotation-candidates'])}}">annotation candidates</a> directly depends on the number of selected training proposals. In some cases a few hundred may be sufficient, in other cases many more might be required.
         </p>
 
