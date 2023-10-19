@@ -32,9 +32,7 @@ This is the BIIGLE module module for the [Machine Learning Assisted Image Annota
 
 ## Configuration
 
-New processing jobs are submitted to the `default` queue of the `gpu` connection. You can configure these with the `MAIA_REQUEST_QUEUE` and `MAIA_REQUEST_CONNECTION` environment variables.
-
-The results of the processing jobs are submitted to the `default` queue of the `gpu-response` connection. You can configure these with the `MAIA_RESPONSE_QUEUE` and `MAIA_RESPONSE_CONNECTION` environment variables.
+New processing jobs are submitted to the `default` queue of the `gpu` connection. You can configure these with the `MAIA_JOB_QUEUE` and `MAIA_JOB_CONNECTION` environment variables.
 
 ## References
 

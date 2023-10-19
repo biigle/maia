@@ -33,10 +33,10 @@ class PrepareExistingAnnotations extends PrepareAnnotationsJob
         $this->convertAnnotations();
 
         if ($this->job->shouldShowTrainingProposals()) {
-            // Pretend this to be a novelty detection response that returned all existing
-            // annotations as training proposals.
-            Queue::connection(config('maia.response_connection'))
-                ->pushOn(config('maia.response_queue'), new NoveltyDetectionResponse($this->job->id, []));
+            $this->updateJobState();
+            $this->dispatchAnnotationPatchJobs();
+            $this->dispatchAnnotationFeatureVectorsJob();
+            $this->sendNotification();
         } else {
             // Continue with object detection using all existing annotations as
             // training data.

@@ -5,7 +5,7 @@ namespace Biigle\Modules\Maia\Listeners;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
+use Biigle\Modules\Maia\Jobs\NoveltyDetection;
 use Biigle\Modules\Maia\Jobs\PrepareExistingAnnotations;
 use Biigle\Modules\Maia\Jobs\PrepareKnowledgeTransfer;
 use Exception;
@@ -23,13 +23,13 @@ class DispatchMaiaJob implements ShouldQueue
     public function handle(MaiaJobCreated $event)
     {
         if ($event->job->shouldUseNoveltyDetection()) {
-            $request = new NoveltyDetectionRequest($event->job);
-            Queue::connection(config('maia.request_connection'))
-                ->pushOn(config('maia.request_queue'), $request);
+            $job = new NoveltyDetection($event->job);
+            Queue::connection(config('maia.job_connection'))
+                ->pushOn(config('maia.job_queue'), $job);
         } elseif ($event->job->shouldUseExistingAnnotations()) {
-            PrepareExistingAnnotations::dispatch($event->job);
+            Queue::push(new PrepareExistingAnnotations($event->job));
         } elseif ($event->job->shouldUseKnowledgeTransfer()) {
-            PrepareKnowledgeTransfer::dispatch($event->job);
+            Queue::push(new PrepareKnowledgeTransfer($event->job));
         } else {
             throw new Exception('Unknown training data method.');
         }

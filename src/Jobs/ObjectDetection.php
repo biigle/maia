@@ -2,14 +2,20 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\GenericImage;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionComplete;
 use Biigle\Volume;
+use DB;
 use Exception;
 use File;
 use FileCache;
+use Queue;
 
-class ObjectDetectionRequest extends JobRequest
+class ObjectDetection extends DetectionJob
 {
     /**
      * Selected training proposals.
@@ -46,7 +52,7 @@ class ObjectDetectionRequest extends JobRequest
         $this->trainingProposals = $this->bundleTrainingProposals($job);
 
         if ($this->shouldUseKnowledgeTransfer()) {
-            $volume = Volume::find($this->jobParams['kt_volume_id']);
+            $volume = Volume::find($this->job->params['kt_volume_id']);
             $this->knowledgeTransferVolumeUrl = $volume->url;
             $this->knowledgeTransferImages = $volume->images()
                 ->pluck('filename', 'id')
@@ -86,7 +92,17 @@ class ObjectDetectionRequest extends JobRequest
         $this->performInference($images, $output[0], $output[1]);
 
         $annotations = $this->parseAnnotations($images);
-        $this->dispatchResponse($annotations);
+
+        // Make sure to roll back any DB modifications if an error occurs.
+        DB::transaction(function () use ($annotations) {
+            $this->createMaiaAnnotations($annotations);
+            $this->updateJobState();
+        });
+
+        $this->dispatchAnnotationPatchJobs();
+        $this->dispatchAnnotationFeatureVectorsJob();
+        $this->sendNotification();
+
         $this->cleanup();
     }
 
@@ -97,7 +113,7 @@ class ObjectDetectionRequest extends JobRequest
      */
     protected function shouldUseKnowledgeTransfer()
     {
-        return array_key_exists('training_data_method', $this->jobParams) && in_array($this->jobParams['training_data_method'], ['knowledge_transfer', 'area_knowledge_transfer']);
+        return array_key_exists('training_data_method', $this->job->params) && in_array($this->job->params['training_data_method'], ['knowledge_transfer', 'area_knowledge_transfer']);
     }
 
     /**
@@ -168,7 +184,7 @@ class ObjectDetectionRequest extends JobRequest
         ];
 
         if ($this->shouldUseKnowledgeTransfer()) {
-            $content['kt_scale_factors'] = $this->jobParams['kt_scale_factors'];
+            $content['kt_scale_factors'] = $this->job->params['kt_scale_factors'];
         }
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
@@ -302,7 +318,7 @@ class ObjectDetectionRequest extends JobRequest
      */
     protected function dispatchResponse($annotations)
     {
-        $this->dispatch(new ObjectDetectionResponse($this->jobId, $annotations));
+        $this->dispatch(new ObjectDetectionResponse($this->job->id, $annotations));
     }
 
     /**
@@ -310,7 +326,7 @@ class ObjectDetectionRequest extends JobRequest
      */
     protected function dispatchFailure(Exception $e)
     {
-        $this->dispatch(new ObjectDetectionFailure($this->jobId, $e));
+        Queue::push(new ObjectDetectionFailure($this->job->id, $e));
     }
 
     /**
@@ -334,5 +350,56 @@ class ObjectDetectionRequest extends JobRequest
         }
 
         return $images;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function insertAnnotationChunk(array $chunk)
+    {
+        AnnotationCandidate::insert($chunk);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getCreatedAnnotations()
+    {
+        return $this->job->annotationCandidates();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function updateJobState()
+    {
+        $this->job->state_id = State::annotationCandidatesId();
+        $this->job->save();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function sendNotification()
+    {
+        $this->job->user->notify(new ObjectDetectionComplete($this->job));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getPatchStorageDisk()
+    {
+        return config('maia.annotation_candidate_storage_disk');
+    }
+
+    /**
+     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
+     */
+    protected function dispatchAnnotationFeatureVectorsJob()
+    {
+        $queue = config('maia.feature_vector_queue');
+        Queue::connection(config('maia.feature_vector_connection'))
+            ->pushOn($queue, new GenerateAnnotationCandidateFeatureVectors($this->job));
     }
 }

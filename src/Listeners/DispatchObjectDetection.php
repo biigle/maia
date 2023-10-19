@@ -4,12 +4,12 @@ namespace Biigle\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
-use Biigle\Modules\Maia\Jobs\ObjectDetectionRequest;
+use Biigle\Modules\Maia\Jobs\ObjectDetection;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Queue;
 
-class DispatchObjectDetectionRequest implements ShouldQueue
+class DispatchObjectDetection implements ShouldQueue
 {
     /**
       * Handle the event.
@@ -19,9 +19,9 @@ class DispatchObjectDetectionRequest implements ShouldQueue
       */
     public function handle(MaiaJobContinued $event)
     {
-        $request = new ObjectDetectionRequest($event->job);
-        Queue::connection(config('maia.request_connection'))
-            ->pushOn(config('maia.request_queue'), $request);
+        $job = new ObjectDetection($event->job);
+        Queue::connection(config('maia.job_connection'))
+            ->pushOn(config('maia.job_queue'), $job);
     }
 
     /**

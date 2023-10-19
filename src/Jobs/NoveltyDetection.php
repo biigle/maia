@@ -2,16 +2,18 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
+use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalFeatureVectors;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
+use Biigle\Modules\Maia\TrainingProposal;
+use DB;
 use Exception;
 use File;
 use FileCache;
 use Queue;
 
-/**
- * This job is executed on a machine with GPU access.
- */
-class NoveltyDetectionRequest extends JobRequest
+class NoveltyDetection extends DetectionJob
 {
     /**
      * Disable the timeout of the Laravel queue worker because this job may run long.
@@ -38,7 +40,17 @@ class NoveltyDetectionRequest extends JobRequest
         $annotations = $this->parseAnnotations($images);
         $limit = config('maia.training_proposal_limit');
         $annotations = $this->maybeLimitAnnotations($annotations, $limit);
-        $this->dispatchResponse($annotations);
+
+        // Make sure to roll back any DB modifications if an error occurs.
+        DB::transaction(function () use ($annotations) {
+            $this->createMaiaAnnotations($annotations);
+            $this->updateJobState();
+        });
+
+        $this->dispatchAnnotationPatchJobs();
+        $this->dispatchAnnotationFeatureVectorsJob();
+        $this->sendNotification();
+
         $this->cleanup();
     }
 
@@ -57,15 +69,17 @@ class NoveltyDetectionRequest extends JobRequest
             $imagesMap[$image->getId()] = $paths[$index];
         }
 
+        $params = $this->job->params;
+
         $content = [
-            'nd_clusters' => intval($this->jobParams['nd_clusters']),
-            'nd_patch_size' => intval($this->jobParams['nd_patch_size']),
-            'nd_threshold' => intval($this->jobParams['nd_threshold']),
-            'nd_latent_size' => floatval($this->jobParams['nd_latent_size']),
-            'nd_trainset_size' => intval($this->jobParams['nd_trainset_size']),
-            'nd_epochs' => intval($this->jobParams['nd_epochs']),
-            'nd_stride' => intval($this->jobParams['nd_stride']),
-            'nd_ignore_radius' => intval($this->jobParams['nd_ignore_radius']),
+            'nd_clusters' => intval($params['nd_clusters']),
+            'nd_patch_size' => intval($params['nd_patch_size']),
+            'nd_threshold' => intval($params['nd_threshold']),
+            'nd_latent_size' => floatval($params['nd_latent_size']),
+            'nd_trainset_size' => intval($params['nd_trainset_size']),
+            'nd_epochs' => intval($params['nd_epochs']),
+            'nd_stride' => intval($params['nd_stride']),
+            'nd_ignore_radius' => intval($params['nd_ignore_radius']),
             'images' => $imagesMap,
             'tmp_dir' => $this->tmpDir,
             'max_workers' => intval(config('maia.max_workers')),
@@ -77,21 +91,11 @@ class NoveltyDetectionRequest extends JobRequest
     }
 
     /**
-     * Dispatch the job to store the novelty detection results.
-     *
-     * @param array $annotations
-     */
-    protected function dispatchResponse($annotations)
-    {
-        $this->dispatch(new NoveltyDetectionResponse($this->jobId, $annotations));
-    }
-
-    /**
      * {@inheritdoc}
      */
     protected function dispatchFailure(Exception $e)
     {
-        $this->dispatch(new NoveltyDetectionFailure($this->jobId, $e));
+        Queue::push(new NoveltyDetectionFailure($this->job->id, $e));
     }
 
     /**
@@ -101,7 +105,6 @@ class NoveltyDetectionRequest extends JobRequest
     {
         return parent::getTmpDirPath()."-novelty-detection";
     }
-
 
     /**
      * Apply the limit for the maximum number of annotations.
@@ -124,5 +127,58 @@ class NoveltyDetectionRequest extends JobRequest
         });
 
         return array_slice($annotations, 0, $limit);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function insertAnnotationChunk(array $chunk)
+    {
+        TrainingProposal::insert($chunk);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getCreatedAnnotations()
+    {
+        return $this->job->trainingProposals();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function updateJobState()
+    {
+        $this->job->state_id = State::trainingProposalsId();
+        $this->job->save();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function sendNotification()
+    {
+        $this->job->user->notify(new NoveltyDetectionComplete($this->job));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getPatchStorageDisk()
+    {
+        return config('maia.training_proposal_storage_disk');
+    }
+
+    /**
+     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
+     *
+     * @param MaiaJob $job
+     */
+    protected function dispatchAnnotationFeatureVectorsJob()
+    {
+        $queue = config('maia.feature_vector_queue');
+        Queue::connection(config('maia.feature_vector_connection'))
+            ->pushOn($queue, new GenerateTrainingProposalFeatureVectors($this->job));
     }
 }

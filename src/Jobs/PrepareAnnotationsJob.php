@@ -8,22 +8,19 @@ use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Shape;
 use DB;
+use Exception;
 use Illuminate\Queue\SerializesModels;
+use Queue;
 
-abstract class PrepareAnnotationsJob extends Job
+// This extends DetectionJob because it "fakes" the novelty detection.
+abstract class PrepareAnnotationsJob extends DetectionJob
 {
     use SerializesModels, QueriesExistingAnnotations;
-
-    /**
-     * The job to use existing annotations for.
-     *
-     * @var MaiaJob
-     */
-    protected $job;
 
     /**
      * Ignore this job if the MAIA job does not exist any more.
@@ -38,16 +35,6 @@ abstract class PrepareAnnotationsJob extends Job
      * @var bool
      */
     protected $selectTrainingProposals = true;
-
-    /**
-     * Create a new isntance.
-     *
-     * @param MaiaJob $job
-     */
-    public function __construct(MaiaJob $job)
-    {
-        $this->job = $job;
-    }
 
     /**
      * Get the query for the annotations to convert.
@@ -103,7 +90,7 @@ abstract class PrepareAnnotationsJob extends Job
             ];
         });
 
-        TrainingProposal::insert($trainingProposals->toArray());
+        $this->insertAnnotationChunk($trainingProposals->toArray());
     }
 
     /**
@@ -162,5 +149,66 @@ abstract class PrepareAnnotationsJob extends Job
         $r = round(sqrt($r), 2);
 
         return [$x, $y, $r];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function dispatchFailure(Exception $e)
+    {
+        Queue::push(new ObjectDetectionFailure($this->job->id, $e));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function insertAnnotationChunk(array $chunk)
+    {
+        TrainingProposal::insert($chunk);
+    }
+
+    /**
+     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
+     *
+     * @param MaiaJob $job
+     */
+    protected function dispatchAnnotationFeatureVectorsJob()
+    {
+        $queue = config('maia.feature_vector_queue');
+        Queue::connection(config('maia.feature_vector_connection'))
+            ->pushOn($queue, new GenerateTrainingProposalFeatureVectors($this->job));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getCreatedAnnotations()
+    {
+        return $this->job->trainingProposals();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function updateJobState()
+    {
+        $this->job->state_id = State::trainingProposalsId();
+        $this->job->save();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function sendNotification()
+    {
+        $this->job->user->notify(new NoveltyDetectionComplete($this->job));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getPatchStorageDisk()
+    {
+        return config('maia.training_proposal_storage_disk');
     }
 }

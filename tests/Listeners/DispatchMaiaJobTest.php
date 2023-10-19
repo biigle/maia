@@ -4,14 +4,13 @@ namespace Biigle\Tests\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
+use Biigle\Modules\Maia\Jobs\NoveltyDetection;
 use Biigle\Modules\Maia\Jobs\PrepareExistingAnnotations;
 use Biigle\Modules\Maia\Jobs\PrepareKnowledgeTransfer;
 use Biigle\Modules\Maia\Listeners\DispatchMaiaJob;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Event;
 use Exception;
-use Illuminate\Support\Facades\Bus;
 use Queue;
 use TestCase;
 
@@ -23,9 +22,8 @@ class DispatchMaiaJobTest extends TestCase
         $event = new MaiaJobCreated($job);
         $listener = new DispatchMaiaJob;
 
-        Queue::fake();
         $listener->handle($event);
-        Queue::assertPushed(NoveltyDetectionRequest::class);
+        Queue::assertPushed(NoveltyDetection::class);
     }
 
     public function testHandleExistingAnnotations()
@@ -34,9 +32,8 @@ class DispatchMaiaJobTest extends TestCase
         $event = new MaiaJobCreated($job);
         $listener = new DispatchMaiaJob;
 
-        Bus::fake();
         $listener->handle($event);
-        Bus::assertDispatched(PrepareExistingAnnotations::class);
+        Queue::assertPushed(PrepareExistingAnnotations::class);
     }
 
     public function testHandleKnowledgeTransfer()
@@ -45,9 +42,8 @@ class DispatchMaiaJobTest extends TestCase
         $event = new MaiaJobCreated($job);
         $listener = new DispatchMaiaJob;
 
-        Bus::fake();
         $listener->handle($event);
-        Bus::assertDispatched(PrepareKnowledgeTransfer::class);
+        Queue::assertPushed(PrepareKnowledgeTransfer::class);
     }
 
     public function testHandleAreaKnowledgeTransfer()
@@ -56,9 +52,8 @@ class DispatchMaiaJobTest extends TestCase
         $event = new MaiaJobCreated($job);
         $listener = new DispatchMaiaJob;
 
-        Bus::fake();
         $listener->handle($event);
-        Bus::assertDispatched(PrepareKnowledgeTransfer::class);
+        Queue::assertPushed(PrepareKnowledgeTransfer::class);
     }
 
     public function testFailed()
@@ -67,7 +62,6 @@ class DispatchMaiaJobTest extends TestCase
         $event = new MaiaJobCreated($job);
         $listener = new DispatchMaiaJob;
 
-        Queue::fake();
         $listener->failed($event, new Exception);
         Queue::assertPushed(NoveltyDetectionFailure::class);
     }

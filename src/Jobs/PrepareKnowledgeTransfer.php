@@ -26,8 +26,15 @@ class PrepareKnowledgeTransfer extends PrepareAnnotationsJob
             } else {
                 $scaleFactors = $this->getDistanceScaleFactors();
             }
+
+            if (!$this->hasAnnotations()) {
+                throw new PrepareKnowledgeTransferException('The volume that was selected for knowledge transfer has no annotations.');
+            }
         } catch (PrepareKnowledgeTransferException $e) {
-            $this->handleFailure($e->getMessage());
+            $this->job->error = ['message' => $e->getMessage()];
+            $this->job->state_id = State::failedObjectDetectionId();
+            $this->job->save();
+            $this->job->user->notify(new ObjectDetectionFailed($this->job));
             return;
         }
 
@@ -36,11 +43,7 @@ class PrepareKnowledgeTransfer extends PrepareAnnotationsJob
         $this->job->params = $params;
 
 
-        if (!$this->hasAnnotations()) {
-            $this->handleFailure('The volume that was selected for knowledge transfer has no annotations.');
-            return;
-        }
-
+        // There is no option to show the "training proposals" here, so we skip all that.
         $this->convertAnnotations();
         $this->job->save();
         event(new MaiaJobContinued($this->job));
@@ -160,16 +163,4 @@ class PrepareKnowledgeTransfer extends PrepareAnnotationsJob
         return $this->getExistingAnnotationsQuery($this->job->params['kt_volume_id'], $restrictLabels);
     }
 
-    /**
-     * Set the failed state and error message and notify the user.
-     *
-     * @param string $message
-     */
-    protected function handleFailure($message)
-    {
-        $this->job->error = ['message' => $message];
-        $this->job->state_id = State::failedObjectDetectionId();
-        $this->job->save();
-        $this->job->user->notify(new ObjectDetectionFailed($this->job));
-    }
 }
