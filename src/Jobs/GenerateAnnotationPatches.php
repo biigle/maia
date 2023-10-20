@@ -3,11 +3,12 @@
 namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Jobs\Job;
-use Biigle\Modules\Maia\MaiaJob;
-use Illuminate\Queue\SerializesModels;
 use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Modules\Maia\MaiaJob;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\SerializesModels;
 
-abstract class GenerateAnnotationPatches extends Job
+abstract class GenerateAnnotationPatches extends Job implements ShouldQueue
 {
     use SerializesModels;
 

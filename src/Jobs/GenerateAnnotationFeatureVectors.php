@@ -8,12 +8,13 @@ use Biigle\Modules\Maia\MaiaAnnotation;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Shape;
 use FileCache;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use SplFileObject;
 
-abstract class GenerateAnnotationFeatureVectors extends Job
+abstract class GenerateAnnotationFeatureVectors extends Job implements ShouldQueue
 {
     use SerializesModels;
 
