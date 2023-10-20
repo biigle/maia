@@ -39,7 +39,7 @@ class DispatchMaiaJob implements ShouldQueue
                 new NotifyNoveltyDetectionComplete($job),
             ])
             ->onConnection(config('maia.job_connection'))
-        ->onQueue(config('maia.job_queue'))
+            ->onQueue(config('maia.job_queue'))
             ->dispatch();
         } elseif ($job->shouldUseExistingAnnotations()) {
             if ($job->shouldShowTrainingProposals()) {

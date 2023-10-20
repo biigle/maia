@@ -4,10 +4,11 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\MaiaJob;
-use Illuminate\Queue\SerializesModels;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\SerializesModels;
 
-class NotifyNoveltyDetectionComplete extends Job
+class NotifyNoveltyDetectionComplete extends Job implements ShouldQueue
 {
     use SerializesModels;
 
