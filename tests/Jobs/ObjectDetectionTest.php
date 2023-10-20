@@ -17,7 +17,6 @@ use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Exception;
 use FileCache;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Str;
 use TestCase;
@@ -26,7 +25,6 @@ class ObjectDetectionTest extends TestCase
 {
     public function testHandle()
     {
-        Notification::fake();
         FileCache::fake();
         config([
             'maia.mmdet_train_batch_size' => 12,
@@ -123,10 +121,6 @@ class ObjectDetectionTest extends TestCase
             $this->assertNull($annotations[0]->annotation_id);
             $this->assertEquals($image->id, $annotations[0]->image_id);
             $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
-
-            Queue::assertPushed(GenerateImageAnnotationPatch::class);
-            Queue::assertPushed(GenerateAnnotationCandidateFeatureVectors::class);
-            Notification::assertSentTo($job->user, ObjectDetectionComplete::class);
 
             $this->assertTrue($request->cleanup);
         } finally {

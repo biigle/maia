@@ -17,8 +17,7 @@ use Exception;
 use Illuminate\Queue\SerializesModels;
 use Queue;
 
-// This extends DetectionJob because it "fakes" the novelty detection.
-abstract class PrepareAnnotationsJob extends DetectionJob
+abstract class PrepareAnnotationsJob extends Job
 {
     use SerializesModels, QueriesExistingAnnotations;
 
@@ -35,6 +34,16 @@ abstract class PrepareAnnotationsJob extends DetectionJob
      * @var bool
      */
     protected $selectTrainingProposals = true;
+
+    /**
+     * Create a new instance
+     *
+     * @param MaiaJob $job
+     */
+    public function __construct(public MaiaJob $job)
+    {
+        //
+    }
 
     /**
      * Get the query for the annotations to convert.
@@ -90,7 +99,7 @@ abstract class PrepareAnnotationsJob extends DetectionJob
             ];
         });
 
-        $this->insertAnnotationChunk($trainingProposals->toArray());
+        TrainingProposal::insert($trainingProposals->toArray());
     }
 
     /**
@@ -149,66 +158,5 @@ abstract class PrepareAnnotationsJob extends DetectionJob
         $r = round(sqrt($r), 2);
 
         return [$x, $y, $r];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function dispatchFailure(Exception $e)
-    {
-        Queue::push(new ObjectDetectionFailure($this->job->id, $e));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function insertAnnotationChunk(array $chunk)
-    {
-        TrainingProposal::insert($chunk);
-    }
-
-    /**
-     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
-     *
-     * @param MaiaJob $job
-     */
-    protected function dispatchAnnotationFeatureVectorsJob()
-    {
-        $queue = config('maia.feature_vector_queue');
-        Queue::connection(config('maia.feature_vector_connection'))
-            ->pushOn($queue, new GenerateTrainingProposalFeatureVectors($this->job));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getCreatedAnnotations()
-    {
-        return $this->job->trainingProposals();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function updateJobState()
-    {
-        $this->job->state_id = State::trainingProposalsId();
-        $this->job->save();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function sendNotification()
-    {
-        $this->job->user->notify(new NoveltyDetectionComplete($this->job));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getPatchStorageDisk()
-    {
-        return config('maia.training_proposal_storage_disk');
     }
 }

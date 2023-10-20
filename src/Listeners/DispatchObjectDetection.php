@@ -3,10 +3,14 @@
 namespace Biigle\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidatePatches;
+use Biigle\Modules\Maia\Jobs\NotifyObjectDetectionComplete;
 use Biigle\Modules\Maia\Jobs\ObjectDetection;
+use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Bus;
 use Queue;
 
 class DispatchObjectDetection implements ShouldQueue
@@ -19,9 +23,20 @@ class DispatchObjectDetection implements ShouldQueue
       */
     public function handle(MaiaJobContinued $event)
     {
-        $job = new ObjectDetection($event->job);
-        Queue::connection(config('maia.job_connection'))
-            ->pushOn(config('maia.job_queue'), $job);
+        $job = $event->job;
+        // The job chain is used so the feature vectors are immediately generated
+        // after the detection on the GPU queue. Otherwise another detection job
+        // could squeeze inbetween and delay the generation of feature vectors by
+        // hours.
+        Bus::chain([
+            new ObjectDetection($job),
+            new GenerateAnnotationCandidatePatches($job),
+            new GenerateAnnotationCandidateFeatureVectors($job),
+            new NotifyObjectDetectionComplete($job),
+        ])
+        ->onConnection(config('maia.job_connection'))
+        ->onQueue(config('maia.job_queue'))
+        ->dispatch();
     }
 
     /**

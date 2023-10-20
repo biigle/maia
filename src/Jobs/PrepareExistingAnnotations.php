@@ -33,10 +33,8 @@ class PrepareExistingAnnotations extends PrepareAnnotationsJob
         $this->convertAnnotations();
 
         if ($this->job->shouldShowTrainingProposals()) {
-            $this->updateJobState();
-            $this->dispatchAnnotationPatchJobs();
-            $this->dispatchAnnotationFeatureVectorsJob();
-            $this->sendNotification();
+            $this->job->state_id = State::trainingProposalsId();
+            $this->job->save();
         } else {
             // Continue with object detection using all existing annotations as
             // training data.

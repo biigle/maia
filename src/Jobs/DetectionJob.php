@@ -2,7 +2,6 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\GenericImage;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Shape;
@@ -256,43 +255,7 @@ abstract class DetectionJob implements ShouldQueue
     abstract protected function insertAnnotationChunk(array $chunk);
 
     /**
-     * Dispatches the jobs to generate annotation patches for the MAIA annotations.
-     */
-    protected function dispatchAnnotationPatchJobs()
-    {
-        $disk = $this->getPatchStorageDisk();
-        $this->getCreatedAnnotations()->chunkById(1000, function ($chunk) use ($disk) {
-            foreach ($chunk as $annotation) {
-                GenerateImageAnnotationPatch::dispatch($annotation, $disk)
-                    ->onQueue(config('largo.generate_annotation_patch_queue'));
-            }
-        });
-    }
-
-    /**
-     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
-     */
-    abstract protected function dispatchAnnotationFeatureVectorsJob();
-
-    /**
-     * Get a query for the annotations that have been created by this job.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    abstract protected function getCreatedAnnotations();
-
-    /**
      * Update the state of the MAIA job after processing the response.
      */
     abstract protected function updateJobState();
-
-    /**
-     * Send the notification about the completion to the creator of the job.
-     */
-    abstract protected function sendNotification();
-
-    /**
-     * Get the storage disk to store the annotation patches to.
-     */
-    abstract protected function getPatchStorageDisk();
 }

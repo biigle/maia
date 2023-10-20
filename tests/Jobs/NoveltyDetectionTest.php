@@ -16,7 +16,6 @@ use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Exception;
 use FileCache;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use TestCase;
 
@@ -24,7 +23,6 @@ class NoveltyDetectionTest extends TestCase
 {
     public function testHandle()
     {
-        Notification::fake();
         FileCache::fake();
         config([
             'maia.max_workers' => 2,
@@ -69,10 +67,6 @@ class NoveltyDetectionTest extends TestCase
             $this->assertEquals($image->id, $annotations[0]->image_id);
             $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
-            Queue::assertPushed(GenerateImageAnnotationPatch::class);
-            Queue::assertPushed(GenerateTrainingProposalFeatureVectors::class);
-            Notification::assertSentTo($job->user, NoveltyDetectionComplete::class);
-
             $this->assertTrue($request->cleanup);
         } finally {
             File::deleteDirectory($tmpDir);
@@ -81,7 +75,6 @@ class NoveltyDetectionTest extends TestCase
 
     public function testHandleLimit()
     {
-        Notification::fake();
         FileCache::fake();
         config(['maia.training_proposal_limit' => 1]);
 
@@ -116,7 +109,6 @@ class NoveltyDetectionTest extends TestCase
 
     public function testHandleRollbackOnError()
     {
-        Notification::fake();
         FileCache::fake();
 
         $params = [

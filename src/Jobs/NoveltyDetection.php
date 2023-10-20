@@ -47,10 +47,6 @@ class NoveltyDetection extends DetectionJob
             $this->updateJobState();
         });
 
-        $this->dispatchAnnotationPatchJobs();
-        $this->dispatchAnnotationFeatureVectorsJob();
-        $this->sendNotification();
-
         $this->cleanup();
     }
 
@@ -140,45 +136,9 @@ class NoveltyDetection extends DetectionJob
     /**
      * {@inheritdoc}
      */
-    protected function getCreatedAnnotations()
-    {
-        return $this->job->trainingProposals();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     protected function updateJobState()
     {
         $this->job->state_id = State::trainingProposalsId();
         $this->job->save();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function sendNotification()
-    {
-        $this->job->user->notify(new NoveltyDetectionComplete($this->job));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getPatchStorageDisk()
-    {
-        return config('maia.training_proposal_storage_disk');
-    }
-
-    /**
-     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
-     *
-     * @param MaiaJob $job
-     */
-    protected function dispatchAnnotationFeatureVectorsJob()
-    {
-        $queue = config('maia.feature_vector_queue');
-        Queue::connection(config('maia.feature_vector_connection'))
-            ->pushOn($queue, new GenerateTrainingProposalFeatureVectors($this->job));
     }
 }

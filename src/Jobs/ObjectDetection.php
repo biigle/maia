@@ -99,10 +99,6 @@ class ObjectDetection extends DetectionJob
             $this->updateJobState();
         });
 
-        $this->dispatchAnnotationPatchJobs();
-        $this->dispatchAnnotationFeatureVectorsJob();
-        $this->sendNotification();
-
         $this->cleanup();
     }
 
@@ -363,43 +359,9 @@ class ObjectDetection extends DetectionJob
     /**
      * {@inheritdoc}
      */
-    protected function getCreatedAnnotations()
-    {
-        return $this->job->annotationCandidates();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     protected function updateJobState()
     {
         $this->job->state_id = State::annotationCandidatesId();
         $this->job->save();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function sendNotification()
-    {
-        $this->job->user->notify(new ObjectDetectionComplete($this->job));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getPatchStorageDisk()
-    {
-        return config('maia.annotation_candidate_storage_disk');
-    }
-
-    /**
-     * Dispatches the job to generate annotation feature vectors for the MAIA annotations.
-     */
-    protected function dispatchAnnotationFeatureVectorsJob()
-    {
-        $queue = config('maia.feature_vector_queue');
-        Queue::connection(config('maia.feature_vector_connection'))
-            ->pushOn($queue, new GenerateAnnotationCandidateFeatureVectors($this->job));
     }
 }

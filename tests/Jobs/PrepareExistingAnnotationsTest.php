@@ -34,11 +34,8 @@ class PrepareExistingAnnotationsTest extends TestCase
         ]);
 
         Event::fake();
-        Queue::fake();
         (new PrepareExistingAnnotations($job))->handle();
         Event::assertDispatched(MaiaJobContinued::class);
-        Queue::assertNotPushed(GenerateImageAnnotationPatch::class);
-        Queue::assertNotPushed(GenerateTrainingProposalFeatureVectors::class);
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a->points, $proposal->points);
@@ -159,12 +156,8 @@ class PrepareExistingAnnotationsTest extends TestCase
         ]);
 
         Event::fake();
-        Notification::fake();
         (new PrepareExistingAnnotations($job))->handle();
 
-        Queue::assertPushed(GenerateImageAnnotationPatch::class);
-        Queue::assertPushed(GenerateTrainingProposalFeatureVectors::class);
-        Notification::assertSentTo($job->user, NoveltyDetectionComplete::class);
         Event::assertNotDispatched(MaiaJobContinued::class);
 
         $this->assertEquals(State::trainingProposalsId(), $job->fresh()->state_id);

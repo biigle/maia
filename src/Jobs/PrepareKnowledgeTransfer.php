@@ -42,8 +42,6 @@ class PrepareKnowledgeTransfer extends PrepareAnnotationsJob
         $params['kt_scale_factors'] = $scaleFactors;
         $this->job->params = $params;
 
-
-        // There is no option to show the "training proposals" here, so we skip all that.
         $this->convertAnnotations();
         $this->job->save();
         event(new MaiaJobContinued($this->job));

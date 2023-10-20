@@ -3,15 +3,37 @@
 namespace Biigle\Tests\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidatePatches;
+use Biigle\Modules\Maia\Jobs\NotifyObjectDetectionComplete;
+use Biigle\Modules\Maia\Jobs\ObjectDetection;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
 use Biigle\Modules\Maia\Listeners\DispatchObjectDetection;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Exception;
-use Queue;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Queue;
 use TestCase;
 
 class DispatchObjectDetectionTest extends TestCase
 {
+    public function testHandle()
+    {
+        Bus::fake();
+        $job = MaiaJobTest::create();
+        $event = new MaiaJobContinued($job);
+        $listener = new DispatchObjectDetection;
+
+        $listener->handle($event);
+
+        Bus::assertChained([
+            ObjectDetection::class,
+            GenerateAnnotationCandidatePatches::class,
+            GenerateAnnotationCandidateFeatureVectors::class,
+            NotifyObjectDetectionComplete::class,
+        ]);
+    }
+
     public function testFailed()
     {
         $job = MaiaJobTest::create();

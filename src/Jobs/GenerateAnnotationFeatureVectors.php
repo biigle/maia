@@ -22,7 +22,7 @@ abstract class GenerateAnnotationFeatureVectors extends Job
      *
      * @var int
      */
-    const INSERT_CUNK_SIZE = 1000;
+    const INSERT_CHUNK_SIZE = 1000;
 
     /**
      * The "radius" of the bounding box around a point annotation.
@@ -80,7 +80,7 @@ abstract class GenerateAnnotationFeatureVectors extends Job
                     'vector' => $row[1],
                 ];
 
-                if (count($insert) >= self::INSERT_CUNK_SIZE) {
+                if (count($insert) >= self::INSERT_CHUNK_SIZE) {
                     $this->insertFeatureVectorModelChunk($insert);
                     $insert = [];
                 }
