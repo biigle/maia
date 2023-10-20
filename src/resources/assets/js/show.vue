@@ -533,7 +533,13 @@ export default {
                 .then((response) => {
                     this.sortedIdsForReferenceProposal = response.body;
                     this.referenceProposal = proposal;
-                }, handleErrorResponse)
+                }, (response) => {
+                    if (response.status === 404) {
+                        Messages.warning('No sorting information available yet. Please try again later.');
+                    } else {
+                        handleErrorResponse(response);
+                    }
+                })
                 .finally(this.finishLoading);
         },
         selectProposal(proposal) {
