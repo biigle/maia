@@ -4,11 +4,12 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
+use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalFeatureVectors;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Maia\Jobs\PrepareExistingAnnotations;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Biigle\Modules\Maia\Notifications\ObjectDetectionFailed;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionFailed;
 use Biigle\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
@@ -33,10 +34,8 @@ class PrepareExistingAnnotationsTest extends TestCase
         ]);
 
         Event::fake();
-        Queue::fake();
         (new PrepareExistingAnnotations($job))->handle();
         Event::assertDispatched(MaiaJobContinued::class);
-        Queue::assertNotPushed(GenerateImageAnnotationPatch::class);
         $this->assertEquals(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
         $this->assertEquals($a->points, $proposal->points);
@@ -157,10 +156,11 @@ class PrepareExistingAnnotationsTest extends TestCase
         ]);
 
         Event::fake();
-        Queue::fake();
         (new PrepareExistingAnnotations($job))->handle();
+
         Event::assertNotDispatched(MaiaJobContinued::class);
-        Queue::assertPushed(NoveltyDetectionResponse::class);
+
+        $this->assertEquals(State::trainingProposalsId(), $job->fresh()->state_id);
         $this->assertEquals(0, $job->trainingProposals()->selected()->count());
         $this->assertEquals(1, $job->trainingProposals()->count());
         $proposal = $job->trainingProposals()->first();

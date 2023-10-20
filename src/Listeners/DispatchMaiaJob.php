@@ -4,13 +4,17 @@ namespace Biigle\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
+use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalFeatureVectors;
+use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalPatches;
+use Biigle\Modules\Maia\Jobs\NotifyNoveltyDetectionComplete;
+use Biigle\Modules\Maia\Jobs\NoveltyDetection;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
-use Biigle\Modules\Maia\Jobs\NoveltyDetectionRequest;
 use Biigle\Modules\Maia\Jobs\PrepareExistingAnnotations;
 use Biigle\Modules\Maia\Jobs\PrepareKnowledgeTransfer;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Queue;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Queue;
 
 class DispatchMaiaJob implements ShouldQueue
 {
@@ -22,14 +26,40 @@ class DispatchMaiaJob implements ShouldQueue
       */
     public function handle(MaiaJobCreated $event)
     {
-        if ($event->job->shouldUseNoveltyDetection()) {
-            $request = new NoveltyDetectionRequest($event->job);
-            Queue::connection(config('maia.request_connection'))
-                ->pushOn(config('maia.request_queue'), $request);
-        } elseif ($event->job->shouldUseExistingAnnotations()) {
-            PrepareExistingAnnotations::dispatch($event->job);
-        } elseif ($event->job->shouldUseKnowledgeTransfer()) {
-            PrepareKnowledgeTransfer::dispatch($event->job);
+        $job = $event->job;
+        if ($job->shouldUseNoveltyDetection()) {
+            // The job chain is used so the feature vectors are immediately generated
+            // after the detection on the GPU queue. Otherwise another detection job
+            // could squeeze inbetween and delay the generation of feature vectors by
+            // hours.
+            Bus::chain([
+                new NoveltyDetection($job),
+                new GenerateTrainingProposalPatches($job),
+                new GenerateTrainingProposalFeatureVectors($job),
+                new NotifyNoveltyDetectionComplete($job),
+            ])
+            ->onConnection(config('maia.job_connection'))
+        ->onQueue(config('maia.job_queue'))
+            ->dispatch();
+        } elseif ($job->shouldUseExistingAnnotations()) {
+            if ($job->shouldShowTrainingProposals()) {
+                // The job chain is used so the feature vectors are immediately generated
+                // after the detection on the GPU queue. Otherwise another detection job
+                // could squeeze inbetween and delay the generation of feature vectors by
+                // hours.
+                Bus::chain([
+                    new PrepareExistingAnnotations($job),
+                    new GenerateTrainingProposalPatches($job),
+                    new GenerateTrainingProposalFeatureVectors($job),
+                    // TODO: Send a different notification?
+                    new NotifyNoveltyDetectionComplete($job),
+                ])
+                ->dispatch();
+            } else {
+                Queue::push(new PrepareExistingAnnotations($job));
+            }
+        } elseif ($job->shouldUseKnowledgeTransfer()) {
+            Queue::push(new PrepareKnowledgeTransfer($job));
         } else {
             throw new Exception('Unknown training data method.');
         }

@@ -4,46 +4,23 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Modules\Maia\GenericImage;
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Shape;
 use Exception;
 use File;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Queue;
 
-/**
- * This job is executed on a machine with GPU access.
- */
-class JobRequest implements ShouldQueue
+abstract class DetectionJob implements ShouldQueue
 {
     use Queueable;
 
     /**
-     * ID of the MAIA job.
+     * Ignore this job if the MAIA job does not exist any more.
      *
-     * @var int
+     * @var bool
      */
-    protected $jobId;
-
-    /**
-     * Parameters of the MAIA job.
-     *
-     * @var array
-     */
-    protected $jobParams;
-
-    /**
-     * URL of the volume associated with the job.
-     *
-     * @var string
-     */
-    protected $volumeUrl;
-
-    /**
-     * Filenames of the images associated with the job, indexed by their IDs.
-     *
-     * @var array
-     */
-    protected $images;
+    protected $deleteWhenMissingModels = true;
 
     /**
      * Temporary directory for files of this job.
@@ -57,12 +34,9 @@ class JobRequest implements ShouldQueue
      *
      * @param MaiaJob $job
      */
-    public function __construct(MaiaJob $job)
+    public function __construct(public MaiaJob $job)
     {
-        $this->jobId = $job->id;
-        $this->jobParams = $job->params;
-        $this->volumeUrl = $job->volume->url;
-        $this->images = $job->volume->images()->pluck('filename', 'id')->toArray();
+        //
     }
 
     /**
@@ -82,17 +56,18 @@ class JobRequest implements ShouldQueue
 
     /**
      * Create GenericImage instances for the images of this job.
-     *
-     * @return array
      */
-    protected function getGenericImages()
+    protected function getGenericImages(): array
     {
-        $images = [];
-        foreach ($this->images as $id => $filename) {
-            $images[$id] = new GenericImage($id, "{$this->volumeUrl}/{$filename}");
-        }
+        $volume = $this->job->volume;
 
-        return $images;
+        return $volume
+            ->images()
+            ->pluck('filename', 'id')
+            ->mapWithKeys(fn ($filename, $id) =>
+                    [$id => new GenericImage($id, "{$volume->url}/{$filename}")]
+            )
+            ->toArray();
     }
 
     /**
@@ -108,10 +83,7 @@ class JobRequest implements ShouldQueue
      *
      * @param Exception $e
      */
-    protected function dispatchFailure(Exception $e)
-    {
-        //
-    }
+    abstract protected function dispatchFailure(Exception $e);
 
     /**
      * Create the temporary directory for this request.
@@ -145,18 +117,7 @@ class JobRequest implements ShouldQueue
      */
     protected function getTmpDirPath()
     {
-        return config('maia.tmp_dir')."/maia-{$this->jobId}";
-    }
-
-    /**
-     * Dispatch a response (success or failure) to the BIIGLE instance.
-     *
-     * @param $job The job to be sent to the BIIGLE instance.
-     */
-    protected function dispatch($job)
-    {
-        Queue::connection(config('maia.response_connection'))
-            ->pushOn(config('maia.response_queue'), $job);
+        return config('maia.tmp_dir')."/maia-{$this->job->id}";
     }
 
     /**
@@ -245,4 +206,56 @@ class JobRequest implements ShouldQueue
         // [$imageId, $xCenter, $yCenter, $radius, $score]
         return $annotations;
     }
+
+    /**
+     * Create MAIA annotations from the training proposals.
+     */
+    protected function createMaiaAnnotations(array $annotations)
+    {
+        $maiaAnnotations = array_map(function ($annotation) {
+            return $this->createMaiaAnnotation($annotation);
+        }, $annotations);
+
+        // Chunk the insert because PDO's maximum number of query parameters is
+        // 65535. Each annotation has 7 parameters so we can store roughly 9000
+        // annotations in one call.
+        $maiaAnnotations = array_chunk($maiaAnnotations, 9000);
+        array_walk($maiaAnnotations, function ($chunk) {
+            $this->insertAnnotationChunk($chunk);
+        });
+    }
+
+    /**
+     * Create an insert array for a MAIA annotation.
+     *
+     * @param array $annotation
+     *
+     * @return array
+     */
+    protected function createMaiaAnnotation($annotation)
+    {
+        $points = array_map(function ($coordinate) {
+            return round($coordinate, 2);
+        }, [$annotation[1], $annotation[2], $annotation[3]]);
+
+        return [
+            'job_id' => $this->job->id,
+            'points' => json_encode($points),
+            'score' => $annotation[4],
+            'image_id' => $annotation[0],
+            'shape_id' => Shape::circleId(),
+        ];
+    }
+
+    /**
+     * Insert one chunk of the MAIA annotations that should be created into the database.
+     *
+     * @param array $chunk
+     */
+    abstract protected function insertAnnotationChunk(array $chunk);
+
+    /**
+     * Update the state of the MAIA job after processing the response.
+     */
+    abstract protected function updateJobState();
 }

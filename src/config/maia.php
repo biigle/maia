@@ -22,32 +22,12 @@ return [
     /*
     | Queue to submit new MAIA jobs to.
     */
-    'request_queue' => env('MAIA_REQUEST_QUEUE', 'default'),
+    'job_queue' => env('MAIA_JOB_QUEUE', env('MAIA_REQUEST_QUEUE', 'default')),
 
     /*
     | Queue connection to submit new MAIA jobs to.
     */
-    'request_connection' => env('MAIA_REQUEST_CONNECTION', 'gpu'),
-
-    /*
-    | Queue to submit the result data of MAIA jobs to.
-    */
-    'response_queue' => env('MAIA_RESPONSE_QUEUE', 'default'),
-
-    /*
-    | Queue connection to submit the result data of MAIA jobs to.
-    */
-    'response_connection' => env('MAIA_RESPONSE_CONNECTION', 'gpu-response'),
-
-    /*
-    | Queue to submit the jobs to generate feature vectors to.
-    */
-    'feature_vector_queue' => env('MAIA_FEATURE_VECTOR_QUEUE', 'default'),
-
-    /*
-    | Queue connection to submit the jobs to generate feature vectors to.
-    */
-    'feature_vector_connection' => env('MAIA_FEATURE_VECTOR_CONNECTION', 'gpu'),
+    'job_connection' => env('MAIA_JOB_CONNECTION', env('MAIA_REQUEST_CONNECTION', 'gpu')),
 
     /*
     | Directory where the temporary files of novelty detection or object detection

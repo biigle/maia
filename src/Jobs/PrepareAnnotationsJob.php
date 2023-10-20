@@ -8,22 +8,18 @@ use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Shape;
 use DB;
+use Exception;
 use Illuminate\Queue\SerializesModels;
+use Queue;
 
 abstract class PrepareAnnotationsJob extends Job
 {
     use SerializesModels, QueriesExistingAnnotations;
-
-    /**
-     * The job to use existing annotations for.
-     *
-     * @var MaiaJob
-     */
-    protected $job;
 
     /**
      * Ignore this job if the MAIA job does not exist any more.
@@ -40,13 +36,13 @@ abstract class PrepareAnnotationsJob extends Job
     protected $selectTrainingProposals = true;
 
     /**
-     * Create a new isntance.
+     * Create a new instance
      *
      * @param MaiaJob $job
      */
-    public function __construct(MaiaJob $job)
+    public function __construct(public MaiaJob $job)
     {
-        $this->job = $job;
+        //
     }
 
     /**

@@ -2,24 +2,29 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
+use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
+use Biigle\Modules\Maia\Jobs\ObjectDetection;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
-use Biigle\Modules\Maia\Jobs\ObjectDetectionRequest;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionResponse;
+use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\MaiaJobState as State;
+use Biigle\Modules\Maia\Notifications\ObjectDetectionComplete;
+use Biigle\Shape;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
 use Exception;
-use File;
 use FileCache;
-use Queue;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Queue;
 use Str;
 use TestCase;
 
-class ObjectDetectionRequestTest extends TestCase
+class ObjectDetectionTest extends TestCase
 {
     public function testHandle()
     {
-        Queue::fake();
         FileCache::fake();
         config([
             'maia.mmdet_train_batch_size' => 12,
@@ -105,10 +110,17 @@ class ObjectDetectionRequestTest extends TestCase
             $this->assertEquals($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-            Queue::assertPushed(ObjectDetectionResponse::class, function ($response) use ($job, $image) {
-                return $response->jobId === $job->id
-                    && in_array([$image->id, 10, 20, 30, 123], $response->annotations);
-            });
+            $this->assertEquals(State::annotationCandidatesId(), $job->fresh()->state_id);
+
+            $annotations = $job->annotationCandidates()->get();
+            // One annotation for each image.
+            $this->assertEquals(2, $annotations->count());
+            $this->assertEquals([10, 20, 30], $annotations[0]->points);
+            $this->assertEquals(123, $annotations[0]->score);
+            $this->assertNull($annotations[0]->label_id);
+            $this->assertNull($annotations[0]->annotation_id);
+            $this->assertEquals($image->id, $annotations[0]->image_id);
+            $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
             $this->assertTrue($request->cleanup);
         } finally {
@@ -118,7 +130,6 @@ class ObjectDetectionRequestTest extends TestCase
 
     public function testHandleKnowledgeTransfer()
     {
-        Queue::fake();
         FileCache::fake();
         config([
             'maia.mmdet_train_batch_size' => 12,
@@ -216,10 +227,11 @@ class ObjectDetectionRequestTest extends TestCase
             $this->assertEquals($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-            Queue::assertPushed(ObjectDetectionResponse::class, function ($response) use ($job, $ownImage) {
-                return $response->jobId === $job->id
-                    && in_array([$ownImage->id, 10, 20, 30, 123], $response->annotations);
-            });
+            $annotations = $job->annotationCandidates()->get();
+            $this->assertEquals(1, $annotations->count());
+            $this->assertEquals([10, 20, 30], $annotations[0]->points);
+            $this->assertEquals(123, $annotations[0]->score);
+            $this->assertEquals($ownImage->id, $annotations[0]->image_id);
 
             $this->assertTrue($request->cleanup);
         } finally {
@@ -229,7 +241,6 @@ class ObjectDetectionRequestTest extends TestCase
 
     public function testHandleAreaKnowledgeTransfer()
     {
-        Queue::fake();
         FileCache::fake();
         config([
             'maia.mmdet_train_batch_size' => 12,
@@ -288,15 +299,58 @@ class ObjectDetectionRequestTest extends TestCase
             unset($inputJson['images']);
             $this->assertEquals($expectDatasetJson, $inputJson);
 
-            Queue::assertPushed(ObjectDetectionResponse::class, function ($response) use ($job, $ownImage) {
-                return $response->jobId === $job->id
-                    && in_array([$ownImage->id, 10, 20, 30, 123], $response->annotations);
-            });
+            $annotations = $job->annotationCandidates()->get();
+            $this->assertEquals(1, $annotations->count());
+            $this->assertEquals([10, 20, 30], $annotations[0]->points);
+            $this->assertEquals(123, $annotations[0]->score);
+            $this->assertEquals($ownImage->id, $annotations[0]->image_id);
 
             $this->assertTrue($request->cleanup);
         } finally {
             File::deleteDirectory($tmpDir);
         }
+    }
+
+    public function testHandleRollbackOnError()
+    {
+        FileCache::fake();
+        config([
+            'maia.mmdet_train_batch_size' => 12,
+            'maia.max_workers' => 2,
+        ]);
+
+        $params = [
+            'batch_size' => 12,
+            'max_workers' => 2,
+        ];
+
+        $job = MaiaJobTest::create([
+            'params' => $params,
+            'state_id' => State::objectDetectionId(),
+        ]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+        $trainingProposal = TrainingProposalTest::create([
+            'job_id' => $job->id,
+            'image_id' => $image->id,
+            'points' => [10.5, 20.4, 30],
+            'selected' => true,
+        ]);
+        config(['maia.tmp_dir' => '/tmp']);
+        $tmpDir = "/tmp/maia-{$job->id}-object-detection";
+
+        try {
+            $request = new OdJobStub($job);
+            $request->crash = true;
+            $request->handle();
+
+        } catch (Exception $e) {
+            //
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+
+        $this->assertFalse($job->annotationCandidates()->exists());
+        $this->assertEquals(State::objectDetectionId(), $job->fresh()->state_id);
     }
 
     public function testFailed()
@@ -306,7 +360,6 @@ class ObjectDetectionRequestTest extends TestCase
         $job = MaiaJobTest::create();
         $request = new OdJobStub($job);
 
-        Queue::fake();
         $request->failed(new Exception);
         Queue::assertPushed(ObjectDetectionFailure::class);
         $this->assertTrue($request->cleanup);
@@ -319,17 +372,17 @@ class ObjectDetectionRequestTest extends TestCase
         $job = MaiaJobTest::create();
         $request = new OdJobStub($job);
 
-        Queue::fake();
         $request->failed(new Exception);
         Queue::assertPushed(ObjectDetectionFailure::class);
         $this->assertFalse($request->cleanup);
     }
 }
 
-class OdJobStub extends ObjectDetectionRequest
+class OdJobStub extends ObjectDetection
 {
     public $commands = [];
     public $cleanup = false;
+    public $crash = false;
 
     protected function maybeDownloadWeights($from, $to)
     {
@@ -345,7 +398,8 @@ class OdJobStub extends ObjectDetectionRequest
         } elseif (Str::contains($command, 'TrainingRunner')) {
             File::put("{$this->tmpDir}/output-training.json", '{}');
         } elseif (Str::contains($command, 'InferenceRunner')) {
-            foreach ($this->images as $id => $image) {
+            $images = $this->job->volume->images()->pluck('filename', 'id');
+            foreach ($images as $id => $image) {
                 File::put("{$this->tmpDir}/{$id}.json", "[[10, 20, 30, 123]]");
             }
         }
@@ -354,5 +408,14 @@ class OdJobStub extends ObjectDetectionRequest
     protected function cleanup()
     {
         $this->cleanup = true;
+    }
+
+    protected function updateJobState()
+    {
+        if ($this->crash) {
+            throw new Exception('Something went wrong!');
+        }
+
+        return parent::updateJobState();
     }
 }
