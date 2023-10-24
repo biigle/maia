@@ -32,7 +32,7 @@ This is the BIIGLE module module for the [Machine Learning Assisted Image Annota
 
 ## Configuration
 
-New processing jobs are submitted to the `default` queue of the `gpu` connection. You can configure these with the `MAIA_JOB_QUEUE` and `MAIA_JOB_CONNECTION` environment variables.
+New processing jobs are submitted to the `default` queue of the `gpu` connection. You can configure these with the `MAIA_JOB_QUEUE` and `MAIA_JOB_CONNECTION` environment variables. Optionally, you can configure a different queue (but not connection) fot the jobs to generate feature vectors with `MAIA_FEATURE_VECTOR_QUEUE`. This can be used to give jobs to generate feature vectors a higher priority.
 
 ## References
 

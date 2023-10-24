@@ -34,8 +34,6 @@ class DispatchObjectDetection implements ShouldQueue
             new GenerateAnnotationCandidateFeatureVectors($job),
             new NotifyObjectDetectionComplete($job),
         ])
-        ->onConnection(config('maia.job_connection'))
-        ->onQueue(config('maia.job_queue'))
         ->dispatch();
     }
 
