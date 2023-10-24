@@ -36,7 +36,8 @@ abstract class DetectionJob implements ShouldQueue
      */
     public function __construct(public MaiaJob $job)
     {
-        //
+        $this->onQueue(config('maia.job_queue'));
+        $this->onConnection(config('maia.job_connection'));
     }
 
     /**

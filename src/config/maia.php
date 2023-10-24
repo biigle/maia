@@ -30,6 +30,11 @@ return [
     'job_connection' => env('MAIA_JOB_CONNECTION', env('MAIA_REQUEST_CONNECTION', 'gpu')),
 
     /*
+    | Queue to submit MAIA feature vector jobs to.
+    */
+    'feature_vector_queue' => env('MAIA_FEATURE_VECTOR_QUEUE', env('MAIA_JOB_QUEUE', env('MAIA_REQUEST_QUEUE', 'default'))),
+
+    /*
     | Directory where the temporary files of novelty detection or object detection
     | should be stored.
     */

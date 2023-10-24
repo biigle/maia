@@ -46,7 +46,8 @@ abstract class GenerateAnnotationFeatureVectors extends Job implements ShouldQue
      */
     public function __construct(public MaiaJob $job)
     {
-        //
+        $this->onQueue(config('maia.feature_vector_queue'));
+        $this->onConnection(config('maia.job_connection'));
     }
 
     /**
