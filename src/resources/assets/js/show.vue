@@ -518,6 +518,10 @@ export default {
                 return;
             }
 
+            // Reset this so there is no unexpected behavior with bulk-selection after
+            // sorting.
+            this.lastSelectedProposal = null;
+
             if (this.referenceProposal?.id === proposal.id) {
                 this.referenceProposal = null;
                 this.sortedIdsForReferenceProposal = [];
@@ -668,6 +672,10 @@ export default {
             if (this.loading) {
                 return;
             }
+
+            // Reset this so there is no unexpected behavior with bulk-selection after
+            // sorting.
+            this.lastSelectedCandidate = null;
 
             if (this.referenceCandidate?.id === candidate.id) {
                 this.referenceCandidate = null;
