@@ -85,8 +85,13 @@ class AnnotationCandidateController extends Controller
         $feature = AnnotationCandidateFeatureVector::where('job_id', $id)
             ->findOrFail($id2);
 
-        $ids = $feature->nearestNeighbors('vector', Distance::Cosine)
+        // Manually optimized query for the cosine distance. The nearestNeighbors()
+        // method of pgvector seems to compute the distances twice and returns lots
+        // of data that we don't need.
+        $ids = $feature->whereNotNull('vector')
+            ->where('id', '!=', $feature->id)
             ->where('job_id', $id)
+            ->orderByRaw('vector <=> ?', [$feature->vector])
             ->pluck('id');
 
         $count = $ids->count();
