@@ -119,6 +119,13 @@ class NoveltyDetector(object):
         height = image.height
         width = image.width
 
+        if image.mode in ['RGBA', 'L', 'P']:
+            image = image.convert('RGB')
+
+        if image.mode =='I':
+            # I images (32 bit signed integer) need to be rescaled manually before converting.
+            image = Image.fromarray(((np.array(image)/(2**16))*2**8).astype(np.uint8)).convert('RGB')
+
         novelty_map = torch.zeros((height, width), dtype=torch.float, device=self.device)
         # This counts how many chunks were added to each pixel.
         chunk_count_map = torch.zeros((height, width), dtype=torch.float, device=self.device)
