@@ -117,9 +117,9 @@ model = dict(
 dataset_type = 'CocoDataset'
 
 train_pipeline = [
-    # Use color_type unchanged to ignore EXIF orientation!
+    # Use color_type color_ignore_orientation to ignore EXIF orientation!
     # See: https://github.com/open-mmlab/mmcv/blob/0b005c52b4571f7cd1a7a882a5acecef6357ef0f/mmcv/image/io.py#L145
-    dict(type='LoadImageFromFile', color_type='unchanged'),
+    dict(type='LoadImageFromFile', color_type='color_ignore_orientation'),
     dict(type='LoadAnnotations', with_bbox=True),
     dict(type='RandomCrop', crop_size=(512, 512)),
     # Example: https://github.com/open-mmlab/mmdetection/blob/master/configs/albu_example/mask_rcnn_r50_fpn_albu_1x_coco.py#L44
@@ -151,9 +151,9 @@ train_pipeline = [
 ]
 
 test_pipeline = [
-    # Use color_type unchanged to ignore EXIF orientation!
+    # Use color_type color_ignore_orientation to ignore EXIF orientation!
     # See: https://github.com/open-mmlab/mmcv/blob/0b005c52b4571f7cd1a7a882a5acecef6357ef0f/mmcv/image/io.py#L145
-    dict(type='LoadImageFromFile', color_type='unchanged'),
+    dict(type='LoadImageFromFile', color_type='color_ignore_orientation'),
     # Required to add the scale_factor to the meta keys. Some action needs this value in the pipeline.
     dict(type='Resize', scale_factor=1.0),
     dict(type='PackDetInputs', meta_keys=('img_id', 'ori_shape', 'img_shape', 'scale_factor'))
