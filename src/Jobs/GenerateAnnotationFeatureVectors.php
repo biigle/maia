@@ -4,6 +4,7 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Image;
 use Biigle\Jobs\Job;
+use Biigle\Modules\Largo\Traits\ComputesAnnotationBox;
 use Biigle\Modules\Maia\MaiaAnnotation;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Shape;
@@ -16,7 +17,7 @@ use SplFileObject;
 
 abstract class GenerateAnnotationFeatureVectors extends Job implements ShouldQueue
 {
-    use SerializesModels;
+    use SerializesModels, ComputesAnnotationBox;
 
     /**
      * Number of feature vector models to insert in one chunk.
@@ -122,9 +123,15 @@ abstract class GenerateAnnotationFeatureVectors extends Job implements ShouldQue
             $imageAnnotations = $annotations[$image->id];
             $boxes = [];
             foreach ($imageAnnotations as $a) {
-                $box = $this->getBoundingBox($a, $image);
-                $allEqual = $box[0] === $box[1] && $box[0] === $box[2] && $box[0] === $box[3];
-                if (!$allEqual) {
+                $box = $this->getAnnotationBoundingBox($a->points, $a->shape, self::POINT_PADDING);
+                $box = $this->makeBoxContained($box, $image->width, $image->height);
+                $zeroSize = $box[2] === 0 && $box[3] === 0;
+
+                if (!$zeroSize) {
+                    // Convert width and height to "right" and "bottom" coordinates.
+                    $box[2] = $box[0] + $box[2];
+                    $box[3] = $box[1] + $box[3];
+
                     $boxes[$a->id] = $box;
                 }
             }
@@ -135,133 +142,6 @@ abstract class GenerateAnnotationFeatureVectors extends Job implements ShouldQue
         }
 
         return $input;
-    }
-
-    protected function getBoundingBox(MaiaAnnotation $annotation, Image $image): array
-    {
-        $box = match ($annotation->shape_id) {
-            Shape::pointId() => $this->getPointBoundingBox($annotation),
-            Shape::circleId() => $this->getCircleBoundingBox($annotation),
-            // TODO: An ellipse will not be handled correctly by this but I didn't bother
-            // because this shape is almost never used anyway.
-            default => $this->getPolygonBoundingBox($annotation),
-        };
-
-        // Now move the box if it overflows the image boundaries.
-
-        if ($box[2] <= 0) {
-            return [0, 0, 0, 0];
-        }
-
-        if ($box[3] <= 0) {
-            return [0, 0, 0, 0];
-        }
-
-        $delta = [0, 0, 0, 0];
-
-        if ($box[0] <= 0) {
-            $delta[0] = -$box[0];
-        }
-
-        if ($box[1] <= 0) {
-            $delta[1] = -$box[1];
-        }
-
-        if (!is_null($image->width)) {
-            if ($box[0] >= $image->width) {
-                return [0, 0, 0, 0];
-            }
-
-            if ($box[2] >= $image->width) {
-                $delta[2] = $box[2] - $image->width;
-            }
-        }
-
-        if (!is_null($image->height)) {
-            if ($box[1] >= $image->height) {
-                return [0, 0, 0, 0];
-            }
-
-            if ($box[3] >= $image->height) {
-                $delta[3] = $box[3] - $image->height;
-            }
-        }
-
-        // The case of both delta values being >0 is handled below.
-        if ($delta[0] > 0) {
-            $box[0] += $delta[0];
-            $box[2] += $delta[0];
-        } elseif ($delta[2] > 0) {
-            $box[0] -= $delta[2];
-            $box[2] -= $delta[2];
-        }
-
-        // The case of both delta values being >0 is handled below.
-        if ($delta[1] > 0) {
-            $box[1] += $delta[1];
-            $box[3] += $delta[1];
-        } elseif ($delta[3] > 0) {
-            $box[1] -= $delta[3];
-            $box[3] -= $delta[3];
-        }
-
-        // Moving the box could have make it overflow on the "other" side.
-        // Shrink the box in this case.
-
-        $box[0] = max(0, $box[0]);
-        $box[1] = max(0, $box[1]);
-
-        if (!is_null($image->width)) {
-            $box[2] = min($image->width, $box[2]);
-        }
-
-        if (!is_null($image->height)) {
-            $box[3] = min($image->height, $box[3]);
-        }
-
-        return $box;
-    }
-
-    protected function getPointBoundingBox(MaiaAnnotation $annotation): array
-    {
-        $points = $annotation->points;
-
-        return [
-            $points[0] - self::POINT_PADDING,
-            $points[1] - self::POINT_PADDING,
-            $points[0] + self::POINT_PADDING,
-            $points[1] + self::POINT_PADDING,
-        ];
-    }
-
-    protected function getCircleBoundingBox(MaiaAnnotation $annotation): array
-    {
-        $points = $annotation->points;
-
-        return [
-            $points[0] - $points[2],
-            $points[1] - $points[2],
-            $points[0] + $points[2],
-            $points[1] + $points[2],
-        ];
-    }
-
-    protected function getPolygonBoundingBox(MaiaAnnotation $annotation): array
-    {
-        $points = $annotation->points;
-        $minX = INF;
-        $minY = INF;
-        $maxX = -INF;
-        $maxY = -INF;
-
-        for ($i = 0; $i < count($points); $i += 2) {
-            $minX = min($minX, $points[$i]);
-            $minY = min($minY, $points[$i + 1]);
-            $maxX = max($maxX, $points[$i]);
-            $maxY = max($maxY, $points[$i + 1]);
-        }
-
-        return [$minX, $minY, $maxX, $maxY];
     }
 
     /**
