@@ -13,13 +13,6 @@ class AnnotationCandidateFeatureVector extends Model
     use HasFactory, HasNeighbors;
 
     /**
-     * The database connection associated with the model.
-     *
-     * @var string
-     */
-    protected $connection = 'pgvector';
-
-    /**
      * The table associated with the model.
      *
      * @var string

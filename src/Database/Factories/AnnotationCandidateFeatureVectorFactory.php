@@ -3,6 +3,7 @@
 namespace Biigle\Modules\Maia\Database\Factories;
 
 use Biigle\Modules\Maia\MaiaJob;
+use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,7 +24,7 @@ class AnnotationCandidateFeatureVectorFactory extends Factory
     public function definition()
     {
         return [
-            'id' => $this->faker->unique()->randomDigit(),
+            'id' => AnnotationCandidate::factory(),
             'job_id' => MaiaJob::factory(),
             'vector' => range(0, 383),
         ];
