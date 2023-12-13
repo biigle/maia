@@ -2,6 +2,8 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
+use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
+use Biigle\Modules\Maia\TrainingProposalFeatureVector;
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
 use Biigle\Modules\Maia\Events\MaiaJobDeleting;
 use Biigle\Modules\Maia\MaiaJob;
@@ -143,5 +145,19 @@ class MaiaJobTest extends ModelTestCase
             'oa_show_training_proposals' => true,
         ];
         $this->assertTrue($this->model->shouldShowTrainingProposals());
+    }
+
+    public function testDeleteFeatureVectorsCascade()
+    {
+        $tp = TrainingProposalFeatureVector::factory()->create([
+            'job_id' => $this->model->id,
+        ]);
+        $ac = AnnotationCandidateFeatureVector::factory()->create([
+            'job_id' => $this->model->id,
+        ]);
+
+        $this->model->delete();
+        $this->assertNull($tp->fresh());
+        $this->assertNull($ac->fresh());
     }
 }

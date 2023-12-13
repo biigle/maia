@@ -21,9 +21,12 @@ return new class extends Migration
                     ->onDelete('cascade');
 
                 $table->unsignedInteger('job_id')->index();
-                $table->vector('vector', 384);
+                $table->foreign('job_id')
+                    ->references('id')
+                    ->on('maia_jobs')
+                    ->onDelete('cascade');
 
-                $table->primary('id');
+                $table->vector('vector', 384);
             });
 
         Schema::create('maia_annotation_candidate_feature_vectors', function (Blueprint $table) {
@@ -34,9 +37,12 @@ return new class extends Migration
                     ->onDelete('cascade');
 
                 $table->unsignedInteger('job_id')->index();
-                $table->vector('vector', 384);
+                $table->foreign('job_id')
+                    ->references('id')
+                    ->on('maia_jobs')
+                    ->onDelete('cascade');
 
-                $table->primary('id');
+                $table->vector('vector', 384);
             });
     }
 
