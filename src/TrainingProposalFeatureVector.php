@@ -5,12 +5,11 @@ namespace Biigle\Modules\Maia;
 use Biigle\Modules\Maia\Database\Factories\TrainingProposalFeatureVectorFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Pgvector\Laravel\HasNeighbors;
 use Pgvector\Laravel\Vector;
 
 class TrainingProposalFeatureVector extends Model
 {
-    use HasFactory, HasNeighbors;
+    use HasFactory;
 
     /**
      * The table associated with the model.
