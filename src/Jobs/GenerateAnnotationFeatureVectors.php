@@ -53,13 +53,16 @@ abstract class GenerateAnnotationFeatureVectors extends GenerateFeatureVectors
             ->get()
             ->all();
 
+        $inputPath = tempnam(sys_get_temp_dir(), 'maia_feature_vector_input');
         $outputPath = tempnam(sys_get_temp_dir(), 'maia_feature_vector_output');
 
         try {
-            FileCache::batch($images, function ($images, $paths) use ($annotations, $outputPath) {
+            FileCache::batch($images, function ($images, $paths) use ($annotations, $inputPath, $outputPath) {
+                $annotations = $annotations->groupBy('image_id');
                 $input = $this->generateInput($images, $paths, $annotations);
                 if (!empty($input)) {
-                    $this->python($input, $outputPath);
+                    File::put($inputPath, json_encode($input));
+                    $this->python($inputPath, $outputPath);
                 }
             });
 
@@ -81,6 +84,7 @@ abstract class GenerateAnnotationFeatureVectors extends GenerateFeatureVectors
             $this->insertFeatureVectorModelChunk($insert);
         } finally {
             File::delete($outputPath);
+            File::delete($inputPath);
         }
     }
 

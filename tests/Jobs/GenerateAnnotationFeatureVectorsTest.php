@@ -411,9 +411,9 @@ class GenerateProposalFeatureVectorsStub extends GenerateTrainingProposalFeature
     public $outputPath;
     public $output = [];
 
-    protected function python(array $input, string $outputPath)
+    protected function python(string $inputPath, string $outputPath)
     {
-        $this->input = $input;
+        $this->input = json_decode(File::get($inputPath), true);
         $this->outputPath = $outputPath;
         $csv = implode("\n", array_map(fn ($row) => implode(',', $row), $this->output));
         File::put($outputPath, $csv);
@@ -426,9 +426,9 @@ class GenerateCandidateFeatureVectorsStub extends GenerateAnnotationCandidateFea
     public $outputPath;
     public $output = [];
 
-    protected function python(array $input, string $outputPath)
+    protected function python(string $inputPath, string $outputPath)
     {
-        $this->input = $input;
+        $this->input = json_decode(File::get($inputPath), true);
         $this->outputPath = $outputPath;
         $csv = implode("\n", array_map(fn ($row) => implode(',', $row), $this->output));
         File::put($outputPath, $csv);
