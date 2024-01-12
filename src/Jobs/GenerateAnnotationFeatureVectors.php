@@ -67,7 +67,7 @@ abstract class GenerateAnnotationFeatureVectors extends GenerateFeatureVectors
             });
 
             $insert = [];
-            foreach ($this->readOuputCsv($outputPath) as $row) {
+            foreach ($this->readOutputCsv($outputPath) as $row) {
                 $insert[] = [
                     'id' => $row[0],
                     'job_id' => $this->job->id,
