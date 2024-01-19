@@ -3,10 +3,10 @@
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Http\Requests\ContinueMaiaJob;
 use Biigle\Modules\Maia\Http\Requests\UpdateTrainingProposal;
+use Biigle\Modules\Maia\Jobs\ProcessNoveltyDetectedImage;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\TrainingProposalFeatureVector;
@@ -149,14 +149,19 @@ class TrainingProposalController extends Controller
      */
     public function update(UpdateTrainingProposal $request)
     {
+        $proposal = $request->proposal;
         if ($request->filled('points')) {
-            $request->proposal->points = $request->input('points');
-            $disk = config('maia.training_proposal_storage_disk');
-            GenerateImageAnnotationPatch::dispatch($request->proposal, $disk)
+            $proposal->points = $request->input('points');
+            ProcessNoveltyDetectedImage::dispatch($proposal->image,
+                    only: [$proposal->id],
+                    maiaJob: $proposal->job,
+                    targetDisk: config('maia.training_proposal_storage_disk')
+                )
                 ->onQueue(config('largo.generate_annotation_patch_queue'));
         }
 
-        $request->proposal->selected = $request->input('selected', $request->proposal->selected);
-        $request->proposal->save();
+        $proposal->selected = $request->input('selected', $proposal->selected);
+
+        $proposal->save();
     }
 }

@@ -3,9 +3,9 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
+use Biigle\Modules\Maia\Jobs\ProcessObjectDetectedImage;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\ImageAnnotationTest;
@@ -171,9 +171,12 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", ['points' => [10, 20, 30]])
             ->assertStatus(200);
 
-        Queue::assertPushed(GenerateImageAnnotationPatch::class);
+        Queue::assertPushed(ProcessObjectDetectedImage::class, function ($job) use ($a) {
+            $this->assertEquals([$a->id], $job->only);
+            $this->assertFalse($job->skipFeatureVectors);
 
-        $this->markTestIncomplete('also push a job to regenerate the feature vector');
+            return true;
+        });
     }
 
     public function testIndexSimilarity()

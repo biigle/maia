@@ -2,23 +2,46 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-class GenerateTrainingProposalPatches extends GenerateAnnotationPatches
+use Biigle\Jobs\Job;
+use Biigle\Modules\Maia\MaiaJob;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\SerializesModels;
+
+class GenerateTrainingProposalPatches extends Job implements ShouldQueue
 {
-    /**
-     * Get a query for the annotations that have been created by this job.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    protected function getCreatedAnnotations()
-    {
-        return $this->job->trainingProposals();
-    }
+    use SerializesModels;
 
     /**
-     * Get the storage disk to store the annotation patches to.
+     * Ignore this job if the MAIA job does not exist any more.
+     *
+     * @var bool
      */
-    protected function getPatchStorageDisk()
+    protected $deleteWhenMissingModels = true;
+
+    /**
+     * Create a new isntance.
+     */
+    public function __construct(public MaiaJob $maiaJob)
     {
-        return config('maia.training_proposal_storage_disk');
+        //
+    }
+
+    public function handle(): void
+    {
+        $this->maiaJob->volume->images()
+            ->whereExists(fn ($q) =>
+                $q->select(\DB::raw(1))
+                    ->from('maia_training_proposals')
+                    ->where('maia_training_proposals.job_id', $this->maiaJob->id)
+                    ->whereColumn('maia_training_proposals.image_id', 'images.id')
+            )
+            ->eachById(fn ($image) =>
+                ProcessNoveltyDetectedImage::dispatch($image, $this->maiaJob,
+                        // Feature vectors are generated in a separate job on the GPU.
+                        skipFeatureVectors: true,
+                        targetDisk: config('maia.training_proposal_storage_disk')
+                    )
+                    ->onQueue(config('largo.generate_annotation_patch_queue'))
+            );
     }
 }

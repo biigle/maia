@@ -3,11 +3,11 @@
 namespace Biigle\Modules\Maia\Http\Controllers\Api;
 
 use Biigle\Http\Controllers\Api\Controller;
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Biigle\Modules\Maia\Http\Requests\SubmitAnnotationCandidates;
 use Biigle\Modules\Maia\Http\Requests\UpdateAnnotationCandidate;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
+use Biigle\Modules\Maia\Jobs\ProcessObjectDetectedImage;
 use Biigle\Modules\Maia\MaiaJob;
 use Illuminate\Http\Response;
 use Pgvector\Laravel\Distance;
@@ -150,17 +150,21 @@ class AnnotationCandidateController extends Controller
      */
     public function update(UpdateAnnotationCandidate $request)
     {
+        $candidate = $request->candidate;
         if ($request->filled('points')) {
-            $request->candidate->points = $request->input('points');
-            $disk = config('maia.annotation_candidate_storage_disk');
-            GenerateImageAnnotationPatch::dispatch($request->candidate, $disk)
+            $candidate->points = $request->input('points');
+            ProcessObjectDetectedImage::dispatch($candidate->image,
+                    only: [$candidate->id],
+                    maiaJob: $candidate->job,
+                    targetDisk: config('maia.annotation_candidate_storage_disk')
+                )
                 ->onQueue(config('largo.generate_annotation_patch_queue'));
         }
 
         if ($request->has('label_id')) {
-            $request->candidate->label_id = $request->input('label_id');
+            $candidate->label_id = $request->input('label_id');
         }
 
-        $request->candidate->save();
+        $candidate->save();
     }
 }
