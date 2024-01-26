@@ -1,5 +1,5 @@
-torch==2.0.*
-torchvision==0.15.*
+torch==2.1.*
+torchvision==0.16.*
 mmcv==2.0.*
 # Update CUDA Version if necessary.
 # See: https://mmcv.readthedocs.io/en/latest/get_started/installation.html#install-with-pip
@@ -8,5 +8,3 @@ mmdet==3.1.*
 albumentations
 scikit-learn
 scikit-image
-Pillow==10.2.0
-xformers==0.0.18

@@ -5,12 +5,13 @@ namespace Biigle\Modules\Maia\Jobs;
 use Biigle\ImageAnnotation;
 use Biigle\ImageAnnotationLabel;
 use Biigle\Jobs\Job;
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\ProcessAnnotatedImage;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\User;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
 class ConvertAnnotationCandidates extends Job
 {
@@ -47,9 +48,9 @@ class ConvertAnnotationCandidates extends Job
     /**
      * Newly created annotations.
      *
-     * @var array
+     * @var Collection
      */
-    protected $newAnnotations = [];
+    protected $newAnnotations;
 
     /**
      * Create a new isntance.
@@ -62,6 +63,7 @@ class ConvertAnnotationCandidates extends Job
         $this->queue = config('maia.convert_annotations_queue');
         $this->job = $job;
         $this->user = $user;
+        $this->newAnnotations = collect([]);
     }
 
     /**
@@ -79,10 +81,15 @@ class ConvertAnnotationCandidates extends Job
                     ->chunkById(10000, [$this, 'processChunk']);
             });
 
-            foreach ($this->newAnnotations as $annotation) {
-                GenerateImageAnnotationPatch::dispatch($annotation)
-                    ->onQueue(config('largo.generate_annotation_patch_queue'));
-            }
+            $this->newAnnotations
+                ->groupBy('image_id')
+                ->each(function ($group) {
+                    $image = $group[0]->image;
+                    $ids = $group->pluck('id')->all();
+                    ProcessAnnotatedImage::dispatch($image, only: $ids)
+                        ->onQueue(config('largo.generate_annotation_patch_queue'));
+                });
+
         } finally {
             $this->job->convertingCandidates = false;
             $this->job->save();

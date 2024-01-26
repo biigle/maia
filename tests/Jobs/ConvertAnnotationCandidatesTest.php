@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Modules\Largo\Jobs\ProcessAnnotatedImage;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\LabelTest;
@@ -47,6 +47,11 @@ class ConvertAnnotationCandidatesTest extends TestCase
 
         $this->assertEquals($annotation->id, $c2->fresh()->annotation_id);
 
-        Queue::assertPushed(GenerateImageAnnotationPatch::class);
+        Queue::assertPushed(ProcessAnnotatedImage::class, function ($job) use ($c1, $a) {
+            $this->assertEquals($c1->image_id, $job->file->id);
+            $this->assertEquals([$a->id], $job->only);
+
+            return true;
+        });
     }
 }
