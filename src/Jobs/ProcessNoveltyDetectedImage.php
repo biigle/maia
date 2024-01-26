@@ -22,6 +22,7 @@ class ProcessNoveltyDetectedImage extends ProcessAnnotatedImage
     {
         parent::__construct($file, $only,
             skipFeatureVectors: $skipFeatureVectors,
+            skipSvgs: true,
             targetDisk: $targetDisk
         );
     }
