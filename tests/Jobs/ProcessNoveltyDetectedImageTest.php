@@ -2,9 +2,9 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
+use Biigle\Modules\Maia\Jobs\ProcessNoveltyDetectedImage;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\TrainingProposalFeatureVector;
-use Biigle\Modules\Maia\Jobs\ProcessNoveltyDetectedImage;
 use File;
 use Mockery;
 use Storage;
@@ -81,7 +81,7 @@ class ProcessNoveltyDetectedImageStub extends ProcessNoveltyDetectedImage
     public $outputPath;
     public $output = [];
 
-    public function getVipsImage($path)
+    public function getVipsImage(string $path, array $options = [])
     {
         return $this->mock;
     }
