@@ -81,7 +81,7 @@ class ProcessObjectDetectedImageStub extends ProcessObjectDetectedImage
     public $outputPath;
     public $output = [];
 
-    public function getVipsImage($path)
+    public function getVipsImage(string $path, array $options = [])
     {
         return $this->mock;
     }
