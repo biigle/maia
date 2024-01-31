@@ -2,8 +2,8 @@
 
 namespace Biigle\Tests\Modules\Maia;
 
-use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
+use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Shape;
 use TestCase;
 
@@ -19,7 +19,7 @@ class AnnotationCandidateFeatureVectorTest extends TestCase
     public function testCascadeDelete()
     {
         $model = AnnotationCandidateFeatureVector::factory()->create();
-        AnnotationCandidate::find($model->id)->delete();
+        MaiaJob::find($model->job_id)->delete();
         $this->assertNull($model->fresh());
     }
 }
