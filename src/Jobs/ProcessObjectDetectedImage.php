@@ -53,4 +53,21 @@ class ProcessObjectDetectedImage extends ProcessAnnotatedImage
             );
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function redispatch(): void
+    {
+        static::dispatch(
+                $this->file,
+                $this->maiaJob,
+                $this->only,
+                $this->skipFeatureVectors,
+                $this->targetDisk
+            )
+            ->onConnection($this->connection)
+            ->onQueue($this->queue)
+            ->delay(60);
+    }
 }
