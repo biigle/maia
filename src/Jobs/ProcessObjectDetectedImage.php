@@ -33,7 +33,8 @@ class ProcessObjectDetectedImage extends ProcessAnnotatedImage
     protected function getAnnotationQuery(VolumeFile $file): Builder
     {
         return AnnotationCandidate::where('image_id', $file->id)
-            ->where('job_id', $this->maiaJob->id);
+            ->where('job_id', $this->maiaJob->id)
+            ->when(!empty($this->only), fn ($q) => $q->whereIn('id', $this->only));
     }
 
     /**

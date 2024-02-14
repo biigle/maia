@@ -62,6 +62,29 @@ class ProcessObjectDetectedImageTest extends TestCase
         $this->assertEquals(range(0, 383), $vectors[0]->vector->toArray());
     }
 
+    public function testOnly()
+    {
+        $disk = Storage::fake('test');
+        $image = $this->getImageMock();
+        $candidate = AnnotationCandidate::factory()->create([
+            'points' => [200, 200, 10],
+        ]);
+        $candidate2 = AnnotationCandidate::factory()->create([
+            'points' => [200, 200, 10],
+            'image_id' => $candidate->image_id,
+            'job_id' => $candidate->job_id,
+        ]);
+        $job = new ProcessObjectDetectedImageStub($candidate->image, $candidate->job,
+            targetDisk: 'test', only: [$candidate->id]
+        );
+        $job->mock = $image;
+
+        $image->shouldReceive('crop')->once()->andReturn($image);
+        $image->shouldReceive('writeToBuffer')->andReturn('abc123');
+
+        $job->handleFile($candidate->image, 'abc');
+    }
+
     protected function getImageMock($times = 1)
     {
         $image = Mockery::mock();
