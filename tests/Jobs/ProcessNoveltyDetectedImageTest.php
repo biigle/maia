@@ -62,6 +62,29 @@ class ProcessNoveltyDetectedImageTest extends TestCase
         $this->assertEquals(range(0, 383), $vectors[0]->vector->toArray());
     }
 
+    public function testOnly()
+    {
+        $disk = Storage::fake('test');
+        $image = $this->getImageMock();
+        $proposal = TrainingProposal::factory()->create([
+            'points' => [200, 200, 10],
+        ]);
+        $proposal2 = TrainingProposal::factory()->create([
+            'points' => [200, 200, 10],
+            'image_id' => $proposal->image_id,
+            'job_id' => $proposal->job_id,
+        ]);
+        $job = new ProcessNoveltyDetectedImageStub($proposal->image, $proposal->job,
+            targetDisk: 'test', only: [$proposal->id]
+        );
+        $job->mock = $image;
+
+        $image->shouldReceive('crop')->once()->andReturn($image);
+        $image->shouldReceive('writeToBuffer')->andReturn('abc123');
+
+        $job->handleFile($proposal->image, 'abc');
+    }
+
     protected function getImageMock($times = 1)
     {
         $image = Mockery::mock();
