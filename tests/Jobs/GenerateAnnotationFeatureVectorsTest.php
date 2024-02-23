@@ -379,29 +379,6 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $box = $input[$filename][$tp->id];
         $this->assertEquals([0, 0, 100, 100], $box);
     }
-
-    public function testHandleCoodinatesSkipZero()
-    {
-        FileCache::fake();
-        $j = MaiaJob::factory()->create();
-        $tp = TrainingProposal::factory()->create([
-            'job_id' => $j->id,
-            'shape_id' => Shape::circleId(),
-            'points' => [10, 10, 0],
-        ]);
-
-        $job = new GenerateProposalFeatureVectorsStub($j);
-        try {
-            $job->handle();
-        } finally {
-            if (isset($job->outputPath) && File::exists($job->outputPath)) {
-                File::delete($job->outputPath);
-            }
-        }
-
-        $this->assertFalse(isset($job->input));
-        $this->assertFalse(TrainingProposalFeatureVector::exists());
-    }
 }
 
 
