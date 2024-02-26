@@ -28,10 +28,13 @@ class Image(object):
 
     def pil_image(self):
         image = PilImage.open(self.path)
-        if image.mode == 'RGBA':
+        if image.mode in ['RGBA', 'L', 'P', 'CMYK']:
             image = image.convert('RGB')
-        elif image.mode == 'LA':
-            image = image.convert('L')
+        elif image.mode in ['I', 'I;16']:
+            # I images (32 bit signed integer) and I;16 (16 bit unsigned imteger)
+            # need to be rescaled manually before converting.
+            # image/256 === image/(2**16)*(2**8)
+            image = Image.fromarray((np.array(image)/256).astype(np.uint8)).convert('RGB')
 
         return image
 

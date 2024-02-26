@@ -119,9 +119,9 @@ class NoveltyDetector(object):
         height = image.height
         width = image.width
 
-        if image.mode in ['RGBA', 'L', 'P']:
+        if image.mode in ['RGBA', 'L', 'P', 'CMYK']:
             image = image.convert('RGB')
-        elif image.mode =='I' or image.mode == 'I;16':
+        elif image.mode in ['I', 'I;16']:
             # I images (32 bit signed integer) and I;16 (16 bit unsigned imteger)
             # need to be rescaled manually before converting.
             # image/256 === image/(2**16)*(2**8)
