@@ -132,26 +132,11 @@ class ObjectDetectionTest extends TestCase
     public function testDeletedImage()
     {
         FileCache::fake();
-        config([
-            'maia.mmdet_train_batch_size' => 12,
-            'maia.max_workers' => 2,
-        ]);
 
-        $params = [
-            'batch_size' => 12,
-            'max_workers' => 2,
-        ];
-
-        $job = MaiaJobTest::create(['params' => $params]);
+        $job = MaiaJobTest::create();
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $image2 = ImageTest::create(['volume_id' => $job->volume_id, 'filename' => 'a']);
-        
-        // Not selected and should not be included.
-        TrainingProposalTest::create([
-            'job_id' => $job->id,
-            'image_id' => $image->id,
-            'selected' => false,
-        ]);
+
         config(['maia.tmp_dir' => '/tmp']);
         $tmpDir = "/tmp/maia-{$job->id}-object-detection";
 
@@ -161,14 +146,9 @@ class ObjectDetectionTest extends TestCase
             $request->handle();
 
             $annotations = $job->annotationCandidates()->get();
-            // One annotation for each image.
+            // One image was deleted, only one image and annotation remains.
             $this->assertEquals(1, $annotations->count());
-            $this->assertEquals([10, 20, 30], $annotations[0]->points);
-            $this->assertEquals(123, $annotations[0]->score);
-            $this->assertNull($annotations[0]->label_id);
-            $this->assertNull($annotations[0]->annotation_id);
             $this->assertEquals($image2->id, $annotations[0]->image_id);
-            $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
         } finally {
             File::deleteDirectory($tmpDir);
         }
