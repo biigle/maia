@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Queue;
 use Str;
 use TestCase;
+use Biigle\Image;
 
 class ObjectDetectionTest extends TestCase
 {
@@ -123,6 +124,31 @@ class ObjectDetectionTest extends TestCase
             $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
 
             $this->assertTrue($request->cleanup);
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
+    public function testDeletedImage()
+    {
+        FileCache::fake();
+
+        $job = MaiaJobTest::create();
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+        $image2 = ImageTest::create(['volume_id' => $job->volume_id, 'filename' => 'a']);
+
+        config(['maia.tmp_dir' => '/tmp']);
+        $tmpDir = "/tmp/maia-{$job->id}-object-detection";
+
+        try {
+            $request = new OdJobStub($job);
+            $request->deleteImage = true;
+            $request->handle();
+
+            $annotations = $job->annotationCandidates()->get();
+            // One image was deleted, only one image and annotation remains.
+            $this->assertEquals(1, $annotations->count());
+            $this->assertEquals($image2->id, $annotations[0]->image_id);
         } finally {
             File::deleteDirectory($tmpDir);
         }
@@ -383,6 +409,7 @@ class OdJobStub extends ObjectDetection
     public $commands = [];
     public $cleanup = false;
     public $crash = false;
+    public $deleteImage = false;
 
     protected function maybeDownloadWeights($from, $to)
     {
@@ -417,5 +444,14 @@ class OdJobStub extends ObjectDetection
         }
 
         return parent::updateJobState();
+    }
+
+    public function createMaiaAnnotations($annotations)
+    {
+        // Simulate image removal after saving its annotations
+        if ($this->deleteImage && !empty($annotations)) {
+            Image::where('id', '=', $annotations[0][0])->delete();
+        }
+        parent::createMaiaAnnotations($annotations);
     }
 }
