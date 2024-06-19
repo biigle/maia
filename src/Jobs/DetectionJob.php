@@ -9,9 +9,6 @@ use Exception;
 use File;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Queue;
-use Biigle\Image;
-use Biigle\ImageAnnotation;
 
 abstract class DetectionJob implements ShouldQueue
 {
@@ -219,13 +216,8 @@ abstract class DetectionJob implements ShouldQueue
             return $this->createMaiaAnnotation($annotation);
         }, $annotations);
 
-        // Remove annotations of already deleted images.        
-        foreach ($maiaAnnotations as $idx => $a) {
-            if (Image::where('id', '=', $a['image_id'])->doesntExist()) {
-                ImageAnnotation::where('image_id', '=', $a['image_id'])->delete();
-                unset($maiaAnnotations[$idx]);
-            }
-        }
+        $existingIds = $this->job->volume->images()->pluck('id', 'id')->toArray();
+        $maiaAnnotations = array_filter($maiaAnnotations, fn ($a) => array_key_exists($a['image_id'], $existingIds));
 
         // Chunk the insert because PDO's maximum number of query parameters is
         // 65535. Each annotation has 7 parameters so we can store roughly 9000
