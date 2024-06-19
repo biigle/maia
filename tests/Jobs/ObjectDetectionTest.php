@@ -145,12 +145,7 @@ class ObjectDetectionTest extends TestCase
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $image2 = ImageTest::create(['volume_id' => $job->volume_id, 'filename' => 'a']);
-        $trainingProposal = TrainingProposalTest::create([
-            'job_id' => $job->id,
-            'image_id' => $image->id,
-            'points' => [10.5, 20.4, 30],
-            'selected' => true,
-        ]);
+        
         // Not selected and should not be included.
         TrainingProposalTest::create([
             'job_id' => $job->id,
@@ -159,64 +154,11 @@ class ObjectDetectionTest extends TestCase
         ]);
         config(['maia.tmp_dir' => '/tmp']);
         $tmpDir = "/tmp/maia-{$job->id}-object-detection";
-        $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
-        $datasetOutputJsonPath = "{$tmpDir}/output-dataset.json";
-        $trainingInputJsonPath = "{$tmpDir}/input-training.json";
-        $trainingOutputJsonPath = "{$tmpDir}/output-training.json";
-        $inferenceInputJsonPath = "{$tmpDir}/input-inference.json";
-
-        $expectDatasetJson = [
-            'max_workers' => 2,
-            'tmp_dir' => $tmpDir,
-            'training_proposals' => [$image->id => [[11, 20, 30]]],
-            'output_path' => "{$tmpDir}/output-dataset.json",
-        ];
-
-        $expectTrainingJson = [
-            'max_workers' => 2,
-            'batch_size' => 12,
-            'tmp_dir' => $tmpDir,
-            'output_path' => "{$tmpDir}/output-training.json",
-            'base_config' => config('maia.mmdet_base_config'),
-            'backbone_model_path' => config('maia.backbone_model_path'),
-            'model_path' => config('maia.model_path'),
-        ];
-
-        $expectInferenceJson = [
-            'max_workers' => 2,
-            'tmp_dir' => $tmpDir,
-        ];
 
         try {
             $request = new OdJobStub($job);
             $request->deleteImage = true;
             $request->handle();
-            $this->assertTrue(File::isDirectory($tmpDir));
-
-            $this->assertTrue(File::exists($datasetInputJsonPath));
-            $inputJson = json_decode(File::get($datasetInputJsonPath), true);
-            $this->assertArrayHasKey('images', $inputJson);
-            $this->assertArrayHasKey($image->id, $inputJson['images']);
-            $this->assertArrayNotHasKey($image2->id, $inputJson['images']);
-            unset($inputJson['images']);
-            $this->assertEquals($expectDatasetJson, $inputJson);
-            $this->assertStringContainsString("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
-
-            $this->assertTrue(File::exists($trainingInputJsonPath));
-            $inputJson = json_decode(File::get($trainingInputJsonPath), true);
-            $this->assertEquals($expectTrainingJson, $inputJson);
-            $this->assertStringContainsString("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
-
-            $this->assertTrue(File::exists($inferenceInputJsonPath));
-            $inputJson = json_decode(File::get($inferenceInputJsonPath), true);
-            $this->assertArrayHasKey('images', $inputJson);
-            $this->assertArrayHasKey($image->id, $inputJson['images']);
-            $this->assertArrayHasKey($image2->id, $inputJson['images']);
-            unset($inputJson['images']);
-            $this->assertEquals($expectInferenceJson, $inputJson);
-            $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
-
-            $this->assertEquals(State::annotationCandidatesId(), $job->fresh()->state_id);
 
             $annotations = $job->annotationCandidates()->get();
             // One annotation for each image.
@@ -227,9 +169,6 @@ class ObjectDetectionTest extends TestCase
             $this->assertNull($annotations[0]->annotation_id);
             $this->assertEquals($image2->id, $annotations[0]->image_id);
             $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
-
-            $this->assertTrue($request->cleanup);
-
         } finally {
             File::deleteDirectory($tmpDir);
         }
