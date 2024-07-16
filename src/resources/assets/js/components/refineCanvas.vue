@@ -1,7 +1,8 @@
 <script>
-import Collection from 'ol/Collection';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
+import Collection from '@biigle/ol/Collection';
+import Style from '@biigle/ol/style/Style';
+import VectorLayer from '@biigle/ol/layer/Vector';
+import VectorSource from '@biigle/ol/source/Vector';
 import {AnnotationCanvas} from '../import';
 import {AttachLabelInteraction} from '../import';
 import {Keyboard} from '../import';
@@ -52,13 +53,25 @@ export default {
             this.unselectedAnnotationSource = new VectorSource({
                 features: this.unselectedAnnotationFeatures
             });
+            // The style can't be used directly because biigle/maia imports their own
+            // @biigle/ol package and the Style object of biigle/core's @biigle/ol does
+            // not match this one.
+            const editingStyle = StylesStore.editing;
             this.unselectedAnnotationLayer = new VectorLayer({
                 source: this.unselectedAnnotationSource,
                 // Should be below regular annotations which are at index 100.
                 zIndex: 99,
                 updateWhileAnimating: true,
                 updateWhileInteracting: true,
-                style: StylesStore.editing,
+                style: [
+                    new Style({
+                        stroke: editingStyle[0].stroke,
+                        image: editingStyle[0].image,
+                    }),
+                    new Style({
+                        stroke: editingStyle[1].stroke,
+                    }),
+                ],
                 opacity: 0.5,
             });
         },

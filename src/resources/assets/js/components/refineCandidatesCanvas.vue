@@ -1,9 +1,9 @@
 <script>
-import Collection from 'ol/Collection';
-import OlObject from 'ol/Object';
+import Collection from '@biigle/ol/Collection';
+import OlObject from '@biigle/ol/Object';
 import RefineCanvas from './refineCanvas';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
+import VectorLayer from '@biigle/ol/layer/Vector';
+import VectorSource from '@biigle/ol/source/Vector';
 import {StylesStore} from '../import';
 
 /**
