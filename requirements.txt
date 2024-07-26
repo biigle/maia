@@ -1,4 +1,4 @@
-torch==2.1.*
+torch==2.2.*
 torchvision==0.16.*
 mmcv==2.1.*
 # Update CUDA Version if necessary.
