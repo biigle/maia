@@ -52,12 +52,12 @@ class PrepareKnowledgeTransferTest extends TestCase
         Event::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Event::assertDispatched(MaiaJobContinued::class);
-        $this->assertEquals(1, $job->trainingProposals()->selected()->count());
+        $this->assertSame(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
-        $this->assertEquals($otherAnnotation->points, $proposal->points);
+        $this->assertSame($otherAnnotation->points, $proposal->points);
         $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
         $expect = [$otherImage->id => 0.25];
-        $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
+        $this->assertSame($expect, $job->fresh()->params['kt_scale_factors']);
     }
 
     public function testHandleArea()
@@ -93,12 +93,12 @@ class PrepareKnowledgeTransferTest extends TestCase
         Event::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Event::assertDispatched(MaiaJobContinued::class);
-        $this->assertEquals(1, $job->trainingProposals()->selected()->count());
+        $this->assertSame(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
-        $this->assertEquals($otherAnnotation->points, $proposal->points);
+        $this->assertSame($otherAnnotation->points, $proposal->points);
         $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
         $expect = [$otherImage->id => 0.25];
-        $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
+        $this->assertSame($expect, $job->fresh()->params['kt_scale_factors']);
     }
 
     public function testHandleAreaLaserpoints()
@@ -134,7 +134,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         (new PrepareKnowledgeTransfer($job))->handle();
         $this->assertArrayHasKey('kt_scale_factors', $job->fresh()->params);
         $expect = [$otherImage->id => 0.25];
-        $this->assertEquals($expect, $job->fresh()->params['kt_scale_factors']);
+        $this->assertSame($expect, $job->fresh()->params['kt_scale_factors']);
     }
 
     public function testHandleShapeConversion()
@@ -186,24 +186,24 @@ class PrepareKnowledgeTransferTest extends TestCase
         ]);
 
         (new PrepareKnowledgeTransfer($job))->handle();
-        $this->assertEquals(5, $job->trainingProposals()->selected()->count());
+        $this->assertSame(5, $job->trainingProposals()->selected()->count());
         $proposals = $job->trainingProposals;
 
-        $this->assertEquals(Shape::circleId(), $proposals[0]->shape_id);
+        $this->assertSame(Shape::circleId(), $proposals[0]->shape_id);
         // Points get a default radius of 50 px.
-        $this->assertEquals([10, 20, 50], $proposals[0]->points);
+        $this->assertSame([10, 20, 50], $proposals[0]->points);
 
-        $this->assertEquals(Shape::circleId(), $proposals[1]->shape_id);
-        $this->assertEquals([55, 55, 63.64], $proposals[1]->points);
+        $this->assertSame(Shape::circleId(), $proposals[1]->shape_id);
+        $this->assertSame([55, 55, 63.64], $proposals[1]->points);
 
-        $this->assertEquals(Shape::circleId(), $proposals[2]->shape_id);
-        $this->assertEquals([10, 20, 30], $proposals[2]->points);
+        $this->assertSame(Shape::circleId(), $proposals[2]->shape_id);
+        $this->assertSame([10, 20, 30], $proposals[2]->points);
 
-        $this->assertEquals(Shape::circleId(), $proposals[3]->shape_id);
-        $this->assertEquals([15, 15, 7.07], $proposals[3]->points);
+        $this->assertSame(Shape::circleId(), $proposals[3]->shape_id);
+        $this->assertSame([15, 15, 7.07], $proposals[3]->points);
 
-        $this->assertEquals(Shape::circleId(), $proposals[4]->shape_id);
-        $this->assertEquals([10, 15, 11.18], $proposals[4]->points);
+        $this->assertSame(Shape::circleId(), $proposals[4]->shape_id);
+        $this->assertSame([10, 15, 11.18], $proposals[4]->points);
     }
 
     public function testHandleDistanceMissingOtherVolume()
@@ -229,8 +229,8 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(0, $job->trainingProposals()->count());
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(0, $job->trainingProposals()->count());
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -257,8 +257,8 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(0, $job->trainingProposals()->count());
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(0, $job->trainingProposals()->count());
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -281,7 +281,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -304,7 +304,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -327,7 +327,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -350,7 +350,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -375,7 +375,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -400,7 +400,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -425,7 +425,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -450,7 +450,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -475,7 +475,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -500,7 +500,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -540,8 +540,8 @@ class PrepareKnowledgeTransferTest extends TestCase
         ]);
 
         (new PrepareKnowledgeTransfer($job))->handle();
-        $this->assertEquals(1, $job->trainingProposals()->selected()->count());
+        $this->assertSame(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
-        $this->assertEquals([1, 2, 3], $proposal->points);
+        $this->assertSame([1, 2, 3], $proposal->points);
     }
 }

@@ -61,25 +61,25 @@ class ObjectDetectionTest extends TestCase
         $inferenceInputJsonPath = "{$tmpDir}/input-inference.json";
 
         $expectDatasetJson = [
-            'max_workers' => 2,
             'tmp_dir' => $tmpDir,
+            'max_workers' => 2,
             'training_proposals' => [$image->id => [[11, 20, 30]]],
             'output_path' => "{$tmpDir}/output-dataset.json",
         ];
 
         $expectTrainingJson = [
-            'max_workers' => 2,
-            'batch_size' => 12,
             'tmp_dir' => $tmpDir,
+            'max_workers' => 2,
             'output_path' => "{$tmpDir}/output-training.json",
             'base_config' => config('maia.mmdet_base_config'),
+            'batch_size' => 12,
             'backbone_model_path' => config('maia.backbone_model_path'),
             'model_path' => config('maia.model_path'),
         ];
 
         $expectInferenceJson = [
-            'max_workers' => 2,
             'tmp_dir' => $tmpDir,
+            'max_workers' => 2,
         ];
 
         try {
@@ -94,12 +94,12 @@ class ObjectDetectionTest extends TestCase
             $this->assertArrayHasKey($image->id, $inputJson['images']);
             $this->assertArrayNotHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
-            $this->assertEquals($expectDatasetJson, $inputJson);
+            $this->assertSame($expectDatasetJson, $inputJson);
             $this->assertStringContainsString("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
 
             $this->assertTrue(File::exists($trainingInputJsonPath));
             $inputJson = json_decode(File::get($trainingInputJsonPath), true);
-            $this->assertEquals($expectTrainingJson, $inputJson);
+            $this->assertSame($expectTrainingJson, $inputJson);
             $this->assertStringContainsString("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
 
             $this->assertTrue(File::exists($inferenceInputJsonPath));
@@ -108,20 +108,20 @@ class ObjectDetectionTest extends TestCase
             $this->assertArrayHasKey($image->id, $inputJson['images']);
             $this->assertArrayHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
-            $this->assertEquals($expectInferenceJson, $inputJson);
+            $this->assertSame($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-            $this->assertEquals(State::annotationCandidatesId(), $job->fresh()->state_id);
+            $this->assertSame(State::annotationCandidatesId(), $job->fresh()->state_id);
 
             $annotations = $job->annotationCandidates()->get();
             // One annotation for each image.
-            $this->assertEquals(2, $annotations->count());
-            $this->assertEquals([10, 20, 30], $annotations[0]->points);
-            $this->assertEquals(123, $annotations[0]->score);
+            $this->assertSame(2, $annotations->count());
+            $this->assertSame([10, 20, 30], $annotations[0]->points);
+            $this->assertSame(123.0, $annotations[0]->score);
             $this->assertNull($annotations[0]->label_id);
             $this->assertNull($annotations[0]->annotation_id);
-            $this->assertEquals($image->id, $annotations[0]->image_id);
-            $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
+            $this->assertSame($image->id, $annotations[0]->image_id);
+            $this->assertSame(Shape::circleId(), $annotations[0]->shape_id);
 
             $this->assertTrue($request->cleanup);
         } finally {
@@ -147,8 +147,8 @@ class ObjectDetectionTest extends TestCase
 
             $annotations = $job->annotationCandidates()->get();
             // One image was deleted, only one image and annotation remains.
-            $this->assertEquals(1, $annotations->count());
-            $this->assertEquals($image2->id, $annotations[0]->image_id);
+            $this->assertSame(1, $annotations->count());
+            $this->assertSame($image2->id, $annotations[0]->image_id);
         } finally {
             File::deleteDirectory($tmpDir);
         }
@@ -200,29 +200,29 @@ class ObjectDetectionTest extends TestCase
         $inferenceInputJsonPath = "{$tmpDir}/input-inference.json";
 
         $expectDatasetJson = [
+            'tmp_dir' => $tmpDir,
+            'max_workers' => 2,
+            'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
+            'output_path' => "{$tmpDir}/output-dataset.json",
             'kt_scale_factors' => [
                 $otherImage->id => 0.25,
                 $otherImage2->id => 0.25,
             ],
-            'max_workers' => 2,
-            'tmp_dir' => $tmpDir,
-            'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
-            'output_path' => "{$tmpDir}/output-dataset.json",
         ];
 
         $expectTrainingJson = [
-            'max_workers' => 2,
-            'batch_size' => 12,
             'tmp_dir' => $tmpDir,
+            'max_workers' => 2,
             'output_path' => "{$tmpDir}/output-training.json",
             'base_config' => config('maia.mmdet_base_config'),
+            'batch_size' => 12,
             'backbone_model_path' => config('maia.backbone_model_path'),
             'model_path' => config('maia.model_path'),
         ];
 
         $expectInferenceJson = [
-            'max_workers' => 2,
             'tmp_dir' => $tmpDir,
+            'max_workers' => 2,
         ];
 
         try {
@@ -237,12 +237,12 @@ class ObjectDetectionTest extends TestCase
             $this->assertArrayHasKey($otherImage->id, $inputJson['images']);
             $this->assertArrayNotHasKey($otherImage2->id, $inputJson['images']);
             unset($inputJson['images']);
-            $this->assertEquals($expectDatasetJson, $inputJson);
+            $this->assertSame($expectDatasetJson, $inputJson);
             $this->assertStringContainsString("DatasetGenerator.py {$datasetInputJsonPath}", $request->commands[0]);
 
             $this->assertTrue(File::exists($trainingInputJsonPath));
             $inputJson = json_decode(File::get($trainingInputJsonPath), true);
-            $this->assertEquals($expectTrainingJson, $inputJson);
+            $this->assertSame($expectTrainingJson, $inputJson);
             $this->assertStringContainsString("TrainingRunner.py {$trainingInputJsonPath} {$datasetOutputJsonPath}", $request->commands[1]);
 
             $this->assertTrue(File::exists($inferenceInputJsonPath));
@@ -250,14 +250,14 @@ class ObjectDetectionTest extends TestCase
             $this->assertArrayHasKey('images', $inputJson);
             $this->assertArrayHasKey($ownImage->id, $inputJson['images']);
             unset($inputJson['images']);
-            $this->assertEquals($expectInferenceJson, $inputJson);
+            $this->assertSame($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
             $annotations = $job->annotationCandidates()->get();
-            $this->assertEquals(1, $annotations->count());
-            $this->assertEquals([10, 20, 30], $annotations[0]->points);
-            $this->assertEquals(123, $annotations[0]->score);
-            $this->assertEquals($ownImage->id, $annotations[0]->image_id);
+            $this->assertSame(1, $annotations->count());
+            $this->assertSame([10, 20, 30], $annotations[0]->points);
+            $this->assertSame(123.0, $annotations[0]->score);
+            $this->assertSame($ownImage->id, $annotations[0]->image_id);
 
             $this->assertTrue($request->cleanup);
         } finally {
@@ -307,14 +307,14 @@ class ObjectDetectionTest extends TestCase
         $datasetInputJsonPath = "{$tmpDir}/input-dataset.json";
 
         $expectDatasetJson = [
+            'tmp_dir' => $tmpDir,
+            'max_workers' => 2,
+            'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
+            'output_path' => "{$tmpDir}/output-dataset.json",
             'kt_scale_factors' => [
                 $otherImage->id => 0.25,
                 $otherImage2->id => 0.25,
             ],
-            'max_workers' => 2,
-            'tmp_dir' => $tmpDir,
-            'training_proposals' => [$otherImage->id => [[11, 20, 30]]],
-            'output_path' => "{$tmpDir}/output-dataset.json",
         ];
 
         try {
@@ -323,13 +323,13 @@ class ObjectDetectionTest extends TestCase
 
             $inputJson = json_decode(File::get($datasetInputJsonPath), true);
             unset($inputJson['images']);
-            $this->assertEquals($expectDatasetJson, $inputJson);
+            $this->assertSame($expectDatasetJson, $inputJson);
 
             $annotations = $job->annotationCandidates()->get();
-            $this->assertEquals(1, $annotations->count());
-            $this->assertEquals([10, 20, 30], $annotations[0]->points);
-            $this->assertEquals(123, $annotations[0]->score);
-            $this->assertEquals($ownImage->id, $annotations[0]->image_id);
+            $this->assertSame(1, $annotations->count());
+            $this->assertSame([10, 20, 30], $annotations[0]->points);
+            $this->assertSame(123.0, $annotations[0]->score);
+            $this->assertSame($ownImage->id, $annotations[0]->image_id);
 
             $this->assertTrue($request->cleanup);
         } finally {
@@ -376,7 +376,7 @@ class ObjectDetectionTest extends TestCase
         }
 
         $this->assertFalse($job->annotationCandidates()->exists());
-        $this->assertEquals(State::objectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::objectDetectionId(), $job->fresh()->state_id);
     }
 
     public function testFailed()

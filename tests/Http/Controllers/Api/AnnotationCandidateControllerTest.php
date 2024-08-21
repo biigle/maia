@@ -106,7 +106,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
             ->assertStatus(200);
 
         $a->refresh();
-        $this->assertEquals([10, 20, 30], $a->points);
+        $this->assertSame([10, 20, 30], $a->points);
     }
 
     public function testUpdateLabel()
@@ -134,7 +134,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
             ])
             ->assertStatus(200);
 
-        $this->assertEquals($this->labelRoot()->id, $a->fresh()->label_id);
+        $this->assertSame($this->labelRoot()->id, $a->fresh()->label_id);
 
         $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
                 'label_id' => null,
@@ -172,7 +172,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
             ->assertStatus(200);
 
         Queue::assertPushed(ProcessObjectDetectedImage::class, function ($job) use ($a) {
-            $this->assertEquals([$a->id], $job->only);
+            $this->assertSame([$a->id], $job->only);
             $this->assertFalse($job->skipFeatureVectors);
 
             return true;

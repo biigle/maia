@@ -30,7 +30,7 @@ class ProcessObjectDetectedImageTest extends TestCase
         $job->handleFile($candidate->image, 'abc');
         $prefix = fragment_uuid_path($candidate->image->uuid);
         $content = $disk->get("{$prefix}/{$candidate->id}.jpg");
-        $this->assertEquals('abc123', $content);
+        $this->assertSame('abc123', $content);
     }
 
     public function testGenerateFeatureVector()
@@ -54,12 +54,12 @@ class ProcessObjectDetectedImageTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($candidate->id, $input[$filename]);
         $box = $input[$filename][$candidate->id];
-        $this->assertEquals([190, 190, 210, 210], $box);
+        $this->assertSame([190, 190, 210, 210], $box);
 
         $vectors = AnnotationCandidateFeatureVector::where('id', $candidate->id)->get();
         $this->assertCount(1, $vectors);
-        $this->assertEquals($candidate->job_id, $vectors[0]->job_id);
-        $this->assertEquals(range(0, 383), $vectors[0]->vector->toArray());
+        $this->assertSame($candidate->job_id, $vectors[0]->job_id);
+        $this->assertSame(range(0, 383), $vectors[0]->vector->toArray());
     }
 
     public function testOnly()

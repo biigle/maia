@@ -36,9 +36,9 @@ class PrepareExistingAnnotationsTest extends TestCase
         Event::fake();
         (new PrepareExistingAnnotations($job))->handle();
         Event::assertDispatched(MaiaJobContinued::class);
-        $this->assertEquals(1, $job->trainingProposals()->selected()->count());
+        $this->assertSame(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
-        $this->assertEquals($a->points, $proposal->points);
+        $this->assertSame($a->points, $proposal->points);
     }
 
     public function testHandleRestrictLabels()
@@ -65,9 +65,9 @@ class PrepareExistingAnnotationsTest extends TestCase
         ]);
 
         (new PrepareExistingAnnotations($job))->handle();
-        $this->assertEquals(1, $job->trainingProposals()->selected()->count());
+        $this->assertSame(1, $job->trainingProposals()->selected()->count());
         $proposal = $job->trainingProposals()->first();
-        $this->assertEquals($a1->points, $proposal->points);
+        $this->assertSame($a1->points, $proposal->points);
         $this->assertNull($proposal->score);
     }
 
@@ -110,24 +110,24 @@ class PrepareExistingAnnotationsTest extends TestCase
         ]);
 
         (new PrepareExistingAnnotations($job))->handle();
-        $this->assertEquals(5, $job->trainingProposals()->selected()->count());
+        $this->assertSame(5, $job->trainingProposals()->selected()->count());
         $proposals = $job->trainingProposals;
 
-        $this->assertEquals(Shape::circleId(), $proposals[0]->shape_id);
+        $this->assertSame(Shape::circleId(), $proposals[0]->shape_id);
         // Points get a default radius of 50 px.
-        $this->assertEquals([10, 20, 50], $proposals[0]->points);
+        $this->assertSame([10, 20, 50], $proposals[0]->points);
 
-        $this->assertEquals(Shape::circleId(), $proposals[1]->shape_id);
-        $this->assertEquals([55, 55, 63.64], $proposals[1]->points);
+        $this->assertSame(Shape::circleId(), $proposals[1]->shape_id);
+        $this->assertSame([55, 55, 63.64], $proposals[1]->points);
 
-        $this->assertEquals(Shape::circleId(), $proposals[2]->shape_id);
-        $this->assertEquals([10, 20, 30], $proposals[2]->points);
+        $this->assertSame(Shape::circleId(), $proposals[2]->shape_id);
+        $this->assertSame([10, 20, 30], $proposals[2]->points);
 
-        $this->assertEquals(Shape::circleId(), $proposals[3]->shape_id);
-        $this->assertEquals([15, 15, 7.07], $proposals[3]->points);
+        $this->assertSame(Shape::circleId(), $proposals[3]->shape_id);
+        $this->assertSame([15, 15, 7.07], $proposals[3]->points);
 
-        $this->assertEquals(Shape::circleId(), $proposals[4]->shape_id);
-        $this->assertEquals([10, 15, 11.18], $proposals[4]->points);
+        $this->assertSame(Shape::circleId(), $proposals[4]->shape_id);
+        $this->assertSame([10, 15, 11.18], $proposals[4]->points);
     }
 
     public function testHandleSkipNdNoAnnotations()
@@ -137,8 +137,8 @@ class PrepareExistingAnnotationsTest extends TestCase
         Notification::fake();
         (new PrepareExistingAnnotations($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertEquals(0, $job->trainingProposals()->count());
-        $this->assertEquals(State::failedObjectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(0, $job->trainingProposals()->count());
+        $this->assertSame(State::failedObjectDetectionId(), $job->fresh()->state_id);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -160,10 +160,10 @@ class PrepareExistingAnnotationsTest extends TestCase
 
         Event::assertNotDispatched(MaiaJobContinued::class);
 
-        $this->assertEquals(State::trainingProposalsId(), $job->fresh()->state_id);
-        $this->assertEquals(0, $job->trainingProposals()->selected()->count());
-        $this->assertEquals(1, $job->trainingProposals()->count());
+        $this->assertSame(State::trainingProposalsId(), $job->fresh()->state_id);
+        $this->assertSame(0, $job->trainingProposals()->selected()->count());
+        $this->assertSame(1, $job->trainingProposals()->count());
         $proposal = $job->trainingProposals()->first();
-        $this->assertEquals($a->points, $proposal->points);
+        $this->assertSame($a->points, $proposal->points);
     }
 }

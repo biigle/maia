@@ -45,12 +45,12 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([5, 5, 15, 15], $box);
+        $this->assertSame([5, 5, 15, 15], $box);
 
         $vectors = TrainingProposalFeatureVector::where('job_id', $j->id)->get();
         $this->assertCount(1, $vectors);
-        $this->assertEquals($tp->id, $vectors[0]->id);
-        $this->assertEquals(range(0, 383), $vectors[0]->vector->toArray());
+        $this->assertSame($tp->id, $vectors[0]->id);
+        $this->assertSame(range(0, 383), $vectors[0]->vector->toArray());
     }
 
     public function testHandleAnnotationCandidates()
@@ -80,12 +80,12 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($ac->id, $input[$filename]);
         $box = $input[$filename][$ac->id];
-        $this->assertEquals([5, 5, 15, 15], $box);
+        $this->assertSame([5, 5, 15, 15], $box);
 
         $vectors = AnnotationCandidateFeatureVector::where('job_id', $j->id)->get();
         $this->assertCount(1, $vectors);
-        $this->assertEquals($ac->id, $vectors[0]->id);
-        $this->assertEquals(range(0, 383), $vectors[0]->vector->toArray());
+        $this->assertSame($ac->id, $vectors[0]->id);
+        $this->assertSame(range(0, 383), $vectors[0]->vector->toArray());
     }
 
     public function testHandleConvertPoint()
@@ -112,7 +112,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([188, 188, 412, 412], $box);
+        $this->assertSame([188, 188, 412, 412], $box);
     }
 
     public function testHandleConvertRectangle()
@@ -139,7 +139,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([10, 10, 20, 20], $box);
+        $this->assertSame([10, 10, 20, 20], $box);
     }
 
     public function testHandleConvertLineString()
@@ -166,7 +166,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([10, 10, 20, 20], $box);
+        $this->assertSame([10, 10, 20, 20], $box);
     }
 
     public function testHandleConvertEllipse()
@@ -193,7 +193,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([10, 10, 20, 20], $box);
+        $this->assertSame([10, 10, 20, 20], $box);
     }
 
     public function testHandleConvertPolygon()
@@ -220,7 +220,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([10, 10, 20, 20], $box);
+        $this->assertSame([10, 10, 20, 20], $box);
     }
 
     public function testHandleCoodinatesOutsideImageNegative()
@@ -247,7 +247,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([0, 0, 30, 30], $box);
+        $this->assertSame([0, 0, 30, 30], $box);
     }
 
     public function testHandleCoodinatesOutsideImageNegativeProblematic()
@@ -280,7 +280,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
         // Moving the box outside negative space makes it overflow in the positive space.
-        $this->assertEquals([0, 0, 25, 25], $box);
+        $this->assertSame([0, 0, 25, 25], $box);
     }
 
     public function testHandleCoodinatesOutsideImagePositive()
@@ -312,7 +312,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([70, 70, 100, 100], $box);
+        $this->assertSame([70, 70, 100, 100], $box);
     }
 
     public function testHandleCoodinatesOutsideImagePositiveProblematic()
@@ -345,7 +345,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
         // Moving the box outside positive space makes it overflow in the negative space.
-        $this->assertEquals([0, 0, 25, 25], $box);
+        $this->assertSame([0, 0, 25, 25], $box);
     }
 
     public function testHandleCoodinatesOutsideImageBoth()
@@ -377,7 +377,7 @@ class GenerateAnnotationFeatureVectorsTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($tp->id, $input[$filename]);
         $box = $input[$filename][$tp->id];
-        $this->assertEquals([0, 0, 100, 100], $box);
+        $this->assertSame([0, 0, 100, 100], $box);
     }
 }
 
