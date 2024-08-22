@@ -25,7 +25,7 @@ class NoveltyDetectionFailureTest extends TestCase
         Notification::assertSentTo($job->user, NoveltyDetectionFailed::class);
 
         $job->refresh();
-        $this->assertEquals(State::failedNoveltyDetectionId(), $job->state_id);
-        $this->assertEquals('This is the message.', $job->error['message']);
+        $this->assertSame(State::failedNoveltyDetectionId(), $job->state_id);
+        $this->assertSame('This is the message.', $job->error['message']);
     }
 }

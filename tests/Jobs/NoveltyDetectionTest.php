@@ -37,13 +37,13 @@ class NoveltyDetectionTest extends TestCase
             'nd_epochs' => 100,
             'nd_stride' => 2,
             'nd_ignore_radius' => 5,
-            'max_workers' => 2,
         ];
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $tmpDir = config('maia.tmp_dir')."/maia-{$job->id}-novelty-detection";
         $inputJsonPath = "{$tmpDir}/input.json";
         $expectJson = array_merge($params, ['tmp_dir' => $tmpDir]);
+        $expectJson['max_workers'] = 2; // Add here, because order is important
 
         try {
             $request = new NdJobStub($job);
@@ -55,17 +55,17 @@ class NoveltyDetectionTest extends TestCase
             $this->assertArrayHasKey('images', $inputJson);
             $this->assertArrayHasKey($image->id, $inputJson['images']);
             unset($inputJson['images']);
-            $this->assertEquals($expectJson, $inputJson);
+            $this->assertSame($expectJson, $inputJson);
             $this->assertStringContainsString("DetectionRunner.py {$inputJsonPath}", $request->command);
 
-            $this->assertEquals(State::trainingProposalsId(), $job->fresh()->state_id);
+            $this->assertSame(State::trainingProposalsId(), $job->fresh()->state_id);
             $annotations = $job->trainingProposals()->get();
-            $this->assertEquals(1, $annotations->count());
-            $this->assertEquals([100, 200, 20], $annotations[0]->points);
-            $this->assertEquals(0.9, $annotations[0]->score);
+            $this->assertSame(1, $annotations->count());
+            $this->assertSame([100, 200, 20], $annotations[0]->points);
+            $this->assertSame(0.9, $annotations[0]->score);
             $this->assertFalse($annotations[0]->selected);
-            $this->assertEquals($image->id, $annotations[0]->image_id);
-            $this->assertEquals(Shape::circleId(), $annotations[0]->shape_id);
+            $this->assertSame($image->id, $annotations[0]->image_id);
+            $this->assertSame(Shape::circleId(), $annotations[0]->shape_id);
 
             $this->assertTrue($request->cleanup);
         } finally {
@@ -100,8 +100,8 @@ class NoveltyDetectionTest extends TestCase
             $request->handle();
 
             $annotations = $job->trainingProposals()->get();
-            $this->assertEquals(1, $annotations->count());
-            $this->assertEquals(123, $annotations[0]->score);
+            $this->assertSame(1, $annotations->count());
+            $this->assertSame(123.0, $annotations[0]->score);
         } finally {
             File::deleteDirectory($tmpDir);
         }
@@ -139,7 +139,7 @@ class NoveltyDetectionTest extends TestCase
         }
 
         $this->assertFalse($job->trainingProposals()->exists());
-        $this->assertEquals(State::noveltyDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::noveltyDetectionId(), $job->fresh()->state_id);
     }
 
     public function testFailed()

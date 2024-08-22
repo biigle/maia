@@ -17,7 +17,7 @@ class GenericImageTest extends TestCase
     public function testAttributes()
     {
         $i = new GenericImage(1, 'url');
-        $this->assertEquals(1, $i->getId());
-        $this->assertEquals('url', $i->getUrl());
+        $this->assertSame(1, $i->getId());
+        $this->assertSame('url', $i->getUrl());
     }
 }

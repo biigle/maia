@@ -40,16 +40,16 @@ class ConvertAnnotationCandidatesTest extends TestCase
 
         $a = $c1->fresh()->annotation;
         $this->assertNotNull($a);
-        $this->assertEquals([1, 2, 3], $a->points);
+        $this->assertSame([1, 2, 3], $a->points);
         $annotationLabel = $a->labels()->first();
-        $this->assertEquals($label->id, $annotationLabel->label_id);
-        $this->assertEquals($user->id, $annotationLabel->user_id);
+        $this->assertSame($label->id, $annotationLabel->label_id);
+        $this->assertSame($user->id, $annotationLabel->user_id);
 
-        $this->assertEquals($annotation->id, $c2->fresh()->annotation_id);
+        $this->assertSame($annotation->id, $c2->fresh()->annotation_id);
 
         Queue::assertPushed(ProcessAnnotatedImage::class, function ($job) use ($c1, $a) {
-            $this->assertEquals($c1->image_id, $job->file->id);
-            $this->assertEquals([$a->id], $job->only);
+            $this->assertSame($c1->image_id, $job->file->id);
+            $this->assertSame([$a->id], $job->only);
 
             return true;
         });

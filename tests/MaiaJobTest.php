@@ -30,27 +30,27 @@ class MaiaJobTest extends ModelTestCase
     public function testTrainingProposals()
     {
         $a = TrainingProposalTest::create(['job_id' => $this->model->id]);
-        $this->assertEquals($a->id, $this->model->trainingProposals()->first()->id);
+        $this->assertSame($a->id, $this->model->trainingProposals()->first()->id);
     }
 
     public function testAnnotationCandidates()
     {
         $a = AnnotationCandidateTest::create(['job_id' => $this->model->id]);
-        $this->assertEquals($a->id, $this->model->annotationCandidates()->first()->id);
+        $this->assertSame($a->id, $this->model->annotationCandidates()->first()->id);
     }
 
     public function testCastsParams()
     {
         $this->model->params = ['test'];
         $this->model->save();
-        $this->assertEquals(['test'], $this->model->fresh()->params);
+        $this->assertSame(['test'], $this->model->fresh()->params);
     }
 
     public function testCastsError()
     {
         $this->model->error = ['message' => 'test'];
         $this->model->save();
-        $this->assertEquals(['message' => 'test'], $this->model->fresh()->error);
+        $this->assertSame(['message' => 'test'], $this->model->fresh()->error);
     }
 
     public function testIsRunning()

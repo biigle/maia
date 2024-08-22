@@ -30,7 +30,7 @@ class ProcessNoveltyDetectedImageTest extends TestCase
         $job->handleFile($proposal->image, 'abc');
         $prefix = fragment_uuid_path($proposal->image->uuid);
         $content = $disk->get("{$prefix}/{$proposal->id}.jpg");
-        $this->assertEquals('abc123', $content);
+        $this->assertSame('abc123', $content);
     }
 
     public function testGenerateFeatureVector()
@@ -54,12 +54,12 @@ class ProcessNoveltyDetectedImageTest extends TestCase
         $filename = array_keys($input)[0];
         $this->assertArrayHasKey($proposal->id, $input[$filename]);
         $box = $input[$filename][$proposal->id];
-        $this->assertEquals([190, 190, 210, 210], $box);
+        $this->assertSame([190, 190, 210, 210], $box);
 
         $vectors = TrainingProposalFeatureVector::where('id', $proposal->id)->get();
         $this->assertCount(1, $vectors);
-        $this->assertEquals($proposal->job_id, $vectors[0]->job_id);
-        $this->assertEquals(range(0, 383), $vectors[0]->vector->toArray());
+        $this->assertSame($proposal->job_id, $vectors[0]->job_id);
+        $this->assertSame(range(0, 383), $vectors[0]->vector->toArray());
     }
 
     public function testOnly()

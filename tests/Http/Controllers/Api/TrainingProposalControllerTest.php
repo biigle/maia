@@ -70,7 +70,7 @@ class TrainingProposalControllerTest extends ApiTestCase
         Event::fake();
         $this->postJson("/api/v1/maia-jobs/{$job->id}/training-proposals")->assertStatus(200);
         Event::assertDispatched(MaiaJobContinued::class);
-        $this->assertEquals(State::objectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::objectDetectionId(), $job->fresh()->state_id);
 
         // Job is no longer in training proposal state.
         $this->postJson("/api/v1/maia-jobs/{$job->id}/training-proposals")->assertStatus(422);
@@ -116,7 +116,7 @@ class TrainingProposalControllerTest extends ApiTestCase
 
         $a->refresh();
         $this->assertTrue($a->selected);
-        $this->assertEquals([10, 20, 30], $a->points);
+        $this->assertSame([10, 20, 30], $a->points);
     }
 
     public function testUpdateAfterState()
@@ -154,7 +154,7 @@ class TrainingProposalControllerTest extends ApiTestCase
             ->assertStatus(200);
 
         Queue::assertPushed(ProcessNoveltyDetectedImage::class, function ($job) use ($a) {
-            $this->assertEquals([$a->id], $job->only);
+            $this->assertSame([$a->id], $job->only);
             $this->assertFalse($job->skipFeatureVectors);
 
             return true;
