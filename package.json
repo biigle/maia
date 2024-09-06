@@ -23,5 +23,8 @@
     "sass-loader": "^8.0.0",
     "vue-loader": "^15.9.6",
     "vue-template-compiler": "^2.6.11"
-  }
+  },
+  "dependencies": {
+    "@biigle/ol": "^9.2.4"
+   }
 }
