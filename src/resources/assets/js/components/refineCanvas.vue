@@ -65,11 +65,11 @@ export default {
                 updateWhileInteracting: true,
                 style: [
                     new Style({
-                        stroke: editingStyle[0].stroke,
-                        image: editingStyle[0].image,
+                        stroke: editingStyle[0].getStroke(),
+                        image: editingStyle[0].getImage(),
                     }),
                     new Style({
-                        stroke: editingStyle[1].stroke,
+                        stroke: editingStyle[1].getStroke(),
                     }),
                 ],
                 opacity: 0.5,
