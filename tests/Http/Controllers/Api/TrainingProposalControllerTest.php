@@ -243,4 +243,54 @@ class TrainingProposalControllerTest extends ApiTestCase
         $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
             ->assertStatus(404);
     }
+
+    public function testBulkUpdate()
+    {
+    $job = MaiaJobTest::create([
+        'volume_id' => $this->volume()->id,
+        'state_id' => State::trainingProposalsId(),
+    ]);
+
+    $proposals = TrainingProposalTest::factory()->count(3)->create(['job_id' => $job->id]);
+
+    $this->beGuest();
+    $this->postJson('/api/v1/maia/training-proposals/bulk-update', ['proposals' => []])->assertStatus(403);
+
+    $this->beEditor();
+    $this->postJson('/api/v1/maia/training-proposals/bulk-update', ['proposals' => []])
+        // Must not be empty.
+        ->assertStatus(422);
+
+    $this->postJson('/api/v1/maia/training-proposals/bulk-update', [
+            'proposals' => [
+                ['id' => $proposals[0]->id, 'selected' => 123, 'points' => [10, 20, 30]],
+                ['id' => $proposals[1]->id, 'selected' => true, 'points' => [10, 20]],
+            ]
+        ])
+        ->assertStatus(422);
+
+    $this->postJson('/api/v1/maia/training-proposals/bulk-update', [
+            'proposals' => [
+                ['id' => $proposals[0]->id, 'selected' => true, 'points' => [10, 20, 30]],
+                ['id' => $proposals[1]->id, 'selected' => false, 'points' => [30, 40, 50]],
+                ['id' => $proposals[2]->id, 'selected' => true, 'points' => [50, 60, 70]],
+            ]
+        ])
+        ->assertStatus(200);
+
+    $proposals[0]->refresh();
+    $proposals[1]->refresh();
+    $proposals[2]->refresh();
+
+    $this->assertTrue($proposals[0]->selected);
+    $this->assertEquals([10, 20, 30], $proposals[0]->points);
+
+    $this->assertFalse($proposals[1]->selected);
+    $this->assertEquals([30, 40, 50], $proposals[1]->points);
+
+    $this->assertTrue($proposals[2]->selected);
+    $this->assertEquals([50, 60, 70], $proposals[2]->points);
+}
+
+   
 }

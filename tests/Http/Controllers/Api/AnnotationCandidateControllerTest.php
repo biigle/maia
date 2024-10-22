@@ -261,4 +261,51 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
             ->assertStatus(404);
     }
+    public function testBulkUpdate()
+    {
+        $job = MaiaJobTest::create([
+            'volume_id' => $this->volume()->id,
+            'state_id' => State::annotationCandidatesId(),
+        ]);
+    
+        $candidates = AnnotationCandidateTest::factory()->count(3)->create(['job_id' => $job->id]);
+    
+        $this->beGuest();
+        $this->postJson('/api/v1/maia/annotation-candidates/bulk-update', ['candidates' => []])->assertStatus(403);
+    
+        $this->beEditor();
+        $this->postJson('/api/v1/maia/annotation-candidates/bulk-update', ['candidates' => []])
+            // Must not be empty.
+            ->assertStatus(422);
+    
+        $this->postJson('/api/v1/maia/annotation-candidates/bulk-update', [
+                'candidates' => [
+                    ['id' => $candidates[0]->id, 'label_id' => 9999, 'points' => [10, 20]],
+                    ['id' => $candidates[1]->id, 'label_id' => $this->labelRoot()->id, 'points' => [10, 20, 30]],
+                ]
+            ])
+            ->assertStatus(422);
+    
+        $this->postJson('/api/v1/maia/annotation-candidates/bulk-update', [
+                'candidates' => [
+                    ['id' => $candidates[0]->id, 'label_id' => $this->labelRoot()->id, 'points' => [10, 20, 30]],
+                    ['id' => $candidates[1]->id, 'label_id' => null, 'points' => [30, 40, 50]],
+                    ['id' => $candidates[2]->id, 'label_id' => $this->labelRoot()->id, 'points' => [50, 60, 70]],
+                ]
+            ])
+            ->assertStatus(200);
+    
+        $candidates[0]->refresh();
+        $candidates[1]->refresh();
+        $candidates[2]->refresh();
+    
+        $this->assertEquals($this->labelRoot()->id, $candidates[0]->label_id);
+        $this->assertEquals([10, 20, 30], $candidates[0]->points);
+    
+        $this->assertNull($candidates[1]->label_id);
+        $this->assertEquals([30, 40, 50], $candidates[1]->points);
+    
+        $this->assertEquals($this->labelRoot()->id, $candidates[2]->label_id);
+        $this->assertEquals([50, 60, 70], $candidates[2]->points);
+    }
 }
