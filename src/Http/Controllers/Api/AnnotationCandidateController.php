@@ -148,23 +148,30 @@ class AnnotationCandidateController extends Controller
      * @param UpdateAnnotationCandidate $request
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateAnnotationCandidate $request)
+    public function updateMany(Request $request)
     {
-        $candidate = $request->candidate;
-        if ($request->filled('points')) {
-            $candidate->points = $request->input('points');
-            ProcessObjectDetectedImage::dispatch($candidate->image,
-                    only: [$candidate->id],
-                    maiaJob: $candidate->job,
-                    targetDisk: config('maia.annotation_candidate_storage_disk')
-                )
-                ->onQueue(config('largo.generate_annotation_patch_queue'));
+        $candidates = $request->input('candidates');
+        foreach ($candidates as $candidateData) {
+            $candidate = AnnotationCandidate::find($candidateData['id']);
+            if ($candidate) {
+                if (isset($candidateData['points'])) {
+                    $candidate->points = $candidateData['points'];
+                    ProcessObjectDetectedImage::dispatch($candidate->image,
+                            only: [$candidate->id],
+                            maiaJob: $candidate->job,
+                            targetDisk: config('maia.annotation_candidate_storage_disk')
+                        )
+                        ->onQueue(config('largo.generate_annotation_patch_queue'));
+                }
+                if (isset($candidateData['label_id'])) {
+                    $candidate->label_id = $candidateData['label_id'];
+                }
+                $candidate->save();
+            }
         }
-
-        if ($request->has('label_id')) {
-            $candidate->label_id = $request->input('label_id');
-        }
-
-        $candidate->save();
+        return response()->json(['status' => 'success']);
     }
+
+
+    
 }

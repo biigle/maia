@@ -497,22 +497,57 @@ export default {
             }
         },
         handleSelectedProposal(proposal, event) {
-            if (proposal.selected) {
-                this.unselectProposal(proposal);
+        if (proposal.selected) {
+            this.unselectProposal(proposal);
+        } else {
+            if (event.shiftKey && this.lastSelectedProposal) {
+                this.doForEachBetween(
+                    this.proposalsForSelectView,
+                    proposal,
+                    this.lastSelectedProposal,
+                    this.selectProposal
+                );
             } else {
-                if (event.shiftKey && this.lastSelectedProposal) {
-                    this.doForEachBetween(
-                        this.proposalsForSelectView,
-                        proposal,
-                        this.lastSelectedProposal,
-                        this.selectProposal
-                    );
-                } else {
-                    this.lastSelectedProposal = proposal;
-                    this.selectProposal(proposal);
-                }
+                this.lastSelectedProposal = proposal;
+                this.selectProposal(proposal);
             }
-        },
+        }
+        this.bulkUpdateProposals();
+    },
+    handleSelectedCandidate(candidate, event) {
+        if (candidate.label) {
+            this.unselectCandidate(candidate);
+        } else {
+            if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
+                this.doForEachBetween(this.candidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
+            } else {
+                this.lastSelectedCandidate = candidate;
+                this.selectCandidate(candidate);
+            }
+        }
+        this.bulkUpdateCandidates();
+    },
+    bulkUpdateProposals() {
+        const selectedProposals = this.proposalsForSelectView.filter(p => p.selected);
+        const chunks = this.chunkArray(selectedProposals, 100);
+        chunks.forEach(chunk => {
+            axios.post('/api/v1/maia/training-proposals/bulk-update', { proposals: chunk });
+        });
+    },
+    bulkUpdateCandidates() {
+        const selectedCandidates = this.candidates.filter(c => c.label);
+        const chunks = this.chunkArray(selectedCandidates, 100);
+        chunks.forEach(chunk => {
+            axios.post('/api/v1/maia/annotation-candidates/bulk-update', { candidates: chunk });
+        });
+    },
+    chunkArray(array, size) {
+        const result = [];
+        for (let i = 0; i < array.length; i += size) {
+            result.push(array.slice(i, i + size));
+        }
+        return result;
+    },
         handleSelectedReferenceProposal(proposal) {
             if (this.loading) {
                 return;

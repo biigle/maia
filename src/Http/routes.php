@@ -47,4 +47,8 @@ $router->group([
 
     $router->get('volumes/filter/knowledge-transfer', 'KnowledgeTransferVolumeController@index');
     $router->get('volumes/filter/area-knowledge-transfer', 'AreaKnowledgeTransferVolumeController@index');
+    
+    $router->post('maia/training-proposals/bulk-update', 'TrainingProposalController@updateMany');
+    $router->post('maia/annotation-candidates/bulk-update', 'AnnotationCandidateController@updateMany');
+
 });
