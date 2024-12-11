@@ -147,28 +147,39 @@ class TrainingProposalController extends Controller
      * @param UpdateTrainingProposal $request
      * @return \Illuminate\Http\Response
      */
-    public function updateMany(Request $request)
+    public function update(UpdateTrainingProposal $request)
     {
-        $proposals = $request->input('proposals');
-        foreach ($proposals as $proposalData) {
-            $proposal = TrainingProposal::find($proposalData['id']);
-            if ($proposal) {
-                if (isset($proposalData['points'])) {
-                    $proposal->points = $proposalData['points'];
-                    ProcessNoveltyDetectedImage::dispatch($proposal->image,
-                            only: [$proposal->id],
-                            maiaJob: $proposal->job,
-                            targetDisk: config('maia.training_proposal_storage_disk')
-                        )
-                        ->onQueue(config('largo.generate_annotation_patch_queue'));
-                }
-                $proposal->selected = $proposalData['selected'] ?? $proposal->selected;
-                $proposal->save();
-            }
+        $proposal = $request->proposal;
+        if ($request->filled('points')) {
+            $proposal->points = $request->input('points');
+            ProcessNoveltyDetectedImage::dispatch($proposal->image,
+                    only: [$proposal->id],
+                    maiaJob: $proposal->job,
+                    targetDisk: config('maia.training_proposal_storage_disk')
+                )
+                ->onQueue(config('largo.generate_annotation_patch_queue'));
         }
-        return response()->json(['status' => 'success']);
+
+        $proposal->selected = $request->input('selected', $proposal->selected);
+
+        $proposal->save();
     }
 
+    public function updateBatch(Request $request)
+{
+    $proposals = $request->input('proposals', []);
 
-    
+    foreach ($proposals as $proposalData) {
+        $proposal = TrainingProposal::find($proposalData['id']);
+
+        if ($proposal) {
+            $proposal->selected = $proposalData['selected'];
+            $proposal->points = $proposalData['points'] ?? $proposal->points;
+            $proposal->save();
+        }
+    }
+
+    return response()->json(['message' => 'Proposals updated successfully'], 200);
+}
+
 }

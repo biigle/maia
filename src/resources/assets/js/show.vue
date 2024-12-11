@@ -512,41 +512,29 @@ export default {
                 this.selectProposal(proposal);
             }
         }
-        this.bulkUpdateProposals();
+
+        // Call batch update for proposals
+        this.updateProposalsBatch();
     },
-    handleSelectedCandidate(candidate, event) {
-        if (candidate.label) {
-            this.unselectCandidate(candidate);
-        } else {
-            if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
-                this.doForEachBetween(this.candidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
-            } else {
-                this.lastSelectedCandidate = candidate;
-                this.selectCandidate(candidate);
+    updateProposalsBatch() {
+        const chunks = [];
+        let currentChunk = [];
+
+        this.proposalsForSelectView.forEach(proposal => {
+            if (proposal.selected) {
+                currentChunk.push(proposal);
+                if (currentChunk.length === 100) {
+                    chunks.push(currentChunk);
+                    currentChunk = [];
+                }
             }
-        }
-        this.bulkUpdateCandidates();
-    },
-    bulkUpdateProposals() {
-        const selectedProposals = this.proposalsForSelectView.filter(p => p.selected);
-        const chunks = this.chunkArray(selectedProposals, 100);
-        chunks.forEach(chunk => {
-            axios.post('/api/v1/maia/training-proposals/bulk-update', { proposals: chunk });
         });
-    },
-    bulkUpdateCandidates() {
-        const selectedCandidates = this.candidates.filter(c => c.label);
-        const chunks = this.chunkArray(selectedCandidates, 100);
-        chunks.forEach(chunk => {
-            axios.post('/api/v1/maia/annotation-candidates/bulk-update', { candidates: chunk });
-        });
-    },
-    chunkArray(array, size) {
-        const result = [];
-        for (let i = 0; i < array.length; i += size) {
-            result.push(array.slice(i, i + size));
+
+        if (currentChunk.length) {
+            chunks.push(currentChunk);
         }
-        return result;
+
+        chunks.forEach(chunk => ProposalsApi.updateBatch({ proposals: chunk }).catch(handleErrorResponse));
     },
         handleSelectedReferenceProposal(proposal) {
             if (this.loading) {
@@ -658,17 +646,45 @@ export default {
             return this.fetchCandidatesPromise;
         },
         handleSelectedCandidate(candidate, event) {
-            if (candidate.label) {
-                this.unselectCandidate(candidate);
+        if (candidate.label) {
+            this.unselectCandidate(candidate);
+        } else {
+            if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
+                this.doForEachBetween(
+                    this.candidates,
+                    candidate,
+                    this.lastSelectedCandidate,
+                    this.selectCandidate
+                );
             } else {
-                if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
-                    this.doForEachBetween(this.candidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
-                } else {
-                    this.lastSelectedCandidate = candidate;
-                    this.selectCandidate(candidate);
+                this.lastSelectedCandidate = candidate;
+                this.selectCandidate(candidate);
+            }
+        }
+
+        // Call batch update for candidates
+        this.updateCandidatesBatch();
+    },
+    updateCandidatesBatch() {
+        const chunks = [];
+        let currentChunk = [];
+
+        this.candidates.forEach(candidate => {
+            if (candidate.label) {
+                currentChunk.push(candidate);
+                if (currentChunk.length === 100) {
+                    chunks.push(currentChunk);
+                    currentChunk = [];
                 }
             }
-        },
+        });
+
+        if (currentChunk.length) {
+            chunks.push(currentChunk);
+        }
+
+        chunks.forEach(chunk => CandidatesApi.updateBatch({ candidates: chunk }).catch(handleErrorResponse));
+    },
         selectCandidate(candidate) {
             if (this.selectedLabel) {
                 // Do not select candidates that have been converted.

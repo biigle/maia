@@ -308,4 +308,34 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->assertEquals($this->labelRoot()->id, $candidates[2]->label_id);
         $this->assertEquals([50, 60, 70], $candidates[2]->points);
     }
+
+    public function testUpdateBatch()
+{
+    $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+    $candidate1 = AnnotationCandidateTest::create(['job_id' => $job->id, 'label_id' => null]);
+    $candidate2 = AnnotationCandidateTest::create(['job_id' => $job->id, 'label_id' => null]);
+
+    $this->beGuest();
+    $this->putJson('/api/v1/maia/annotation-candidates/batch', [
+        'candidates' => [
+            ['id' => $candidate1->id, 'label_id' => 1],
+            ['id' => $candidate2->id, 'label_id' => 2],
+        ],
+    ])->assertStatus(403);
+
+    $this->beEditor();
+    $this->putJson('/api/v1/maia/annotation-candidates/batch', [
+        'candidates' => [
+            ['id' => $candidate1->id, 'label_id' => 1],
+            ['id' => $candidate2->id, 'label_id' => 2],
+        ],
+    ])->assertStatus(200);
+
+    $candidate1->refresh();
+    $candidate2->refresh();
+
+    $this->assertSame(1, $candidate1->label_id);
+    $this->assertSame(2, $candidate2->label_id);
+}
+
 }
