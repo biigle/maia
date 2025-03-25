@@ -25,7 +25,7 @@
     biigle.$mount('maia-notification-settings', {
         mixins: [biigle.$require('core.mixins.notificationSettings')],
         data: {
-            settings: '{!! $user->getSettings('maia_notifications', config('user_storage.notifications.default_settings')) !!}',
+            settings: '{!! $user->getSettings('maia_notifications', config('maia.notifications.default_settings')) !!}',
             settingsKey: 'maia_notifications',
         },
     });
