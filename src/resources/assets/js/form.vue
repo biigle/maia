@@ -4,6 +4,7 @@ import knowledgeTransferVolumeApi from './api/knowledgeTransferVolume.js';
 import {handleErrorResponse} from './import.js';
 import {LabelTypeahead} from './import.js';
 import {LoaderMixin} from './import.js';
+import {VolumesApi} from './import.js';
 
 /**
  * View model for the form to submit new MAIA jobs
@@ -74,6 +75,8 @@ export default {
             let volumeId = this.knowledgeTransferVolume.id;
 
             if (!this.knowledgeTransferLabelCache.hasOwnProperty(volumeId)) {
+                // Initialize empty, will be filled by fetchKnowledgeTransferLabels().
+                this.knowledgeTransferLabelCache[volumeId] = [];
                 this.fetchKnowledgeTransferLabels(volumeId);
             }
 
@@ -118,7 +121,7 @@ export default {
         },
         fetchLabels(id) {
             this.startLoading();
-            let promise = this.$http.get('api/v1/volumes{/id}/annotation-labels', {params: {id: id}});
+            let promise = VolumesApi.queryAnnotationLabels({id});
             promise.finally(this.finishLoading);
 
             return promise;

@@ -14,3 +14,4 @@ export let Resource = biigle.$require('resource');
 export let Sidebar = biigle.$require('core.components.sidebar');
 export let SidebarTab = biigle.$require('core.components.sidebarTab');
 export let StylesStore = biigle.$require('annotations.stores.styles');
+export let VolumesApi = biigle.$require('volumes.api.volumes');

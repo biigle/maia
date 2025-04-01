@@ -15,6 +15,7 @@ import {StylesStore} from '../import.js';
  * @type {Object}
  */
 export default {
+    compatConfig: {WATCH_ARRAY: false},
     template: '#refine-proposals-canvas-template',
     emits: [
         'previous-image',
@@ -100,8 +101,11 @@ export default {
         },
     },
     watch: {
-        unselectedAnnotations(annotations) {
-            this.refreshAnnotationSource(annotations, this.unselectedAnnotationSource);
+        unselectedAnnotations: {
+            handler(annotations) {
+                this.refreshAnnotationSource(annotations, this.unselectedAnnotationSource);
+            },
+            deep: true,
         },
         selectingMaiaAnnotation(selecting) {
             this.selectMaiaAnnotationInteraction.setActive(selecting);

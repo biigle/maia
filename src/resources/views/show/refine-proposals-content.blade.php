@@ -16,6 +16,7 @@
     ref="refineProposalsCanvas"
     ></refine-canvas>
 
+@push('scripts')
 <script type="text/html" id="refine-proposals-canvas-template">
     <div class="annotation-canvas">
         <minimap v-show="showMinimap" :extent="extent"></minimap>
@@ -39,3 +40,4 @@
         </div>
     </div>
 </script>
+@endpush

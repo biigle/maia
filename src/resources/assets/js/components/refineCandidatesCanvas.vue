@@ -13,6 +13,7 @@ import {StylesStore} from '../import.js';
  * @type {Object}
  */
 export default {
+    compatConfig: {WATCH_ARRAY: false},
     template: '#refine-candidates-canvas-template',
     extends: RefineCanvas,
     props: {
@@ -58,8 +59,11 @@ export default {
         },
     },
     watch: {
-        convertedAnnotations(annotations) {
-            this.refreshAnnotationSource(annotations, this.convertedAnnotationSource);
+        convertedAnnotations: {
+            deep: true,
+            handler(annotations) {
+                this.refreshAnnotationSource(annotations, this.convertedAnnotationSource);
+            },
         },
     },
     created() {
