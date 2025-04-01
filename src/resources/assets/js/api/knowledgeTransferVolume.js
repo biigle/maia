@@ -1,6 +1,6 @@
+import { Resource } from '../import.js';
+
 /**
  * Resource for (distance) knowledge transfer volumes.
- *
- * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/volumes/filter/knowledge-transfer');
+export default Resource('api/v1/volumes/filter/knowledge-transfer');

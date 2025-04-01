@@ -3,10 +3,10 @@ import Collection from '@biigle/ol/Collection';
 import Style from '@biigle/ol/style/Style';
 import VectorLayer from '@biigle/ol/layer/Vector';
 import VectorSource from '@biigle/ol/source/Vector';
-import {AnnotationCanvas} from '../import';
-import {AttachLabelInteraction} from '../import';
-import {Keyboard} from '../import';
-import {StylesStore} from '../import';
+import {AnnotationCanvas} from '../import.js';
+import {AttachLabelInteraction} from '../import.js';
+import {Keyboard} from '../import.js';
+import {StylesStore} from '../import.js';
 
 /**
  * A variant of the annotation canvas used for the refinement of training proposals and

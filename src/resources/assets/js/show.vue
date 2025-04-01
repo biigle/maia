@@ -1,22 +1,22 @@
 <script>
-import CandidatesApi from './api/annotationCandidate';
-import CandidatesImageGrid from './components/candidatesImageGrid';
-import JobApi from './api/maiaJob';
-import ProposalsApi from './api/trainingProposal';
-import ProposalsImageGrid from './components/proposalsImageGrid';
-import RefineCandidatesCanvas from './components/refineCandidatesCanvas';
-import RefineCandidatesTab from './components/refineCandidatesTab';
-import RefineCanvas from './components/refineCanvas';
-import RefineProposalsTab from './components/refineProposalsTab';
-import SelectCandidatesTab from './components/selectCandidatesTab';
-import SelectProposalsTab from './components/selectProposalsTab';
-import {handleErrorResponse} from './import';
-import {ImagesStore} from './import';
-import {Keyboard} from './import';
-import {LoaderMixin} from './import';
-import {Messages} from './import';
-import {SidebarTab} from './import';
-import {Sidebar} from './import';
+import CandidatesApi from './api/annotationCandidate.js';
+import CandidatesImageGrid from './components/candidatesImageGrid.vue';
+import JobApi from './api/maiaJob.js';
+import ProposalsApi from './api/trainingProposal.js';
+import ProposalsImageGrid from './components/proposalsImageGrid.vue';
+import RefineCandidatesCanvas from './components/refineCandidatesCanvas.vue';
+import RefineCandidatesTab from './components/refineCandidatesTab.vue';
+import RefineCanvas from './components/refineCanvas.vue';
+import RefineProposalsTab from './components/refineProposalsTab.vue';
+import SelectCandidatesTab from './components/selectCandidatesTab.vue';
+import SelectProposalsTab from './components/selectProposalsTab.vue';
+import {handleErrorResponse} from './import.js';
+import {ImagesStore} from './import.js';
+import {Keyboard} from './import.js';
+import {LoaderMixin} from './import.js';
+import {Messages} from './import.js';
+import {SidebarTab} from './import.js';
+import {Sidebar} from './import.js';
 
 // Proposals = Training Proposals
 // Candidates = Annotation Candidates
@@ -403,13 +403,13 @@ export default {
         },
         setSelectedProposalId(proposal) {
             if (proposal.selected) {
-                Vue.set(this.selectedProposalIds, proposal.id, this.getSequenceId());
+                this.selectedProposalIds[proposal.id] = this.getSequenceId();
             } else {
-                Vue.delete(this.selectedProposalIds, proposal.id);
+                delete this.selectedProposalIds[proposal.id];
             }
         },
         setSeenProposalId(p) {
-            Vue.set(this.seenProposalIds, p.id, true);
+            this.seenProposalIds[p.id] = true;
         },
         fetchProposalAnnotations(id) {
             if (!this.proposalAnnotationCache.hasOwnProperty(id)) {
@@ -478,7 +478,7 @@ export default {
             }
         },
         handleRefineProposal(proposals) {
-            Vue.Promise.all(proposals.map(this.updateProposalPoints))
+            Promise.all(proposals.map(this.updateProposalPoints))
                 .catch(handleErrorResponse);
         },
         updateProposalPoints(proposal) {
@@ -587,16 +587,16 @@ export default {
         },
         setSelectedCandidateId(candidate) {
             if (candidate.label && !candidate.annotation_id) {
-                Vue.set(this.selectedCandidateIds, candidate.id, this.getSequenceId());
+                this.selectedCandidateIds[candidate.id] = this.getSequenceId();
             } else {
-                Vue.delete(this.selectedCandidateIds, candidate.id);
+                delete this.selectedCandidateIds[candidate.id];
             }
         },
         setConvertedCandidateId(candidate) {
             if (candidate.annotation_id) {
-                Vue.set(this.convertedCandidateIds, candidate.id, candidate.annotation_id);
+                this.convertedCandidateIds[candidate.id] = candidate.annotation_id;
             } else {
-                Vue.delete(this.convertedCandidateIds, candidate.id);
+                delete this.convertedCandidateIds[candidate.id];
             }
         },
         setCandidates(response) {
@@ -800,7 +800,7 @@ export default {
             }
         },
         handleRefineCandidate(candidates) {
-            Vue.Promise.all(candidates.map(this.updateCandidatePoints))
+            Promise.all(candidates.map(this.updateCandidatePoints))
                 .catch(handleErrorResponse);
         },
         updateCandidatePoints(candidate) {
@@ -885,7 +885,7 @@ export default {
         currentProposalImageId(id) {
             if (id) {
                 this.startLoading();
-                Vue.Promise.all([
+                Promise.all([
                         ImagesStore.fetchAndDrawImage(id),
                         this.fetchProposalAnnotations(id),
                         this.fetchProposals(),
@@ -913,7 +913,7 @@ export default {
         currentCandidateImageId(id) {
             if (id) {
                 this.startLoading();
-                Vue.Promise.all([
+                Promise.all([
                         ImagesStore.fetchAndDrawImage(id),
                         this.fetchCandidateAnnotations(id),
                         this.fetchCandidates(),

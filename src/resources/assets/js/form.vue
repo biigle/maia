@@ -1,9 +1,9 @@
 <script>
-import areaKnowledgeTransferVolumeApi from './api/areaKnowledgeTransferVolume';
-import knowledgeTransferVolumeApi from './api/knowledgeTransferVolume';
-import {handleErrorResponse} from './import';
-import {LabelTypeahead} from './import';
-import {LoaderMixin} from './import';
+import areaKnowledgeTransferVolumeApi from './api/areaKnowledgeTransferVolume.js';
+import knowledgeTransferVolumeApi from './api/knowledgeTransferVolume.js';
+import {handleErrorResponse} from './import.js';
+import {LabelTypeahead} from './import.js';
+import {LoaderMixin} from './import.js';
 
 /**
  * View model for the form to submit new MAIA jobs

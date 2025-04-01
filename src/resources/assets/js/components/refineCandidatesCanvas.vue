@@ -1,11 +1,11 @@
 <script>
 import Collection from '@biigle/ol/Collection';
 import OlObject from '@biigle/ol/Object';
-import RefineCanvas from './refineCanvas';
+import RefineCanvas from './refineCanvas.vue';
 import Style from '@biigle/ol/style/Style';
 import VectorLayer from '@biigle/ol/layer/Vector';
 import VectorSource from '@biigle/ol/source/Vector';
-import {StylesStore} from '../import';
+import {StylesStore} from '../import.js';
 
 /**
  * A variant of the annotation canvas used for the refinement of annotation candidates.

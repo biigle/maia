@@ -1,6 +1,6 @@
+import { Resource } from '../import.js';
+
 /**
  * Resource for (area) knowledge transfer volumes.
- *
- * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/volumes/filter/area-knowledge-transfer');
+export default Resource('api/v1/volumes/filter/area-knowledge-transfer');

@@ -18,7 +18,7 @@
         </p>
 
         <p class="text-center">
-            <a href="{{asset('vendor/maia/images/select_tp_grid.jpg')}}"><img src="{{asset('vendor/maia/images/select_tp_grid.jpg')}}" width="75%"></a>
+            <a href="{{asset('vendor/maia/assets/select_tp_grid.jpg')}}"><img src="{{asset('vendor/maia/assets/select_tp_grid.jpg')}}" width="75%"></a>
         </p>
 
         <p>
@@ -26,9 +26,9 @@
         </p>
 
         <p class="text-center">
-            <img src="{{asset('vendor/maia/images/select_tp_1.jpg')}}" width="30%">
-            <img src="{{asset('vendor/maia/images/select_tp_2.jpg')}}" width="30%">
-            <img src="{{asset('vendor/maia/images/select_tp_3.jpg')}}" width="30%">
+            <img src="{{asset('vendor/maia/assets/select_tp_1.jpg')}}" width="30%">
+            <img src="{{asset('vendor/maia/assets/select_tp_2.jpg')}}" width="30%">
+            <img src="{{asset('vendor/maia/assets/select_tp_3.jpg')}}" width="30%">
         </p>
 
         <p>
@@ -80,15 +80,15 @@
 
         <div style="display: flex; justify-content: space-between; flex-wrap: nowrap;">
             <figure class="text-center">
-                <a href="{{asset('vendor/maia/images/select_tp_sort_1.jpg')}}">
-                    <img src="{{asset('vendor/maia/images/select_tp_sort_1.jpg')}}" width="95%">
+                <a href="{{asset('vendor/maia/assets/select_tp_sort_1.jpg')}}">
+                    <img src="{{asset('vendor/maia/assets/select_tp_sort_1.jpg')}}" width="95%">
                 </a>
                 <br>
                 <caption>Default image grid</caption>
             </figure>
             <figure class="text-center">
-                <a href="{{asset('vendor/maia/images/select_tp_sort_2.jpg')}}">
-                    <img src="{{asset('vendor/maia/images/select_tp_sort_2.jpg')}}" width="95%">
+                <a href="{{asset('vendor/maia/assets/select_tp_sort_2.jpg')}}">
+                    <img src="{{asset('vendor/maia/assets/select_tp_sort_2.jpg')}}" width="95%">
                 </a>
                 <br>
                 <caption>Sorted image grid</caption>
@@ -110,7 +110,7 @@
         </p>
 
         <p class="text-center">
-            <a href="{{asset('vendor/maia/images/refine_tp_tool.jpg')}}"><img src="{{asset('vendor/maia/images/refine_tp_tool.jpg')}}" width="75%"></a>
+            <a href="{{asset('vendor/maia/assets/refine_tp_tool.jpg')}}"><img src="{{asset('vendor/maia/assets/refine_tp_tool.jpg')}}" width="75%"></a>
         </p>
 
         <p>
@@ -122,10 +122,10 @@
         </p>
 
         <p class="text-center">
-            <img src="{{asset('vendor/maia/images/refine_tp_1.jpg')}}" width="24%">
-            <img src="{{asset('vendor/maia/images/refine_tp_2.jpg')}}" width="24%">
-            <img src="{{asset('vendor/maia/images/refine_tp_3.jpg')}}" width="24%">
-            <img src="{{asset('vendor/maia/images/refine_tp_4.jpg')}}" width="24%">
+            <img src="{{asset('vendor/maia/assets/refine_tp_1.jpg')}}" width="24%">
+            <img src="{{asset('vendor/maia/assets/refine_tp_2.jpg')}}" width="24%">
+            <img src="{{asset('vendor/maia/assets/refine_tp_3.jpg')}}" width="24%">
+            <img src="{{asset('vendor/maia/assets/refine_tp_4.jpg')}}" width="24%">
         </p>
 
         <p>
@@ -137,8 +137,8 @@
         </p>
 
         <p class="text-center">
-            <a href="{{asset('vendor/maia/images/refine_select_tp_1.jpg')}}"><img src="{{asset('vendor/maia/images/refine_select_tp_1.jpg')}}" width="40%"></a>
-            <a href="{{asset('vendor/maia/images/refine_select_tp_2.jpg')}}"><img src="{{asset('vendor/maia/images/refine_select_tp_2.jpg')}}" width="40%"></a>
+            <a href="{{asset('vendor/maia/assets/refine_select_tp_1.jpg')}}"><img src="{{asset('vendor/maia/assets/refine_select_tp_1.jpg')}}" width="40%"></a>
+            <a href="{{asset('vendor/maia/assets/refine_select_tp_2.jpg')}}"><img src="{{asset('vendor/maia/assets/refine_select_tp_2.jpg')}}" width="40%"></a>
         </p>
 
         <p>

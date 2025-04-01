@@ -254,7 +254,7 @@
 </form>
 
 @push('scripts')
-<script type="text/javascript">
+<script type="module">
     biigle.$declare('maia.volumeId', {!! $volume->id !!});
     biigle.$declare('maia.hasErrors', {!! $errors->any() ? 'true' : 'false' !!});
     biigle.$declare('maia.trainingDataMethod', '{!! old('training_data_method', 'novelty_detection') !!}');

@@ -1,5 +1,5 @@
 <script>
-import {LabelTrees} from '../import';
+import {LabelTrees} from '../import.js';
 
 /**
  * The select annotation candidates tab

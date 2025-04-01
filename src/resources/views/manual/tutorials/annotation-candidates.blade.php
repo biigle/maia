@@ -23,9 +23,9 @@
         </p>
 
         <p class="text-center">
-            <img src="{{asset('vendor/maia/images/select_ac_1.jpg')}}" width="30%">
-            <img src="{{asset('vendor/maia/images/select_ac_2.jpg')}}" width="30%">
-            <img src="{{asset('vendor/maia/images/select_ac_3.jpg')}}" width="30%">
+            <img src="{{asset('vendor/maia/assets/select_ac_1.jpg')}}" width="30%">
+            <img src="{{asset('vendor/maia/assets/select_ac_2.jpg')}}" width="30%">
+            <img src="{{asset('vendor/maia/assets/select_ac_3.jpg')}}" width="30%">
         </p>
 
         <p>
@@ -53,8 +53,8 @@
         </p>
 
         <p class="text-center">
-            <img src="{{asset('vendor/maia/images/converted_ac_1.jpg')}}" width="30%">
-            <img src="{{asset('vendor/maia/images/converted_ac_2.jpg')}}" width="30%">
+            <img src="{{asset('vendor/maia/assets/converted_ac_1.jpg')}}" width="30%">
+            <img src="{{asset('vendor/maia/assets/converted_ac_2.jpg')}}" width="30%">
         </p>
 
         <p>

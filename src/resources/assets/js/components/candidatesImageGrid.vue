@@ -46,8 +46,8 @@
 </template>
 
 <script>
-import Image from './candidatesImageGridImage';
-import {ImageGrid} from '../import';
+import Image from './candidatesImageGridImage.vue';
+import {ImageGrid} from '../import.js';
 
 /**
  * A variant of the image grid used for the selection of MAIA annotation candidates.
