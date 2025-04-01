@@ -33,6 +33,10 @@ export default Resource('api/v1/maia-jobs{/id}', {}, {
         method: 'GET',
         url: 'api/v1/maia-jobs{/id}/training-proposals',
     },
+    saveTrainingProposals: {
+        method: 'POST',
+        url: 'api/v1/maia-jobs{/id}/training-proposals',
+    },
     getSimilarTrainingProposals: {
         method: 'GET',
         url: 'api/v1/maia-jobs{/jobId}/training-proposals/similar-to{/proposalId}',

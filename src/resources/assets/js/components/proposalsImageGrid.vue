@@ -55,7 +55,7 @@ import {ImageGrid} from '../import.js';
  * @type {Object}
  */
 export default {
-    mixins: [ImageGrid],
+    extends: ImageGrid,
     components: {
         imageGridImage: Image,
     },

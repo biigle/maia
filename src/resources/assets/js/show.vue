@@ -839,6 +839,10 @@ export default {
         getSequenceId() {
             return this.sequenceCounter++;
         },
+        handleSaveProposals() {
+            JobApi.saveTrainingProposals({id: this.job.id})
+                .then(window.location.reload, handleErrorResponse);
+        },
     },
     watch: {
         selectProposalsTabOpen(open) {

@@ -248,7 +248,7 @@
         @if ($maintenanceMode && !$user->can('sudo'))
             <button type="submit" class="btn btn-success pull-right" disabled>Create job</button>
         @else
-            <button type="submit" class="btn btn-success pull-right" :disabled="canSubmit">Create job</button>
+            <button type="submit" class="btn btn-success pull-right" :disabled="canSubmit || null">Create job</button>
         @endif
     </div>
 </form>

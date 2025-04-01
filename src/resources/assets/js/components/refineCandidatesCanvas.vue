@@ -13,7 +13,8 @@ import {StylesStore} from '../import.js';
  * @type {Object}
  */
 export default {
-    mixins: [RefineCanvas],
+    template: '#refine-candidates-canvas-template',
+    extends: RefineCanvas,
     props: {
         convertedAnnotations: {
             type: Array,

@@ -15,7 +15,14 @@ import {StylesStore} from '../import.js';
  * @type {Object}
  */
 export default {
-    mixins: [AnnotationCanvas],
+    template: '#refine-proposals-canvas-template',
+    emits: [
+        'previous-image',
+        'next-image',
+        'select',
+        'unselect',
+    ],
+    extends: AnnotationCanvas,
     props: {
         unselectedAnnotations: {
             type: Array,
