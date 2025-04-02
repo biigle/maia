@@ -72,15 +72,7 @@ export default {
                 return [];
             }
 
-            let volumeId = this.knowledgeTransferVolume.id;
-
-            if (!this.knowledgeTransferLabelCache.hasOwnProperty(volumeId)) {
-                // Initialize empty, will be filled by fetchKnowledgeTransferLabels().
-                this.knowledgeTransferLabelCache[volumeId] = [];
-                this.fetchKnowledgeTransferLabels(volumeId);
-            }
-
-            return this.knowledgeTransferLabelCache[volumeId];
+            return this.knowledgeTransferLabelCache[this.knowledgeTransferVolume.id];
         },
     },
     methods: {
@@ -107,6 +99,10 @@ export default {
         handleSelectedKnowledgeTransferVolume(volume) {
             this.knowledgeTransferVolume = volume;
             this.selectedKnowledgeTransferLabels = [];
+            // Initialize empty for immediate use. Will be filled by
+            // fetchKnowledgeTransferLabels() below.
+            this.knowledgeTransferLabelCache[volume.id] = [];
+            this.fetchKnowledgeTransferLabels(volume.id);
         },
         parseKnowledgeTransferVolumes(response) {
             return response.body
