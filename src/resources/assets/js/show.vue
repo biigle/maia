@@ -17,6 +17,7 @@ import {LoaderMixin} from './import.js';
 import {Messages} from './import.js';
 import {SidebarTab} from './import.js';
 import {Sidebar} from './import.js';
+import {markRaw} from 'vue';
 
 // Proposals = Training Proposals
 // Candidates = Annotation Candidates
@@ -117,7 +118,6 @@ export default {
         isInAnnotationCandidateState() {
             return this.job.state_id === this.states['annotation-candidates'];
         },
-
         proposals() {
             if (this.hasProposals) {
                 return PROPOSALS;
@@ -508,7 +508,10 @@ export default {
                         this.selectProposal
                     );
                 } else {
-                    this.lastSelectedProposal = proposal;
+                    // Use markRaw() because doForEachBetween() above looks for raw
+                    // objects in the array of the first argument. The Proxy would not be
+                    // found.
+                    this.lastSelectedProposal = markRaw(proposal);
                     this.selectProposal(proposal);
                 }
             }
@@ -629,7 +632,10 @@ export default {
                 if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
                     this.doForEachBetween(this.candidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
                 } else {
-                    this.lastSelectedCandidate = candidate;
+                    // Use markRaw() because doForEachBetween() above looks for raw
+                    // objects in the array of the first argument. The Proxy would not be
+                    // found.
+                    this.lastSelectedCandidate = markRaw(candidate);
                     this.selectCandidate(candidate);
                 }
             }
