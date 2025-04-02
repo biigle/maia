@@ -46,7 +46,7 @@
         @endif
         <loader-block :active="loading"></loader-block>
     </div>
-    <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened" v-on:toggle="handleSidebarToggle">
+    <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened" v-on:toggle="updateImageGridDimensions">
         <sidebar-tab name="info" icon="info-circle" title="Job information">
             @include('maia::show.info-tab')
         </sidebar-tab>

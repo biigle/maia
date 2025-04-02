@@ -347,13 +347,13 @@ export default {
         },
     },
     methods: {
-        handleSidebarToggle() {
+        updateImageGridDimensions() {
             this.$nextTick(() => {
                 if (this.$refs.proposalsImageGrid) {
-                    this.$refs.proposalsImageGrid.$emit('resize');
+                    this.$refs.proposalsImageGrid.updateDimensions();
                 }
                 if (this.$refs.candidatesImageGrid) {
-                    this.$refs.candidatesImageGrid.$emit('resize');
+                    this.$refs.candidatesImageGrid.updateDimensions();
                 }
             });
         },
@@ -940,6 +940,16 @@ export default {
                     this.currentCandidateImageIndex = this.candidateImageIds.indexOf(candidate.image_id);
                 }
             }
+        },
+        hasCandidates() {
+            // The component is hidden until there are candidates, so the dimensions must
+            // be updated once there are candidates.
+            this.updateImageGridDimensions();
+        },
+        hasProposals() {
+            // The component is hidden until there are proposals, so the dimensions must
+            // be updated once there are proposals.
+            this.updateImageGridDimensions();
         },
     },
     created() {

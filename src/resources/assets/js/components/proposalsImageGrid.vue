@@ -55,7 +55,6 @@ import {ImageGrid} from '../import.js';
  * @type {Object}
  */
 export default {
-    emits: ['resize'],
     extends: ImageGrid,
     components: {
         imageGridImage: Image,
