@@ -364,6 +364,10 @@ export default {
             PROPOSALS = response.body;
 
             PROPOSALS.forEach((p) => {
+                // Mark all as raw for two reasons: 1) Better performance. 2) At several
+                // places objects are compared or searched in arrays. This does not work
+                // if e.g. a Proxy is searched in an array of raw objects or vice versa.
+                markRaw(p);
                 PROPOSALS_BY_ID[p.id] = p;
                 this.setSelectedProposalId(p);
             });
@@ -508,10 +512,7 @@ export default {
                         this.selectProposal
                     );
                 } else {
-                    // Use markRaw() because doForEachBetween() above looks for raw
-                    // objects in the array of the first argument. The Proxy would not be
-                    // found.
-                    this.lastSelectedProposal = markRaw(proposal);
+                    this.lastSelectedProposal = proposal;
                     this.selectProposal(proposal);
                 }
             }
@@ -606,6 +607,10 @@ export default {
             CANDIDATES = response.body;
 
             CANDIDATES.forEach((p) => {
+                // Mark all as raw for two reasons: 1) Better performance. 2) At several
+                // places objects are compared or searched in arrays. This does not work
+                // if e.g. a Proxy is searched in an array of raw objects or vice versa.
+                markRaw(p);
                 CANDIDATES_BY_ID[p.id] = p;
                 this.setSelectedCandidateId(p);
                 this.setConvertedCandidateId(p);
@@ -632,10 +637,7 @@ export default {
                 if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
                     this.doForEachBetween(this.candidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
                 } else {
-                    // Use markRaw() because doForEachBetween() above looks for raw
-                    // objects in the array of the first argument. The Proxy would not be
-                    // found.
-                    this.lastSelectedCandidate = markRaw(candidate);
+                    this.lastSelectedCandidate = candidate;
                     this.selectCandidate(candidate);
                 }
             }
