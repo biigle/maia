@@ -75,6 +75,8 @@ export default {
                     new Style({
                         stroke: editingStyle[0].getStroke(),
                         image: editingStyle[0].getImage(),
+                        // Fill is important for hit detection in circles.
+                        fill: editingStyle[0].getFill(),
                     }),
                     new Style({
                         stroke: editingStyle[1].getStroke(),
