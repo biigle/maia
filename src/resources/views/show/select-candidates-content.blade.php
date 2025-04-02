@@ -1,7 +1,7 @@
 <candidates-image-grid
     :converted-candidate-ids="convertedCandidateIds"
     :height="{{config('thumbnails.height')}}"
-    :images="candidates"
+    :images="sortedCandidates"
     :pinned-image="referenceCandidate"
     :selectable="isInAnnotationCandidateState"
     :selected-candidate-ids="selectedCandidateIds"

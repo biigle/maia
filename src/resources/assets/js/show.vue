@@ -19,19 +19,11 @@ import {SidebarTab} from './import.js';
 import {Sidebar} from './import.js';
 import {markRaw} from 'vue';
 
-// Proposals = Training Proposals
-// Candidates = Annotation Candidates
-
-// We have to take very great care from preventing Vue to make the training proposals
-// and annotation candidates fully reactive. These can be huge arrays and Vue is not
-// fast enough to ensure a fluid UX if they are fully reactive.
-let PROPOSALS = [];
-let PROPOSALS_BY_ID = {};
-let CANDIDATES = [];
-let CANDIDATES_BY_ID = {};
-
 /**
  * View model for the main view of a MAIA job
+ *
+ * Proposals = Training Proposals
+ * Candidates = Annotation Candidates
  */
 export default {
     mixins: [LoaderMixin],
@@ -58,8 +50,10 @@ export default {
             visitedRefineCandidatesTab: false,
             openTab: 'info',
 
+            // These must be raw for performance reasons.
+            proposals: markRaw([]),
+            proposalsById: markRaw({}),
             fetchProposalsPromise: null,
-            hasProposals: false,
             // Track these manually and not via a computed property because the number of
             // training proposals can be huge.
             selectedProposalIds: {},
@@ -74,8 +68,10 @@ export default {
             sortedIdsForReferenceProposal: [],
             referenceProposal: null,
 
+            // These must be raw for performance reasons.
+            candidates: markRaw([]),
+            candidatesById: markRaw({}),
             fetchCandidatesPromise: null,
-            hasCandidates: false,
             selectedCandidateIds: {},
             convertedCandidateIds: {},
             lastSelectedCandidate: null,
@@ -118,18 +114,14 @@ export default {
         isInAnnotationCandidateState() {
             return this.job.state_id === this.states['annotation-candidates'];
         },
-        proposals() {
-            if (this.hasProposals) {
-                return PROPOSALS;
-            }
-
-            return [];
+        hasProposals() {
+            return this.proposals.length > 0;
         },
         selectedProposals() {
             let selectedIds = this.selectedProposalIds;
 
             return Object.keys(selectedIds)
-                .map((id) => PROPOSALS_BY_ID[id])
+                .map((id) => this.proposalsById[id])
                 // Sort by image ID first and the proposals of the same image by
                 // their assigned sequence ID. This way proposals that were selected
                 // during refinement are always focussed next.
@@ -148,7 +140,7 @@ export default {
             if (this.isInTrainingProposalState) {
                 if (this.sortedIdsForReferenceProposal.length > 0) {
                     return this.sortedIdsForReferenceProposal
-                        .map(id => PROPOSALS_BY_ID[id]);
+                        .map(id => this.proposalsById[id]);
                 }
 
                 return this.proposals;
@@ -235,23 +227,26 @@ export default {
             );
         },
 
-        candidates() {
+        sortedCandidates() {
             if (this.hasCandidates) {
                 if (this.sortedIdsForReferenceCandidate.length > 0) {
                     return this.sortedIdsForReferenceCandidate
-                        .map(id => CANDIDATES_BY_ID[id]);
+                        .map(id => this.candidatesById[id]);
                 }
 
-                return CANDIDATES;
+                return this.candidates;
             }
 
             return [];
+        },
+        hasCandidates() {
+            return this.candidates.length > 0;
         },
         selectedCandidates() {
             let selectedIds = this.selectedCandidateIds;
 
             return Object.keys(selectedIds)
-                .map((id) => CANDIDATES_BY_ID[id])
+                .map((id) => this.candidatesById[id])
                 // Sort by image ID first and the candidates of the same image by
                 // their assigned sequence ID. This way candidates that were selected
                 // during refinement are always focussed next.
@@ -269,7 +264,7 @@ export default {
         candidateImageIds() {
             if (this.hasCandidates) {
                 let tmp = {};
-                CANDIDATES.forEach((p) => tmp[p.image_id] = undefined);
+                this.candidates.forEach((p) => tmp[p.image_id] = undefined);
 
                 return Object.keys(tmp).map((id) => parseInt(id, 10));
             }
@@ -361,18 +356,16 @@ export default {
             this.openTab = tab;
         },
         setProposals(response) {
-            PROPOSALS = response.body;
+            this.proposals = markRaw(response.body);
 
-            PROPOSALS.forEach((p) => {
+            this.proposals.forEach((p) => {
                 // Mark all as raw for two reasons: 1) Better performance. 2) At several
                 // places objects are compared or searched in arrays. This does not work
                 // if e.g. a Proxy is searched in an array of raw objects or vice versa.
                 markRaw(p);
-                PROPOSALS_BY_ID[p.id] = p;
+                this.proposalsById[p.id] = p;
                 this.setSelectedProposalId(p);
             });
-
-            this.hasProposals = PROPOSALS.length > 0;
         },
         fetchProposals() {
             if (!this.fetchProposalsPromise) {
@@ -604,19 +597,17 @@ export default {
             }
         },
         setCandidates(response) {
-            CANDIDATES = response.body;
+            this.candidates = response.body;
 
-            CANDIDATES.forEach((p) => {
+            this.candidates.forEach((p) => {
                 // Mark all as raw for two reasons: 1) Better performance. 2) At several
                 // places objects are compared or searched in arrays. This does not work
                 // if e.g. a Proxy is searched in an array of raw objects or vice versa.
                 markRaw(p);
-                CANDIDATES_BY_ID[p.id] = p;
+                this.candidatesById[p.id] = p;
                 this.setSelectedCandidateId(p);
                 this.setConvertedCandidateId(p);
             });
-
-            this.hasCandidates = CANDIDATES.length > 0;
         },
         fetchCandidates(force) {
             if (!this.fetchCandidatesPromise || force) {
@@ -635,7 +626,7 @@ export default {
                 this.unselectCandidate(candidate);
             } else {
                 if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
-                    this.doForEachBetween(this.candidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
+                    this.doForEachBetween(this.sortedCandidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
                 } else {
                     this.lastSelectedCandidate = candidate;
                     this.selectCandidate(candidate);
