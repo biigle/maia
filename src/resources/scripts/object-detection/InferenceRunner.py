@@ -2,8 +2,10 @@ import sys
 import os
 import json
 from torch import cuda
+from torch.serialization import safe_globals
 from concurrent.futures import ThreadPoolExecutor
 from mmdet.apis import init_detector, inference_detector
+from mmengine.logging.history_buffer import HistoryBuffer
 
 class InferenceRunner(object):
 
@@ -25,7 +27,8 @@ class InferenceRunner(object):
 
     def run(self):
         device = 'cuda:0' if cuda.is_available() else 'cpu'
-        model = init_detector(self.config_path, checkpoint=self.checkpoint_path, device=device, cfg_options=self.cfg_options)
+        with safe_globals([HistoryBuffer]):
+            model = init_detector(self.config_path, checkpoint=self.checkpoint_path, device=device, cfg_options=self.cfg_options)
 
         executor = ThreadPoolExecutor(max_workers=self.max_workers)
 
