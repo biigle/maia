@@ -7,6 +7,9 @@ from concurrent.futures import ThreadPoolExecutor
 from mmdet.apis import init_detector, inference_detector
 from mmengine.logging.history_buffer import HistoryBuffer
 from numpy.core.multiarray import _reconstruct
+from numpy import ndarray
+from numpy import dtype
+from numpy.core.multiarray import scalar
 
 class InferenceRunner(object):
 
@@ -28,7 +31,18 @@ class InferenceRunner(object):
 
     def run(self):
         device = 'cuda:0' if cuda.is_available() else 'cpu'
-        with safe_globals([HistoryBuffer, _reconstruct]):
+        custom_safe_globals = [
+            HistoryBuffer,
+            _reconstruct,
+            ndarray,
+            dtype,
+            type(dtype('float64')),
+            type(dtype('int64')),
+            getattr,
+            scalar,
+        ]
+
+        with safe_globals(custom_safe_globals):
             model = init_detector(self.config_path, checkpoint=self.checkpoint_path, device=device, cfg_options=self.cfg_options)
 
         executor = ThreadPoolExecutor(max_workers=self.max_workers)
