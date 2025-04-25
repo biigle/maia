@@ -15,7 +15,6 @@ import {StylesStore} from '../import.js';
  * @type {Object}
  */
 export default {
-    compatConfig: {WATCH_ARRAY: false},
     template: '#refine-proposals-canvas-template',
     emits: [
         'previous-image',

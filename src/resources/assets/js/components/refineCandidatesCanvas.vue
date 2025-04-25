@@ -13,7 +13,6 @@ import {StylesStore} from '../import.js';
  * @type {Object}
  */
 export default {
-    compatConfig: {WATCH_ARRAY: false},
     template: '#refine-candidates-canvas-template',
     extends: RefineCanvas,
     props: {
