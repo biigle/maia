@@ -14,7 +14,10 @@
     v-on:unselect="unselectProposal"
     listener-set="refine-proposals"
     ref="refineProposalsCanvas"
-    inline-template>
+    ></refine-canvas>
+
+@push('scripts')
+<script type="text/html" id="refine-proposals-canvas-template">
     <div class="annotation-canvas">
         <minimap v-show="showMinimap" :extent="extent"></minimap>
         <div class="annotation-canvas__toolbar">
@@ -28,7 +31,7 @@
             </div>
             @if ($job->state_id === $states['training-proposals'])
                 <div class="btn-group drawing-controls">
-                    <control-button icon="fa-minus" title="Unselect current training proposal as interesting 𝗗𝗲𝗹𝗲𝘁𝗲" :disabled="modifyInProgress||!hasSelectedAnnotations" v-on:click="handleUnselectMaiaAnnotation"></control-button>
+                    <control-button icon="fa-minus" title="Unselect current training proposal as interesting 𝗗𝗲𝗹𝗲𝘁𝗲" :disabled="modifyInProgress || !hasSelectedAnnotations" v-on:click="handleUnselectMaiaAnnotation"></control-button>
                 </div>
                 <div class="btn-group drawing-controls">
                     <control-button icon="fa-plus" title="Select training proposals as interesting" :active="selectingMaiaAnnotation" v-on:click="toggleSelectingMaiaAnnotation"></control-button>
@@ -36,4 +39,5 @@
             @endif
         </div>
     </div>
-</refine-canvas>
+</script>
+@endpush

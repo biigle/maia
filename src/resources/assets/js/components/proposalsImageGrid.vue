@@ -46,8 +46,8 @@
 </template>
 
 <script>
-import Image from './proposalsImageGridImage';
-import {ImageGrid} from '../import';
+import Image from './proposalsImageGridImage.vue';
+import {ImageGrid} from '../import.js';
 
 /**
  * A variant of the image grid used for the selection of MAIA training proposals.
@@ -55,7 +55,7 @@ import {ImageGrid} from '../import';
  * @type {Object}
  */
 export default {
-    mixins: [ImageGrid],
+    extends: ImageGrid,
     components: {
         imageGridImage: Image,
     },

@@ -2,11 +2,11 @@
 @section('title', "{$volume->name} MAIA")
 
 @push('styles')
-<link href="{{ cachebust_asset('vendor/maia/styles/main.css') }}" rel="stylesheet">
+{{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/maia')}}
 @endpush
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/maia/scripts/main.js') }}"></script>
+{{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/js/main.js'], 'vendor/maia')}}
 @endpush
 
 @section('content')
@@ -50,7 +50,7 @@
 @endsection
 
 @section('navbar')
-<div id="geo-navbar" class="navbar-text navbar-volumes-breadcrumbs">
+<div class="navbar-text navbar-volumes-breadcrumbs">
     @include('volumes.partials.projectsBreadcrumb', ['projects' => $volume->projects]) / <a href="{{route('volume', $volume->id)}}">{{$volume->name}}</a> / <strong>MAIA</strong>
 </div>
 @endsection

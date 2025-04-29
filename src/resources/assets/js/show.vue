@@ -1,36 +1,29 @@
 <script>
-import CandidatesApi from './api/annotationCandidate';
-import CandidatesImageGrid from './components/candidatesImageGrid';
-import JobApi from './api/maiaJob';
-import ProposalsApi from './api/trainingProposal';
-import ProposalsImageGrid from './components/proposalsImageGrid';
-import RefineCandidatesCanvas from './components/refineCandidatesCanvas';
-import RefineCandidatesTab from './components/refineCandidatesTab';
-import RefineCanvas from './components/refineCanvas';
-import RefineProposalsTab from './components/refineProposalsTab';
-import SelectCandidatesTab from './components/selectCandidatesTab';
-import SelectProposalsTab from './components/selectProposalsTab';
-import {handleErrorResponse} from './import';
-import {ImagesStore} from './import';
-import {Keyboard} from './import';
-import {LoaderMixin} from './import';
-import {Messages} from './import';
-import {SidebarTab} from './import';
-import {Sidebar} from './import';
-
-// Proposals = Training Proposals
-// Candidates = Annotation Candidates
-
-// We have to take very great care from preventing Vue to make the training proposals
-// and annotation candidates fully reactive. These can be huge arrays and Vue is not
-// fast enough to ensure a fluid UX if they are fully reactive.
-let PROPOSALS = [];
-let PROPOSALS_BY_ID = {};
-let CANDIDATES = [];
-let CANDIDATES_BY_ID = {};
+import CandidatesApi from './api/annotationCandidate.js';
+import CandidatesImageGrid from './components/candidatesImageGrid.vue';
+import JobApi from './api/maiaJob.js';
+import ProposalsApi from './api/trainingProposal.js';
+import ProposalsImageGrid from './components/proposalsImageGrid.vue';
+import RefineCandidatesCanvas from './components/refineCandidatesCanvas.vue';
+import RefineCandidatesTab from './components/refineCandidatesTab.vue';
+import RefineCanvas from './components/refineCanvas.vue';
+import RefineProposalsTab from './components/refineProposalsTab.vue';
+import SelectCandidatesTab from './components/selectCandidatesTab.vue';
+import SelectProposalsTab from './components/selectProposalsTab.vue';
+import {handleErrorResponse} from './import.js';
+import {ImagesStore} from './import.js';
+import {Keyboard} from './import.js';
+import {LoaderMixin} from './import.js';
+import {Messages} from './import.js';
+import {SidebarTab} from './import.js';
+import {Sidebar} from './import.js';
+import {markRaw} from 'vue';
 
 /**
  * View model for the main view of a MAIA job
+ *
+ * Proposals = Training Proposals
+ * Candidates = Annotation Candidates
  */
 export default {
     mixins: [LoaderMixin],
@@ -57,8 +50,10 @@ export default {
             visitedRefineCandidatesTab: false,
             openTab: 'info',
 
+            // These must be raw for performance reasons.
+            proposals: markRaw([]),
+            proposalsById: markRaw({}),
             fetchProposalsPromise: null,
-            hasProposals: false,
             // Track these manually and not via a computed property because the number of
             // training proposals can be huge.
             selectedProposalIds: {},
@@ -73,8 +68,10 @@ export default {
             sortedIdsForReferenceProposal: [],
             referenceProposal: null,
 
+            // These must be raw for performance reasons.
+            candidates: markRaw([]),
+            candidatesById: markRaw({}),
             fetchCandidatesPromise: null,
-            hasCandidates: false,
             selectedCandidateIds: {},
             convertedCandidateIds: {},
             lastSelectedCandidate: null,
@@ -117,19 +114,14 @@ export default {
         isInAnnotationCandidateState() {
             return this.job.state_id === this.states['annotation-candidates'];
         },
-
-        proposals() {
-            if (this.hasProposals) {
-                return PROPOSALS;
-            }
-
-            return [];
+        hasProposals() {
+            return this.proposals.length > 0;
         },
         selectedProposals() {
             let selectedIds = this.selectedProposalIds;
 
             return Object.keys(selectedIds)
-                .map((id) => PROPOSALS_BY_ID[id])
+                .map((id) => this.proposalsById[id])
                 // Sort by image ID first and the proposals of the same image by
                 // their assigned sequence ID. This way proposals that were selected
                 // during refinement are always focussed next.
@@ -148,7 +140,7 @@ export default {
             if (this.isInTrainingProposalState) {
                 if (this.sortedIdsForReferenceProposal.length > 0) {
                     return this.sortedIdsForReferenceProposal
-                        .map(id => PROPOSALS_BY_ID[id]);
+                        .map(id => this.proposalsById[id]);
                 }
 
                 return this.proposals;
@@ -235,23 +227,26 @@ export default {
             );
         },
 
-        candidates() {
+        sortedCandidates() {
             if (this.hasCandidates) {
                 if (this.sortedIdsForReferenceCandidate.length > 0) {
                     return this.sortedIdsForReferenceCandidate
-                        .map(id => CANDIDATES_BY_ID[id]);
+                        .map(id => this.candidatesById[id]);
                 }
 
-                return CANDIDATES;
+                return this.candidates;
             }
 
             return [];
+        },
+        hasCandidates() {
+            return this.candidates.length > 0;
         },
         selectedCandidates() {
             let selectedIds = this.selectedCandidateIds;
 
             return Object.keys(selectedIds)
-                .map((id) => CANDIDATES_BY_ID[id])
+                .map((id) => this.candidatesById[id])
                 // Sort by image ID first and the candidates of the same image by
                 // their assigned sequence ID. This way candidates that were selected
                 // during refinement are always focussed next.
@@ -269,7 +264,7 @@ export default {
         candidateImageIds() {
             if (this.hasCandidates) {
                 let tmp = {};
-                CANDIDATES.forEach((p) => tmp[p.image_id] = undefined);
+                this.candidates.forEach((p) => tmp[p.image_id] = undefined);
 
                 return Object.keys(tmp).map((id) => parseInt(id, 10));
             }
@@ -347,28 +342,20 @@ export default {
         },
     },
     methods: {
-        handleSidebarToggle() {
-            this.$nextTick(() => {
-                if (this.$refs.proposalsImageGrid) {
-                    this.$refs.proposalsImageGrid.$emit('resize');
-                }
-                if (this.$refs.candidatesImageGrid) {
-                    this.$refs.candidatesImageGrid.$emit('resize');
-                }
-            });
-        },
         handleTabOpened(tab) {
             this.openTab = tab;
         },
         setProposals(response) {
-            PROPOSALS = response.body;
+            this.proposals = markRaw(response.body);
 
-            PROPOSALS.forEach((p) => {
-                PROPOSALS_BY_ID[p.id] = p;
+            this.proposals.forEach((p) => {
+                // Mark all as raw for two reasons: 1) Better performance. 2) At several
+                // places objects are compared or searched in arrays. This does not work
+                // if e.g. a Proxy is searched in an array of raw objects or vice versa.
+                markRaw(p);
+                this.proposalsById[p.id] = p;
                 this.setSelectedProposalId(p);
             });
-
-            this.hasProposals = PROPOSALS.length > 0;
         },
         fetchProposals() {
             if (!this.fetchProposalsPromise) {
@@ -403,13 +390,13 @@ export default {
         },
         setSelectedProposalId(proposal) {
             if (proposal.selected) {
-                Vue.set(this.selectedProposalIds, proposal.id, this.getSequenceId());
+                this.selectedProposalIds[proposal.id] = this.getSequenceId();
             } else {
-                Vue.delete(this.selectedProposalIds, proposal.id);
+                delete this.selectedProposalIds[proposal.id];
             }
         },
         setSeenProposalId(p) {
-            Vue.set(this.seenProposalIds, p.id, true);
+            this.seenProposalIds[p.id] = true;
         },
         fetchProposalAnnotations(id) {
             if (!this.proposalAnnotationCache.hasOwnProperty(id)) {
@@ -478,7 +465,7 @@ export default {
             }
         },
         handleRefineProposal(proposals) {
-            Vue.Promise.all(proposals.map(this.updateProposalPoints))
+            Promise.all(proposals.map(this.updateProposalPoints))
                 .catch(handleErrorResponse);
         },
         updateProposalPoints(proposal) {
@@ -587,28 +574,30 @@ export default {
         },
         setSelectedCandidateId(candidate) {
             if (candidate.label && !candidate.annotation_id) {
-                Vue.set(this.selectedCandidateIds, candidate.id, this.getSequenceId());
+                this.selectedCandidateIds[candidate.id] = this.getSequenceId();
             } else {
-                Vue.delete(this.selectedCandidateIds, candidate.id);
+                delete this.selectedCandidateIds[candidate.id];
             }
         },
         setConvertedCandidateId(candidate) {
             if (candidate.annotation_id) {
-                Vue.set(this.convertedCandidateIds, candidate.id, candidate.annotation_id);
+                this.convertedCandidateIds[candidate.id] = candidate.annotation_id;
             } else {
-                Vue.delete(this.convertedCandidateIds, candidate.id);
+                delete this.convertedCandidateIds[candidate.id];
             }
         },
         setCandidates(response) {
-            CANDIDATES = response.body;
+            this.candidates = response.body;
 
-            CANDIDATES.forEach((p) => {
-                CANDIDATES_BY_ID[p.id] = p;
+            this.candidates.forEach((p) => {
+                // Mark all as raw for two reasons: 1) Better performance. 2) At several
+                // places objects are compared or searched in arrays. This does not work
+                // if e.g. a Proxy is searched in an array of raw objects or vice versa.
+                markRaw(p);
+                this.candidatesById[p.id] = p;
                 this.setSelectedCandidateId(p);
                 this.setConvertedCandidateId(p);
             });
-
-            this.hasCandidates = CANDIDATES.length > 0;
         },
         fetchCandidates(force) {
             if (!this.fetchCandidatesPromise || force) {
@@ -627,7 +616,7 @@ export default {
                 this.unselectCandidate(candidate);
             } else {
                 if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
-                    this.doForEachBetween(this.candidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
+                    this.doForEachBetween(this.sortedCandidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
                 } else {
                     this.lastSelectedCandidate = candidate;
                     this.selectCandidate(candidate);
@@ -800,7 +789,7 @@ export default {
             }
         },
         handleRefineCandidate(candidates) {
-            Vue.Promise.all(candidates.map(this.updateCandidatePoints))
+            Promise.all(candidates.map(this.updateCandidatePoints))
                 .catch(handleErrorResponse);
         },
         updateCandidatePoints(candidate) {
@@ -838,6 +827,10 @@ export default {
         },
         getSequenceId() {
             return this.sequenceCounter++;
+        },
+        handleSaveProposals() {
+            JobApi.saveTrainingProposals({id: this.job.id})
+                .then(window.location.reload, handleErrorResponse);
         },
     },
     watch: {
@@ -885,7 +878,7 @@ export default {
         currentProposalImageId(id) {
             if (id) {
                 this.startLoading();
-                Vue.Promise.all([
+                Promise.all([
                         ImagesStore.fetchAndDrawImage(id),
                         this.fetchProposalAnnotations(id),
                         this.fetchProposals(),
@@ -913,7 +906,7 @@ export default {
         currentCandidateImageId(id) {
             if (id) {
                 this.startLoading();
-                Vue.Promise.all([
+                Promise.all([
                         ImagesStore.fetchAndDrawImage(id),
                         this.fetchCandidateAnnotations(id),
                         this.fetchCandidates(),

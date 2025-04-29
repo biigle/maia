@@ -1,3 +1,5 @@
+import { Resource } from '../import.js';
+
 /**
  * Resource for training proposals.
  *
@@ -5,7 +7,5 @@
  *
  * Update the proposal:
  * resource.update({id: 1}, {selected: true}).then(...);
- *
- * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/maia/training-proposals{/id}');
+export default Resource('api/v1/maia/training-proposals{/id}');

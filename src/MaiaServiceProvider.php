@@ -33,7 +33,7 @@ class MaiaServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/Database/migrations');
 
         $this->publishes([
-            __DIR__.'/public/assets' => public_path('vendor/maia'),
+            __DIR__.'/public' => public_path('vendor/maia'),
         ], 'public');
 
         $router->group([

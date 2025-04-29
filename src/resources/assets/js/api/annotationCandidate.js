@@ -1,3 +1,5 @@
+import { Resource } from '../import.js';
+
 /**
  * Resource for annotation candidates.
  *
@@ -5,7 +7,5 @@
  *
  * Update the candidate:
  * resource.update({id: 1}, {label_id: 123}).then(...);
- *
- * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/maia/annotation-candidates{/id}');
+export default Resource('api/v1/maia/annotation-candidates{/id}');

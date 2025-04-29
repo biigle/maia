@@ -3,14 +3,14 @@
 @section('full-navbar', true)
 
 @push('styles')
-<link href="{{ cachebust_asset('vendor/largo/styles/main.css') }}" rel="stylesheet">
-<link href="{{ cachebust_asset('vendor/maia/styles/main.css') }}" rel="stylesheet">
+{{vite_hot(base_path('vendor/biigle/largo/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/largo')}}
+{{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/maia')}}
 @endpush
 
 @push('scripts')
-<script src="{{ cachebust_asset('vendor/largo/scripts/main.js') }}"></script>
-<script src="{{ cachebust_asset('vendor/maia/scripts/main.js') }}"></script>
-<script type="text/javascript">
+{{vite_hot(base_path('vendor/biigle/largo/hot'), ['src/resources/assets/js/main.js'], 'vendor/largo')}}
+{{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/js/main.js'], 'vendor/maia')}}
+<script type="module">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
     biigle.$declare('maia.states', {!! $states->toJson() !!});
     biigle.$declare('maia.labelTrees', {!! $trees->toJson() !!});
@@ -46,7 +46,7 @@
         @endif
         <loader-block :active="loading"></loader-block>
     </div>
-    <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened" v-on:toggle="handleSidebarToggle">
+    <sidebar v-bind:open-tab="openTab" v-on:open="handleTabOpened">
         <sidebar-tab name="info" icon="info-circle" title="Job information">
             @include('maia::show.info-tab')
         </sidebar-tab>

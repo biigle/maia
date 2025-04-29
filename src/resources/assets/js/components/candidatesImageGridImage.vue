@@ -28,8 +28,8 @@
 </template>
 
 <script>
-import {AnnotationPatch} from '../import';
-import {ImageGridImage} from '../import';
+import {AnnotationPatch} from '../import.js';
+import {ImageGridImage} from '../import.js';
 
 /**
  * A variant of the image grid image used for the selection of MAIA annotation candidates.

@@ -1,3 +1,5 @@
+import { Resource } from '../import.js';
+
 /**
  * Resource for MAIA jobs.
  *
@@ -21,16 +23,18 @@
  *
  * Delete a MAIA job:
  * resource.delete({id: 1}).then(...);
- *
- * @type {Vue.resource}
  */
-export default Vue.resource('api/v1/maia-jobs{/id}', {}, {
+export default Resource('api/v1/maia-jobs{/id}', {}, {
     save: {
         method: 'POST',
         url: 'api/v1/volumes{/id}/maia-jobs',
     },
     getTrainingProposals: {
         method: 'GET',
+        url: 'api/v1/maia-jobs{/id}/training-proposals',
+    },
+    saveTrainingProposals: {
+        method: 'POST',
         url: 'api/v1/maia-jobs{/id}/training-proposals',
     },
     getSimilarTrainingProposals: {

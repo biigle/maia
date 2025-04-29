@@ -1,9 +1,10 @@
 <script>
-import areaKnowledgeTransferVolumeApi from './api/areaKnowledgeTransferVolume';
-import knowledgeTransferVolumeApi from './api/knowledgeTransferVolume';
-import {handleErrorResponse} from './import';
-import {LabelTypeahead} from './import';
-import {LoaderMixin} from './import';
+import areaKnowledgeTransferVolumeApi from './api/areaKnowledgeTransferVolume.js';
+import knowledgeTransferVolumeApi from './api/knowledgeTransferVolume.js';
+import {handleErrorResponse} from './import.js';
+import {LabelTypeahead} from './import.js';
+import {LoaderMixin} from './import.js';
+import {VolumesApi} from './import.js';
 
 /**
  * View model for the form to submit new MAIA jobs
@@ -71,13 +72,7 @@ export default {
                 return [];
             }
 
-            let volumeId = this.knowledgeTransferVolume.id;
-
-            if (!this.knowledgeTransferLabelCache.hasOwnProperty(volumeId)) {
-                this.fetchKnowledgeTransferLabels(volumeId);
-            }
-
-            return this.knowledgeTransferLabelCache[volumeId];
+            return this.knowledgeTransferLabelCache[this.knowledgeTransferVolume.id];
         },
     },
     methods: {
@@ -104,6 +99,10 @@ export default {
         handleSelectedKnowledgeTransferVolume(volume) {
             this.knowledgeTransferVolume = volume;
             this.selectedKnowledgeTransferLabels = [];
+            // Initialize empty for immediate use. Will be filled by
+            // fetchKnowledgeTransferLabels() below.
+            this.knowledgeTransferLabelCache[volume.id] = [];
+            this.fetchKnowledgeTransferLabels(volume.id);
         },
         parseKnowledgeTransferVolumes(response) {
             return response.body
@@ -118,7 +117,7 @@ export default {
         },
         fetchLabels(id) {
             this.startLoading();
-            let promise = this.$http.get('api/v1/volumes{/id}/annotation-labels', {params: {id: id}});
+            let promise = VolumesApi.queryAnnotationLabels({id});
             promise.finally(this.finishLoading);
 
             return promise;

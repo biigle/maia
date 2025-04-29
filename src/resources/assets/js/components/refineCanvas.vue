@@ -3,10 +3,10 @@ import Collection from '@biigle/ol/Collection';
 import Style from '@biigle/ol/style/Style';
 import VectorLayer from '@biigle/ol/layer/Vector';
 import VectorSource from '@biigle/ol/source/Vector';
-import {AnnotationCanvas} from '../import';
-import {AttachLabelInteraction} from '../import';
-import {Keyboard} from '../import';
-import {StylesStore} from '../import';
+import {AnnotationCanvas} from '../import.js';
+import {AttachLabelInteraction} from '../import.js';
+import {Keyboard} from '../import.js';
+import {StylesStore} from '../import.js';
 
 /**
  * A variant of the annotation canvas used for the refinement of training proposals and
@@ -15,7 +15,14 @@ import {StylesStore} from '../import';
  * @type {Object}
  */
 export default {
-    mixins: [AnnotationCanvas],
+    template: '#refine-proposals-canvas-template',
+    emits: [
+        'previous-image',
+        'next-image',
+        'select',
+        'unselect',
+    ],
+    extends: AnnotationCanvas,
     props: {
         unselectedAnnotations: {
             type: Array,
@@ -67,6 +74,8 @@ export default {
                     new Style({
                         stroke: editingStyle[0].getStroke(),
                         image: editingStyle[0].getImage(),
+                        // Fill is important for hit detection in circles.
+                        fill: editingStyle[0].getFill(),
                     }),
                     new Style({
                         stroke: editingStyle[1].getStroke(),
@@ -93,8 +102,11 @@ export default {
         },
     },
     watch: {
-        unselectedAnnotations(annotations) {
-            this.refreshAnnotationSource(annotations, this.unselectedAnnotationSource);
+        unselectedAnnotations: {
+            handler(annotations) {
+                this.refreshAnnotationSource(annotations, this.unselectedAnnotationSource);
+            },
+            deep: true,
         },
         selectingMaiaAnnotation(selecting) {
             this.selectMaiaAnnotationInteraction.setActive(selecting);

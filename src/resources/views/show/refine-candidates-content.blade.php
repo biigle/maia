@@ -15,7 +15,10 @@
     v-on:unselect="unselectCandidate"
     listener-set="refine-candidates"
     ref="refineCandidatesCanvas"
-    inline-template>
+    ></refine-candidates-canvas>
+
+@push('scripts')
+<script type="text/html" id="refine-candidates-canvas-template">
     <div class="annotation-canvas">
         <minimap v-show="showMinimap" :extent="extent"></minimap>
         <div class="annotation-canvas__toolbar">
@@ -35,4 +38,5 @@
             </div>
         </div>
     </div>
-</refine-candidates-canvas>
+</script>
+@endpush
