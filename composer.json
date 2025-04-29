@@ -15,7 +15,7 @@
       }
     ],
     "require": {
-        "biigle/largo": "^2.25 || dev-master || dev-vue3"
+        "biigle/largo": "^2.25 || dev-master"
     },
     "autoload": {
         "psr-4": {
