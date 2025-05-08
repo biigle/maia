@@ -83,4 +83,12 @@ abstract class MaiaAnnotation extends Model implements AnnotationContract
     {
         return $this->image;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
 }
