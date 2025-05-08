@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
 use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalFeatureVectors;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
