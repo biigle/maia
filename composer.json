@@ -14,9 +14,6 @@
          "email": "martin@cebitec.uni-bielefeld.de"
       }
     ],
-    "require": {
-        "biigle/largo": "^2.25 || dev-master"
-    },
     "autoload": {
         "psr-4": {
             "Biigle\\Modules\\Maia\\": "src"

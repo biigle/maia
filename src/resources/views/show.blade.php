@@ -3,12 +3,10 @@
 @section('full-navbar', true)
 
 @push('styles')
-{{vite_hot(base_path('vendor/biigle/largo/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/largo')}}
 {{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/sass/main.scss'], 'vendor/maia')}}
 @endpush
 
 @push('scripts')
-{{vite_hot(base_path('vendor/biigle/largo/hot'), ['src/resources/assets/js/main.js'], 'vendor/largo')}}
 {{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/js/main.js'], 'vendor/maia')}}
 <script type="module">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
