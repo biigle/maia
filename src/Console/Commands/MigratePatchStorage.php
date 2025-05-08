@@ -3,7 +3,7 @@
 namespace Biigle\Modules\Maia\Console\Commands;
 
 use Biigle\ImageAnnotation;
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\TrainingProposal;
 use File;

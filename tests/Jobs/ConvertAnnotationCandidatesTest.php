@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\ProcessAnnotatedImage;
+use Biigle\Jobs\ProcessAnnotatedImage;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\LabelTest;

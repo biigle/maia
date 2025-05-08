@@ -2,7 +2,7 @@
 
 namespace Biigle\Tests\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\GenerateImageAnnotationPatch;
+use Biigle\Jobs\GenerateImageAnnotationPatch;
 use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
 use Biigle\Modules\Maia\Jobs\ObjectDetection;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;

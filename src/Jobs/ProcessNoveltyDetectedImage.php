@@ -2,7 +2,7 @@
 
 namespace Biigle\Modules\Maia\Jobs;
 
-use Biigle\Modules\Largo\Jobs\ProcessAnnotatedImage;
+use Biigle\Jobs\ProcessAnnotatedImage;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\TrainingProposalFeatureVector;

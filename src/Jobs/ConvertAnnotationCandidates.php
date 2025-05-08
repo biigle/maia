@@ -5,7 +5,7 @@ namespace Biigle\Modules\Maia\Jobs;
 use Biigle\ImageAnnotation;
 use Biigle\ImageAnnotationLabel;
 use Biigle\Jobs\Job;
-use Biigle\Modules\Largo\Jobs\ProcessAnnotatedImage;
+use Biigle\Jobs\ProcessAnnotatedImage;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\User;
 use Carbon\Carbon;

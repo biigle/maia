@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Image;
 use Biigle\Jobs\Job;
-use Biigle\Modules\Largo\Jobs\GenerateFeatureVectors;
+use Biigle\Jobs\GenerateFeatureVectors;
 use Biigle\Modules\Maia\MaiaAnnotation;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Shape;
