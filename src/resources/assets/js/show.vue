@@ -830,7 +830,7 @@ export default {
         },
         handleSaveProposals() {
             JobApi.saveTrainingProposals({id: this.job.id}, {})
-                .then(window.location.reload, handleErrorResponse);
+                .then(() => window.location.reload(), handleErrorResponse);
         },
     },
     watch: {

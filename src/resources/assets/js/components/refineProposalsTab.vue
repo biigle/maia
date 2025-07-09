@@ -28,7 +28,7 @@
                     </div>
                 </div>
 
-                <form @submit="handleSubmit">
+                <form @submit.prevent="handleSubmit">
                     <button
                         type="submit"
                         class="btn btn-block"
