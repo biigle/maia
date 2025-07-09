@@ -829,7 +829,7 @@ export default {
             return this.sequenceCounter++;
         },
         handleSaveProposals() {
-            JobApi.saveTrainingProposals({id: this.job.id})
+            JobApi.saveTrainingProposals({id: this.job.id}, {})
                 .then(window.location.reload, handleErrorResponse);
         },
     },
