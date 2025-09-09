@@ -17,7 +17,7 @@ import {LoaderMixin} from './import.js';
 import {Messages} from './import.js';
 import {SidebarTab} from './import.js';
 import {Sidebar} from './import.js';
-import {markRaw} from 'vue';
+import {markRaw, toRaw} from 'vue';
 
 /**
  * View model for the main view of a MAIA job
@@ -352,8 +352,7 @@ export default {
                 // Mark all as raw for two reasons: 1) Better performance. 2) At several
                 // places objects are compared or searched in arrays. This does not work
                 // if e.g. a Proxy is searched in an array of raw objects or vice versa.
-                markRaw(p);
-                this.proposalsById[p.id] = p;
+                this.proposalsById[p.id] = toRaw(markRaw(p));
                 this.setSelectedProposalId(p);
             });
         },
@@ -593,8 +592,7 @@ export default {
                 // Mark all as raw for two reasons: 1) Better performance. 2) At several
                 // places objects are compared or searched in arrays. This does not work
                 // if e.g. a Proxy is searched in an array of raw objects or vice versa.
-                markRaw(p);
-                this.candidatesById[p.id] = p;
+                this.candidatesById[p.id] = toRaw(markRaw(p));
                 this.setSelectedCandidateId(p);
                 this.setConvertedCandidateId(p);
             });
