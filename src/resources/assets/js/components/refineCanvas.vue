@@ -63,7 +63,7 @@ export default {
             // The style can't be used directly because biigle/maia imports their own
             // @biigle/ol package and the Style object of biigle/core's @biigle/ol does
             // not match this one.
-            const editingStyle = StylesStore.editing;
+            const editingStyle = StylesStore.editing();
             this.unselectedAnnotationLayer = new VectorLayer({
                 source: this.unselectedAnnotationSource,
                 // Should be below regular annotations which are at index 100.
