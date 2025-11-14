@@ -64,7 +64,7 @@ class DatasetGenerator(object):
             'images': image_list,
             'annotations': annotation_list,
             'categories': [{
-                'id': 0,
+                'id': 1,
                 'name': 'interesting',
                 'supercategory': 'interesting',
             }],
@@ -102,7 +102,7 @@ class DatasetGenerator(object):
                 annotations.append({
                     'id': 0, # Placeholder, will be updated to an uniwue ID later.
                     'image_id': int(imageId),
-                    'category_id': 0, # There is only one category.
+                    'category_id': 1, # There is only one category.
                     'bbox': [
                         int(p[0] - p[2]), # px
                         int(p[1] - p[2]), # py

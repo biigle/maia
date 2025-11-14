@@ -65,42 +65,17 @@ return [
     /*
     | Path to the script that generates the training dataset for MMDetection.
     */
-    'mmdet_dataset_script' => __DIR__.'/../resources/scripts/object-detection/DatasetGenerator.py',
+    'dataset_script' => __DIR__.'/../resources/scripts/object-detection/DatasetGenerator.py',
 
     /*
     | Path to the script that trains the MMDetection model.
     */
-    'mmdet_training_script' => __DIR__.'/../resources/scripts/object-detection/TrainingRunner.py',
+    'training_script' => __DIR__.'/../resources/scripts/object-detection/TrainingRunner.py',
 
     /*
     | Path to the script that performs inference with the trained MMDetection model.
     */
-    'mmdet_inference_script' => __DIR__.'/../resources/scripts/object-detection/InferenceRunner.py',
-
-    /*
-    | Path to the MMDetection base config file.
-    */
-    'mmdet_base_config' => __DIR__.'/../resources/scripts/object-detection/faster_rcnn_r50_fpn_1x.py',
-
-    /*
-    | URL from which to download the pretrained weights for the model backbone.
-    */
-    'backbone_model_url' => env('MAIA_BACKBONE_MODEL_URL', 'https://download.pytorch.org/models/resnet50-11ad3fa6.pth'),
-
-    /*
-    | URL from which to download the trained weights for the model.
-    */
-    'model_url' => env('MAIA_MODEL_URL', 'https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'),
-
-    /*
-    | Path to the file to store the pretrained backbone weights to.
-    */
-    'backbone_model_path' => storage_path('maia_jobs').'/resnet50-11ad3fa6.pth',
-
-    /*
-    | Path to the file to store the pretrained model weights to.
-    */
-    'model_path' => storage_path('maia_jobs').'/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',
+    'inference_script' => __DIR__.'/../resources/scripts/object-detection/InferenceRunner.py',
 
     /*
     | Number of 512x512 px images in a training batch of MMDetection.
@@ -108,7 +83,7 @@ return [
     |
     | Default is 16.
     */
-    'mmdet_train_batch_size' => env('MAIA_MMDET_TRAIN_BATCH_SIZE', 16),
+    'train_batch_size' => env('MAIA_MMDET_TRAIN_BATCH_SIZE', 16),
 
 
     'notifications' => [
