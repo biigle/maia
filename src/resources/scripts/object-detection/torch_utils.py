@@ -5,6 +5,8 @@ import math
 
 import torch
 import torch.distributed as dist
+from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 # Based on https://github.com/pytorch/vision/blob/main/references/detection/utils.py
 # and https://github.com/pytorch/vision/blob/main/references/detection/engine.py
@@ -40,6 +42,15 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+
+def get_model(num_classes):
+    model = fasterrcnn_resnet50_fpn_v2(weights='DEFAULT')
+    # Replace the classifier with a new one having the user-defined number of classes.
+    num_classes = num_classes + 1  # +1 for background
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+
+    return model
 
 def collate_fn(batch):
     return tuple(zip(*batch))

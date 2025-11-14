@@ -129,13 +129,13 @@ abstract class DetectionJob implements ShouldQueue
      *
      * @return string
      */
-    protected function python($command, $log = 'log.txt')
+    protected function python($command, $log = 'log.txt', $env = '')
     {
         $code = 0;
         $lines = [];
         $python = config('maia.python');
         $logFile = "{$this->tmpDir}/{$log}";
-        exec("{$python} -u {$command} >{$logFile} 2>&1", $lines, $code);
+        exec("{$env} {$python} -u {$command} >{$logFile} 2>&1", $lines, $code);
 
         if ($code !== 0) {
             $lines = File::get($logFile);

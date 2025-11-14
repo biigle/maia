@@ -1,9 +1,7 @@
 from albumentations.pytorch import ToTensorV2
 from torch.utils.data import DataLoader
-from torch_utils import collate_fn, train_one_epoch
+from torch_utils import collate_fn, train_one_epoch, get_model
 from torchvision.datasets import CocoDetection
-from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 import albumentations as A
 import json
 import numpy as np
@@ -19,12 +17,10 @@ with open(sys.argv[1]) as f:
 with open(sys.argv[2]) as f:
     trainset = json.load(f)
 
-model = fasterrcnn_resnet50_fpn_v2(weights='DEFAULT')
-# Replace the classifier with a new one having the user-defined number of classes.
-num_classes = len(trainset['classes']) + 1  # +1 for background
-in_features = model.roi_heads.box_predictor.cls_score.in_features
-model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+num_classes = len(trainset['classes'])
+model = get_model(num_classes)
 
+bbox_params = A.BboxParams(format='pascal_voc', label_fields=['labels'], clip=True)
 transforms = A.Compose([
     A.AtLeastOneBBoxRandomCrop(512, 512),
     A.SomeOf([
@@ -36,12 +32,11 @@ transforms = A.Compose([
     ], n=4, p=0.9),
     A.ToFloat(),
     ToTensorV2(),
-], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
+], bbox_params=bbox_params)
 
 class MyCocoDetection(CocoDetection):
     def _load_target(self, id):
         anns = self.coco.loadAnns(self.coco.getAnnIds(id))
-        img = self.coco.imgs[id]
         boxes = [a['bbox'] for a in anns]
         boxes = [[b[0], b[1], b[0] + b[2], b[1] + b[3]] for b in boxes]
         labels = [a['category_id'] for a in anns]
@@ -102,9 +97,7 @@ lr_scheduler = torch.optim.lr_scheduler.StepLR(
 device = torch.accelerator.current_accelerator() if torch.accelerator.is_available() else torch.device('cpu')
 model.to(device)
 
-# TODO
-# num_epochs = 12
-num_epochs = 2
+num_epochs = 12
 
 for epoch in range(num_epochs):
     # train for one epoch, printing every 10 iterations
@@ -115,11 +108,9 @@ for epoch in range(num_epochs):
 checkpoint_path = os.path.join(params['tmp_dir'], 'model.pth')
 torch.save(model.state_dict(), checkpoint_path)
 
-# TODO
 output = {
-    # 'work_dir': cfg.work_dir,
     'checkpoint_path': checkpoint_path,
-    # 'config_path': os.path.join(cfg.work_dir, self.dump_config_name),
+    'num_classes': num_classes,
 }
 
 with open(params['output_path'], 'w') as f:

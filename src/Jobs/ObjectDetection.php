@@ -154,7 +154,7 @@ class ObjectDetection extends DetectionJob
 
         $imagesMap = $this->buildImagesMap($images, $paths);
         $inputPath = $this->createDatasetJson($imagesMap, $outputPath);
-        $script = config('maia.mmdet_dataset_script');
+        $script = config('maia.dataset_script');
         $this->python("{$script} {$inputPath}", 'dataset-log.txt');
 
         return $outputPath;
@@ -198,32 +198,13 @@ class ObjectDetection extends DetectionJob
     protected function performTraining($datasetOutputPath)
     {
         $outputPath = "{$this->tmpDir}/output-training.json";
-        $this->maybeDownloadWeights(config('maia.backbone_model_url'), config('maia.backbone_model_path'));
-        $this->maybeDownloadWeights(config('maia.model_url'), config('maia.model_path'));
         $inputPath = $this->createTrainingJson($outputPath);
-        $script = config('maia.mmdet_training_script');
-        $this->python("{$script} {$inputPath} {$datasetOutputPath}", 'training-log.txt');
+        $script = config('maia.training_script');
+        $tmpDir = config('maia.tmp_dir');
+        $env = "TORCH_HOME=$tmpDir";
+        $this->python("{$script} {$inputPath} {$datasetOutputPath}", 'training-log.txt', $env);
 
         return $outputPath;
-    }
-
-    /**
-     * Downloads the model pretrained weights if they weren't downloaded yet.
-     *
-     * @param string $from
-     * @param string $to
-     *
-     */
-    protected function maybeDownloadWeights($from, $to)
-    {
-        if (!File::exists($to)) {
-            $this->ensureDirectory(dirname($to));
-            $success = @copy($from, $to);
-
-            if (!$success) {
-                throw new Exception("Failed to download model weights from '{$from}'.");
-            }
-        }
     }
 
     /**
@@ -240,8 +221,8 @@ class ObjectDetection extends DetectionJob
             'tmp_dir' => $this->tmpDir,
             'max_workers' => intval(config('maia.max_workers')),
             'output_path' => $outputJsonPath,
-            'base_config' => config('maia.mmdet_base_config'),
-            'batch_size' => config('maia.mmdet_train_batch_size'),
+            'base_config' => config('maia.base_config'),
+            'batch_size' => config('maia.train_batch_size'),
             'backbone_model_path' => config('maia.backbone_model_path'),
             'model_path' => config('maia.model_path'),
         ];
@@ -263,8 +244,10 @@ class ObjectDetection extends DetectionJob
         FileCache::batch($images, function ($images, $paths) use ($datasetOutputPath, $trainingOutputPath) {
             $imagesMap = $this->buildImagesMap($images, $paths);
             $inputPath = $this->createInferenceJson($imagesMap);
-            $script = config('maia.mmdet_inference_script');
-            $this->python("{$script} {$inputPath} {$datasetOutputPath} {$trainingOutputPath}", 'inference-log.txt');
+            $script = config('maia.inference_script');
+            $tmpDir = config('maia.tmp_dir');
+            $env = "TORCH_HOME=$tmpDir";
+            $this->python("{$script} {$inputPath} {$trainingOutputPath}", 'inference-log.txt', $env);
         });
     }
 
