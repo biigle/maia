@@ -4,7 +4,19 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'src/resources/assets/**'
+      - 'src/resources/scripts/**'
+      - 'src/public/**'
+      - 'package.json'
+      - 'package-lock.json'
   pull_request:
+    paths-ignore:
+      - 'src/resources/assets/**'
+      - 'src/resources/scripts/**'
+      - 'src/public/**'
+      - 'package.json'
+      - 'package-lock.json'
 
 jobs:
   test-module:
@@ -32,6 +44,12 @@ jobs:
 
     - name: Copy .env
       run: cp .env.example .env
+      working-directory: ../core
+
+    - name: Update .env
+      run: |
+        echo USER_ID=$(id -u) >> .env
+        echo GROUP_ID=$(id -g) >> .env
       working-directory: ../core
 
     - name: Set testing key

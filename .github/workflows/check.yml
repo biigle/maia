@@ -1,0 +1,55 @@
+name: Check
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/check.yml'
+      - 'src/resources/assets/**'
+      - 'src/public/**'
+      - 'package.json'
+      - 'package-lock.json'
+  pull_request:
+    paths:
+      - '.github/workflows/check.yml'
+      - 'src/resources/assets/**'
+      - 'src/public/**'
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  check-js:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Set registry authentication token
+      run: echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" >> .npmrc
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    - name: Install dependencies
+      run: npm install
+
+    # Clone core to get access to the variabley stylesheet
+    - uses: actions/checkout@v1
+      with:
+        repository: biigle/core
+        ref: master
+        fetch-depth: 1
+        path: core
+
+    - name: Update variables stylesheet link
+      run: ln -sf ../../../../../core/resources/assets/sass/bootstrap/_variables.scss src/resources/assets/sass/_variables.scss
+
+    # Don't use "npm run build" because it also runs the artisan command
+    - name: Run Vite
+      run: npx vite build
+
+    - name: Check for uncommitted changes
+      run: '[ -z "$(git status -s --porcelain | grep public)" ]'
