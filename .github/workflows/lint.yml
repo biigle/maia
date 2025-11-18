@@ -4,7 +4,17 @@ on:
   push:
     branches:
       - master
+    paths:
+      - '.github/workflows/lint.yml'
+      - 'src/resources/assets/**'
+      - 'package.json'
+      - 'package-lock.json'
   pull_request:
+    paths:
+      - '.github/workflows/lint.yml'
+      - 'src/resources/assets/**'
+      - 'package.json'
+      - 'package-lock.json'
 
 jobs:
   lint:
