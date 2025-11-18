@@ -221,10 +221,7 @@ class ObjectDetection extends DetectionJob
             'tmp_dir' => $this->tmpDir,
             'max_workers' => intval(config('maia.max_workers')),
             'output_path' => $outputJsonPath,
-            'base_config' => config('maia.base_config'),
             'batch_size' => config('maia.train_batch_size'),
-            'backbone_model_path' => config('maia.backbone_model_path'),
-            'model_path' => config('maia.model_path'),
         ];
 
         File::put($path, json_encode($content, JSON_UNESCAPED_SLASHES));
