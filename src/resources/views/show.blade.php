@@ -49,28 +49,28 @@
             @include('maia::show.info-tab')
         </sidebar-tab>
         @if ($job->shouldShowTrainingProposals())
-            @if ($job->state_id < $states['training-proposals'])
-                <sidebar-tab name="select-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
-                <sidebar-tab name="refine-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
-            @else
+            @if ($job->state_id === $states['training-proposals'])
                 <sidebar-tab name="select-proposals" icon="plus-square" title="Select training proposals">
                     @include('maia::show.select-proposals-tab')
                 </sidebar-tab>
                 <sidebar-tab name="refine-proposals" icon="pen-square" title="Refine training proposals">
                     @include('maia::show.refine-proposals-tab')
                 </sidebar-tab>
+            @else
+                <sidebar-tab name="select-proposals" icon="plus-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
+                <sidebar-tab name="refine-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
             @endif
         @endif
-        @if ($job->state_id < $states['annotation-candidates'])
-            <sidebar-tab name="select-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
-            <sidebar-tab name="refine-candidates" icon="pen-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
-        @else
+        @if ($job->state_id === $states['annotation-candidates'])
             <sidebar-tab name="select-candidates" icon="check-square" title="Select annotation candidates">
                 @include('maia::show.select-candidates-tab')
             </sidebar-tab>
             <sidebar-tab name="refine-candidates" icon="pen-square" title="Refine annotation candidates">
                 @include('maia::show.refine-candidates-tab')
             </sidebar-tab>
+        @else
+            <sidebar-tab name="select-candidates" icon="check-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
+            <sidebar-tab name="refine-candidates" icon="pen-square" title="Annotation candidates are not ready yet" disabled></sidebar-tab>
         @endif
     </sidebar>
 </div>
