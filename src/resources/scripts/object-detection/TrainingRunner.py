@@ -42,6 +42,7 @@ transforms = A.Compose([
     ToTensorV2(),
 ], bbox_params=bbox_params)
 
+# Custom dataset for compatibility with Albumentations.
 class MyCocoDetection(CocoDetection):
     def _load_target(self, id):
         anns = self.coco.loadAnns(self.coco.getAnnIds(id))
@@ -84,7 +85,7 @@ data_loader = DataLoader(
     collate_fn=collate_fn
 )
 
-# Freeze the backbone.
+# Freeze the backbone, we only want to train the head leyers.
 for param in model.backbone.parameters():
     param.requires_grad = False
 
@@ -108,9 +109,7 @@ model.to(device)
 num_epochs = 12
 
 for epoch in range(num_epochs):
-    # train for one epoch, printing every 10 iterations
     train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
-    # update the learning rate
     lr_scheduler.step()
 
 checkpoint_path = os.path.join(params['tmp_dir'], 'model.pth')
