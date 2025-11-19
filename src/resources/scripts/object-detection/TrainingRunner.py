@@ -27,6 +27,7 @@ bbox_params = A.BboxParams(
     clip=True,
     # Remove all boxes with less than 10% of their content in the random crop.
     min_visibility=0.1,
+    filter_invalid_bboxes=True,
 )
 transforms = A.Compose([
     A.AtLeastOneBBoxRandomCrop(512, 512),
