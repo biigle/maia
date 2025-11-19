@@ -1,4 +1,5 @@
 from albumentations.pytorch import ToTensorV2
+from torch.amp import GradScaler
 from torch.utils.data import DataLoader
 from torch_utils import collate_fn, train_one_epoch, get_model
 from torchvision.datasets import CocoDetection
@@ -85,10 +86,24 @@ data_loader = DataLoader(
     collate_fn=collate_fn
 )
 
+# Freeze the first stage
+for param in model.backbone.body.conv1.parameters():
+    param.requires_grad = False
+
+for param in model.backbone.body.bn1.parameters():
+    param.requires_grad = False
+
+for param in model.backbone.body.layer1.parameters():
+    param.requires_grad = False
+
+# Scale the learn rate for different batch sizes.
+base_batch_size = 16.0
+lr = 0.02 * float(params['batch_size']) / base_batch_size
+
 optim_params = [p for p in model.parameters() if p.requires_grad]
 optimizer = torch.optim.SGD(
     optim_params,
-    lr=0.02,
+    lr=lr,
     momentum=0.9,
     weight_decay=0.0001
 )
@@ -102,10 +117,12 @@ lr_scheduler = torch.optim.lr_scheduler.StepLR(
 device = torch.accelerator.current_accelerator() if torch.accelerator.is_available() else torch.device('cpu')
 model.to(device)
 
+scaler = GradScaler(device)
+
 num_epochs = 12
 
 for epoch in range(num_epochs):
-    train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
+    train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10, scaler=scaler)
     lr_scheduler.step()
 
 checkpoint_path = os.path.join(params['tmp_dir'], 'model.pth')

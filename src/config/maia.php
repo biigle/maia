@@ -78,12 +78,12 @@ return [
     'inference_script' => __DIR__.'/../resources/scripts/object-detection/InferenceRunner.py',
 
     /*
-    | Number of 512x512 px images in a training batch of MMDetection.
+    | Number of 512x512 px images in one training batch.
     | This can be increased with larger GPU memory to achieve faster training.
     |
     | Default is 16.
     */
-    'train_batch_size' => env('MAIA_MMDET_TRAIN_BATCH_SIZE', 16),
+    'train_batch_size' => env('MAIA_TRAIN_BATCH_SIZE', 16),
 
 
     'notifications' => [
