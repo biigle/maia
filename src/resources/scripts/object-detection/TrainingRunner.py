@@ -85,10 +85,6 @@ data_loader = DataLoader(
     collate_fn=collate_fn
 )
 
-# Freeze the backbone, we only want to train the head leyers.
-for param in model.backbone.parameters():
-    param.requires_grad = False
-
 optim_params = [p for p in model.parameters() if p.requires_grad]
 optimizer = torch.optim.SGD(
     optim_params,
