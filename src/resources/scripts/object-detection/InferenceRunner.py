@@ -44,7 +44,7 @@ class InferenceRunner(object):
             for index, (image_id, image_path) in enumerate(self.images.items()):
                 print('Image {} of {} (#{})'.format(index + 1, total_images, image_id))
                 image = np.array(Image.open(image_path).convert('RGB'))
-                image = self.transforms(image=image)['image']
+                image = self.transforms(image=image)['image'].to(device)
                 result = model([image])[0]
 
                 executor.submit(self.process_result, image_id, result)
