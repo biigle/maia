@@ -15,6 +15,13 @@ return [
     'training_proposal_limit' => 50000,
 
     /*
+    | Maximum number of automatically generated annottation candidates that are created
+    | for a job. The limit applies to the list of annotation candidates sorted by
+    | confidence score in descending order. Set to INF to allow any number.
+    */
+    'annotation_candidate_limit' => 100000,
+
+    /*
     | Storage disk where the annotation candidate patch images will be stored
     */
     'annotation_candidate_storage_disk' => env('MAIA_ANNOTATION_CANDIDATE_STORAGE_DISK'),

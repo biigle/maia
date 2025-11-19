@@ -136,6 +136,7 @@ class MaiaJobController extends Controller
             ->url(':prefix/:id.'.config('largo.patch_format'));
 
         $tpLimit = config('maia.training_proposal_limit');
+        $acLimit = config('maia.annotation_candidate_limit');
 
         return view('maia::show', compact(
             'job',
@@ -144,7 +145,8 @@ class MaiaJobController extends Controller
             'trees',
             'tpUrlTemplate',
             'acUrlTemplate',
-            'tpLimit'
+            'tpLimit',
+            'acLimit'
         ));
     }
 }

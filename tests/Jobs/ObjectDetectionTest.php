@@ -129,6 +129,32 @@ class ObjectDetectionTest extends TestCase
         }
     }
 
+    public function testHandleLimit()
+    {
+        FileCache::fake();
+        config(['maia.annotation_candidate_limit' => 1]);
+
+        $params = [
+            'batch_size' => 12,
+            'max_workers' => 2,
+        ];
+        $job = MaiaJobTest::create(['params' => $params]);
+        $image = ImageTest::create(['volume_id' => $job->volume_id]);
+        $tmpDir = config('maia.tmp_dir')."/maia-{$job->id}-object-detection";
+
+        try {
+            $request = new OdJobStub($job);
+            $request->annotations = "[[10,20,30,1],[10,20,30,123],[10,20,30,1]]";
+            $request->handle();
+
+            $annotations = $job->annotationCandidates()->get();
+            $this->assertSame(1, $annotations->count());
+            $this->assertSame(123.0, $annotations[0]->score);
+        } finally {
+            File::deleteDirectory($tmpDir);
+        }
+    }
+
     public function testDeletedImage()
     {
         FileCache::fake();
@@ -410,6 +436,7 @@ class OdJobStub extends ObjectDetection
     public $cleanup = false;
     public $crash = false;
     public $deleteImage = false;
+    public $annotations = "[[10, 20, 30, 123]]";
 
     protected function maybeDownloadWeights($from, $to)
     {
@@ -427,7 +454,7 @@ class OdJobStub extends ObjectDetection
         } elseif (Str::contains($command, 'InferenceRunner')) {
             $images = $this->job->volume->images()->pluck('filename', 'id');
             foreach ($images as $id => $image) {
-                File::put("{$this->tmpDir}/{$id}.json", "[[10, 20, 30, 123]]");
+                File::put("{$this->tmpDir}/{$id}.json", $this->annotations);
             }
         }
     }

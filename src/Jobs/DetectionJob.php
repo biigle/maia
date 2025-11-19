@@ -251,6 +251,29 @@ abstract class DetectionJob implements ShouldQueue
     }
 
     /**
+     * Apply the limit for the maximum number of annotations.
+     *
+     * @param array $annotations
+     * @param int $limit
+     *
+     * @return array
+     */
+    protected function maybeLimitAnnotations($annotations, $limit)
+    {
+        if (count($annotations) <= $limit) {
+            return $annotations;
+        }
+
+        usort($annotations, function ($a, $b) {
+            // The fourth array element is the score of the annotation. We want to sort
+            // the annotations by descending scores.
+            return round($b[4] - $a[4]);
+        });
+
+        return array_slice($annotations, 0, $limit);
+    }
+
+    /**
      * Insert one chunk of the MAIA annotations that should be created into the database.
      *
      * @param array $chunk

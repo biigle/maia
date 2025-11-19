@@ -2,11 +2,11 @@
     <div class="sidebar-tab__content sidebar-tab__content--maia">
         <div class="maia-tab-content__top">
             <p class="lead">
-                {{selectedProposalsCount}} of {{selectedProposalsCount}} selected
+                {{selectedProposalsCount}} of {{proposalsCount}} selected
             </p>
             <div v-if="reachedLimit" class="panel panel-warning">
                 <div class="panel-body text-warning">
-                    This job reached the allowed maximum of {{proposalLimit}} training proposals.
+                    This job reached the allowed maximum of {{proposalLimit}} training proposals!
                 </div>
             </div>
             <div v-if="locked">
@@ -45,12 +45,12 @@
 export default {
     emits: ['proceed'],
     props: {
-        proposals: {
-            type: Array,
+        proposalsCount: {
+            type: Number,
             required: true,
         },
-        selectedProposals: {
-            type: Array,
+        selectedProposalsCount: {
+            type: Number,
             required: true,
         },
         proposalLimit: {
@@ -63,12 +63,6 @@ export default {
         },
     },
     computed: {
-        selectedProposalsCount() {
-            return this.selectedProposals.length;
-        },
-        proposalsCount() {
-            return this.proposals.length;
-        },
         reachedLimit() {
             return this.proposalsCount >= this.proposalLimit;
         },
