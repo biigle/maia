@@ -63,6 +63,7 @@ class AnnotationCandidateController extends Controller
             }
         };
 
+        // Use a streamed response because there can be a lot of items.
         return response()->streamJson($yieldItems());
     }
 
