@@ -92,7 +92,6 @@ class NoveltyDetectionTest extends TestCase
         $job = MaiaJobTest::create(['params' => $params]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $tmpDir = config('maia.tmp_dir')."/maia-{$job->id}-novelty-detection";
-        $inputJsonPath = "{$tmpDir}/input.json";
 
         try {
             $request = new NdJobStub($job);
