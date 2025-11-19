@@ -20,7 +20,14 @@ with open(sys.argv[2]) as f:
 num_classes = len(trainset['classes'])
 model = get_model(num_classes)
 
-bbox_params = A.BboxParams(format='pascal_voc', label_fields=['labels'], clip=True)
+bbox_params = A.BboxParams(
+    format='pascal_voc',
+    label_fields=['labels'],
+    # Clip boxes that overflow image boundaries.
+    clip=True,
+    # Remove all boxes with less than 10% of their content in the random crop.
+    min_visibility=0.1,
+)
 transforms = A.Compose([
     A.AtLeastOneBBoxRandomCrop(512, 512),
     A.SomeOf([
