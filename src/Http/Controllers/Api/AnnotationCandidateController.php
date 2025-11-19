@@ -43,7 +43,7 @@ class AnnotationCandidateController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
 
-        return $job->annotationCandidates()
+        $query = $job->annotationCandidates()
             ->join('images', 'images.id', '=', 'maia_annotation_candidates.image_id')
             ->select(
                 'maia_annotation_candidates.id',
@@ -53,12 +53,17 @@ class AnnotationCandidateController extends Controller
                 'images.uuid as uuid'
             )
             ->orderBy('score', 'desc')
-            ->with('label')
-            ->get()
-            ->each(function ($candidate) {
-                $candidate->makeHidden('label_id');
-            })
-            ->toArray();
+            ->orderBy('id', 'desc')
+            ->with('label');
+
+        $yieldItems = function () use ($query): \Generator {
+            foreach ($query->lazy() as $item) {
+                $item->makeHidden('label_id');
+                yield $item;
+            }
+        };
+
+        return response()->streamJson($yieldItems());
     }
 
     /**
