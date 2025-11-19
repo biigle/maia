@@ -43,7 +43,7 @@ class TrainingProposalController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
 
-        return $job->trainingProposals()
+        $query = $job->trainingProposals()
             ->join('images', 'images.id', '=', 'maia_training_proposals.image_id')
             ->select(
                 'maia_training_proposals.id',
@@ -52,8 +52,16 @@ class TrainingProposalController extends Controller
                 'images.uuid as uuid'
             )
             ->orderBy('score', 'desc')
-            ->get()
-            ->toArray();
+            ->orderBy('id', 'desc');
+
+        $yieldItems = function () use ($query): \Generator {
+            foreach ($query->lazy() as $item) {
+                yield $item;
+            }
+        };
+
+        // Use a streamed response because there can be a lot of items.
+        return response()->streamJson($yieldItems());
     }
 
     /**

@@ -13,8 +13,9 @@ use Biigle\Tests\LabelTest;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
+use Illuminate\Testing\TestResponse;
 use Queue;
-use Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class AnnotationCandidateControllerTest extends ApiTestCase
 {
@@ -32,9 +33,20 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates")->assertStatus(403);
 
         $this->beEditor();
-        $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates")
-            ->assertStatus(200)
-            ->assertExactJson([[
+        $response = $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates")
+            ->assertStatus(200);
+
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+        $response = new TestResponse(
+            new Response($content,
+                $response->baseResponse->getStatusCode(),
+                $response->baseResponse->headers->all()
+            )
+        );
+
+        $response->assertExactJson([[
                 'id' => $annotation->id,
                 'image_id' => $annotation->image_id,
                 'label' => null,
