@@ -21,7 +21,7 @@ with open(sys.argv[2]) as f:
 num_classes = len(trainset['classes'])
 model = get_model(
     num_classes,
-    # Use same min_size than random crop transform.
+    # Each crop from the dataset is at least 512x512px
     min_size=512,
     # Train all but the first (of 5) layers.
     trainable_backbone_layers=4,
@@ -32,12 +32,10 @@ bbox_params = A.BboxParams(
     label_fields=['labels'],
     # Clip boxes that overflow image boundaries.
     clip=True,
-    # Remove all boxes with less than 10% of their content in the random crop.
-    min_visibility=0.1,
     filter_invalid_bboxes=True,
 )
 transforms = A.Compose([
-    A.AtLeastOneBBoxRandomCrop(512, 512),
+    A.PadIfNeeded(512, 512),
     A.SomeOf([
         A.HorizontalFlip(p=0.25),
         A.VerticalFlip(p=0.25),
@@ -50,7 +48,8 @@ transforms = A.Compose([
 ], bbox_params=bbox_params)
 
 # Custom dataset for compatibility with Albumentations.
-class MyCocoDetection(CocoDetection):
+# Returns one item for each annotation which is a crop around the annotation.
+class SingleBoxCocoDetection(CocoDetection):
     def _load_target(self, id):
         anns = self.coco.loadAnns(self.coco.getAnnIds(id))
         boxes = [a['bbox'] for a in anns]
@@ -66,14 +65,44 @@ class MyCocoDetection(CocoDetection):
         if not isinstance(index, int):
             raise ValueError(f"Index must be of type integer, got {type(index)} instead.")
 
-        id = self.ids[index]
+        try:
+            ann = self.coco.anns[index]
+        except KeyError:
+            raise IndexError
+
+        id = ann['image_id']
         image = self._load_image(id)
         target = self._load_target(id)
+        width, height = image.size
+
+        crop_bbox = ann['bbox']
+        # Make sure crops are at least 512x512px
+        if crop_bbox[2] < 512:
+            crop_bbox[0] = crop_bbox[0] - (crop_bbox[2] - 512) // 2
+            crop_bbox[2] = 512
+        if crop_bbox[3] < 512:
+            crop_bbox[1] = crop_bbox[1] - (crop_bbox[3] - 512) // 2
+            crop_bbox[3] = 512
+
+        crop_bbox = [
+            max(0, crop_bbox[0]),
+            max(0, crop_bbox[1]),
+            min(width, crop_bbox[0] + crop_bbox[2]),
+            min(height, crop_bbox[1] + crop_bbox[3])
+        ]
+
+        image = A.augmentations.crops.functional.crop(np.array(image), *crop_bbox)
+        target['boxes'] = A.augmentations.crops.functional.crop_bboxes_by_coords(
+            bboxes=np.array(target['boxes'], dtype=np.float32),
+            crop_coords=crop_bbox,
+            image_shape=(height, width),
+            normalized_input=False
+        )
 
         if self.transforms is not None:
             ret = self.transforms(
-                image=np.array(image),
-                bboxes=np.array(target['boxes'], dtype=np.float32),
+                image=image,
+                bboxes=target['boxes'],
                 labels=target['labels']
             )
             image = ret['image']
@@ -82,7 +111,10 @@ class MyCocoDetection(CocoDetection):
 
         return image, target
 
-dataset = MyCocoDetection(root=trainset['img_prefix'], annFile=trainset['ann_file'], transforms=transforms)
+    def __len__(self) -> int:
+        return len(self.coco.anns)
+
+dataset = SingleBoxCocoDetection(root=trainset['img_prefix'], annFile=trainset['ann_file'], transforms=transforms)
 
 data_loader = DataLoader(
     dataset,
