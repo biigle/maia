@@ -19,7 +19,13 @@ with open(sys.argv[2]) as f:
     trainset = json.load(f)
 
 num_classes = len(trainset['classes'])
-model = get_model(num_classes)
+model = get_model(
+    num_classes,
+    # Use same min_size than random crop transform.
+    min_size=512,
+    # Train all but the first (of 5) layers.
+    trainable_backbone_layers=4,
+)
 
 bbox_params = A.BboxParams(
     format='pascal_voc',
@@ -86,26 +92,16 @@ data_loader = DataLoader(
     collate_fn=collate_fn
 )
 
-# Freeze the first stage
-for param in model.backbone.body.conv1.parameters():
-    param.requires_grad = False
-
-for param in model.backbone.body.bn1.parameters():
-    param.requires_grad = False
-
-for param in model.backbone.body.layer1.parameters():
-    param.requires_grad = False
-
 # Scale the learn rate for different batch sizes.
 base_batch_size = 16.0
-lr = 0.02 * float(params['batch_size']) / base_batch_size
+lr = 0.005 * float(params['batch_size']) / base_batch_size
 
 optim_params = [p for p in model.parameters() if p.requires_grad]
 optimizer = torch.optim.SGD(
     optim_params,
     lr=lr,
     momentum=0.9,
-    weight_decay=0.0001
+    weight_decay=0.0005
 )
 
 lr_scheduler = torch.optim.lr_scheduler.StepLR(

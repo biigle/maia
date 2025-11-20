@@ -36,6 +36,10 @@ class InferenceRunner(object):
             # Lowered, because of many overlapping boxes for the same objects in tests.
             rpn_nms_thresh=0.2,
             box_nms_thresh=0.2,
+            # Increase default max_size of 1333.
+            max_size=8192,
+            # Usse same min_size enforced by BIIGLE.
+            min_size=512,
         )
         model.load_state_dict(torch.load(self.checkpoint_path))
 
