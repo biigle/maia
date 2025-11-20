@@ -43,8 +43,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-def get_model(num_classes):
-    model = fasterrcnn_resnet50_fpn_v2(weights='DEFAULT')
+def get_model(num_classes, **kwargs):
+    model = fasterrcnn_resnet50_fpn_v2(weights='DEFAULT', **kwargs)
     # Replace the classifier with a new one having the user-defined number of classes.
     num_classes = num_classes + 1  # +1 for background
     in_features = model.roi_heads.box_predictor.cls_score.in_features
