@@ -85,8 +85,8 @@ class SingleBoxCocoDetection(CocoDetection):
             crop_bbox[3] = 512
 
         crop_bbox = [
-            max(0, crop_bbox[0]),
-            max(0, crop_bbox[1]),
+            min(width, max(0, crop_bbox[0])),
+            min(height, max(0, crop_bbox[1])),
             min(width, crop_bbox[0] + crop_bbox[2]),
             min(height, crop_bbox[1] + crop_bbox[3])
         ]
