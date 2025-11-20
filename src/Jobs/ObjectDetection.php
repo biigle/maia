@@ -92,6 +92,8 @@ class ObjectDetection extends DetectionJob
         $this->performInference($images, $output[0], $output[1]);
 
         $annotations = $this->parseAnnotations($images);
+        $limit = config('maia.annotation_candidate_limit');
+        $annotations = $this->maybeLimitAnnotations($annotations, $limit);
 
         // Make sure to roll back any DB modifications if an error occurs.
         DB::transaction(function () use ($annotations) {

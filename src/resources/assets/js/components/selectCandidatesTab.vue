@@ -1,6 +1,14 @@
 <template>
     <div class="sidebar-tab__content sidebar-tab__content--maia">
         <div class="maia-tab-content__top">
+            <p class="lead">
+                {{selectedCandidatesCount}} of {{candidatesCount}} selected
+            </p>
+            <div v-if="reachedLimit" class="panel panel-warning">
+                <div class="panel-body text-warning">
+                    This job reached the allowed maximum of {{candidatesLimit}} annotation candidates!
+                </div>
+            </div>
             <label-trees
                 :trees="labelTrees"
                 :show-favourites="true"
@@ -40,6 +48,23 @@ export default {
         labelTrees: {
             type: Array,
             required: true,
+        },
+        candidatesCount: {
+            type: Number,
+            required: true,
+        },
+        selectedCandidatesCount: {
+            type: Number,
+            required: true,
+        },
+        candidatesLimit: {
+            type: Number,
+            default: Infinity,
+        },
+    },
+    computed: {
+        reachedLimit() {
+            return this.candidatesCount >= this.candidatesLimit;
         },
     },
     methods: {
