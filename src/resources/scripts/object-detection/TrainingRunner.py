@@ -75,13 +75,13 @@ class SingleBoxCocoDetection(CocoDetection):
         target = self._load_target(id)
         width, height = image.size
 
-        crop_bbox = ann['bbox']
+        crop_bbox = ann['bbox'].copy()
         # Make sure crops are at least 512x512px
         if crop_bbox[2] < 512:
-            crop_bbox[0] = crop_bbox[0] - (crop_bbox[2] - 512) // 2
+            crop_bbox[0] = crop_bbox[0] - (512 - crop_bbox[2]) // 2
             crop_bbox[2] = 512
         if crop_bbox[3] < 512:
-            crop_bbox[1] = crop_bbox[1] - (crop_bbox[3] - 512) // 2
+            crop_bbox[1] = crop_bbox[1] - (512 - crop_bbox[3]) // 2
             crop_bbox[3] = 512
 
         crop_bbox = [
