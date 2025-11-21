@@ -173,7 +173,7 @@ class NdJobStub extends NoveltyDetection
     public $crash = false;
     public $annotations = "[[100,200,20,0.9]]";
 
-    protected function python($command, $log = 'log.txt')
+    protected function python($command, $log = 'log.txt', $env = '')
     {
         $this->command = $command;
         $imageId = $this->job->volume->images()->first()->id;
