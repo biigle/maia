@@ -110,7 +110,7 @@ class AnnotationCandidateController extends Controller
                 ->orderBy('id')
                 ->select('id');
 
-            foreach ($idsQuery->lazy() as $item) {
+            foreach ($idsQuery->lazy(10000) as $item) {
                 yield $item->id;
             }
 
@@ -122,7 +122,7 @@ class AnnotationCandidateController extends Controller
                         ->where('job_id', $job->id);
                 });
 
-            foreach ($remainingIdsQuery->lazyById() as $item) {
+            foreach ($remainingIdsQuery->lazyById(10000) as $item) {
                 yield $item->id;
             }
         };
