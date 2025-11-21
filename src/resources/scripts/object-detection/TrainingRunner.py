@@ -51,7 +51,7 @@ transforms = A.Compose([
 # Returns one item for each annotation which is a crop around the annotation.
 class SingleBoxCocoDetection(CocoDetection):
     def __init__(self, **kwargs):
-        super().__init__(self, **kwargs)
+        super().__init__(**kwargs)
         self.image_cache = None
         self.target_cache = None
         self.item_cache_id = None
