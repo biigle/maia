@@ -85,34 +85,47 @@ class TrainingProposalController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
 
-        $feature = TrainingProposalFeatureVector::where('job_id', $id)
-            ->findOrFail($id2);
+        $feature = TrainingProposalFeatureVector::findOrFail($id2);
+        $query = TrainingProposalFeatureVector::where('job_id', $id);
+        $hasFeatures = $query->clone()
+            ->whereNotNull('vector')
+            ->whereNot('id', $id2)
+            ->exists();
 
-        // Manually optimized query for the cosine distance. The nearestNeighbors()
-        // method of pgvector seems to compute the distances twice and returns lots
-        // of data that we don't need.
-        $ids = $feature->whereNotNull('vector')
-            ->where('id', '!=', $feature->id)
-            ->where('job_id', $id)
-            ->orderByRaw('vector <=> ?', [$feature->vector])
-            ->pluck('id');
-
-        $count = $ids->count();
-        if ($count === 0) {
+        if (!$hasFeatures) {
             abort(Response::HTTP_NOT_FOUND);
         }
 
-        if ($count !== ($job->trainingProposals()->count() - 1)) {
-            // Add IDs of proposals without feature vectors at the end.
-            $ids = $ids->concat(
-                $job->trainingProposals()
-                    ->whereNotIn('id', $ids)
-                    ->whereNot('id', $id2)
-                    ->pluck('id')
-            );
-        }
+        $yieldItems = function () use ($query, $feature, $job): \Generator {
+            // Manually optimized query for the cosine distance. The nearestNeighbors()
+            // method of pgvector seems to compute the distances twice and returns lots
+            // of data that we don't need.
+            $idsQuery = $query->clone()
+                ->whereNotNull('vector')
+                ->whereNot('id', $feature->id)
+                ->orderByRaw('vector <=> ?', [$feature->vector])
+                ->orderBy('id')
+                ->select('id');
 
-        return $ids;
+            foreach ($idsQuery->lazy() as $item) {
+                yield $item->id;
+            }
+
+            // Add IDs of candidates without feature vectors at the end.
+            $remainingIdsQuery = $job->trainingProposals()
+                ->whereNotIn('id', function ($query) use ($job) {
+                    $query->select('id')
+                        ->from('maia_training_proposal_feature_vectors')
+                        ->where('job_id', $job->id);
+                });
+
+            foreach ($remainingIdsQuery->lazyById() as $item) {
+                yield $item->id;
+            }
+        };
+
+        // Use a streamed response because there can be a lot of items.
+        return response()->streamJson($yieldItems());
     }
 
     /**

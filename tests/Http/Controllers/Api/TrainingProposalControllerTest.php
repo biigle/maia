@@ -207,9 +207,20 @@ class TrainingProposalControllerTest extends ApiTestCase
             'vector' => range(0, 383),
         ]);
 
-        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
-            ->assertStatus(200)
-            ->assertExactJson([$tp3->id, $tp2->id]);
+        $response = $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
+            ->assertStatus(200);
+
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+        $response = new TestResponse(
+            new Response($content,
+                $response->baseResponse->getStatusCode(),
+                $response->baseResponse->headers->all()
+            )
+        );
+
+        $response->assertExactJson([$tp3->id, $tp2->id]);
     }
 
     public function testIndexSimilarityMissing()
@@ -232,9 +243,20 @@ class TrainingProposalControllerTest extends ApiTestCase
         $tp3 = TrainingProposalTest::create(['job_id' => $id]);
 
         $this->beEditor();
-        $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
-            ->assertStatus(200)
-            ->assertExactJson([$tp2->id, $tp3->id]);
+        $response = $this->getJson("/api/v1/maia-jobs/{$id}/training-proposals/similar-to/{$tp1->id}")
+            ->assertStatus(200);
+
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+        $response = new TestResponse(
+            new Response($content,
+                $response->baseResponse->getStatusCode(),
+                $response->baseResponse->headers->all()
+            )
+        );
+
+        $response->assertExactJson([$tp2->id, $tp3->id]);
     }
 
     public function testIndexSimilarityEmpty()

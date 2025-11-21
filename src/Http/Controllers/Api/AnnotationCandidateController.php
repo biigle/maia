@@ -88,34 +88,47 @@ class AnnotationCandidateController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
 
-        $feature = AnnotationCandidateFeatureVector::where('job_id', $id)
-            ->findOrFail($id2);
+        $feature = AnnotationCandidateFeatureVector::findOrFail($id2);
+        $query = AnnotationCandidateFeatureVector::where('job_id', $id);
+        $hasFeatures = $query->clone()
+            ->whereNotNull('vector')
+            ->whereNot('id', $id2)
+            ->exists();
 
-        // Manually optimized query for the cosine distance. The nearestNeighbors()
-        // method of pgvector seems to compute the distances twice and returns lots
-        // of data that we don't need.
-        $ids = $feature->whereNotNull('vector')
-            ->where('id', '!=', $feature->id)
-            ->where('job_id', $id)
-            ->orderByRaw('vector <=> ?', [$feature->vector])
-            ->pluck('id');
-
-        $count = $ids->count();
-        if ($count === 0) {
+        if (!$hasFeatures) {
             abort(Response::HTTP_NOT_FOUND);
         }
 
-        if ($count !== ($job->annotationCandidates()->count() - 1)) {
-            // Add IDs of candidates without feature vectors at the end.
-            $ids = $ids->concat(
-                $job->annotationCandidates()
-                    ->whereNotIn('id', $ids)
-                    ->whereNot('id', $id2)
-                    ->pluck('id')
-            );
-        }
+        $yieldItems = function () use ($query, $feature, $job): \Generator {
+            // Manually optimized query for the cosine distance. The nearestNeighbors()
+            // method of pgvector seems to compute the distances twice and returns lots
+            // of data that we don't need.
+            $idsQuery = $query->clone()
+                ->whereNotNull('vector')
+                ->whereNot('id', $feature->id)
+                ->orderByRaw('vector <=> ?', [$feature->vector])
+                ->orderBy('id')
+                ->select('id');
 
-        return $ids;
+            foreach ($idsQuery->lazy() as $item) {
+                yield $item->id;
+            }
+
+            // Add IDs of candidates without feature vectors at the end.
+            $remainingIdsQuery = $job->annotationCandidates()
+                ->whereNotIn('id', function ($query) use ($job) {
+                    $query->select('id')
+                        ->from('maia_annotation_candidate_feature_vectors')
+                        ->where('job_id', $job->id);
+                });
+
+            foreach ($remainingIdsQuery->lazyById() as $item) {
+                yield $item->id;
+            }
+        };
+
+        // Use a streamed response because there can be a lot of items.
+        return response()->streamJson($yieldItems());
     }
 
     /**

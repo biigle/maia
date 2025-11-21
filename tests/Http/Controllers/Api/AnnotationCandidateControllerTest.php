@@ -225,9 +225,20 @@ class AnnotationCandidateControllerTest extends ApiTestCase
             'vector' => range(0, 383),
         ]);
 
-        $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
-            ->assertStatus(200)
-            ->assertExactJson([$ac3->id, $ac2->id]);
+        $response = $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
+            ->assertStatus(200);
+
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+        $response = new TestResponse(
+            new Response($content,
+                $response->baseResponse->getStatusCode(),
+                $response->baseResponse->headers->all()
+            )
+        );
+
+        $response->assertExactJson([$ac3->id, $ac2->id]);
     }
 
     public function testIndexSimilarityMissing()
@@ -250,9 +261,20 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $ac3 = AnnotationCandidateTest::create(['job_id' => $id]);
 
         $this->beEditor();
-        $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
-            ->assertStatus(200)
-            ->assertExactJson([$ac2->id, $ac3->id]);
+        $response = $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
+            ->assertStatus(200);
+
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+        $response = new TestResponse(
+            new Response($content,
+                $response->baseResponse->getStatusCode(),
+                $response->baseResponse->headers->all()
+            )
+        );
+
+        $response->assertExactJson([$ac2->id, $ac3->id]);
     }
 
     public function testIndexSimilarityEmpty()
