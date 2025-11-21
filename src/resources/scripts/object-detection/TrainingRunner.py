@@ -50,6 +50,12 @@ transforms = A.Compose([
 # Custom dataset for compatibility with Albumentations.
 # Returns one item for each annotation which is a crop around the annotation.
 class SingleBoxCocoDetection(CocoDetection):
+    def __init__(self, **kwargs):
+        super().__init__(self, **kwargs)
+        self.image_cache = None
+        self.target_cache = None
+        self.item_cache_id = None
+
     def _load_target(self, id):
         anns = self.coco.loadAnns(self.coco.getAnnIds(id))
         boxes = [a['bbox'] for a in anns]
@@ -71,9 +77,17 @@ class SingleBoxCocoDetection(CocoDetection):
             raise IndexError
 
         id = ann['image_id']
-        image = self._load_image(id)
-        target = self._load_target(id)
-        width, height = image.size
+        if self.item_cache_id == id:
+            image = self.image_cache
+            target = self.target_cache
+        else:
+            image = np.array(self._load_image(id))
+            target = self._load_target(id)
+            self.image_cache = image
+            self.target_cache = target
+            self.item_cache_id = id
+
+        width, height, _ = image.shape
 
         crop_bbox = ann['bbox'].copy()
         # Make sure crops are at least 512x512px
@@ -91,7 +105,7 @@ class SingleBoxCocoDetection(CocoDetection):
             min(height, crop_bbox[1] + crop_bbox[3])
         ]
 
-        image = A.augmentations.crops.functional.crop(np.array(image), *crop_bbox)
+        image = A.augmentations.crops.functional.crop(image, *crop_bbox)
         target['boxes'] = A.augmentations.crops.functional.crop_bboxes_by_coords(
             bboxes=np.array(target['boxes'], dtype=np.float32),
             crop_coords=crop_bbox,
