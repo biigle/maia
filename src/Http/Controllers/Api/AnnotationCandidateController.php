@@ -57,7 +57,7 @@ class AnnotationCandidateController extends Controller
             ->with('label');
 
         $yieldItems = function () use ($query): \Generator {
-            foreach ($query->lazy() as $item) {
+            foreach ($query->lazy(10000) as $item) {
                 $item->makeHidden('label_id');
                 yield $item;
             }
@@ -112,6 +112,11 @@ class AnnotationCandidateController extends Controller
 
             foreach ($idsQuery->lazy(10000) as $item) {
                 yield $item->id;
+            }
+
+            // Return early to avoid running the very expensive query below.
+            if ($query->clone()->count() === $job->annotationCandidates()->count()) {
+                return;
             }
 
             // Add IDs of candidates without feature vectors at the end.

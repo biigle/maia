@@ -55,7 +55,7 @@ class TrainingProposalController extends Controller
             ->orderBy('id', 'desc');
 
         $yieldItems = function () use ($query): \Generator {
-            foreach ($query->lazy() as $item) {
+            foreach ($query->lazy(10000) as $item) {
                 yield $item;
             }
         };
@@ -109,6 +109,11 @@ class TrainingProposalController extends Controller
 
             foreach ($idsQuery->lazy(10000) as $item) {
                 yield $item->id;
+            }
+
+            // Return early to avoid running the very expensive query below.
+            if ($query->clone()->count() === $job->trainingProposals()->count()) {
+                return;
             }
 
             // Add IDs of candidates without feature vectors at the end.
