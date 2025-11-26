@@ -44,7 +44,7 @@ transforms = A.Compose([
         A.RandomRotate90(p=0.25),
         A.GaussianBlur(sigma_limit=[1.0, 2.0]),
         A.ImageCompression(quality_range=[25, 50]),
-    ], n=4, p=0.9),
+    ], n=4, p=0.25),
     A.ToFloat(),
     ToTensorV2(),
 ], bbox_params=bbox_params)
@@ -89,6 +89,8 @@ data_loader = DataLoader(
     batch_size=int(params['batch_size']),
     shuffle=True,
     num_workers=int(params['max_workers']),
+    persistent_workers=True,
+    pin_memory=True,
     collate_fn=collate_fn
 )
 
@@ -104,9 +106,9 @@ optimizer = torch.optim.SGD(
     weight_decay=0.0005
 )
 
-lr_scheduler = torch.optim.lr_scheduler.StepLR(
+lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
     optimizer,
-    step_size=3,
+    milestones=[8, 11],
     gamma=0.1
 )
 
