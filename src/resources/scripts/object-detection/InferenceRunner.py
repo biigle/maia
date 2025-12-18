@@ -5,10 +5,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 import torch
 from PIL import Image
-import albumentations as A
 import numpy as np
-from torch_utils import get_model
-from albumentations.pytorch import ToTensorV2
+from TrainingRunner import get_model
+from torchvision.transforms import functional as F
 
 class InferenceRunner(object):
 
@@ -24,29 +23,23 @@ class InferenceRunner(object):
 
         self.images = {k: v for k, v in params['images'].items()}
 
-        self.transforms = A.Compose([
-            A.ToFloat(),
-            ToTensorV2(),
-        ])
-
     def run(self):
         model = get_model(
-            self.num_classes,
-            # The original config had rpn_nms_thresh=0.7 and box_nms_thresh=0.5.
-            # Lowered, because of many overlapping boxes for the same objects in tests.
-            rpn_nms_thresh=0.2,
-            box_nms_thresh=0.2,
+            self.num_classes
+            # # The original config had rpn_nms_thresh=0.7 and box_nms_thresh=0.5.
+            # # Lowered, because of many overlapping boxes for the same objects in tests.
+            # rpn_nms_thresh=0.2,
+            # box_nms_thresh=0.2,
             # Increase default max_size of 1333.
             max_size=8192,
-            # Use same min_size enforced by BIIGLE.
-            min_size=512,
+            # # Use same min_size enforced by BIIGLE.
+            # min_size=512,
         )
         model.load_state_dict(torch.load(self.checkpoint_path))
 
-        model.eval()
-
         device = torch.accelerator.current_accelerator() if torch.accelerator.is_available() else torch.device('cpu')
         model.to(device)
+        model.eval()
 
         executor = ThreadPoolExecutor(max_workers=self.max_workers)
 
@@ -55,7 +48,7 @@ class InferenceRunner(object):
             for index, (image_id, image_path) in enumerate(self.images.items()):
                 print('Image {} of {} (#{})'.format(index + 1, total_images, image_id))
                 image = np.array(Image.open(image_path).convert('RGB'))
-                image = self.transforms(image=image)['image'].to(device)
+                image = F.to_tensor(image).to(device)
                 result = model([image])[0]
 
                 executor.submit(self.process_result, image_id, result)

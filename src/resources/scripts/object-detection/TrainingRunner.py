@@ -1,8 +1,11 @@
 from albumentations.pytorch import ToTensorV2
 from torch.amp import GradScaler
 from torch.utils.data import DataLoader
-from torch_utils import collate_fn, train_one_epoch, get_model
 from torchvision.datasets import CocoDetection
+from torchvision.transforms import functional as F
+from torchvision.models.detection import fasterrcnn_resnet50_fpn
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection.rpn import AnchorGenerator
 import albumentations as A
 import json
 import numpy as np
@@ -10,126 +13,143 @@ import os
 import sys
 import torch
 
-# Based on: https://docs.pytorch.org/tutorials/intermediate/torchvision_tutorial.html#torchvision-object-detection-finetuning-tutorial
+class CocoDataset(CocoDetection):
+    def __init__(self, root, annFile, transform=None):
+        super().__init__(root, annFile)
+        self.transform = transform
 
-with open(sys.argv[1]) as f:
-    params = json.load(f)
+    def __getitem__(self, idx):
+        # Load image and standard COCO annotation
+        img, target = super().__getitem__(idx)
+        image_id = self.ids[idx]
 
-with open(sys.argv[2]) as f:
-    trainset = json.load(f)
+        # Convert Image to Tensor
+        img = F.to_tensor(img)
 
-num_classes = len(trainset['classes'])
-model = get_model(
-    num_classes,
-    # Use same min_size than random crop transform.
-    min_size=512,
-    # Train all but the first (of 5) layers.
-    trainable_backbone_layers=4,
-)
+        # Parse the COCO annotations
+        boxes = []
+        labels = []
+        area = []
+        iscrowd = []
 
-bbox_params = A.BboxParams(
-    format='pascal_voc',
-    label_fields=['labels'],
-    # Clip boxes that overflow image boundaries.
-    clip=True,
-    # Remove all boxes with less than 10% of their content in the random crop.
-    min_visibility=0.1,
-    filter_invalid_bboxes=True,
-)
-transforms = A.Compose([
-    A.AtLeastOneBBoxRandomCrop(512, 512),
-    A.SomeOf([
-        A.HorizontalFlip(p=0.25),
-        A.VerticalFlip(p=0.25),
-        A.RandomRotate90(p=0.25),
-        A.GaussianBlur(sigma_limit=[1.0, 2.0]),
-        A.ImageCompression(quality_range=[25, 50]),
-    ], n=4, p=0.25),
-    A.ToFloat(),
-    ToTensorV2(),
-], bbox_params=bbox_params)
+        for obj in target:
+            # COCO bbox: [x, y, w, h] -> PyTorch bbox: [x1, y1, x2, y2]
+            xmin = obj['bbox'][0]
+            ymin = obj['bbox'][1]
+            xmax = xmin + obj['bbox'][2]
+            ymax = ymin + obj['bbox'][3]
 
-# Custom dataset for compatibility with Albumentations.
-class MyCocoDetection(CocoDetection):
-    def _load_target(self, id):
-        anns = self.coco.loadAnns(self.coco.getAnnIds(id))
-        boxes = [a['bbox'] for a in anns]
-        boxes = [[b[0], b[1], b[0] + b[2], b[1] + b[3]] for b in boxes]
-        labels = [a['category_id'] for a in anns]
+            # Filter out small/empty boxes to prevent NaN loss
+            if obj['bbox'][2] > 0 and obj['bbox'][3] > 0:
+                boxes.append([xmin, ymin, xmax, ymax])
+                labels.append(obj['category_id'])
+                area.append(obj['area'])
+                iscrowd.append(obj['iscrowd'])
 
-        return {
-            'boxes': boxes,
-            'labels': labels,
+        # Convert python lists to torch tensors
+        boxes = torch.as_tensor(boxes, dtype=torch.float32)
+        labels = torch.as_tensor(labels, dtype=torch.int64)
+        area = torch.as_tensor(area, dtype=torch.float32)
+        iscrowd = torch.as_tensor(iscrowd, dtype=torch.int64)
+        image_id = torch.tensor([image_id])
+
+        target_dict = {
+            "boxes": boxes,
+            "labels": labels,
+            "image_id": image_id,
+            "area": area,
+            "iscrowd": iscrowd
         }
 
-    def __getitem__(self, index):
-        if not isinstance(index, int):
-            raise ValueError(f"Index must be of type integer, got {type(index)} instead.")
+        return img, target_dict
 
-        id = self.ids[index]
-        image = self._load_image(id)
-        target = self._load_target(id)
+def collate_fn(batch):
+    return tuple(zip(*batch))
 
-        if self.transforms is not None:
-            ret = self.transforms(
-                image=np.array(image),
-                bboxes=np.array(target['boxes'], dtype=np.float32),
-                labels=target['labels']
-            )
-            image = ret['image']
-            target['boxes'] = torch.tensor(ret['bboxes'])
-            target['labels'] = torch.tensor(ret['labels'], dtype=torch.int64)
+# TODO no anchor generator for inference?
+def get_model(num_classes, **kwargs):
+    anchor_sizes = ((4,), (8,), (16,), (32,), (64,))
+    aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+    anchor_generator = AnchorGenerator(anchor_sizes, aspect_ratios)
+    kwargs['rpn_anchor_generator'] = anchor_generator
 
-        return image, target
+    model = fasterrcnn_resnet50_fpn(weights='DEFAULT', **kwargs)
+    # Replace the classifier with a new one having the user-defined number of classes.
+    num_classes = num_classes + 1  # +1 for background
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
-dataset = MyCocoDetection(root=trainset['img_prefix'], annFile=trainset['ann_file'], transforms=transforms)
+    return model
 
-data_loader = DataLoader(
-    dataset,
-    batch_size=int(params['batch_size']),
-    shuffle=True,
-    num_workers=int(params['max_workers']),
-    persistent_workers=True,
-    pin_memory=True,
-    collate_fn=collate_fn
-)
+if __name__ == '__main__':
+    with open(sys.argv[1]) as f:
+        params = json.load(f)
 
-# Scale the learn rate for different batch sizes.
-base_batch_size = 16.0
-lr = 0.005 * float(params['batch_size']) / base_batch_size
+    with open(sys.argv[2]) as f:
+        trainset = json.load(f)
 
-optim_params = [p for p in model.parameters() if p.requires_grad]
-optimizer = torch.optim.SGD(
-    optim_params,
-    lr=lr,
-    momentum=0.9,
-    weight_decay=0.0005
-)
+    num_classes = len(trainset['classes'])
 
-lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
-    optimizer,
-    milestones=[8, 11],
-    gamma=0.1
-)
+    device = torch.accelerator.current_accelerator() if torch.accelerator.is_available() else torch.device('cpu')
+    print(f"Training on: {device}")
 
-device = torch.accelerator.current_accelerator() if torch.accelerator.is_available() else torch.device('cpu')
-model.to(device)
+    dataset = CocoDataset(root=trainset['img_prefix'], annFile=trainset['ann_file'])
 
-scaler = GradScaler(device)
+    data_loader = DataLoader(
+        dataset,
+        batch_size=int(params['batch_size']),
+        shuffle=True,
+        num_workers=int(params['max_workers']),
+        pin_memory=True,
+        collate_fn=collate_fn
+    )
 
-num_epochs = 12
+    model = get_model(num_classes)
+    model.to(device)
 
-for epoch in range(num_epochs):
-    train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10, scaler=scaler)
-    lr_scheduler.step()
+    model_params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.SGD(model_params, lr=0.005, momentum=0.9, weight_decay=0.0005)
 
-checkpoint_path = os.path.join(params['tmp_dir'], 'model.pth')
-torch.save(model.state_dict(), checkpoint_path)
+    model.train()
 
-output = {
-    'checkpoint_path': checkpoint_path,
-    'num_classes': num_classes,
-}
+    NUM_EPOCHS = 12
+    for epoch in range(NUM_EPOCHS):
+        print(f"--- Epoch {epoch+1}/{NUM_EPOCHS} ---")
+        epoch_loss = 0
 
-with open(params['output_path'], 'w') as f:
-    json.dump(output, f)
+        for i, (images, targets) in enumerate(data_loader):
+            # Move data to GPU
+            images = list(image.to(device) for image in images)
+            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+
+            loss_dict = model(images, targets)
+            losses = sum(loss for loss in loss_dict.values())
+            loss_value = losses.item()
+
+            if not math.isfinite(loss_value):
+                print(f"Loss is {loss_value}, stopping training")
+                print(loss_dict)
+                sys.exit(1)
+
+            # Backward pass
+            optimizer.zero_grad()
+            losses.backward()
+            optimizer.step()
+
+            epoch_loss += losses.item()
+
+            if i % 10 == 0:
+                print(f"Batch {i}: Loss = {losses.item():.4f}")
+
+        print(f"Epoch {epoch+1} Average Loss: {epoch_loss / len(data_loader):.4f}")
+
+    checkpoint_path = os.path.join(params['tmp_dir'], 'model.pth')
+    torch.save(model.state_dict(), checkpoint_path)
+
+    output = {
+        'checkpoint_path': checkpoint_path,
+        'num_classes': num_classes,
+    }
+
+    with open(params['output_path'], 'w') as f:
+        json.dump(output, f)
