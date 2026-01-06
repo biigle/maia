@@ -12,6 +12,7 @@ import numpy as np
 import os
 import sys
 import torch
+import math
 
 class CocoDataset(CocoDetection):
     def __init__(self, root, annFile, transform=None):
@@ -66,14 +67,8 @@ class CocoDataset(CocoDetection):
 def collate_fn(batch):
     return tuple(zip(*batch))
 
-# TODO no anchor generator for inference?
 def get_model(num_classes, **kwargs):
-    anchor_sizes = ((4,), (8,), (16,), (32,), (64,))
-    aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
-    anchor_generator = AnchorGenerator(anchor_sizes, aspect_ratios)
-    kwargs['rpn_anchor_generator'] = anchor_generator
-
-    model = fasterrcnn_resnet50_fpn(weights='DEFAULT', **kwargs)
+    model = fasterrcnn_resnet50_fpn(**kwargs)
     # Replace the classifier with a new one having the user-defined number of classes.
     num_classes = num_classes + 1  # +1 for background
     in_features = model.roi_heads.box_predictor.cls_score.in_features
@@ -104,7 +99,10 @@ if __name__ == '__main__':
         collate_fn=collate_fn
     )
 
-    model = get_model(num_classes)
+    anchor_sizes = ((4,), (8,), (16,), (32,), (64,))
+    aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+    anchor_generator = AnchorGenerator(anchor_sizes, aspect_ratios)
+    model = get_model(num_classes, weights='DEFAULT', anchor_generator=anchor_generator)
     model.to(device)
 
     model_params = [p for p in model.parameters() if p.requires_grad]

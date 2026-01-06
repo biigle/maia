@@ -79,6 +79,7 @@ class DatasetGenerator(object):
             target_path = os.path.join(self.training_images_path, target_name)
             image = PilImage.open(source_path)
 
+            # TODO disable scaling?
             if bool(self.scale_factors) != False:
                 # If scale transfer should be performed, scale the image and proposals.
                 scale_factor = self.scale_factors[imageId]

@@ -25,13 +25,14 @@ class InferenceRunner(object):
 
     def run(self):
         model = get_model(
-            self.num_classes
+            self.num_classes,
+            weights=None,
             # # The original config had rpn_nms_thresh=0.7 and box_nms_thresh=0.5.
             # # Lowered, because of many overlapping boxes for the same objects in tests.
             # rpn_nms_thresh=0.2,
             # box_nms_thresh=0.2,
             # Increase default max_size of 1333.
-            max_size=8192,
+            # max_size=8192,
             # # Use same min_size enforced by BIIGLE.
             # min_size=512,
         )
