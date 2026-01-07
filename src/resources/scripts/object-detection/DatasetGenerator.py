@@ -1,9 +1,10 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from PIL import Image as PilImage
+import json
+import math
+import numpy as np
 import os
 import sys
-import json
-from PIL import Image as PilImage
-import numpy as np
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class DatasetGenerator(object):
     def __init__(self, params):
@@ -79,20 +80,19 @@ class DatasetGenerator(object):
             target_path = os.path.join(self.training_images_path, target_name)
             image = PilImage.open(source_path)
 
-            # TODO disable scaling?
             if bool(self.scale_factors) != False:
                 # If scale transfer should be performed, scale the image and proposals.
                 scale_factor = self.scale_factors[imageId]
                 width = int(round(image.width * scale_factor))
                 height = int(round(image.height * scale_factor))
                 # Make sure the scaling does not increase the image size too much
-                # (e.g. if there is an error in the metadata). Use a maximum of
-                # 15,000x15,000 pixels.
-                too_large_factor = min(15000 / width, 15000 / height)
-                if too_large_factor < 1.0:
-                    width = int(round(width * too_large_factor))
-                    height = int(round(height * too_large_factor))
-                    scale_factor = scale_factor * too_large_factor
+                # (e.g. if there is an error in the metadata).
+                num_pixels = width * height
+                if num_pixels > PilImage.MAX_IMAGE_PIXELS:
+                    adjust_factor = math.sqrt(PilImage.MAX_IMAGE_PIXELS / num_pixels)
+                    width = int(round(width * adjust_factor))
+                    height = int(round(height * adjust_factor))
+                    scale_factor = width / image.width
                 image_format = image.format
                 image = image.resize((width, height))
                 proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor)
