@@ -48,9 +48,9 @@ class InferenceRunner(object):
         with torch.inference_mode():
             for index, (image_id, image_path) in enumerate(self.images.items()):
                 print('Image {} of {} (#{})'.format(index + 1, total_images, image_id))
-                image = np.array(Image.open(image_path).convert('RGB'))
-                image = F.to_tensor(image).to(device)
-                result = model([image])[0]
+                image = Image.open(image_path).convert('RGB')
+                image_tensor = F.to_tensor(image).unsqueeze(0).to(device)
+                result = model(image_tensor)[0]
 
                 executor.submit(self.process_result, image_id, result)
 
