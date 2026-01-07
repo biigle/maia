@@ -1,14 +1,10 @@
-from albumentations.pytorch import ToTensorV2
-from torch.amp import GradScaler
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection
 from torchvision.transforms import functional as F
 from torchvision.models.detection import fasterrcnn_resnet50_fpn
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.rpn import AnchorGenerator
-import albumentations as A
 import json
-import numpy as np
 import os
 import sys
 import torch
@@ -24,9 +20,6 @@ class CocoDataset(CocoDetection):
         img, target = super().__getitem__(idx)
         image_id = self.ids[idx]
 
-        # Convert Image to Tensor
-        img = F.to_tensor(img)
-
         # Parse the COCO annotations
         boxes = []
         labels = []
@@ -35,13 +28,13 @@ class CocoDataset(CocoDetection):
 
         for obj in target:
             # COCO bbox: [x, y, w, h] -> PyTorch bbox: [x1, y1, x2, y2]
-            xmin = obj['bbox'][0]
-            ymin = obj['bbox'][1]
-            xmax = xmin + obj['bbox'][2]
-            ymax = ymin + obj['bbox'][3]
+            xmin = max(obj['bbox'][0], 0)
+            ymin = max(obj['bbox'][1], 0)
+            xmax = min(xmin + obj['bbox'][2], img.width)
+            ymax = min(ymin + obj['bbox'][3], img.height)
 
             # Filter out small/empty boxes to prevent NaN loss
-            if obj['bbox'][2] > 0 and obj['bbox'][3] > 0:
+            if xmax > xmin and ymax > ymin:
                 boxes.append([xmin, ymin, xmax, ymax])
                 labels.append(obj['category_id'])
                 area.append(obj['area'])
@@ -62,7 +55,9 @@ class CocoDataset(CocoDetection):
             "iscrowd": iscrowd
         }
 
-        return img, target_dict
+        img_tensor = F.to_tensor(img)
+
+        return img_tensor, target_dict
 
 def collate_fn(batch):
     return tuple(zip(*batch))
