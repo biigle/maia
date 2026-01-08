@@ -94,10 +94,7 @@ if __name__ == '__main__':
         collate_fn=collate_fn
     )
 
-    anchor_sizes = ((4,), (8,), (16,), (32,), (64,))
-    aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
-    anchor_generator = AnchorGenerator(anchor_sizes, aspect_ratios)
-    model = get_model(num_classes, weights='DEFAULT', rpn_anchor_generator=anchor_generator)
+    model = get_model(num_classes, weights='DEFAULT')
     model.to(device)
 
     model_params = [p for p in model.parameters() if p.requires_grad]
