@@ -24,7 +24,7 @@ class InferenceRunner(object):
 
         # Sliding window parameters for SAHI
         self.slice_size = 512
-        self.overlap_ratio = 0.5
+        self.overlap_ratio = 0.2
 
     def run(self):
         # Load the custom model
@@ -45,7 +45,7 @@ class InferenceRunner(object):
         detection_model = AutoDetectionModel.from_pretrained(
             model_type='torchvision',
             model=model,
-            device=device,
+            device=str(device),
             confidence_threshold=0.05,
             category_mapping=category_mapping,
             image_size=512,
