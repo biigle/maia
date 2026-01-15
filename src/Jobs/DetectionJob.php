@@ -75,7 +75,8 @@ abstract class DetectionJob implements ShouldQueue
      */
     protected function cleanup()
     {
-        File::deleteDirectory($this->tmpDir);
+        // TODO
+        // File::deleteDirectory($this->tmpDir);
     }
 
     /**

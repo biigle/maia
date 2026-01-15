@@ -129,13 +129,16 @@ if __name__ == '__main__':
     )
     transforms = A.Compose([
         A.AtLeastOneBBoxRandomCrop(512, 512, erosion_factor=0.5),
-        A.SomeOf([
-            A.HorizontalFlip(p=0.25),
-            A.VerticalFlip(p=0.25),
-            A.RandomRotate90(p=0.25),
-            A.GaussianBlur(sigma_limit=[1.0, 2.0]),
-            A.ImageCompression(quality_range=[25, 50]),
-        ], n=4, p=0.25),
+        A.HorizontalFlip(p=0.25),
+        A.VerticalFlip(p=0.25),
+        A.RandomRotate90(p=0.25),
+        # A.SomeOf([
+        #     A.HorizontalFlip(p=0.25),
+        #     A.VerticalFlip(p=0.25),
+        #     A.RandomRotate90(p=0.25),
+        #     A.GaussianBlur(sigma_limit=[1.0, 2.0]),
+        #     A.ImageCompression(quality_range=[25, 50]),
+        # ], n=4, p=0.25),
         A.ToFloat(),
         ToTensorV2(),
     ], bbox_params=bbox_params)
