@@ -128,7 +128,7 @@ if __name__ == '__main__':
         filter_invalid_bboxes=True,
     )
     transforms = A.Compose([
-        A.AtLeastOneBBoxRandomCrop(512, 512, erosion_factor=0.5),
+        A.AtLeastOneBBoxRandomCrop(1024, 1024, erosion_factor=0.5),
         A.HorizontalFlip(p=0.25),
         A.VerticalFlip(p=0.25),
         A.RandomRotate90(p=0.25),

@@ -23,7 +23,7 @@ class InferenceRunner(object):
         self.images = {k: v for k, v in params['images'].items()}
 
         # Sliding window parameters for SAHI
-        self.slice_size = 512
+        self.slice_size = 1024
         self.overlap_ratio = 0.2
 
     def run(self):
@@ -31,8 +31,8 @@ class InferenceRunner(object):
         model = get_model(
             self.num_classes,
             weights='DEFAULT',
-            max_size=512,
-            min_size=512,
+            max_size=self.slice_size,
+            min_size=self.slice_size,
         )
         model.load_state_dict(torch.load(self.checkpoint_path))
 
@@ -46,9 +46,9 @@ class InferenceRunner(object):
             model_type='torchvision',
             model=model,
             device=str(device),
-            confidence_threshold=0.05,
+            confidence_threshold=0.5,
             category_mapping=category_mapping,
-            image_size=512,
+            image_size=self.slice_size,
         )
 
         executor = ThreadPoolExecutor(max_workers=self.max_workers)
@@ -65,6 +65,7 @@ class InferenceRunner(object):
                 slice_width=self.slice_size,
                 overlap_height_ratio=self.overlap_ratio,
                 overlap_width_ratio=self.overlap_ratio,
+                postprocess_match_threshold=0.25,
                 verbose=0,
             )
 
