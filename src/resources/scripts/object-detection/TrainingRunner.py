@@ -154,7 +154,8 @@ if __name__ == '__main__':
         collate_fn=collate_fn
     )
 
-    model = get_model(num_classes, weights='DEFAULT', min_size=512)
+    # TODO min_size necessary?
+    model = get_model(num_classes, weights='DEFAULT', min_size=1024)
     model.to(device)
 
     model_params = [p for p in model.parameters() if p.requires_grad]
