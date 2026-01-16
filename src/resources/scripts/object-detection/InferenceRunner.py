@@ -65,6 +65,7 @@ class InferenceRunner(object):
                 slice_width=self.slice_size,
                 overlap_height_ratio=self.overlap_ratio,
                 overlap_width_ratio=self.overlap_ratio,
+                postprocess_match_metric='IOU',
                 postprocess_match_threshold=0.25,
                 verbose=0,
             )
