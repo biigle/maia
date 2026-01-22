@@ -13,55 +13,6 @@ import os
 import sys
 import torch
 
-# class CocoDataset(CocoDetection):
-#     def __init__(self, root, annFile, transform=None):
-#         super().__init__(root, annFile)
-#         self.transform = transform
-
-#     def __getitem__(self, idx):
-#         # Load image and standard COCO annotation
-#         img, target = super().__getitem__(idx)
-#         image_id = self.ids[idx]
-
-#         # Parse the COCO annotations
-#         boxes = []
-#         labels = []
-#         area = []
-#         iscrowd = []
-
-#         for obj in target:
-#             # COCO bbox: [x, y, w, h] -> PyTorch bbox: [x1, y1, x2, y2]
-#             xmin = max(obj['bbox'][0], 0)
-#             ymin = max(obj['bbox'][1], 0)
-#             xmax = min(xmin + obj['bbox'][2], img.width)
-#             ymax = min(ymin + obj['bbox'][3], img.height)
-
-#             # Filter out small/empty boxes to prevent NaN loss
-#             if xmax > xmin and ymax > ymin:
-#                 boxes.append([xmin, ymin, xmax, ymax])
-#                 labels.append(obj['category_id'])
-#                 area.append(obj['area'])
-#                 iscrowd.append(obj['iscrowd'])
-
-#         # Convert python lists to torch tensors
-#         boxes = torch.as_tensor(boxes, dtype=torch.float32)
-#         labels = torch.as_tensor(labels, dtype=torch.int64)
-#         area = torch.as_tensor(area, dtype=torch.float32)
-#         iscrowd = torch.as_tensor(iscrowd, dtype=torch.int64)
-#         image_id = torch.tensor([image_id])
-
-#         target_dict = {
-#             "boxes": boxes,
-#             "labels": labels,
-#             "image_id": image_id,
-#             "area": area,
-#             "iscrowd": iscrowd
-#         }
-
-#         img_tensor = F.to_tensor(img)
-
-#         return img_tensor, target_dict
-
 class CocoDataset(CocoDetection):
     def _load_target(self, id):
         anns = self.coco.loadAnns(self.coco.getAnnIds(id))
@@ -154,7 +105,6 @@ if __name__ == '__main__':
         collate_fn=collate_fn
     )
 
-    # TODO min_size necessary?
     model = get_model(num_classes, weights='DEFAULT', min_size=1024)
     model.to(device)
 
