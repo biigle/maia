@@ -46,7 +46,7 @@ class InferenceRunner(object):
             model_type='torchvision',
             model=model,
             device=str(device),
-            confidence_threshold=0.5,
+            confidence_threshold=0.05,
             category_mapping=category_mapping,
             image_size=self.slice_size,
         )
@@ -67,6 +67,9 @@ class InferenceRunner(object):
                 overlap_width_ratio=self.overlap_ratio,
                 postprocess_match_metric='IOU',
                 postprocess_match_threshold=0.25,
+                # Disable prediction on full image because the model was only trained on
+                # crops.
+                perform_standard_pred=False,
                 verbose=0,
             )
 
