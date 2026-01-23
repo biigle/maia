@@ -4,3 +4,4 @@ pycocotools
 albumentations
 scikit-learn
 scikit-image
+sahi
