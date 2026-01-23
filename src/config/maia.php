@@ -90,7 +90,7 @@ return [
     |
     | Default is 16.
     */
-    'train_batch_size' => env('MAIA_TRAIN_BATCH_SIZE', 16),
+    'train_batch_size' => env('MAIA_TRAIN_BATCH_SIZE', 8),
 
 
     'notifications' => [
