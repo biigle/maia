@@ -28,7 +28,7 @@ class ObjectDetectionTest extends TestCase
     {
         FileCache::fake();
         config([
-            'maia.mmdet_train_batch_size' => 12,
+            'maia.train_batch_size' => 12,
             'maia.max_workers' => 2,
         ]);
 
@@ -71,10 +71,7 @@ class ObjectDetectionTest extends TestCase
             'tmp_dir' => $tmpDir,
             'max_workers' => 2,
             'output_path' => "{$tmpDir}/output-training.json",
-            'base_config' => config('maia.mmdet_base_config'),
             'batch_size' => 12,
-            'backbone_model_path' => config('maia.backbone_model_path'),
-            'model_path' => config('maia.model_path'),
         ];
 
         $expectInferenceJson = [
@@ -109,7 +106,7 @@ class ObjectDetectionTest extends TestCase
             $this->assertArrayHasKey($image2->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertSame($expectInferenceJson, $inputJson);
-            $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
+            $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
             $this->assertSame(State::annotationCandidatesId(), $job->fresh()->state_id);
 
@@ -184,7 +181,7 @@ class ObjectDetectionTest extends TestCase
     {
         FileCache::fake();
         config([
-            'maia.mmdet_train_batch_size' => 12,
+            'maia.train_batch_size' => 12,
             'maia.max_workers' => 2,
         ]);
 
@@ -240,10 +237,7 @@ class ObjectDetectionTest extends TestCase
             'tmp_dir' => $tmpDir,
             'max_workers' => 2,
             'output_path' => "{$tmpDir}/output-training.json",
-            'base_config' => config('maia.mmdet_base_config'),
             'batch_size' => 12,
-            'backbone_model_path' => config('maia.backbone_model_path'),
-            'model_path' => config('maia.model_path'),
         ];
 
         $expectInferenceJson = [
@@ -277,7 +271,7 @@ class ObjectDetectionTest extends TestCase
             $this->assertArrayHasKey($ownImage->id, $inputJson['images']);
             unset($inputJson['images']);
             $this->assertSame($expectInferenceJson, $inputJson);
-            $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$datasetOutputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
+            $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
             $annotations = $job->annotationCandidates()->get();
             $this->assertSame(1, $annotations->count());
@@ -295,7 +289,7 @@ class ObjectDetectionTest extends TestCase
     {
         FileCache::fake();
         config([
-            'maia.mmdet_train_batch_size' => 12,
+            'maia.train_batch_size' => 12,
             'maia.max_workers' => 2,
         ]);
 
@@ -367,7 +361,7 @@ class ObjectDetectionTest extends TestCase
     {
         FileCache::fake();
         config([
-            'maia.mmdet_train_batch_size' => 12,
+            'maia.train_batch_size' => 12,
             'maia.max_workers' => 2,
         ]);
 
@@ -443,7 +437,7 @@ class OdJobStub extends ObjectDetection
         // do nothing
     }
 
-    protected function python($command, $log = 'log.txt')
+    protected function python($command, $log = 'log.txt', $env = '')
     {
         array_push($this->commands, $command);
 

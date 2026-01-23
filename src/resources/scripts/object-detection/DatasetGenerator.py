@@ -1,9 +1,10 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from PIL import Image as PilImage
+import json
+import math
+import numpy as np
 import os
 import sys
-import json
-from PIL import Image as PilImage
-import numpy as np
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class DatasetGenerator(object):
     def __init__(self, params):
@@ -64,7 +65,7 @@ class DatasetGenerator(object):
             'images': image_list,
             'annotations': annotation_list,
             'categories': [{
-                'id': 0,
+                'id': 1,
                 'name': 'interesting',
                 'supercategory': 'interesting',
             }],
@@ -84,6 +85,14 @@ class DatasetGenerator(object):
                 scale_factor = self.scale_factors[imageId]
                 width = int(round(image.width * scale_factor))
                 height = int(round(image.height * scale_factor))
+                # Make sure the scaling does not increase the image size too much
+                # (e.g. if there is an error in the metadata).
+                num_pixels = width * height
+                if num_pixels > PilImage.MAX_IMAGE_PIXELS:
+                    adjust_factor = math.sqrt(PilImage.MAX_IMAGE_PIXELS / num_pixels)
+                    width = int(round(width * adjust_factor))
+                    height = int(round(height * adjust_factor))
+                    scale_factor = width / image.width
                 image_format = image.format
                 image = image.resize((width, height))
                 proposals = np.round(np.array(proposals, dtype=np.float32) * scale_factor)
@@ -102,7 +111,7 @@ class DatasetGenerator(object):
                 annotations.append({
                     'id': 0, # Placeholder, will be updated to an uniwue ID later.
                     'image_id': int(imageId),
-                    'category_id': 0, # There is only one category.
+                    'category_id': 1, # There is only one category.
                     'bbox': [
                         int(p[0] - p[2]), # px
                         int(p[1] - p[2]), # py
