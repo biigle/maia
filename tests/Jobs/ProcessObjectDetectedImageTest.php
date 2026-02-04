@@ -46,15 +46,10 @@ class ProcessObjectDetectedImageTest extends TestCase
             targetDisk: 'test'
         );
         $job->mock = $image;
-        $job->output = [[$candidate->id, '"'.json_encode(range(0, 383)).'"']];
         $job->handleFile($candidate->image, 'abc');
 
-        $input = $job->input;
-        $this->assertCount(1, $input);
-        $filename = array_keys($input)[0];
-        $this->assertArrayHasKey($candidate->id, $input[$filename]);
-        $box = $input[$filename][$candidate->id];
-        $this->assertSame([190, 190, 210, 210], $box);
+        $box = $job->capturedCropBoxes[0];
+        $this->assertSame([190, 190, 20, 20], $box);
 
         $vectors = AnnotationCandidateFeatureVector::where('id', $candidate->id)->get();
         $this->assertCount(1, $vectors);
@@ -100,20 +95,31 @@ class ProcessObjectDetectedImageTest extends TestCase
 
 class ProcessObjectDetectedImageStub extends ProcessObjectDetectedImage
 {
-    public $input;
-    public $outputPath;
-    public $output = [];
+    public $mock;
+    public $featureVector;
+    public $capturedCropBoxes = [];
 
     public function getVipsImage(string $path, array $options = [])
     {
         return $this->mock;
     }
 
-    protected function python(string $inputPath, string $outputPath)
+    protected function getVipsImageForPyworker(string $path, array $options = [])
     {
-        $this->input = json_decode(File::get($inputPath), true);
-        $this->outputPath = $outputPath;
-        $csv = implode("\n", array_map(fn ($row) => implode(',', $row), $this->output));
-        File::put($outputPath, $csv);
+        // Return the mock directly, skipping RGB conversion
+        return $this->getVipsImage($path, $options);
+    }
+
+    protected function getCropBufferForPyworker($image, array $box): string
+    {
+        // Capture the bounding box for test assertions
+        $this->capturedCropBoxes[] = $box;
+        // Return a fake PNG buffer
+        return 'fake-png-buffer';
+    }
+
+    protected function sendPyworkerRequest(string $buffer): array
+    {
+        return $this->featureVector ?: range(0, 383);
     }
 }
