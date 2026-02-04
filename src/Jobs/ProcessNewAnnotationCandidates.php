@@ -7,7 +7,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 
-class GenerateAnnotationCandidatePatches extends Job implements ShouldQueue
+class ProcessNewAnnotationCandidates extends Job implements ShouldQueue
 {
     use SerializesModels;
 
@@ -37,8 +37,6 @@ class GenerateAnnotationCandidatePatches extends Job implements ShouldQueue
             )
             ->eachById(fn ($image) =>
                 ProcessObjectDetectedImage::dispatch($image, $this->maiaJob,
-                        // Feature vectors are generated in a separate job on the GPU.
-                        skipFeatureVectors: true,
                         targetDisk: config('maia.annotation_candidate_storage_disk')
                     )
                     ->onQueue(config('largo.generate_annotation_patch_queue'))

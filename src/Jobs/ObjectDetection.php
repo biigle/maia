@@ -4,7 +4,6 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\GenericImage;
-use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\ObjectDetectionComplete;

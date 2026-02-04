@@ -3,11 +3,10 @@
 namespace Biigle\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
-use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidatePatches;
 use Biigle\Modules\Maia\Jobs\NotifyObjectDetectionComplete;
 use Biigle\Modules\Maia\Jobs\ObjectDetection;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
+use Biigle\Modules\Maia\Jobs\ProcessNewAnnotationCandidates;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Bus;
@@ -30,8 +29,7 @@ class DispatchObjectDetection implements ShouldQueue
         // hours.
         Bus::chain([
             new ObjectDetection($job),
-            new GenerateAnnotationCandidatePatches($job),
-            new GenerateAnnotationCandidateFeatureVectors($job),
+            new ProcessNewAnnotationCandidates($job),
             new NotifyObjectDetectionComplete($job),
         ])
         ->dispatch();

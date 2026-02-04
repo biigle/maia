@@ -4,13 +4,13 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 
 use Biigle\Image;
 use Biigle\Modules\Maia\Jobs\ProcessObjectDetectedImage;
-use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidatePatches;
+use Biigle\Modules\Maia\Jobs\ProcessNewAnnotationCandidates;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Illuminate\Support\Facades\Queue;
 use TestCase;
 
-class GenerateAnnotationCandidatePatchesTest extends TestCase
+class ProcessNewAnnotationCandidatesTest extends TestCase
 {
     public function testHandle()
     {
@@ -20,20 +20,16 @@ class GenerateAnnotationCandidatePatchesTest extends TestCase
             'job_id' => $job->id,
             'image_id' => $image->id,
         ]);
-        $j = new GenerateAnnotationCandidatePatches($tp->job);
+        $j = new ProcessNewAnnotationCandidates($tp->job);
         $j->handle();
-        Queue::assertPushed(ProcessObjectDetectedImage::class, function ($job) {
-            $this->assertTrue($job->skipFeatureVectors);
-
-            return true;
-        });
+        Queue::assertPushed(ProcessObjectDetectedImage::class);
     }
 
     public function testHandleEmpty()
     {
         $image = Image::factory()->create();
         $job = MaiaJob::factory()->create(['volume_id' => $image->volume_id]);
-        $j = new GenerateAnnotationCandidatePatches($job);
+        $j = new ProcessNewAnnotationCandidates($job);
         $j->handle();
         Queue::assertNotPushed(ProcessObjectDetectedImage::class);
     }
