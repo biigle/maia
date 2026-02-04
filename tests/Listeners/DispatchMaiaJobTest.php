@@ -3,8 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobCreated;
-use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalFeatureVectors;
-use Biigle\Modules\Maia\Jobs\GenerateTrainingProposalPatches;
+use Biigle\Modules\Maia\Jobs\ProcessNewTrainingProposals;
 use Biigle\Modules\Maia\Jobs\NotifyNoveltyDetectionComplete;
 use Biigle\Modules\Maia\Jobs\NoveltyDetection;
 use Biigle\Modules\Maia\Jobs\NoveltyDetectionFailure;
@@ -30,8 +29,7 @@ class DispatchMaiaJobTest extends TestCase
         $listener->handle($event);
         Bus::assertChained([
             NoveltyDetection::class,
-            GenerateTrainingProposalPatches::class,
-            GenerateTrainingProposalFeatureVectors::class,
+            ProcessNewTrainingProposals::class,
             NotifyNoveltyDetectionComplete::class,
         ]);
     }
@@ -59,8 +57,7 @@ class DispatchMaiaJobTest extends TestCase
         $listener->handle($event);
         Bus::assertChained([
             PrepareExistingAnnotations::class,
-            GenerateTrainingProposalPatches::class,
-            GenerateTrainingProposalFeatureVectors::class,
+            ProcessNewTrainingProposals::class,
             NotifyNoveltyDetectionComplete::class,
         ]);
     }

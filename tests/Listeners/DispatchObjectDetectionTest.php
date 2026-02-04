@@ -3,8 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Listeners;
 
 use Biigle\Modules\Maia\Events\MaiaJobContinued;
-use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidateFeatureVectors;
-use Biigle\Modules\Maia\Jobs\GenerateAnnotationCandidatePatches;
+use Biigle\Modules\Maia\Jobs\ProcessNewAnnotationCandidates;
 use Biigle\Modules\Maia\Jobs\NotifyObjectDetectionComplete;
 use Biigle\Modules\Maia\Jobs\ObjectDetection;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionFailure;
@@ -28,8 +27,7 @@ class DispatchObjectDetectionTest extends TestCase
 
         Bus::assertChained([
             ObjectDetection::class,
-            GenerateAnnotationCandidatePatches::class,
-            GenerateAnnotationCandidateFeatureVectors::class,
+            ProcessNewAnnotationCandidates::class,
             NotifyObjectDetectionComplete::class,
         ]);
     }
