@@ -28,4 +28,17 @@ class ObjectDetectionFailureTest extends TestCase
         $this->assertSame(State::failedObjectDetectionId(), $job->state_id);
         $this->assertSame('This is the message.', $job->error['message']);
     }
+
+    public function testHandleDetleted()
+    {
+        $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
+        $exception = new Exception('This is the message.');
+        $failure = new ObjectDetectionFailure($job->id, $exception);
+
+        Log::shouldReceive('warning')->once();
+        Notification::fake();
+        $job->delete();
+        $failure->handle();
+        Notification::assertNothingSent();
+    }
 }

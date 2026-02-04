@@ -46,6 +46,12 @@ class JobFailure extends Job implements ShouldQueue
     public function handle()
     {
         $job = MaiaJob::find($this->jobId);
+
+        if (is_null($job)) {
+            Log::warning("MAIA job {$this->jobId} no longer exists, cannot mark as failed.");
+            return;
+        }
+
         $job->error = ['message' => $this->message];
         $this->updateJobState($job);
         $job->save();
