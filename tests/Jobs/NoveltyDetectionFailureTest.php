@@ -28,4 +28,17 @@ class NoveltyDetectionFailureTest extends TestCase
         $this->assertSame(State::failedNoveltyDetectionId(), $job->state_id);
         $this->assertSame('This is the message.', $job->error['message']);
     }
+
+    public function testHandleDetleted()
+    {
+        $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
+        $exception = new Exception('This is the message.');
+        $failure = new NoveltyDetectionFailure($job->id, $exception);
+
+        Log::shouldReceive('warning')->once();
+        Notification::fake();
+        $job->delete();
+        $failure->handle();
+        Notification::assertNothingSent();
+    }
 }

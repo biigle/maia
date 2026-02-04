@@ -5,7 +5,6 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Biigle\Modules\Maia\Jobs\ProcessObjectDetectedImage;
-use File;
 use Mockery;
 use Storage;
 use TestCase;

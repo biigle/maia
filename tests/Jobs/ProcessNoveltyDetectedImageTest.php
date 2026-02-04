@@ -5,7 +5,6 @@ namespace Biigle\Tests\Modules\Maia\Jobs;
 use Biigle\Modules\Maia\Jobs\ProcessNoveltyDetectedImage;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\TrainingProposalFeatureVector;
-use File;
 use Mockery;
 use Storage;
 use TestCase;
