@@ -39,7 +39,7 @@ export default defineConfig({
         }),
     ],
     build: {
-        rollupOptions: {
+        rolldownOptions: {
             // Ensure that Vue is loaded through the importmap of biigle/core in build.
             external: ['vue'],
         },
