@@ -14,6 +14,7 @@ export default defineConfig({
                 {
                     src: 'src/resources/assets/images/*',
                     dest: 'assets',
+                    rename: { stripBase: true },
                 },
             ],
         }),
@@ -39,7 +40,7 @@ export default defineConfig({
         }),
     ],
     build: {
-        rollupOptions: {
+        rolldownOptions: {
             // Ensure that Vue is loaded through the importmap of biigle/core in build.
             external: ['vue'],
         },
