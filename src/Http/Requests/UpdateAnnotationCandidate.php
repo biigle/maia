@@ -5,7 +5,7 @@ namespace Biigle\Modules\Maia\Http\Requests;
 use Biigle\Label;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\MaiaJobState as State;
-use Exception;
+use Biigle\Rules\AnnotationPoints;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAnnotationCandidate extends FormRequest
@@ -48,7 +48,10 @@ class UpdateAnnotationCandidate extends FormRequest
     {
         return [
             'label_id' => 'nullable|integer|exists:labels,id',
-            'points' => 'array',
+            'points' => [
+                'array',
+                new AnnotationPoints($this->candidate->shape_id),
+            ],
         ];
     }
 
@@ -61,25 +64,8 @@ class UpdateAnnotationCandidate extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $this->maybeValidatePoints($validator);
             $this->maybeRestrictUpdating($validator);
         });
-    }
-
-    /**
-     * Check if the points array is correct if it is present.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     */
-    protected function maybeValidatePoints($validator)
-    {
-        if ($this->filled('points')) {
-            try {
-                $this->candidate->validatePoints($this->input('points'));
-            } catch (Exception $e) {
-                $validator->errors()->add('points', $e->getMessage());
-            }
-        }
     }
 
     /**
