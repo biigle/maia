@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia\Http\Requests;
 
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\TrainingProposal;
-use Exception;
+use Biigle\Rules\AnnotationPoints;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTrainingProposal extends FormRequest
@@ -37,7 +37,11 @@ class UpdateTrainingProposal extends FormRequest
     {
         return [
             'selected' => 'required_without:points|boolean',
-            'points' => 'required_without:selected|array',
+            'points' => [
+                'required_without:selected',
+                'array',
+                new AnnotationPoints($this->proposal->shape_id),
+            ],
         ];
     }
 
@@ -50,25 +54,8 @@ class UpdateTrainingProposal extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $this->maybeValidatePoints($validator);
             $this->maybeRestrictUpdating($validator);
         });
-    }
-
-    /**
-     * Check if the points array is correct if it is present.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     */
-    protected function maybeValidatePoints($validator)
-    {
-        if ($this->filled('points')) {
-            try {
-                $this->proposal->validatePoints($this->input('points'));
-            } catch (Exception $e) {
-                $validator->errors()->add('points', $e->getMessage());
-            }
-        }
     }
 
     /**

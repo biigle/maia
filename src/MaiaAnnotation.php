@@ -5,13 +5,12 @@ namespace Biigle\Modules\Maia;
 use Biigle\Contracts\Annotation as AnnotationContract;
 use Biigle\Image;
 use Biigle\Shape;
-use Biigle\Traits\HasPointsAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class MaiaAnnotation extends Model implements AnnotationContract
 {
-    use HasPointsAttribute, HasFactory;
+    use HasFactory;
 
     /**
      * Don't maintain timestamps for this model.
@@ -29,6 +28,21 @@ abstract class MaiaAnnotation extends Model implements AnnotationContract
         'points' => 'array',
         'score' => 'float',
     ];
+
+    /**
+     * Round the floats of the points array to 2 decimals before saving.
+     *
+     * This is a more than sufficient precision for annotation point coordinates and
+     * saves memory in the DB as well as when processing the annotations in PHP.
+     *
+     * @param array $points
+     */
+    public function setPointsAttribute(array $points)
+    {
+        $points = array_map(fn ($coordinate) => round($coordinate, 2), $points);
+
+        $this->attributes['points'] = json_encode($points);
+    }
 
     /**
      * The image, this MAIA annotation belongs to.
