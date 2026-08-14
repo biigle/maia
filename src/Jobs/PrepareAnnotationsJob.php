@@ -14,19 +14,14 @@ use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
 use Biigle\Shape;
 use DB;
 use Exception;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 use Queue;
 
+#[DeleteWhenMissingModels]
 abstract class PrepareAnnotationsJob extends Job
 {
     use SerializesModels, QueriesExistingAnnotations;
-
-    /**
-     * Ignore this job if the MAIA job does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Set newly converted training proposals as selected.

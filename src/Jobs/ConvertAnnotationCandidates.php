@@ -10,9 +10,11 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\User;
 use Carbon\Carbon;
 use DB;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
+#[DeleteWhenMissingModels]
 class ConvertAnnotationCandidates extends Job
 {
     use SerializesModels;
@@ -30,13 +32,6 @@ class ConvertAnnotationCandidates extends Job
      * @var User
      */
     public $user;
-
-    /**
-     * Ignore this job if the MAIA job does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Number of times to retry this job.
