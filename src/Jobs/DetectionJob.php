@@ -9,17 +9,12 @@ use Exception;
 use File;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 
+#[DeleteWhenMissingModels]
 abstract class DetectionJob implements ShouldQueue
 {
     use Queueable;
-
-    /**
-     * Ignore this job if the MAIA job does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Temporary directory for files of this job.

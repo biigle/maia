@@ -6,18 +6,13 @@ use Biigle\Jobs\Job;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\Notifications\ObjectDetectionComplete;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 use Illuminate\Queue\SerializesModels;
 
+#[DeleteWhenMissingModels]
 class NotifyObjectDetectionComplete extends Job implements ShouldQueue
 {
     use SerializesModels;
-
-    /**
-     * Ignore this job if the MAIA job does not exist any more.
-     *
-     * @var bool
-     */
-    protected $deleteWhenMissingModels = true;
 
     /**
      * Create a new isntance.
