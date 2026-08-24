@@ -1,5 +1,6 @@
 <select-candidates-tab
     :label-trees="labelTrees"
+    :sorting-project-ids="projectIds"
     :candidates-count="candidates.length"
     :selected-candidates-count="selectedCandidates.length"
     @if ($acLimit !== INF ) :candidates-limit="{{$acLimit}}" @endif

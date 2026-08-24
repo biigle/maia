@@ -11,6 +11,7 @@
             </div>
             <label-trees
                 :trees="labelTrees"
+                :sorting-project-ids="sortingProjectIds"
                 :show-favourites="true"
                 listener-set="select-candidates"
                 @select="handleSelectedLabel"
@@ -46,6 +47,10 @@ export default {
     },
     props: {
         labelTrees: {
+            type: Array,
+            required: true,
+        },
+        sortingProjectIds: {
             type: Array,
             required: true,
         },
