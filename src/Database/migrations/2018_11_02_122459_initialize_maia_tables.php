@@ -89,10 +89,6 @@ class InitializeMaiaTables extends Migration
                   ->onDelete('cascade');
 
             $table->integer('shape_id')->unsigned();
-            $table->foreign('shape_id')
-                  ->references('id')
-                  ->on('shapes')
-                  ->onDelete('restrict');
 
             $table->integer('job_id')->unsigned();
             $table->foreign('job_id')
@@ -114,10 +110,6 @@ class InitializeMaiaTables extends Migration
                   ->onDelete('cascade');
 
             $table->integer('shape_id')->unsigned();
-            $table->foreign('shape_id')
-                  ->references('id')
-                  ->on('shapes')
-                  ->onDelete('restrict');
 
             $table->integer('job_id')->unsigned();
             $table->foreign('job_id')
@@ -139,7 +131,7 @@ class InitializeMaiaTables extends Migration
             $table->integer('annotation_id')->unsigned()->nullable();
             $table->foreign('annotation_id')
                   ->references('id')
-                  ->on('annotations')
+                  ->on('image_annotations')
                   ->onDelete('set null');
         });
     }
