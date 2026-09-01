@@ -77,11 +77,11 @@ class MaiaJob extends Model
     /**
      * The state of this MAIA job.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return MaiaJobState
      */
-    public function state()
+    public function getStateAttribute()
     {
-        return $this->belongsTo(MaiaJobState::class);
+        return MaiaJobState::from($this->state_id);
     }
 
     /**

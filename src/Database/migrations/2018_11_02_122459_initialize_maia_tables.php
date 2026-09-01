@@ -131,7 +131,7 @@ class InitializeMaiaTables extends Migration
             $table->integer('annotation_id')->unsigned()->nullable();
             $table->foreign('annotation_id')
                   ->references('id')
-                  ->on('image_annotations')
+                  ->on('annotations')
                   ->onDelete('set null');
         });
     }

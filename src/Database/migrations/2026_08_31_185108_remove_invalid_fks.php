@@ -26,7 +26,7 @@ return new class extends Migration
     private function dropForeignKeyIfExists($table, $constraint)
     {
         $driverName = DB::getDriverName();
-        if ($driverName !== 'psql') // TODO do we support others?
+        if ($driverName !== 'pgsql') // TODO do we support others?
         {
             throw new RuntimeException("Unsupported DB driver '$driverName'. Only psql is supported");
         }

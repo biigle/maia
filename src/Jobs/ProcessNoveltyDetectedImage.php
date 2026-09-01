@@ -30,9 +30,9 @@ class ProcessNoveltyDetectedImage extends ProcessAnnotatedImage
     /**
      * {@inheritdoc}
      */
-    protected function getAnnotationQuery(VolumeFile $file): Builder
+    protected function getAnnotationQuery(): Builder
     {
-        return TrainingProposal::where('image_id', $file->id)
+        return TrainingProposal::where('image_id', $this->file->id)
             ->where('job_id', $this->maiaJob->id)
             ->when(!empty($this->only), fn ($q) => $q->whereIn('id', $this->only));
     }
