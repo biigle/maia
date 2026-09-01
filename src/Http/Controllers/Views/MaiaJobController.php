@@ -97,7 +97,8 @@ class MaiaJobController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
         $volume = $job->volume;
-        $states = State::pluck('id', 'name');
+        $states = collect(State::cases())
+            ->mapWithKeys(fn (State $state) => [$state->label() => $state->value]);
 
         $user = $request->user();
 

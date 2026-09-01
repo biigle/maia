@@ -57,11 +57,11 @@ abstract class MaiaAnnotation extends Model implements AnnotationContract
     /**
      * The shape of this MAIA annotation.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return Shape
      */
-    public function shape()
+    public function getShapeAttribute()
     {
-        return $this->belongsTo(Shape::class);
+        return Shape::from($this->shape_id);
     }
 
     /**
