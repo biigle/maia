@@ -97,27 +97,6 @@ enum MaiaJobState: int implements \JsonSerializable
         };
     }
 
-    public static function labels(): array
-    {
-        return array_map(
-            fn (self $state) => $state->label(),
-            self::cases()
-        );
-    }
-
-    public static function fromLabel(string $label): self
-    {
-        return match ($label) {
-            'novelty-detection' => self::NOVELTY_DETECTION,
-            'failed-novelty-detection' => self::FAILED_NOVELTY_DETECTION,
-            'training-proposals' => self::TRAINING_PROPOSALS,
-            'annotation-candidates' => self::ANNOTATION_CANDIDATES,
-            'instance-segmentation' => self::OBJECT_DETECTION,
-            'failed-instance-segmentation' => self::FAILED_OBJECT_DETECTION,
-            default => throw new ValueError("Invalid Maia job state label $label"),
-        };
-    }
-
     public function toArray(): array
     {
         return [
