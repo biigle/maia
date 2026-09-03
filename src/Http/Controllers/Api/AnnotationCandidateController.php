@@ -178,11 +178,10 @@ class AnnotationCandidateController extends Controller
         if ($request->filled('points')) {
             $candidate->points = $request->input('points');
             ProcessObjectDetectedImage::dispatch($candidate->image,
-                    only: [$candidate->id],
-                    maiaJob: $candidate->job,
-                    targetDisk: config('maia.annotation_candidate_storage_disk')
-                )
-                ->onQueue(config('largo.generate_annotation_patch_queue'));
+                only: [$candidate->id],
+                maiaJob: $candidate->job,
+                targetDisk: config('maia.annotation_candidate_storage_disk')
+            );
         }
 
         if ($request->has('label_id')) {
