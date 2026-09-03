@@ -17,13 +17,15 @@ class ProcessObjectDetectedImage extends ProcessAnnotatedImage
         public MaiaJob $maiaJob,
         public array $only = [],
         public bool $skipFeatureVectors = false,
-        public ?string $targetDisk = null
+        public ?string $targetDisk = null,
+        public int $redispatchTries = 0
     )
     {
         parent::__construct($file, $only,
             skipFeatureVectors: $skipFeatureVectors,
             skipSvgs: true,
-            targetDisk: $targetDisk
+            targetDisk: $targetDisk,
+            redispatchTries: $redispatchTries
         );
     }
 
@@ -65,10 +67,10 @@ class ProcessObjectDetectedImage extends ProcessAnnotatedImage
                 $this->maiaJob,
                 $this->only,
                 $this->skipFeatureVectors,
-                $this->targetDisk
+                $this->targetDisk,
+                $this->redispatchTries + 1
             )
             ->onConnection($this->connection)
-            ->onQueue($this->queue)
             ->delay(60);
     }
 }

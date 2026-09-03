@@ -37,9 +37,8 @@ class ProcessNewAnnotationCandidates extends Job implements ShouldQueue
             )
             ->eachById(fn ($image) =>
                 ProcessObjectDetectedImage::dispatch($image, $this->maiaJob,
-                        targetDisk: config('maia.annotation_candidate_storage_disk')
-                    )
-                    ->onQueue(config('largo.generate_annotation_patch_queue'))
+                    targetDisk: config('maia.annotation_candidate_storage_disk')
+                )
             );
     }
 }
