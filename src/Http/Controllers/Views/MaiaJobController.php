@@ -100,6 +100,7 @@ class MaiaJobController extends Controller
         $states = State::pluck('id', 'name');
 
         $user = $request->user();
+        $projectIds = collect([]);
 
         if ($job->state_id === State::annotationCandidatesId()) {
             if ($user->can('sudo')) {
@@ -143,6 +144,7 @@ class MaiaJobController extends Controller
             'volume',
             'states',
             'trees',
+            'projectIds',
             'tpUrlTemplate',
             'acUrlTemplate',
             'tpLimit',

@@ -3,6 +3,7 @@
         <div class="maia-tab-content__top">
             <label-trees
                 :trees="labelTrees"
+                :sorting-project-ids="sortingProjectIds"
                 :show-favourites="true"
                 listener-set="select-candidates"
                 @select="handleSelectedLabel"
@@ -53,6 +54,10 @@ export default {
             required: true,
         },
         labelTrees: {
+            type: Array,
+            required: true,
+        },
+        sortingProjectIds: {
             type: Array,
             required: true,
         },
