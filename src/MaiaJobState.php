@@ -2,14 +2,15 @@
 
 namespace Biigle\Modules\Maia;
 
-use Override;
-use ValueError;
+use Biigle\Traits\EnumSerialization;
 
 /**
  * Represents the different stages of a Maia job.
  */
 enum MaiaJobState: int implements \JsonSerializable
 {
+    use EnumSerialization;
+
     // The novelty detection stage.
     case NOVELTY_DETECTION = 1;
     // A failure during novelty detection.
@@ -95,20 +96,6 @@ enum MaiaJobState: int implements \JsonSerializable
             self::OBJECT_DETECTION => 'instance-segmentation',
             self::FAILED_OBJECT_DETECTION => 'failed-instance-segmentation',
         };
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->value,
-            'name' => $this->label(),
-        ];
-    }
-
-    #[Override]
-    public function jsonSerialize(): mixed
-    {
-        return $this->toArray();
     }
 }
 
