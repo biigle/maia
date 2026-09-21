@@ -103,7 +103,7 @@ class ConvertAnnotationCandidates extends Job
         foreach ($candidates as $candidate) {
             $annotation = new ImageAnnotation;
             $annotation->image_id = $candidate->image_id;
-            $annotation->shape_id = $candidate->shape_id;
+            $annotation->shape = $candidate->shape;
             $annotation->points = $candidate->points;
             $annotation->save();
             $this->newAnnotations[$candidate->id] = $annotation;

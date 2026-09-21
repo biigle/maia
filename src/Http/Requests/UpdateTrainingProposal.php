@@ -40,7 +40,7 @@ class UpdateTrainingProposal extends FormRequest
             'points' => [
                 'required_without:selected',
                 'array',
-                new AnnotationPoints($this->proposal->shape_id),
+                new AnnotationPoints($this->proposal->shape->value),
             ],
         ];
     }

@@ -67,7 +67,7 @@ abstract class PrepareAnnotationsJob extends Job
                 // Use DISTINCT ON to get only one result per annotation, no matter how
                 // many matching labels are attached to it. We can't simply use DISTINCT
                 // because the rows include JSON.
-                ->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape_id'))
+                ->select(DB::raw('DISTINCT ON (annotations_id) image_annotations.id as annotations_id, image_annotations.points, image_annotations.image_id, image_annotations.shape'))
                 ->chunkById(1000, [$this, 'convertAnnotationChunk'], 'image_annotations.id', 'annotations_id');
         });
     }
@@ -85,7 +85,7 @@ abstract class PrepareAnnotationsJob extends Job
             return [
                 'points' => $this->convertAnnotationPointsToCircle($annotation),
                 'image_id' => $annotation->image_id,
-                'shape_id' => Shape::CIRCLE->value,
+                'shape' => Shape::CIRCLE->value,
                 'job_id' => $this->job->id,
                 // All these proposals should be taken for object detection unless
                 // the user chose to review them as training proposals first.
@@ -106,10 +106,10 @@ abstract class PrepareAnnotationsJob extends Job
      */
     protected function convertAnnotationPointsToCircle(ImageAnnotation $annotation)
     {
-        if ($annotation->shape_id === Shape::POINT) {
+        if ($annotation->shape === Shape::POINT) {
             // Points are converted to circles with a default radius of 50 px.
             $points = [$annotation->points[0], $annotation->points[1], 50];
-        } elseif ($annotation->shape_id === Shape::CIRCLE) {
+        } elseif ($annotation->shape === Shape::CIRCLE) {
             $points = $annotation->points;
         } else {
             $points = $this->convertPolygonToCirlce($annotation->points);

@@ -50,7 +50,7 @@ class UpdateAnnotationCandidate extends FormRequest
             'label_id' => 'nullable|integer|exists:labels,id',
             'points' => [
                 'array',
-                new AnnotationPoints($this->candidate->shape_id),
+                new AnnotationPoints($this->candidate->shape->value),
             ],
         ];
     }

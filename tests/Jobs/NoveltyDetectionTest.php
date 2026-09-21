@@ -65,7 +65,7 @@ class NoveltyDetectionTest extends TestCase
             $this->assertSame(0.9, $annotations[0]->score);
             $this->assertFalse($annotations[0]->selected);
             $this->assertSame($image->id, $annotations[0]->image_id);
-            $this->assertSame(Shape::CIRCLE->value, $annotations[0]->shape_id);
+            $this->assertSame(Shape::CIRCLE, $annotations[0]->shape);
 
             $this->assertTrue($request->cleanup);
         } finally {

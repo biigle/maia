@@ -242,7 +242,7 @@ abstract class DetectionJob implements ShouldQueue
             'points' => json_encode($points),
             'score' => $annotation[4],
             'image_id' => $annotation[0],
-            'shape_id' => Shape::CIRCLE->value,
+            'shape' => Shape::CIRCLE->value,
         ];
     }
 

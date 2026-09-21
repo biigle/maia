@@ -8,6 +8,9 @@ use Biigle\Shape;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property Shape $shape
+ */
 abstract class MaiaAnnotation extends Model implements AnnotationContract
 {
     use HasFactory;
@@ -27,6 +30,7 @@ abstract class MaiaAnnotation extends Model implements AnnotationContract
     protected $casts = [
         'points' => 'array',
         'score' => 'float',
+        'shape' => Shape::class,
     ];
 
     /**
@@ -52,16 +56,6 @@ abstract class MaiaAnnotation extends Model implements AnnotationContract
     public function image()
     {
         return $this->belongsTo(Image::class);
-    }
-
-    /**
-     * The shape of this MAIA annotation.
-     *
-     * @return Shape
-     */
-    public function getShapeAttribute()
-    {
-        return Shape::from($this->shape_id);
     }
 
     /**

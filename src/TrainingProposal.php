@@ -3,7 +3,11 @@
 namespace Biigle\Modules\Maia;
 
 use Biigle\Modules\Maia\Database\Factories\TrainingProposalFactory;
+use Biigle\Shape;
 
+/**
+ * @property Shape $shape
+ */
 class TrainingProposal extends MaiaAnnotation
 {
     /**
@@ -22,6 +26,7 @@ class TrainingProposal extends MaiaAnnotation
         'points' => 'array',
         'score' => 'float',
         'selected' => 'boolean',
+        'shape' => Shape::class,
     ];
 
     /**

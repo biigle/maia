@@ -13,6 +13,11 @@ return new class extends Migration
         ['maia_jobs', 'state_id']
     ];
 
+    private $tablesWithShapeId = [
+        'maia_annotation_candidates',
+        'maia_training_proposals',
+    ];
+
     /**
      * Run the migrations.
      */
@@ -28,7 +33,13 @@ return new class extends Migration
             $oldIds['failed-instance-segmentation'] => MaiaJobState::FAILED_OBJECT_DETECTION->value,
         ];
 
-        EnumMigrationHelper::replaceStaticTableWithEnum($map, 'maia_job_states', $this->foreignKeys, true);
+        EnumMigrationHelper::replaceStaticTableWithEnum($map, 'maia_job_states', $this->foreignKeys);
+
+        foreach ($this->tablesWithShapeId as $table) {
+            Schema::table($table, function (Blueprint $t) {
+                $t->renameColumn('shape_id', 'shape');
+            });
+        }
     }
 
     /**
@@ -50,6 +61,12 @@ return new class extends Migration
             ['id' => MaiaJobState::FAILED_OBJECT_DETECTION->value,   'name' => 'failed-instance-segmentation'],
         ]);
 
-        EnumMigrationHelper::createForeignKeys($this->foreignKeys, 'maia_job_states', true);
+        EnumMigrationHelper::createForeignKeys($this->foreignKeys, 'maia_job_states');
+
+        foreach ($this->tablesWithShapeId as $table) {
+            Schema::table($table, function (Blueprint $t) {
+                $t->renameColumn('shape', 'shape_id');
+            });
+        }
     }
 };
