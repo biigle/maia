@@ -13,7 +13,7 @@ class NoveltyDetectionFailure extends JobFailure
      */
     protected function updateJobState(MaiaJob $job)
     {
-        $job->state_id = State::FAILED_NOVELTY_DETECTION;
+        $job->state = State::FAILED_NOVELTY_DETECTION;
     }
 
     /**

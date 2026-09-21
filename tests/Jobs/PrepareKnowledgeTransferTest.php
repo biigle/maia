@@ -230,7 +230,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
         $this->assertSame(0, $job->trainingProposals()->count());
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -258,7 +258,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
         $this->assertSame(0, $job->trainingProposals()->count());
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -281,7 +281,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -304,7 +304,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -327,7 +327,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -350,7 +350,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -375,7 +375,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -400,7 +400,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -425,7 +425,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -450,7 +450,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -475,7 +475,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -500,7 +500,7 @@ class PrepareKnowledgeTransferTest extends TestCase
         Notification::fake();
         (new PrepareKnowledgeTransfer($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 

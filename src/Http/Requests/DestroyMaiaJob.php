@@ -46,9 +46,9 @@ class DestroyMaiaJob extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            if ($this->job->state_id === State::NOVELTY_DETECTION) {
+            if ($this->job->state === State::NOVELTY_DETECTION) {
                 $validator->errors()->add('id', 'The job cannot be deleted while the novelty detection is running.');
-            } elseif ($this->job->state_id === State::OBJECT_DETECTION) {
+            } elseif ($this->job->state === State::OBJECT_DETECTION) {
                 $validator->errors()->add('id', 'The job cannot be deleted while the object detection is running.');
             }
         });

@@ -42,7 +42,7 @@ class MaiaJob extends Model
      */
     protected $casts = [
         'attrs' => 'array',
-        'state_id' => MaiaJobState::class,
+        'state' => MaiaJobState::class,
     ];
 
     /**
@@ -76,16 +76,6 @@ class MaiaJob extends Model
     }
 
     /**
-     * The state of this MAIA job.
-     *
-     * @return MaiaJobState
-     */
-    public function getStateAttribute()
-    {
-        return $this->state_id;
-    }
-
-    /**
      * The training proposals of this MAIA job.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -112,8 +102,8 @@ class MaiaJob extends Model
      */
     public function isRunning()
     {
-        return $this->state_id === MaiaJobState::NOVELTY_DETECTION
-            || $this->state_id === MaiaJobState::OBJECT_DETECTION;
+        return $this->state === MaiaJobState::NOVELTY_DETECTION
+            || $this->state === MaiaJobState::OBJECT_DETECTION;
     }
 
     /**
@@ -123,8 +113,8 @@ class MaiaJob extends Model
      */
     public function hasFailed()
     {
-        return $this->state_id === MaiaJobState::FAILED_NOVELTY_DETECTION
-            || $this->state_id === MaiaJobState::FAILED_OBJECT_DETECTION;
+        return $this->state === MaiaJobState::FAILED_NOVELTY_DETECTION
+            || $this->state === MaiaJobState::FAILED_OBJECT_DETECTION;
     }
 
     /**
@@ -134,7 +124,7 @@ class MaiaJob extends Model
      */
     public function requiresAction()
     {
-        return $this->state_id === MaiaJobState::TRAINING_PROPOSALS;
+        return $this->state === MaiaJobState::TRAINING_PROPOSALS;
     }
 
     /**

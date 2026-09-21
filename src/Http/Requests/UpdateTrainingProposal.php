@@ -67,7 +67,7 @@ class UpdateTrainingProposal extends FormRequest
     protected function maybeRestrictUpdating($validator)
     {
         $jobContinued = !$this->proposal->job()
-            ->where('state_id', State::TRAINING_PROPOSALS)
+            ->where('state', State::TRAINING_PROPOSALS)
             ->exists();
 
         if ($jobContinued) {

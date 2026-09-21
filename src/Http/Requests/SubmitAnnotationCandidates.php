@@ -46,7 +46,7 @@ class SubmitAnnotationCandidates extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            if ($this->job->state_id !== State::ANNOTATION_CANDIDATES) {
+            if ($this->job->state !== State::ANNOTATION_CANDIDATES) {
                 $validator->errors()->add('id', 'Annotation candidates can only be submitted if the job is in annotation candidates state.');
             }
 

@@ -29,7 +29,7 @@
                 <control-button icon="fa-step-backward" title="Previous image 𝗟𝗲𝗳𝘁 𝗮𝗿𝗿𝗼𝘄" v-on:click="handlePreviousImage"></control-button>
                 <control-button icon="fa-step-forward" title="Next image 𝗥𝗶𝗴𝗵𝘁 𝗮𝗿𝗿𝗼𝘄/𝗦𝗽𝗮𝗰𝗲" v-on:click="handleNextImage"></control-button>
             </div>
-            @if ($job->state_id === $states['training-proposals'])
+            @if ($job->state === $states['training-proposals'])
                 <div class="btn-group drawing-controls">
                     <control-button icon="fa-minus" title="Unselect current training proposal as interesting 𝗗𝗲𝗹𝗲𝘁𝗲" :disabled="modifyInProgress || !hasSelectedAnnotations" v-on:click="handleUnselectMaiaAnnotation"></control-button>
                 </div>

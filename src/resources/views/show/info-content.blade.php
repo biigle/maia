@@ -1,5 +1,5 @@
 <div class="maia-content-message">
-    @if ($job->state_id === $states['annotation-candidates'])
+    @if ($job->state === $states['annotation-candidates'])
         <div class="maia-status">
             <span class="fa-stack fa-2x" title="Job finished">
                 <i class="fas fa-circle fa-stack-2x"></i>
@@ -17,7 +17,7 @@
             </span>
         </div>
         <p class="text-danger lead">
-            @if ($job->state_id === $states['failed-novelty-detection'])
+            @if ($job->state === $states['failed-novelty-detection'])
                 The job has failed during novelty detection.
             @else
                 The job has failed during object detection.
@@ -38,16 +38,16 @@
                 <i class="fas fa-robot fa-stack-1x fa-inverse"></i>
             </span>
         </div>
-        @if ($job->state_id === $states['novelty-detection'])
+        @if ($job->state === $states['novelty-detection'])
             <p class="text-warning text-center lead">
                 Novelty detection in progress.<br>Please come back later.
             </p>
-        @elseif ($job->state_id === $states['training-proposals'])
+        @elseif ($job->state === $states['training-proposals'])
             <p class="text-warning lead">
                 Please select <i class="fas fa-plus-square"></i> and refine <i class="fas fa-pen-square"></i> the training proposals.
             </p>
         {{-- The array key is instance-segmentation for legacy reasons --}}
-        @elseif ($job->state_id === $states['instance-segmentation'])
+        @elseif ($job->state === $states['instance-segmentation'])
             <p class="text-warning text-center lead">
                 Object detection in progress.<br>Please come back later.
             </p>

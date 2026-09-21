@@ -41,7 +41,7 @@ class MaiaJobController extends Controller
             ->get();
 
         $hasJobsInProgress = $jobs
-            ->whereIn('state_id', [
+            ->whereIn('state', [
                 State::NOVELTY_DETECTION,
                 State::TRAINING_PROPOSALS,
                 State::OBJECT_DETECTION,
@@ -49,7 +49,7 @@ class MaiaJobController extends Controller
             ->count() > 0;
 
         $hasJobsRunning = $jobs
-            ->whereIn('state_id', [
+            ->whereIn('state', [
                 State::NOVELTY_DETECTION,
                 State::OBJECT_DETECTION,
             ])
@@ -103,7 +103,7 @@ class MaiaJobController extends Controller
         $user = $request->user();
         $projectIds = collect([]);
 
-        if ($job->state_id === State::ANNOTATION_CANDIDATES) {
+        if ($job->state === State::ANNOTATION_CANDIDATES) {
             if ($user->can('sudo')) {
                 // Global admins have no restrictions.
                 $projectIds = $volume->projects()->pluck('id');

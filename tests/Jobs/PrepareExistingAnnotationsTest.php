@@ -138,7 +138,7 @@ class PrepareExistingAnnotationsTest extends TestCase
         (new PrepareExistingAnnotations($job))->handle();
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
         $this->assertSame(0, $job->trainingProposals()->count());
-        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->fresh()->state);
         $this->assertNotEmpty($job->error['message']);
     }
 
@@ -160,7 +160,7 @@ class PrepareExistingAnnotationsTest extends TestCase
 
         Event::assertNotDispatched(MaiaJobContinued::class);
 
-        $this->assertSame(State::TRAINING_PROPOSALS, $job->fresh()->state_id);
+        $this->assertSame(State::TRAINING_PROPOSALS, $job->fresh()->state);
         $this->assertSame(0, $job->trainingProposals()->selected()->count());
         $this->assertSame(1, $job->trainingProposals()->count());
         $proposal = $job->trainingProposals()->first();

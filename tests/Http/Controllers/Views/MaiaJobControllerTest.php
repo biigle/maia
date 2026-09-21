@@ -73,7 +73,7 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         $job = MaiaJobTest::create([
             'volume_id' => $this->volume()->id,
-            'state_id' => State::ANNOTATION_CANDIDATES,
+            'state' => State::ANNOTATION_CANDIDATES,
         ]);
 
         $this->beEditor();

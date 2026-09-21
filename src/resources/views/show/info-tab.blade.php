@@ -108,10 +108,10 @@
         <form class="text-right" action="{{ url("api/v1/maia-jobs/{$job->id}") }}" method="POST" onsubmit="return confirm('Are you sure that you want to delete this job?')">
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
             <input type="hidden" name="_method" value="DELETE">
-            @if ($job->state_id === $states['novelty-detection'])
+            @if ($job->state === $states['novelty-detection'])
                 <button class="btn btn-danger" type="button" title="The job cannot be deleted while the novelty detection is running" disabled>Delete this job</button>
             {{-- The array key is instance-segmentation for legacy reasons --}}
-            @elseif ($job->state_id === $states['instance-segmentation'])
+            @elseif ($job->state === $states['instance-segmentation'])
                 <button class="btn btn-danger" type="button" title="The job cannot be deleted while the object detection is running" disabled>Delete this job</button>
             @else
                 <button class="btn btn-danger" type="submit">Delete this job</button>

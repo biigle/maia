@@ -28,7 +28,7 @@ return new class extends Migration
             $oldIds['failed-instance-segmentation'] => MaiaJobState::FAILED_OBJECT_DETECTION->value,
         ];
 
-        EnumMigrationHelper::replaceStaticTableWithEnum($map, 'maia_job_states', $this->foreignKeys);
+        EnumMigrationHelper::replaceStaticTableWithEnum($map, 'maia_job_states', $this->foreignKeys, true);
     }
 
     /**
@@ -50,6 +50,6 @@ return new class extends Migration
             ['id' => MaiaJobState::FAILED_OBJECT_DETECTION->value,   'name' => 'failed-instance-segmentation'],
         ]);
 
-        EnumMigrationHelper::createForeignKeys($this->foreignKeys, 'maia_job_states');
+        EnumMigrationHelper::createForeignKeys($this->foreignKeys, 'maia_job_states', true);
     }
 };
