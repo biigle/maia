@@ -20,12 +20,12 @@ return new class extends Migration
     {
         $oldIds = DB::table('maia_job_states')->pluck('id', 'name');
         $map = [
-            $oldIds['novelty-detection']          => MaiaJobState::NOVELTY_DETECTION,
-            $oldIds['failed-novelty-detection']   => MaiaJobState::FAILED_NOVELTY_DETECTION,
-            $oldIds['training-proposals']         => MaiaJobState::TRAINING_PROPOSALS,
-            $oldIds['annotation-candidates']      => MaiaJobState::ANNOTATION_CANDIDATES,
-            $oldIds['instance-segmentation']      => MaiaJobState::OBJECT_DETECTION,
-            $oldIds['failed-instance-segmentation'] => MaiaJobState::FAILED_OBJECT_DETECTION,
+            $oldIds['novelty-detection']          => MaiaJobState::NOVELTY_DETECTION->value,
+            $oldIds['failed-novelty-detection']   => MaiaJobState::FAILED_NOVELTY_DETECTION->value,
+            $oldIds['training-proposals']         => MaiaJobState::TRAINING_PROPOSALS->value,
+            $oldIds['annotation-candidates']      => MaiaJobState::ANNOTATION_CANDIDATES->value,
+            $oldIds['instance-segmentation']      => MaiaJobState::OBJECT_DETECTION->value,
+            $oldIds['failed-instance-segmentation'] => MaiaJobState::FAILED_OBJECT_DETECTION->value,
         ];
 
         EnumMigrationHelper::replaceStaticTableWithEnum($map, 'maia_job_states', $this->foreignKeys);
@@ -42,12 +42,12 @@ return new class extends Migration
         });
 
         DB::table('maia_job_states')->insert([
-            ['id' => MaiaJobState::NOVELTY_DETECTION,        'name' => 'novelty-detection'],
-            ['id' => MaiaJobState::FAILED_NOVELTY_DETECTION, 'name' => 'failed-novelty-detection'],
-            ['id' => MaiaJobState::TRAINING_PROPOSALS,       'name' => 'training-proposals'],
-            ['id' => MaiaJobState::ANNOTATION_CANDIDATES,    'name' => 'annotation-candidates'],
-            ['id' => MaiaJobState::OBJECT_DETECTION,         'name' => 'instance-segmentation'],
-            ['id' => MaiaJobState::FAILED_OBJECT_DETECTION,   'name' => 'failed-instance-segmentation'],
+            ['id' => MaiaJobState::NOVELTY_DETECTION->value,        'name' => 'novelty-detection'],
+            ['id' => MaiaJobState::FAILED_NOVELTY_DETECTION->value, 'name' => 'failed-novelty-detection'],
+            ['id' => MaiaJobState::TRAINING_PROPOSALS->value,       'name' => 'training-proposals'],
+            ['id' => MaiaJobState::ANNOTATION_CANDIDATES->value,    'name' => 'annotation-candidates'],
+            ['id' => MaiaJobState::OBJECT_DETECTION->value,         'name' => 'instance-segmentation'],
+            ['id' => MaiaJobState::FAILED_OBJECT_DETECTION->value,   'name' => 'failed-instance-segmentation'],
         ]);
 
         EnumMigrationHelper::createForeignKeys($this->foreignKeys, 'maia_job_states');
