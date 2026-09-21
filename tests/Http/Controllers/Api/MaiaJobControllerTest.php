@@ -86,7 +86,7 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->assertNotNull($job);
         $this->assertSame($id, $job->volume_id);
         $this->assertSame($this->editor()->id, $job->user_id);
-        $this->assertSame(State::noveltyDetectionId(), $job->state_id);
+        $this->assertSame(State::NOVELTY_DETECTION, $job->state_id);
         $this->assertSame($this->defaultParams, $job->params);
 
         // only one running job at a time
@@ -111,7 +111,7 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         $job = MaiaJobTest::create([
-            'state_id' => State::failedObjectDetectionId(),
+            'state_id' => State::FAILED_OBJECT_DETECTION,
             'volume_id' => $this->volume()->id,
         ]);
 
@@ -249,7 +249,7 @@ class MaiaJobControllerTest extends ApiTestCase
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
         $this->assertFalse($job->shouldShowTrainingProposals());
-        $this->assertSame(State::objectDetectionId(), $job->state_id);
+        $this->assertSame(State::OBJECT_DETECTION, $job->state_id);
     }
 
     public function testStoreExistingAnnotationsRestrictLabels()
@@ -329,7 +329,7 @@ class MaiaJobControllerTest extends ApiTestCase
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseExistingAnnotations());
         $this->assertTrue($job->shouldShowTrainingProposals());
-        $this->assertSame(State::noveltyDetectionId(), $job->state_id);
+        $this->assertSame(State::NOVELTY_DETECTION, $job->state_id);
     }
 
     public function testStoreNdClustersTooFewImages()
@@ -407,7 +407,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
-        $this->assertSame(State::objectDetectionId(), $job->state_id);
+        $this->assertSame(State::OBJECT_DETECTION, $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertSame($volume->id, $job->params['kt_volume_id']);
     }
@@ -471,7 +471,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
-        $this->assertSame(State::objectDetectionId(), $job->state_id);
+        $this->assertSame(State::OBJECT_DETECTION, $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertSame($volume->id, $job->params['kt_volume_id']);
         $this->assertArrayHasKey('kt_restrict_labels', $job->params);
@@ -544,7 +544,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
-        $this->assertSame(State::objectDetectionId(), $job->state_id);
+        $this->assertSame(State::OBJECT_DETECTION, $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertSame($volume->id, $job->params['kt_volume_id']);
     }
@@ -646,7 +646,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
         $job = MaiaJob::first();
         $this->assertTrue($job->shouldUseKnowledgeTransfer());
-        $this->assertSame(State::objectDetectionId(), $job->state_id);
+        $this->assertSame(State::OBJECT_DETECTION, $job->state_id);
         $this->assertArrayHasKey('kt_volume_id', $job->params);
         $this->assertSame($volume->id, $job->params['kt_volume_id']);
         $this->assertArrayHasKey('kt_restrict_labels', $job->params);

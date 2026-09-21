@@ -82,7 +82,7 @@ class TrainingProposalControllerTest extends ApiTestCase
         Event::fake();
         $this->postJson("/api/v1/maia-jobs/{$job->id}/training-proposals")->assertStatus(200);
         Event::assertDispatched(MaiaJobContinued::class);
-        $this->assertSame(State::objectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::OBJECT_DETECTION, $job->fresh()->state_id);
 
         // Job is no longer in training proposal state.
         $this->postJson("/api/v1/maia-jobs/{$job->id}/training-proposals")->assertStatus(422);

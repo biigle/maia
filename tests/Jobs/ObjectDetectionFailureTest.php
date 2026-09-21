@@ -25,7 +25,7 @@ class ObjectDetectionFailureTest extends TestCase
         Notification::assertSentTo($job->user, ObjectDetectionFailed::class);
 
         $job->refresh();
-        $this->assertSame(State::failedObjectDetectionId(), $job->state_id);
+        $this->assertSame(State::FAILED_OBJECT_DETECTION, $job->state_id);
         $this->assertSame('This is the message.', $job->error['message']);
     }
 

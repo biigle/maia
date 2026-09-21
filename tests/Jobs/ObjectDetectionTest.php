@@ -108,7 +108,7 @@ class ObjectDetectionTest extends TestCase
             $this->assertSame($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-            $this->assertSame(State::annotationCandidatesId(), $job->fresh()->state_id);
+            $this->assertSame(State::ANNOTATION_CANDIDATES, $job->fresh()->state_id);
 
             $annotations = $job->annotationCandidates()->get();
             // One annotation for each image.
@@ -396,7 +396,7 @@ class ObjectDetectionTest extends TestCase
         }
 
         $this->assertFalse($job->annotationCandidates()->exists());
-        $this->assertSame(State::objectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::OBJECT_DETECTION, $job->fresh()->state_id);
     }
 
     public function testFailed()

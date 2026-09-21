@@ -42,6 +42,7 @@ class MaiaJob extends Model
      */
     protected $casts = [
         'attrs' => 'array',
+        'state_id' => MaiaJobState::class,
     ];
 
     /**
@@ -81,7 +82,7 @@ class MaiaJob extends Model
      */
     public function getStateAttribute()
     {
-        return MaiaJobState::from($this->state_id);
+        return $this->state_id;
     }
 
     /**
@@ -111,8 +112,8 @@ class MaiaJob extends Model
      */
     public function isRunning()
     {
-        return $this->state_id === MaiaJobState::noveltyDetectionId()
-            || $this->state_id === MaiaJobState::objectDetectionId();
+        return $this->state_id === MaiaJobState::NOVELTY_DETECTION
+            || $this->state_id === MaiaJobState::OBJECT_DETECTION;
     }
 
     /**
@@ -122,8 +123,8 @@ class MaiaJob extends Model
      */
     public function hasFailed()
     {
-        return $this->state_id === MaiaJobState::failedNoveltyDetectionId()
-            || $this->state_id === MaiaJobState::failedObjectDetectionId();
+        return $this->state_id === MaiaJobState::FAILED_NOVELTY_DETECTION
+            || $this->state_id === MaiaJobState::FAILED_OBJECT_DETECTION;
     }
 
     /**
@@ -133,7 +134,7 @@ class MaiaJob extends Model
      */
     public function requiresAction()
     {
-        return $this->state_id === MaiaJobState::trainingProposalsId();
+        return $this->state_id === MaiaJobState::TRAINING_PROPOSALS;
     }
 
     /**
