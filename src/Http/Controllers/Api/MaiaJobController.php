@@ -59,22 +59,22 @@ class MaiaJobController extends Controller
 
         if ($job->shouldUseExistingAnnotations()) {
             if ($request->input('oa_show_training_proposals')) {
-                $job->state_id = State::noveltyDetectionId();
+                $job->state_id = State::NOVELTY_DETECTION;
             } else {
-                $job->state_id = State::objectDetectionId();
+                $job->state_id = State::OBJECT_DETECTION;
             }
             $paramKeys = array_merge($paramKeys, [
                 'oa_restrict_labels',
                 'oa_show_training_proposals',
             ]);
         } elseif ($job->shouldUseKnowledgeTransfer()) {
-            $job->state_id = State::objectDetectionId();
+            $job->state_id = State::OBJECT_DETECTION;
             $paramKeys = array_merge($paramKeys, [
                 'kt_volume_id',
                 'kt_restrict_labels',
             ]);
         } else {
-            $job->state_id = State::noveltyDetectionId();
+            $job->state_id = State::NOVELTY_DETECTION;
             $paramKeys = array_merge($paramKeys, [
                 'nd_clusters',
                 'nd_patch_size',

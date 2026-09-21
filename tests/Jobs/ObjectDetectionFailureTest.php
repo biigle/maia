@@ -15,7 +15,7 @@ class ObjectDetectionFailureTest extends TestCase
 {
     public function testHandle()
     {
-        $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
+        $job = MaiaJobTest::create(['state_id' => State::NOVELTY_DETECTION]);
         $exception = new Exception('This is the message.');
         $failure = new ObjectDetectionFailure($job->id, $exception);
 
@@ -31,7 +31,7 @@ class ObjectDetectionFailureTest extends TestCase
 
     public function testHandleDetleted()
     {
-        $job = MaiaJobTest::create(['state_id' => State::noveltyDetectionId()]);
+        $job = MaiaJobTest::create(['state_id' => State::NOVELTY_DETECTION]);
         $exception = new Exception('This is the message.');
         $failure = new ObjectDetectionFailure($job->id, $exception);
 

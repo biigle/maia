@@ -19,7 +19,7 @@ class PrepareExistingAnnotations extends PrepareAnnotationsJob
     {
         if (!$this->hasAnnotations()) {
             $this->job->error = ['message' => 'Existing annotations should be used but there are no existing annotations to take as training proposals.'];
-            $this->job->state_id = State::failedObjectDetectionId();
+            $this->job->state_id = State::FAILED_OBJECT_DETECTION;
             $this->job->save();
             $this->job->user->notify(new ObjectDetectionFailed($this->job));
 
@@ -33,7 +33,7 @@ class PrepareExistingAnnotations extends PrepareAnnotationsJob
         $this->convertAnnotations();
 
         if ($this->job->shouldShowTrainingProposals()) {
-            $this->job->state_id = State::trainingProposalsId();
+            $this->job->state_id = State::TRAINING_PROPOSALS;
             $this->job->save();
         } else {
             // Continue with object detection using all existing annotations as

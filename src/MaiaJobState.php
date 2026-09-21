@@ -26,36 +26,6 @@ enum MaiaJobState: int implements \JsonSerializable
     // NOTE: This was incorrectly called instance segmentation before
     case FAILED_OBJECT_DETECTION = 6;
 
-    public static function noveltyDetectionId(): int
-    {
-        return self::NOVELTY_DETECTION->value;
-    }
-
-    public static function failedNoveltyDetectionId(): int
-    {
-        return self::FAILED_NOVELTY_DETECTION->value;
-    }
-
-    public static function trainingProposalsId(): int
-    {
-        return self::TRAINING_PROPOSALS->value;
-    }
-
-    public static function annotationCandidatesId(): int
-    {
-        return self::ANNOTATION_CANDIDATES->value;
-    }
-
-    public static function objectDetectionId(): int
-    {
-        return self::OBJECT_DETECTION->value;
-    }
-
-    public static function failedObjectDetectionId(): int
-    {
-        return self::FAILED_OBJECT_DETECTION->value;
-    }
-
     public function label(): string
     {
         return match ($this) {

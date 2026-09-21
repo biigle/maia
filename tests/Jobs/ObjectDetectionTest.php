@@ -372,7 +372,7 @@ class ObjectDetectionTest extends TestCase
 
         $job = MaiaJobTest::create([
             'params' => $params,
-            'state_id' => State::objectDetectionId(),
+            'state_id' => State::OBJECT_DETECTION,
         ]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $trainingProposal = TrainingProposalTest::create([

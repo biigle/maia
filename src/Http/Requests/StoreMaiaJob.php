@@ -89,9 +89,9 @@ class StoreMaiaJob extends FormRequest
 
             $hasJobInProgress = MaiaJob::where('volume_id', $this->volume->id)
                 ->whereIn('state_id', [
-                    State::noveltyDetectionId(),
-                    State::trainingProposalsId(),
-                    State::objectDetectionId(),
+                    State::NOVELTY_DETECTION,
+                    State::TRAINING_PROPOSALS,
+                    State::OBJECT_DETECTION,
                 ])
                 ->exists();
 

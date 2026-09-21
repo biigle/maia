@@ -342,7 +342,7 @@ class ObjectDetection extends DetectionJob
      */
     protected function updateJobState()
     {
-        $this->job->state_id = State::annotationCandidatesId();
+        $this->job->state_id = State::ANNOTATION_CANDIDATES;
         $this->job->save();
     }
 }

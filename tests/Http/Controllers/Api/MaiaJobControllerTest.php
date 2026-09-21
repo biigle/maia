@@ -98,7 +98,7 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         $id = $this->volume()->id;
         $job = MaiaJobTest::create([
-            'state_id' => State::failedNoveltyDetectionId(),
+            'state_id' => State::FAILED_NOVELTY_DETECTION,
             'volume_id' => $this->volume()->id,
         ]);
 
@@ -665,7 +665,7 @@ class MaiaJobControllerTest extends ApiTestCase
         // cannot be deleted during novelty detection
         $this->deleteJson("/api/v1/maia-jobs/{$job->id}")->assertStatus(422);
 
-        $job->state_id = State::trainingProposalsId();
+        $job->state_id = State::TRAINING_PROPOSALS;
         $job->save();
 
         $this->deleteJson("/api/v1/maia-jobs/{$job->id}")->assertStatus(200);

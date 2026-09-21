@@ -149,7 +149,7 @@ class TrainingProposalController extends Controller
      */
     public function submit(ContinueMaiaJob $request)
     {
-        $request->job->state_id = State::objectDetectionId();
+        $request->job->state_id = State::OBJECT_DETECTION;
         $request->job->save();
         event(new MaiaJobContinued($request->job));
 

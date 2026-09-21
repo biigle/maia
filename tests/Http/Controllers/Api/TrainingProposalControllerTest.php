@@ -56,7 +56,7 @@ class TrainingProposalControllerTest extends ApiTestCase
     public function testSubmit()
     {
         $job = MaiaJobTest::create([
-            'state_id' => State::noveltyDetectionId(),
+            'state_id' => State::NOVELTY_DETECTION,
             'volume_id' => $this->volume()->id,
         ]);
         $this->doTestApiRoute('POST', "/api/v1/maia-jobs/{$job->id}/training-proposals");
@@ -68,7 +68,7 @@ class TrainingProposalControllerTest extends ApiTestCase
         // The job can only continue from training proposals state.
         $this->postJson("/api/v1/maia-jobs/{$job->id}/training-proposals")->assertStatus(422);
 
-        $job->state_id = State::trainingProposalsId();
+        $job->state_id = State::TRAINING_PROPOSALS;
         $job->save();
 
         // The job cannot continue if it has no selected training proposals.
@@ -92,7 +92,7 @@ class TrainingProposalControllerTest extends ApiTestCase
     {
         $job = MaiaJobTest::create([
             'volume_id' => $this->volume()->id,
-            'state_id' => State::trainingProposalsId(),
+            'state_id' => State::TRAINING_PROPOSALS,
         ]);
         $a = TrainingProposalTest::create(['job_id' => $job->id]);
 
@@ -135,7 +135,7 @@ class TrainingProposalControllerTest extends ApiTestCase
     {
         $job = MaiaJobTest::create([
             'volume_id' => $this->volume()->id,
-            'state_id' => State::objectDetectionId(),
+            'state_id' => State::OBJECT_DETECTION,
         ]);
         $a = TrainingProposalTest::create(['job_id' => $job->id]);
         $this->beEditor();
@@ -151,7 +151,7 @@ class TrainingProposalControllerTest extends ApiTestCase
     {
         $job = MaiaJobTest::create([
             'volume_id' => $this->volume()->id,
-            'state_id' => State::trainingProposalsId(),
+            'state_id' => State::TRAINING_PROPOSALS,
         ]);
         $a = TrainingProposalTest::create(['job_id' => $job->id]);
 
