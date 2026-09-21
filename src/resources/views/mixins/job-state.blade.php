@@ -1,12 +1,12 @@
-@if ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::noveltyDetectionId())
+@if ($job->state === \Biigle\Modules\Maia\MaiaJobState::NOVELTY_DETECTION)
     <strong class="text-warning">running novelty detection</strong>
-@elseif ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::failedNoveltyDetectionId())
+@elseif ($job->state === \Biigle\Modules\Maia\MaiaJobState::FAILED_NOVELTY_DETECTION)
     <strong class="text-danger">failed novelty detection</strong>
-@elseif ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::trainingProposalsId())
+@elseif ($job->state === \Biigle\Modules\Maia\MaiaJobState::TRAINING_PROPOSALS)
     <strong class="text-warning">waiting for training proposals</strong>
-@elseif ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::objectDetectionId())
+@elseif ($job->state === \Biigle\Modules\Maia\MaiaJobState::OBJECT_DETECTION)
     <strong class="text-warning">running object detection</strong>
-@elseif ($job->state_id === \Biigle\Modules\Maia\MaiaJobState::failedObjectDetectionId())
+@elseif ($job->state === \Biigle\Modules\Maia\MaiaJobState::FAILED_OBJECT_DETECTION)
     <strong class="text-danger">failed object detection</strong>
 @else
     <strong class="text-success">finished</strong>

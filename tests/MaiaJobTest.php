@@ -56,29 +56,29 @@ class MaiaJobTest extends ModelTestCase
     public function testIsRunning()
     {
         $this->assertTrue($this->model->isRunning());
-        $this->model->state_id = State::objectDetectionId();
+        $this->model->state = State::OBJECT_DETECTION;
         $this->assertTrue($this->model->isRunning());
-        $this->model->state_id = State::annotationCandidatesId();
+        $this->model->state = State::ANNOTATION_CANDIDATES;
         $this->assertFalse($this->model->isRunning());
     }
 
     public function testIsFailed()
     {
         $this->assertFalse($this->model->hasFailed());
-        $this->model->state_id = State::failedNoveltyDetectionId();
+        $this->model->state = State::FAILED_NOVELTY_DETECTION;
         $this->assertTrue($this->model->hasFailed());
-        $this->model->state_id = State::failedObjectDetectionId();
+        $this->model->state = State::FAILED_OBJECT_DETECTION;
         $this->assertTrue($this->model->hasFailed());
     }
 
     public function testRequiresAction()
     {
         $this->assertFalse($this->model->requiresAction());
-        $this->model->state_id = State::trainingProposalsId();
+        $this->model->state = State::TRAINING_PROPOSALS;
         $this->assertTrue($this->model->requiresAction());
-        $this->model->state_id = State::objectDetectionId();
+        $this->model->state = State::OBJECT_DETECTION;
         $this->assertFalse($this->model->requiresAction());
-        $this->model->state_id = State::annotationCandidatesId();
+        $this->model->state = State::ANNOTATION_CANDIDATES;
         $this->assertFalse($this->model->requiresAction());
     }
 

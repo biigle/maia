@@ -41,17 +41,17 @@ class MaiaJobController extends Controller
             ->get();
 
         $hasJobsInProgress = $jobs
-            ->whereIn('state_id', [
-                State::noveltyDetectionId(),
-                State::trainingProposalsId(),
-                State::objectDetectionId(),
+            ->whereIn('state', [
+                State::NOVELTY_DETECTION,
+                State::TRAINING_PROPOSALS,
+                State::OBJECT_DETECTION,
             ])
             ->count() > 0;
 
         $hasJobsRunning = $jobs
-            ->whereIn('state_id', [
-                State::noveltyDetectionId(),
-                State::objectDetectionId(),
+            ->whereIn('state', [
+                State::NOVELTY_DETECTION,
+                State::OBJECT_DETECTION,
             ])
             ->count() > 0;
 
@@ -97,12 +97,13 @@ class MaiaJobController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
         $volume = $job->volume;
-        $states = State::pluck('id', 'name');
+        $states = collect(State::cases())
+            ->mapWithKeys(fn (State $state) => [$state->label() => $state->value]);
 
         $user = $request->user();
         $projectIds = collect([]);
 
-        if ($job->state_id === State::annotationCandidatesId()) {
+        if ($job->state === State::ANNOTATION_CANDIDATES) {
             if ($user->can('sudo')) {
                 // Global admins have no restrictions.
                 $projectIds = $volume->projects()->pluck('id');
@@ -110,9 +111,9 @@ class MaiaJobController extends Controller
                 // Array of all project IDs that the user and the image have in common
                 // and where the user is editor, expert or admin.
                 $projectIds = Project::inCommon($user, $volume->id, [
-                    Role::editorId(),
-                    Role::expertId(),
-                    Role::adminId(),
+                    Role::EDITOR->value,
+                    Role::EXPERT->value,
+                    Role::ADMIN->value,
                 ])->pluck('id');
             }
 

@@ -26,7 +26,7 @@
             @include('maia::show.info-content')
         </div>
         @if ($job->shouldShowTrainingProposals())
-            @if ($job->state_id >= $states['training-proposals'])
+            @if ($job->state->value >= \Biigle\Modules\Maia\MaiaJobState::TRAINING_PROPOSALS->value)
                 <div v-show="selectProposalsTabOpen" v-cloak class="maia-content">
                     @include('maia::show.select-proposals-content')
                 </div>
@@ -35,7 +35,7 @@
                 </div>
             @endif
         @endif
-        @if ($job->state_id >= $states['annotation-candidates'])
+        @if ($job->state->value >= \Biigle\Modules\Maia\MaiaJobState::ANNOTATION_CANDIDATES->value)
             <div v-show="selectCandidatesTabOpen" v-cloak class="maia-content">
                 @include('maia::show.select-candidates-content')
             </div>
@@ -50,7 +50,7 @@
             @include('maia::show.info-tab')
         </sidebar-tab>
         @if ($job->shouldShowTrainingProposals())
-            @if ($job->state_id === $states['training-proposals'])
+            @if ($job->state === \Biigle\Modules\Maia\MaiaJobState::TRAINING_PROPOSALS)
                 <sidebar-tab name="select-proposals" icon="plus-square" title="Select training proposals">
                     @include('maia::show.select-proposals-tab')
                 </sidebar-tab>
@@ -62,7 +62,7 @@
                 <sidebar-tab name="refine-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
             @endif
         @endif
-        @if ($job->state_id === $states['annotation-candidates'])
+        @if ($job->state === \Biigle\Modules\Maia\MaiaJobState::ANNOTATION_CANDIDATES)
             <sidebar-tab name="select-candidates" icon="check-square" title="Select annotation candidates">
                 @include('maia::show.select-candidates-tab')
             </sidebar-tab>

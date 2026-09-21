@@ -40,7 +40,7 @@ class UpdateTrainingProposal extends FormRequest
             'points' => [
                 'required_without:selected',
                 'array',
-                new AnnotationPoints($this->proposal->shape_id),
+                new AnnotationPoints($this->proposal->shape->value),
             ],
         ];
     }
@@ -67,7 +67,7 @@ class UpdateTrainingProposal extends FormRequest
     protected function maybeRestrictUpdating($validator)
     {
         $jobContinued = !$this->proposal->job()
-            ->where('state_id', State::trainingProposalsId())
+            ->where('state', State::TRAINING_PROPOSALS)
             ->exists();
 
         if ($jobContinued) {

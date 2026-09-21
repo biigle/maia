@@ -27,8 +27,8 @@ class AnnotationCandidateFactory extends Factory
     {
         return [
             'image_id' => Image::factory(),
-            'shape_id' => function () {
-                return Shape::circleId();
+            'shape' => function () {
+                return Shape::CIRCLE;
             },
             'job_id' => MaiaJob::factory(),
             'score' => $this->faker->randomNumber(),

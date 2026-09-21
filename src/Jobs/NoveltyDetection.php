@@ -114,7 +114,7 @@ class NoveltyDetection extends DetectionJob
      */
     protected function updateJobState()
     {
-        $this->job->state_id = State::trainingProposalsId();
+        $this->job->state = State::TRAINING_PROPOSALS;
         $this->job->save();
     }
 }

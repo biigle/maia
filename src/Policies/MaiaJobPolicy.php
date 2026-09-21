@@ -47,10 +47,10 @@ class MaiaJobPolicy extends CachedPolicy
                         ->from('project_volume')
                         ->where('volume_id', $job->volume_id);
                 })
-                ->whereIn('project_role_id', [
-                    Role::editorId(),
-                    Role::expertId(),
-                    Role::adminId(),
+                ->whereIn('project_role', [
+                    Role::EDITOR->value,
+                    Role::EXPERT->value,
+                    Role::ADMIN->value,
                 ])
                 ->exists();
         });

@@ -110,10 +110,10 @@ export default {
             return this.openTab === 'refine-candidates';
         },
         isInTrainingProposalState() {
-            return this.job.state_id === this.states['training-proposals'];
+            return this.job.state === this.states['training-proposals'];
         },
         isInAnnotationCandidateState() {
-            return this.job.state_id === this.states['annotation-candidates'];
+            return this.job.state === this.states['annotation-candidates'];
         },
         hasProposals() {
             return this.proposals.length > 0;

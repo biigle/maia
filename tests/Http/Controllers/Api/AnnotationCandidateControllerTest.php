@@ -58,7 +58,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
     public function testSubmit()
     {
         $job = MaiaJobTest::create([
-            'state_id' => State::objectDetectionId(),
+            'state' => State::OBJECT_DETECTION,
             'volume_id' => $this->volume()->id,
             'attrs' => ['converting_candidates' => true],
         ]);
@@ -73,7 +73,7 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")
             ->assertStatus(422);
 
-        $job->state_id = State::annotationCandidatesId();
+        $job->state = State::ANNOTATION_CANDIDATES;
         $job->save();
 
         // The "job in progress" flag is still set

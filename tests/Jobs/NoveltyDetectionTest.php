@@ -58,14 +58,14 @@ class NoveltyDetectionTest extends TestCase
             $this->assertSame($expectJson, $inputJson);
             $this->assertStringContainsString("DetectionRunner.py {$inputJsonPath}", $request->command);
 
-            $this->assertSame(State::trainingProposalsId(), $job->fresh()->state_id);
+            $this->assertSame(State::TRAINING_PROPOSALS, $job->fresh()->state);
             $annotations = $job->trainingProposals()->get();
             $this->assertSame(1, $annotations->count());
             $this->assertSame([100, 200, 20], $annotations[0]->points);
             $this->assertSame(0.9, $annotations[0]->score);
             $this->assertFalse($annotations[0]->selected);
             $this->assertSame($image->id, $annotations[0]->image_id);
-            $this->assertSame(Shape::circleId(), $annotations[0]->shape_id);
+            $this->assertSame(Shape::CIRCLE, $annotations[0]->shape);
 
             $this->assertTrue($request->cleanup);
         } finally {
@@ -138,7 +138,7 @@ class NoveltyDetectionTest extends TestCase
         }
 
         $this->assertFalse($job->trainingProposals()->exists());
-        $this->assertSame(State::noveltyDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::NOVELTY_DETECTION, $job->fresh()->state);
     }
 
     public function testFailed()

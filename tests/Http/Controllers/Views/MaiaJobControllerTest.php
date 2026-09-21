@@ -42,7 +42,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
     public function testIndexVideoVolume()
     {
-        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $id = $this->volume(['media_type' => MediaType::VIDEO])->id;
         $this->beEditor();
         $this->get("volumes/{$id}/maia")->assertStatus(404);
     }
@@ -73,7 +73,7 @@ class MaiaJobControllerTest extends ApiTestCase
     {
         $job = MaiaJobTest::create([
             'volume_id' => $this->volume()->id,
-            'state_id' => State::annotationCandidatesId(),
+            'state' => State::ANNOTATION_CANDIDATES,
         ]);
 
         $this->beEditor();

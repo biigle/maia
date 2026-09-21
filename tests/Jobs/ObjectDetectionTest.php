@@ -108,7 +108,7 @@ class ObjectDetectionTest extends TestCase
             $this->assertSame($expectInferenceJson, $inputJson);
             $this->assertStringContainsString("InferenceRunner.py {$inferenceInputJsonPath} {$trainingOutputJsonPath}", $request->commands[2]);
 
-            $this->assertSame(State::annotationCandidatesId(), $job->fresh()->state_id);
+            $this->assertSame(State::ANNOTATION_CANDIDATES, $job->fresh()->state);
 
             $annotations = $job->annotationCandidates()->get();
             // One annotation for each image.
@@ -118,7 +118,7 @@ class ObjectDetectionTest extends TestCase
             $this->assertNull($annotations[0]->label_id);
             $this->assertNull($annotations[0]->annotation_id);
             $this->assertSame($image->id, $annotations[0]->image_id);
-            $this->assertSame(Shape::circleId(), $annotations[0]->shape_id);
+            $this->assertSame(Shape::CIRCLE, $annotations[0]->shape);
 
             $this->assertTrue($request->cleanup);
         } finally {
@@ -372,7 +372,7 @@ class ObjectDetectionTest extends TestCase
 
         $job = MaiaJobTest::create([
             'params' => $params,
-            'state_id' => State::objectDetectionId(),
+            'state' => State::OBJECT_DETECTION,
         ]);
         $image = ImageTest::create(['volume_id' => $job->volume_id]);
         $trainingProposal = TrainingProposalTest::create([
@@ -396,7 +396,7 @@ class ObjectDetectionTest extends TestCase
         }
 
         $this->assertFalse($job->annotationCandidates()->exists());
-        $this->assertSame(State::objectDetectionId(), $job->fresh()->state_id);
+        $this->assertSame(State::OBJECT_DETECTION, $job->fresh()->state);
     }
 
     public function testFailed()
