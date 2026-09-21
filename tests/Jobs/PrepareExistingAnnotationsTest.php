@@ -23,7 +23,7 @@ class PrepareExistingAnnotationsTest extends TestCase
 {
     public function testHandle()
     {
-        $a = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
+        $a = ImageAnnotationTest::create(['shape_id' => Shape::CIRCLE]);
         $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
         $al2 = ImageAnnotationLabelTest::create();
         $job = MaiaJobTest::create([
@@ -43,7 +43,7 @@ class PrepareExistingAnnotationsTest extends TestCase
 
     public function testHandleRestrictLabels()
     {
-        $a1 = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
+        $a1 = ImageAnnotationTest::create(['shape_id' => Shape::CIRCLE]);
         $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a1->id]);
         // Create only one proposal even though the annotation has two matching labels.
         $al2 = ImageAnnotationLabelTest::create([
@@ -51,7 +51,7 @@ class PrepareExistingAnnotationsTest extends TestCase
             'label_id' => $al1->label_id,
         ]);
         $a2 = ImageAnnotationTest::create([
-            'shape_id' => Shape::circleId(),
+            'shape_id' => Shape::CIRCLE,
             'image_id' => $a1->image_id,
         ]);
         $al3 = ImageAnnotationLabelTest::create(['annotation_id' => $a2->id]);
@@ -74,30 +74,30 @@ class PrepareExistingAnnotationsTest extends TestCase
     public function testHandleShapeConversion()
     {
         $a1 = ImageAnnotationTest::create([
-            'shape_id' => Shape::pointId(),
+            'shape_id' => Shape::POINT,
             'points' => [10, 20],
         ]);
 
         $a2 = ImageAnnotationTest::create([
-            'shape_id' => Shape::rectangleId(),
+            'shape_id' => Shape::RECTANGLE,
             'points' => [10, 10, 100, 10, 100, 100, 10, 100],
             'image_id' => $a1->image_id,
         ]);
 
         $a3 = ImageAnnotationTest::create([
-            'shape_id' => Shape::circleId(),
+            'shape_id' => Shape::CIRCLE,
             'points' => [10, 20, 30],
             'image_id' => $a1->image_id,
         ]);
 
         $a4 = ImageAnnotationTest::create([
-            'shape_id' => Shape::lineId(),
+            'shape_id' => Shape::LINE,
             'points' => [10, 10, 20, 20],
             'image_id' => $a1->image_id,
         ]);
 
         $a5 = ImageAnnotationTest::create([
-            'shape_id' => Shape::polygonId(),
+            'shape_id' => Shape::POLYGON,
             'points' => [10, 10, 20, 20, 0, 20],
             'image_id' => $a1->image_id,
         ]);
@@ -113,20 +113,20 @@ class PrepareExistingAnnotationsTest extends TestCase
         $this->assertSame(5, $job->trainingProposals()->selected()->count());
         $proposals = $job->trainingProposals;
 
-        $this->assertSame(Shape::circleId(), $proposals[0]->shape_id);
+        $this->assertSame(Shape::CIRCLE->value, $proposals[0]->shape_id);
         // Points get a default radius of 50 px.
         $this->assertSame([10, 20, 50], $proposals[0]->points);
 
-        $this->assertSame(Shape::circleId(), $proposals[1]->shape_id);
+        $this->assertSame(Shape::CIRCLE->value, $proposals[1]->shape_id);
         $this->assertSame([55, 55, 63.64], $proposals[1]->points);
 
-        $this->assertSame(Shape::circleId(), $proposals[2]->shape_id);
+        $this->assertSame(Shape::CIRCLE->value, $proposals[2]->shape_id);
         $this->assertSame([10, 20, 30], $proposals[2]->points);
 
-        $this->assertSame(Shape::circleId(), $proposals[3]->shape_id);
+        $this->assertSame(Shape::CIRCLE->value, $proposals[3]->shape_id);
         $this->assertSame([15, 15, 7.07], $proposals[3]->points);
 
-        $this->assertSame(Shape::circleId(), $proposals[4]->shape_id);
+        $this->assertSame(Shape::CIRCLE->value, $proposals[4]->shape_id);
         $this->assertSame([10, 15, 11.18], $proposals[4]->points);
     }
 
@@ -144,7 +144,7 @@ class PrepareExistingAnnotationsTest extends TestCase
 
     public function testHandleShowTrainingProposals()
     {
-        $a = ImageAnnotationTest::create(['shape_id' => Shape::circleId()]);
+        $a = ImageAnnotationTest::create(['shape_id' => Shape::CIRCLE]);
         $al1 = ImageAnnotationLabelTest::create(['annotation_id' => $a->id]);
         $al2 = ImageAnnotationLabelTest::create();
         $job = MaiaJobTest::create([

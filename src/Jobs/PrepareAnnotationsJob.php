@@ -85,7 +85,7 @@ abstract class PrepareAnnotationsJob extends Job
             return [
                 'points' => $this->convertAnnotationPointsToCircle($annotation),
                 'image_id' => $annotation->image_id,
-                'shape_id' => Shape::circleId(),
+                'shape_id' => Shape::CIRCLE->value,
                 'job_id' => $this->job->id,
                 // All these proposals should be taken for object detection unless
                 // the user chose to review them as training proposals first.
@@ -106,10 +106,10 @@ abstract class PrepareAnnotationsJob extends Job
      */
     protected function convertAnnotationPointsToCircle(ImageAnnotation $annotation)
     {
-        if ($annotation->shape_id === Shape::pointId()) {
+        if ($annotation->shape_id === Shape::POINT) {
             // Points are converted to circles with a default radius of 50 px.
             $points = [$annotation->points[0], $annotation->points[1], 50];
-        } elseif ($annotation->shape_id === Shape::circleId()) {
+        } elseif ($annotation->shape_id === Shape::CIRCLE) {
             $points = $annotation->points;
         } else {
             $points = $this->convertPolygonToCirlce($annotation->points);

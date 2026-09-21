@@ -27,7 +27,7 @@ class TrainingProposalFactory extends Factory
         return [
             'image_id' => Image::factory(),
             'shape_id' => function () {
-                return Shape::circleId();
+                return Shape::CIRCLE->value;
             },
             'job_id' => MaiaJob::factory(),
             'score' => $this->faker->randomNumber(),

@@ -42,7 +42,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
     public function testIndexVideoVolume()
     {
-        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $id = $this->volume(['media_type' => MediaType::VIDEO->value])->id;
         $this->beEditor();
         $this->get("volumes/{$id}/maia")->assertStatus(404);
     }

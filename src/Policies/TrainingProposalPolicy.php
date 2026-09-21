@@ -50,10 +50,10 @@ class TrainingProposalPolicy extends CachedPolicy
                         ->join('maia_jobs', 'project_volume.volume_id', '=', 'maia_jobs.volume_id')
                         ->where('maia_jobs.id', $proposal->job_id);
                 })
-                ->whereIn('project_role_id', [
-                    Role::editorId(),
-                    Role::expertId(),
-                    Role::adminId(),
+                ->whereIn('project_role', [
+                    Role::EDITOR->value,
+                    Role::EXPERT->value,
+                    Role::ADMIN->value,
                 ])
                 ->exists();
         });

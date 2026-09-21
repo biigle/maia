@@ -191,7 +191,7 @@ class MaiaJobControllerTest extends ApiTestCase
     public function testStoreVideoVolume()
     {
         $volume = $this->volume();
-        $volume->media_type_id = MediaType::videoId();
+        $volume->media_type = MediaType::VIDEO;
         $volume->save();
 
         $this->beEditor();

@@ -118,7 +118,7 @@ class ObjectDetectionTest extends TestCase
             $this->assertNull($annotations[0]->label_id);
             $this->assertNull($annotations[0]->annotation_id);
             $this->assertSame($image->id, $annotations[0]->image_id);
-            $this->assertSame(Shape::circleId(), $annotations[0]->shape_id);
+            $this->assertSame(Shape::CIRCLE->value, $annotations[0]->shape_id);
 
             $this->assertTrue($request->cleanup);
         } finally {
