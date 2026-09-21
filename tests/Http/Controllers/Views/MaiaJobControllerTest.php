@@ -77,6 +77,13 @@ class MaiaJobControllerTest extends ApiTestCase
         ]);
 
         $this->beEditor();
-        $this->get("maia/{$job->id}")->assertStatus(200);
+        $response = $this->get("maia/{$job->id}")
+            ->assertStatus(200)
+            ->assertSee("biigle.\$declare('maia.projectIds', [{$this->project()->id}]);", false);
+
+        $this->assertSame(2, substr_count(
+            $response->getContent(),
+            ':sorting-project-ids="projectIds"'
+        ));
     }
 }

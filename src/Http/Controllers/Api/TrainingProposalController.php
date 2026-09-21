@@ -179,11 +179,10 @@ class TrainingProposalController extends Controller
         if ($request->filled('points')) {
             $proposal->points = $request->input('points');
             ProcessNoveltyDetectedImage::dispatch($proposal->image,
-                    only: [$proposal->id],
-                    maiaJob: $proposal->job,
-                    targetDisk: config('maia.training_proposal_storage_disk')
-                )
-                ->onQueue(config('largo.generate_annotation_patch_queue'));
+                only: [$proposal->id],
+                maiaJob: $proposal->job,
+                targetDisk: config('maia.training_proposal_storage_disk')
+            );
         }
 
         $proposal->selected = $request->input('selected', $proposal->selected);

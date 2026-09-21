@@ -81,8 +81,7 @@ class ConvertAnnotationCandidates extends Job
                 ->each(function ($group) {
                     $image = $group[0]->image;
                     $ids = $group->pluck('id')->all();
-                    ProcessAnnotatedImage::dispatch($image, only: $ids)
-                        ->onQueue(config('largo.generate_annotation_patch_queue'));
+                    ProcessAnnotatedImage::dispatch($image, only: $ids);
                 });
 
         } finally {

@@ -101,6 +101,7 @@ class MaiaJobController extends Controller
             ->mapWithKeys(fn (State $state) => [$state->label() => $state->value]);
 
         $user = $request->user();
+        $projectIds = collect([]);
 
         if ($job->state_id === State::ANNOTATION_CANDIDATES) {
             if ($user->can('sudo')) {
@@ -144,6 +145,7 @@ class MaiaJobController extends Controller
             'volume',
             'states',
             'trees',
+            'projectIds',
             'tpUrlTemplate',
             'acUrlTemplate',
             'tpLimit',

@@ -44,6 +44,7 @@ export default {
             job: null,
             states: null,
             labelTrees: [],
+            projectIds: [],
             visitedSelectProposalsTab: false,
             visitedRefineProposalsTab: false,
             visitedSelectCandidatesTab: false,
@@ -933,6 +934,7 @@ export default {
         this.job = biigle.$require('maia.job');
         this.states = biigle.$require('maia.states');
         this.labelTrees = biigle.$require('maia.labelTrees');
+        this.projectIds = biigle.$require('maia.projectIds');
     },
 };
 </script>

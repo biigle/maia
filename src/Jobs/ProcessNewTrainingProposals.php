@@ -32,9 +32,8 @@ class ProcessNewTrainingProposals extends Job implements ShouldQueue
             )
             ->eachById(fn ($image) =>
                 ProcessNoveltyDetectedImage::dispatch($image, $this->maiaJob,
-                        targetDisk: config('maia.training_proposal_storage_disk')
-                    )
-                    ->onQueue(config('largo.generate_annotation_patch_queue'))
+                    targetDisk: config('maia.training_proposal_storage_disk')
+                )
             );
     }
 }
