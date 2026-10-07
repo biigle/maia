@@ -50,7 +50,6 @@
             <p class="text-warning lead">
                 Please select <i class="fas fa-plus-square"></i> and refine <i class="fas fa-pen-square"></i> the training proposals.
             </p>
-        {{-- The array key is instance-segmentation for legacy reasons --}}
         @elseif ($job->state === MaiaJobState::OBJECT_DETECTION)
             <p class="text-warning text-center lead">
                 Object detection in progress.<br>Please come back later.
