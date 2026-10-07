@@ -33,7 +33,7 @@ return new class extends Migration
             $oldIds['failed-instance-segmentation'] => MaiaJobState::FAILED_OBJECT_DETECTION->value,
         ];
 
-        EnumMigrationHelper::replaceStaticTableWithEnum($map, 'maia_job_states', $this->foreignKeys);
+        EnumMigrationHelper::replaceStaticTableWithEnum($map, 'maia_job_states', $this->foreignKeys, validationMin: 1, validationMax: 6);
 
         foreach ($this->tablesWithShapeId as $table) {
             Schema::table($table, function (Blueprint $t) {
