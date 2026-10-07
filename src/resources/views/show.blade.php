@@ -10,7 +10,6 @@
 {{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/js/main.js'], 'vendor/maia')}}
 <script type="module">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
-    biigle.$declare('maia.states', {!! $states->toJson() !!});
     biigle.$declare('maia.labelTrees', {!! $trees->toJson() !!});
     biigle.$declare('maia.projectIds', {!! $projectIds->toJson() !!});
     biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/:id/file') !!}');

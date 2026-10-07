@@ -23,7 +23,7 @@ enum MaiaJobState: int implements \JsonSerializable
     // NOTE: This was incorrectly called instance segmentation before
     case OBJECT_DETECTION = 5;
     // A failure during object detection.
-    // NOTE: This was incorrectly called instance segmentation before
+    // NOTE: This was incorrectly called failed instance segmentation before
     case FAILED_OBJECT_DETECTION = 6;
 
     public function label(): string

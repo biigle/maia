@@ -97,8 +97,6 @@ class MaiaJobController extends Controller
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
         $volume = $job->volume;
-        $states = collect(State::cases())
-            ->mapWithKeys(fn (State $state) => [$state->label() => $state->value]);
 
         $user = $request->user();
         $projectIds = collect([]);
@@ -143,7 +141,6 @@ class MaiaJobController extends Controller
         return view('maia::show', compact(
             'job',
             'volume',
-            'states',
             'trees',
             'projectIds',
             'tpUrlTemplate',
