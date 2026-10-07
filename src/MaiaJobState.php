@@ -20,10 +20,8 @@ enum MaiaJobState: int implements \JsonSerializable
     // The manual review of annotation candidates stage.
     case ANNOTATION_CANDIDATES = 4;
     // The object detection stage.
-    // NOTE: This was incorrectly called "instance segmentation" before
     case OBJECT_DETECTION = 5;
     // A failure during object detection.
-    // NOTE: This was incorrectly called "failed instance segmentation" before
     case FAILED_OBJECT_DETECTION = 6;
 
     public function label(): string
@@ -33,7 +31,9 @@ enum MaiaJobState: int implements \JsonSerializable
             self::FAILED_NOVELTY_DETECTION => 'failed-novelty-detection',
             self::TRAINING_PROPOSALS => 'training-proposals',
             self::ANNOTATION_CANDIDATES => 'annotation-candidates',
+            // NOTE: This was incorrectly called "instance segmentation" before
             self::OBJECT_DETECTION => 'instance-segmentation',
+            // NOTE: This was incorrectly called "failed instance segmentation" before
             self::FAILED_OBJECT_DETECTION => 'failed-instance-segmentation',
         };
     }
