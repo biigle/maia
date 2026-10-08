@@ -1,5 +1,6 @@
 <?php
 
+use Biigle\Enums\Shape;
 use Biigle\Modules\Maia\MaiaJobState;
 use Biigle\Support\EnumMigrationHelper;
 use Illuminate\Database\Migrations\Migration;
@@ -23,6 +24,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $this->replaceMaiaJobStatesTableWithEnum();
+        $this->useEnumInShapeColumns();
+    }
+
+    private function replaceMaiaJobStatesTableWithEnum()
+    {
         $oldIds = DB::table('maia_job_states')->pluck('id', 'name');
         $map = [
             $oldIds['novelty-detection']          => MaiaJobState::NOVELTY_DETECTION->value,
@@ -34,11 +41,31 @@ return new class extends Migration
         ];
 
         EnumMigrationHelper::replaceStaticTableWithEnum($map, 'maia_job_states', $this->foreignKeys, validationMin: 1, validationMax: 6);
+    }
 
-        foreach ($this->tablesWithShapeId as $table) {
+    private function useEnumInShapeColumns()
+    {
+        $oldShapeIds = DB::table('shapes')->pluck('id', 'name');
+
+        $shapeMap = [
+            $oldShapeIds['Point']      => Shape::POINT->value,
+            $oldShapeIds['LineString'] => Shape::LINE->value,
+            $oldShapeIds['Polygon']    => Shape::POLYGON->value,
+            $oldShapeIds['Circle']     => Shape::CIRCLE->value,
+            $oldShapeIds['Rectangle']  => Shape::RECTANGLE->value,
+            $oldShapeIds['Ellipse']    => Shape::ELLIPSE->value,
+            $oldShapeIds['WholeFrame'] => Shape::WHOLE_FRAME->value,
+        ];
+
+        EnumMigrationHelper::assertCompleteMap($shapeMap, 'shapes');
+
+        foreach ($this->tablesWithShapeId as $table)
+        {
+            EnumMigrationHelper::mapValues($shapeMap, $table, 'shape_id');
             Schema::table($table, function (Blueprint $t) {
                 $t->renameColumn('shape_id', 'shape');
             });
+            EnumMigrationHelper::addRangeValidationCheck($table, 'shape', validationMin: 1, validationMax: 7);
         }
     }
 
@@ -47,6 +74,15 @@ return new class extends Migration
      */
     public function down(): void
     {
+        foreach ($this->tablesWithShapeId as $table) {
+            DB::statement(
+                "ALTER TABLE $table DROP CONSTRAINT IF EXISTS {$table}_shape_check"
+            );
+            Schema::table($table, function (Blueprint $t) {
+                $t->renameColumn('shape', 'shape_id');
+            });
+        }
+
         Schema::create('maia_job_states', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 64);
@@ -62,11 +98,5 @@ return new class extends Migration
         ]);
 
         EnumMigrationHelper::createForeignKeys($this->foreignKeys, 'maia_job_states');
-
-        foreach ($this->tablesWithShapeId as $table) {
-            Schema::table($table, function (Blueprint $t) {
-                $t->renameColumn('shape', 'shape_id');
-            });
-        }
     }
 };
