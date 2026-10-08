@@ -11,7 +11,7 @@ use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Modules\Maia\Traits\QueriesExistingAnnotations;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use DB;
 use Exception;
 use Illuminate\Queue\Attributes\DeleteWhenMissingModels;

@@ -3,7 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Views;
 
 use ApiTestCase;
-use Biigle\MediaType;
+use Biigle\Enums\MediaType;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;

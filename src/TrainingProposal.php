@@ -3,7 +3,7 @@
 namespace Biigle\Modules\Maia;
 
 use Biigle\Modules\Maia\Database\Factories\TrainingProposalFactory;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 
 /**
  * @property Shape $shape

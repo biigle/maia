@@ -8,7 +8,7 @@ use Biigle\LabelTree;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Project;
-use Biigle\Role;
+use Biigle\Enums\Role;
 use Biigle\Volume;
 use DB;
 use Illuminate\Http\Request;

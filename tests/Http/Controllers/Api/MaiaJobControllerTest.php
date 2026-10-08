@@ -3,7 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
-use Biigle\MediaType;
+use Biigle\Enums\MediaType;
 use Biigle\Modules\Maia\Jobs\ObjectDetectionRequest;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;

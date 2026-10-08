@@ -7,7 +7,7 @@ use Biigle\Modules\Maia\Jobs\PrepareKnowledgeTransfer;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\ObjectDetectionFailed;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Biigle\Tests\ImageAnnotationLabelTest;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\ImageTest;

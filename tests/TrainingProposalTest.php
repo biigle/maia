@@ -3,7 +3,7 @@
 namespace Biigle\Tests\Modules\Maia;
 
 use Biigle\Modules\Maia\TrainingProposal;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use ModelTestCase;
 
 class TrainingProposalTest extends ModelTestCase

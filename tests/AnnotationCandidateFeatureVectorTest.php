@@ -4,7 +4,7 @@ namespace Biigle\Tests\Modules\Maia;
 
 use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use TestCase;
 
 class AnnotationCandidateFeatureVectorTest extends TestCase

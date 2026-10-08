@@ -5,7 +5,7 @@ namespace Biigle\Modules\Maia\Database\Factories;
 use Biigle\Image;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\TrainingProposal;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TrainingProposalFactory extends Factory

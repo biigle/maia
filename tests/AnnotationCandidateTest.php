@@ -3,7 +3,7 @@
 namespace Biigle\Tests\Modules\Maia;
 
 use Biigle\Modules\Maia\AnnotationCandidate;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Biigle\Tests\ImageAnnotationTest;
 use Biigle\Tests\LabelTest;
 use ModelTestCase;

@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia;
 
 use Biigle\Contracts\Annotation as AnnotationContract;
 use Biigle\Image;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

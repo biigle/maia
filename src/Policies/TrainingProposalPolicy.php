@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia\Policies;
 
 use Biigle\Modules\Maia\TrainingProposal;
 use Biigle\Policies\CachedPolicy;
-use Biigle\Role;
+use Biigle\Enums\Role;
 use Biigle\User;
 use Cache;
 use DB;

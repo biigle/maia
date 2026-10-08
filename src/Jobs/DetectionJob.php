@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Modules\Maia\GenericImage;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Exception;
 use File;
 use Illuminate\Bus\Queueable;

@@ -6,7 +6,7 @@ use Biigle\Image;
 use Biigle\ImageAnnotation;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AnnotationCandidateFactory extends Factory

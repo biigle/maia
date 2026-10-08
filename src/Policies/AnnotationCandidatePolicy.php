@@ -5,7 +5,7 @@ namespace Biigle\Modules\Maia\Policies;
 use Biigle\Label;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Policies\CachedPolicy;
-use Biigle\Role;
+use Biigle\Enums\Role;
 use Biigle\User;
 use Cache;
 use DB;

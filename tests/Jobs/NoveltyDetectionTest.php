@@ -10,7 +10,7 @@ use Biigle\Modules\Maia\Jobs\NoveltyDetectionResponse;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Modules\Maia\Notifications\NoveltyDetectionComplete;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Exception;
