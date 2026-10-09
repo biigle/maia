@@ -69,21 +69,26 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->get("maia/{$job->id}")->assertStatus(200);
     }
 
-    public function testShowTrainingProposals()
+    public function testShowAllStates()
     {
-        $job = MaiaJobTest::create([
-            'volume_id' => $this->volume()->id,
-            'state' => State::TRAINING_PROPOSALS,
-        ]);
-
         $this->beEditor();
-        $response = $this->get("maia/{$job->id}")->assertStatus(200);
 
-        // Both the select and refine proposals tabs must be unlocked.
-        $this->assertSame(2, substr_count(
-            $response->getContent(),
-            ':locked="false"'
-        ));
+        foreach (State::cases() as $state) {
+            $job = MaiaJobTest::create([
+                'volume_id' => $this->volume()->id,
+                'state' => $state,
+            ]);
+
+            $response = $this->get("maia/{$job->id}")->assertStatus(200);
+
+            if ($state === State::TRAINING_PROPOSALS) {
+                // Both the select and refine proposals tabs must be unlocked.
+                $this->assertSame(2, substr_count(
+                    $response->getContent(),
+                    ':locked="false"'
+                ));
+            }
+        }
     }
 
     public function testShowAnnotationCandidates()
