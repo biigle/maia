@@ -1,6 +1,4 @@
-@php
-    use Biigle\Modules\Maia\MaiaJobState;
-@endphp
+@use('Biigle\Modules\Maia\MaiaJobState')
 
 <div class="maia-content-message">
     @if ($job->state === MaiaJobState::ANNOTATION_CANDIDATES)
