@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia\Policies;
 
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Policies\CachedPolicy;
-use Biigle\Role;
+use Biigle\Enums\Role;
 use Biigle\User;
 use DB;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -47,10 +47,10 @@ class MaiaJobPolicy extends CachedPolicy
                         ->from('project_volume')
                         ->where('volume_id', $job->volume_id);
                 })
-                ->whereIn('project_role_id', [
-                    Role::editorId(),
-                    Role::expertId(),
-                    Role::adminId(),
+                ->whereIn('project_role', [
+                    Role::EDITOR->value,
+                    Role::EXPERT->value,
+                    Role::ADMIN->value,
                 ])
                 ->exists();
         });

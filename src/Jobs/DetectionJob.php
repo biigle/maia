@@ -4,7 +4,7 @@ namespace Biigle\Modules\Maia\Jobs;
 
 use Biigle\Modules\Maia\GenericImage;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Exception;
 use File;
 use Illuminate\Bus\Queueable;
@@ -242,7 +242,7 @@ abstract class DetectionJob implements ShouldQueue
             'points' => json_encode($points),
             'score' => $annotation[4],
             'image_id' => $annotation[0],
-            'shape_id' => Shape::circleId(),
+            'shape' => Shape::CIRCLE->value,
         ];
     }
 

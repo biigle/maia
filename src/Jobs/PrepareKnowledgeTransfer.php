@@ -32,7 +32,7 @@ class PrepareKnowledgeTransfer extends PrepareAnnotationsJob
             }
         } catch (PrepareKnowledgeTransferException $e) {
             $this->job->error = ['message' => $e->getMessage()];
-            $this->job->state_id = State::failedObjectDetectionId();
+            $this->job->state = State::FAILED_OBJECT_DETECTION;
             $this->job->save();
             $this->job->user->notify(new ObjectDetectionFailed($this->job));
             return;

@@ -1,5 +1,5 @@
-torch==2.13.0
-torchvision==0.27.1
+torch==2.13
+torchvision==0.28.0
 pycocotools
 albumentations
 scikit-learn

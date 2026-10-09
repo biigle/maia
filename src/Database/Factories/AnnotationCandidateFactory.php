@@ -6,7 +6,7 @@ use Biigle\Image;
 use Biigle\ImageAnnotation;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\MaiaJob;
-use Biigle\Shape;
+use Biigle\Enums\Shape;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AnnotationCandidateFactory extends Factory
@@ -27,8 +27,8 @@ class AnnotationCandidateFactory extends Factory
     {
         return [
             'image_id' => Image::factory(),
-            'shape_id' => function () {
-                return Shape::circleId();
+            'shape' => function () {
+                return Shape::CIRCLE;
             },
             'job_id' => MaiaJob::factory(),
             'score' => $this->faker->randomNumber(),

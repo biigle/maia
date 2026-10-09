@@ -3,7 +3,7 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Views;
 
 use ApiTestCase;
-use Biigle\MediaType;
+use Biigle\Enums\MediaType;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Tests\ImageTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
@@ -42,7 +42,7 @@ class MaiaJobControllerTest extends ApiTestCase
 
     public function testIndexVideoVolume()
     {
-        $id = $this->volume(['media_type_id' => MediaType::videoId()])->id;
+        $id = $this->volume(['media_type' => MediaType::VIDEO])->id;
         $this->beEditor();
         $this->get("volumes/{$id}/maia")->assertStatus(404);
     }
@@ -69,11 +69,33 @@ class MaiaJobControllerTest extends ApiTestCase
         $this->get("maia/{$job->id}")->assertStatus(200);
     }
 
+    public function testShowAllStates()
+    {
+        $this->beEditor();
+
+        foreach (State::cases() as $state) {
+            $job = MaiaJobTest::create([
+                'volume_id' => $this->volume()->id,
+                'state' => $state,
+            ]);
+
+            $response = $this->get("maia/{$job->id}")->assertStatus(200);
+
+            if ($state === State::TRAINING_PROPOSALS) {
+                // Both the select and refine proposals tabs must be unlocked.
+                $this->assertSame(2, substr_count(
+                    $response->getContent(),
+                    ':locked="false"'
+                ));
+            }
+        }
+    }
+
     public function testShowAnnotationCandidates()
     {
         $job = MaiaJobTest::create([
             'volume_id' => $this->volume()->id,
-            'state_id' => State::annotationCandidatesId(),
+            'state' => State::ANNOTATION_CANDIDATES,
         ]);
 
         $this->beEditor();

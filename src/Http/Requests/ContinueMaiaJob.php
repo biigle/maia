@@ -46,7 +46,7 @@ class ContinueMaiaJob extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            if ($this->job->state_id !== State::trainingProposalsId()) {
+            if ($this->job->state !== State::TRAINING_PROPOSALS) {
                 $validator->errors()->add('id', 'The job cannot continue if it is not in training proposal selection and refinement state.');
             } elseif (!$this->job->trainingProposals()->selected()->exists()) {
                 $validator->errors()->add('id', 'The job cannot continue if it has no selected training proposals.');

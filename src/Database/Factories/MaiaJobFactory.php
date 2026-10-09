@@ -27,8 +27,8 @@ class MaiaJobFactory extends Factory
         return [
             'volume_id' => Volume::factory(),
             'user_id' => User::factory(),
-            'state_id' => function () {
-                return MaiaJobState::noveltyDetectionId();
+            'state' => function () {
+                return MaiaJobState::NOVELTY_DETECTION;
             },
         ];
     }

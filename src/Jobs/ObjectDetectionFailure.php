@@ -13,7 +13,7 @@ class ObjectDetectionFailure extends JobFailure
      */
     protected function updateJobState(MaiaJob $job)
     {
-        $job->state_id = State::failedObjectDetectionId();
+        $job->state = State::FAILED_OBJECT_DETECTION;
     }
 
     /**
