@@ -1,3 +1,4 @@
+@use('Biigle\Modules\Maia\MaiaJobState')
 @extends('app')
 @section('title', "MAIA job #{$job->id}")
 @section('full-navbar', true)
@@ -10,8 +11,8 @@
 {{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/js/main.js'], 'vendor/maia')}}
 <script type="module">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
-    biigle.$declare('maia.isInTrainingProposalState', @json($job->state === \Biigle\Modules\Maia\MaiaJobState::TRAINING_PROPOSALS));
-    biigle.$declare('maia.isInAnnotationCandidateState', @json($job->state === \Biigle\Modules\Maia\MaiaJobState::ANNOTATION_CANDIDATES));
+    biigle.$declare('maia.isInTrainingProposalState', @json($job->state === MaiaJobState::TRAINING_PROPOSALS));
+    biigle.$declare('maia.isInAnnotationCandidateState', @json($job->state === MaiaJobState::ANNOTATION_CANDIDATES));
     biigle.$declare('maia.labelTrees', {!! $trees->toJson() !!});
     biigle.$declare('maia.projectIds', {!! $projectIds->toJson() !!});
     biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/:id/file') !!}');
@@ -27,7 +28,12 @@
             @include('maia::show.info-content')
         </div>
         @if ($job->shouldShowTrainingProposals())
-            @if ($job->state->value >= \Biigle\Modules\Maia\MaiaJobState::TRAINING_PROPOSALS->value)
+            @if (in_array($job->state, [
+                MaiaJobState::TRAINING_PROPOSALS,
+                MaiaJobState::ANNOTATION_CANDIDATES,
+                MaiaJobState::OBJECT_DETECTION,
+                MaiaJobState::FAILED_OBJECT_DETECTION,
+            ], true))
                 <div v-show="selectProposalsTabOpen" v-cloak class="maia-content">
                     @include('maia::show.select-proposals-content')
                 </div>
@@ -36,7 +42,11 @@
                 </div>
             @endif
         @endif
-        @if ($job->state->value >= \Biigle\Modules\Maia\MaiaJobState::ANNOTATION_CANDIDATES->value)
+        @if (in_array($job->state, [
+            MaiaJobState::ANNOTATION_CANDIDATES,
+            MaiaJobState::OBJECT_DETECTION,
+            MaiaJobState::FAILED_OBJECT_DETECTION,
+        ], true))
             <div v-show="selectCandidatesTabOpen" v-cloak class="maia-content">
                 @include('maia::show.select-candidates-content')
             </div>
@@ -51,7 +61,7 @@
             @include('maia::show.info-tab')
         </sidebar-tab>
         @if ($job->shouldShowTrainingProposals())
-            @if ($job->state === \Biigle\Modules\Maia\MaiaJobState::TRAINING_PROPOSALS)
+            @if ($job->state === MaiaJobState::TRAINING_PROPOSALS)
                 <sidebar-tab name="select-proposals" icon="plus-square" title="Select training proposals">
                     @include('maia::show.select-proposals-tab')
                 </sidebar-tab>
@@ -63,7 +73,7 @@
                 <sidebar-tab name="refine-proposals" icon="pen-square" title="Training proposals are not ready yet" disabled></sidebar-tab>
             @endif
         @endif
-        @if ($job->state === \Biigle\Modules\Maia\MaiaJobState::ANNOTATION_CANDIDATES)
+        @if ($job->state === MaiaJobState::ANNOTATION_CANDIDATES)
             <sidebar-tab name="select-candidates" icon="check-square" title="Select annotation candidates">
                 @include('maia::show.select-candidates-tab')
             </sidebar-tab>

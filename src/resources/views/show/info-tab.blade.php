@@ -1,6 +1,4 @@
-@php
-    use Biigle\Modules\Maia\MaiaJobState;
-@endphp
+@use('Biigle\Modules\Maia\MaiaJobState')
 
 <div class="sidebar-tab__content sidebar-tab__content--maia">
     <div class="maia-tab-content__top">
