@@ -42,7 +42,8 @@ export default {
     data() {
         return {
             job: null,
-            states: null,
+            isInTrainingProposalState: false,
+            isInAnnotationCandidateState: false,
             labelTrees: [],
             projectIds: [],
             visitedSelectProposalsTab: false,
@@ -108,12 +109,6 @@ export default {
         },
         refineCandidatesTabOpen() {
             return this.openTab === 'refine-candidates';
-        },
-        isInTrainingProposalState() {
-            return this.job.state === this.states['training-proposals'];
-        },
-        isInAnnotationCandidateState() {
-            return this.job.state === this.states['annotation-candidates'];
         },
         hasProposals() {
             return this.proposals.length > 0;
@@ -932,7 +927,8 @@ export default {
     },
     created() {
         this.job = biigle.$require('maia.job');
-        this.states = biigle.$require('maia.states');
+        this.isInTrainingProposalState = biigle.$require('maia.isInTrainingProposalState');
+        this.isInAnnotationCandidateState = biigle.$require('maia.isInAnnotationCandidateState');
         this.labelTrees = biigle.$require('maia.labelTrees');
         this.projectIds = biigle.$require('maia.projectIds');
     },

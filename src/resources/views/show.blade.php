@@ -10,6 +10,8 @@
 {{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/js/main.js'], 'vendor/maia')}}
 <script type="module">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
+    biigle.$declare('maia.isInTrainingProposalState', @json($job->state === \Biigle\Modules\Maia\MaiaJobState::TRAINING_PROPOSALS));
+    biigle.$declare('maia.isInAnnotationCandidateState', @json($job->state === \Biigle\Modules\Maia\MaiaJobState::ANNOTATION_CANDIDATES));
     biigle.$declare('maia.labelTrees', {!! $trees->toJson() !!});
     biigle.$declare('maia.projectIds', {!! $projectIds->toJson() !!});
     biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/:id/file') !!}');
