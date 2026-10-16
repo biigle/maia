@@ -9,6 +9,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\VolumeFile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Pgvector\Laravel\Vector;
 
 class ProcessObjectDetectedImage extends ProcessAnnotatedImage
 {
@@ -44,16 +45,32 @@ class ProcessObjectDetectedImage extends ProcessAnnotatedImage
     protected function updateOrCreateFeatureVectors(Collection $annotations, \Generator $output): void
     {
         $annotations = $annotations->keyBy('id');
+        $vectors = [];
         foreach ($output as $row) {
             $annotation = $annotations->get($row[0]);
-            AnnotationCandidateFeatureVector::updateOrCreate(
-                ['id' => $annotation->id],
-                [
-                    'job_id' => $annotation->job_id,
-                    'vector' => $row[1],
-                ]
-            );
+            $vectors[] = [
+                'id' => $annotation->id,
+                'job_id' => $annotation->job_id,
+                // Same conversion as the Vector cast of the model, which is not
+                // applied by upsert().
+                'vector' => (string) new Vector($row[1]),
+            ];
+
+            if (count($vectors) >= static::FEATURE_VECTOR_BATCH_SIZE) {
+                $this->upsertFeatureVectors($vectors);
+                $vectors = [];
+            }
         }
+
+        $this->upsertFeatureVectors($vectors);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function doUpsertFeatureVectors(array $vectors): void
+    {
+        AnnotationCandidateFeatureVector::upsert($vectors, ['id'], ['job_id', 'vector']);
     }
 
     /**
