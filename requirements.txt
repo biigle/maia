@@ -1,7 +1,7 @@
-torch==2.13
+torch==2.13.0
 torchvision==0.28.0
 pycocotools
 albumentations
-scikit-learn
+scikit-learn==1.6.1
 scikit-image
 sahi
