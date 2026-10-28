@@ -4,9 +4,14 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 
 import torch
+from PIL import Image
 from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
 from TrainingRunner import get_model
+
+# SAHI only disables the limit when it loads images itself, which happens after
+# load_image() opened the first image.
+Image.MAX_IMAGE_PIXELS = None
 
 class InferenceRunner(object):
 
@@ -59,7 +64,7 @@ class InferenceRunner(object):
 
             # Perform sliced prediction using SAHI
             result = get_sliced_prediction(
-                image_path,
+                self.load_image(image_path),
                 detection_model,
                 slice_height=self.slice_size,
                 slice_width=self.slice_size,
@@ -77,6 +82,26 @@ class InferenceRunner(object):
 
         # Wait for pending jobs of the postprocessing.
         executor.shutdown(True)
+
+    def load_image(self, image_path):
+        # Don't pass the path to SAHI because it would apply the EXIF orientation, which
+        # training ignores.
+        with Image.open(image_path) as source:
+            image = source.convert('RGB')
+
+        if image.width >= self.slice_size and image.height >= self.slice_size:
+            return image
+
+        # Slices smaller than slice_size would be upscaled by the model, but training
+        # used padded images at their original scale. Pad at the bottom/right so the
+        # predicted coordinates stay valid for the original image.
+        padded = Image.new('RGB', (
+            max(image.width, self.slice_size),
+            max(image.height, self.slice_size),
+        ))
+        padded.paste(image, (0, 0))
+
+        return padded
 
     def process_result(self, image_id, result):
         points = []
