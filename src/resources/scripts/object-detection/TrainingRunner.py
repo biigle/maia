@@ -13,6 +13,8 @@ import os
 import sys
 import torch
 
+IMAGE_SIZE = 1024
+
 class CocoDataset(CocoDetection):
     def _load_target(self, id):
         anns = self.coco.loadAnns(self.coco.getAnnIds(id))
@@ -79,7 +81,11 @@ if __name__ == '__main__':
         filter_invalid_bboxes=True,
     )
     transforms = A.Compose([
-        A.AtLeastOneBBoxRandomCrop(1024, 1024, erosion_factor=0.5),
+        # Images smaller than the crop size would make the crop fail. The default
+        # constant border is important because reflection would duplicate objects
+        # without annotations.
+        A.PadIfNeeded(min_height=IMAGE_SIZE, min_width=IMAGE_SIZE),
+        A.AtLeastOneBBoxRandomCrop(IMAGE_SIZE, IMAGE_SIZE, erosion_factor=0.5),
         A.HorizontalFlip(p=0.25),
         A.VerticalFlip(p=0.25),
         A.RandomRotate90(p=0.25),
@@ -98,7 +104,7 @@ if __name__ == '__main__':
         collate_fn=collate_fn
     )
 
-    model = get_model(num_classes, weights='DEFAULT', min_size=1024)
+    model = get_model(num_classes, weights='DEFAULT', min_size=IMAGE_SIZE)
     model.to(device)
 
     model_params = [p for p in model.parameters() if p.requires_grad]
