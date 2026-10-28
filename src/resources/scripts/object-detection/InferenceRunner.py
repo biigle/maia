@@ -7,10 +7,10 @@ import torch
 from PIL import Image
 from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
-from TrainingRunner import get_model
+from TrainingRunner import get_model, IMAGE_SIZE
 
-# SAHI only disables the limit when it loads images itself, which happens after
-# load_image() opened the first image.
+# Images are opened by load_image() instead of SAHI, so the decompression bomb limit
+# must be disabled here (SAHI only disables it when it opens images itself).
 Image.MAX_IMAGE_PIXELS = None
 
 class InferenceRunner(object):
@@ -28,7 +28,7 @@ class InferenceRunner(object):
         self.images = {k: v for k, v in params['images'].items()}
 
         # Sliding window parameters for SAHI
-        self.slice_size = 1024
+        self.slice_size = IMAGE_SIZE
         self.overlap_ratio = 0.2
 
     def run(self):

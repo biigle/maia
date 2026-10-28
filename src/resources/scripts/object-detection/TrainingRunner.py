@@ -83,8 +83,8 @@ if __name__ == '__main__':
     transforms = A.Compose([
         # Images smaller than the crop size would make the crop fail. The default
         # constant border is important because reflection would duplicate objects
-        # without annotations.
-        A.PadIfNeeded(min_height=IMAGE_SIZE, min_width=IMAGE_SIZE),
+        # without annotations. Pad at the bottom/right like the inference does.
+        A.PadIfNeeded(min_height=IMAGE_SIZE, min_width=IMAGE_SIZE, position='top_left'),
         A.AtLeastOneBBoxRandomCrop(IMAGE_SIZE, IMAGE_SIZE, erosion_factor=0.5),
         A.HorizontalFlip(p=0.25),
         A.VerticalFlip(p=0.25),
