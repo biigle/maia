@@ -7,7 +7,8 @@ use Biigle\Image;
 use Biigle\Enums\Shape;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
+#[WithoutTimestamps]
 /**
  * @property Shape $shape
  */
@@ -15,13 +16,7 @@ abstract class MaiaAnnotation extends Model implements AnnotationContract
 {
     use HasFactory;
 
-    /**
-     * Don't maintain timestamps for this model.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
-
+  
     /**
      * The attributes that should be casted to native types.
      *
