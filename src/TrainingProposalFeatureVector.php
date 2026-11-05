@@ -6,7 +6,10 @@ use Biigle\Modules\Maia\Database\Factories\TrainingProposalFeatureVectorFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Pgvector\Laravel\Vector;
-
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+#[Fillable(['id','job_id','vector',])]
+#[WithoutTimestamps]
 class TrainingProposalFeatureVector extends Model
 {
     use HasFactory;
@@ -18,12 +21,6 @@ class TrainingProposalFeatureVector extends Model
      */
     protected $table = 'maia_training_proposal_feature_vectors';
 
-    /**
-     * Don't maintain timestamps for this model.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
 
     /**
      * The attributes that should be casted to native types.
@@ -34,16 +31,7 @@ class TrainingProposalFeatureVector extends Model
         'vector' => Vector::class,
     ];
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'id',
-        'job_id',
-        'vector',
-    ];
+   
 
     /**
      * Create a new factory instance for the model.
