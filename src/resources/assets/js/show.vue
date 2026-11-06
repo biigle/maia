@@ -10,6 +10,7 @@ import RefineCanvas from './components/refineCanvas.vue';
 import RefineProposalsTab from './components/refineProposalsTab.vue';
 import SelectCandidatesTab from './components/selectCandidatesTab.vue';
 import SelectProposalsTab from './components/selectProposalsTab.vue';
+import {Echo} from './import.js';
 import {handleErrorResponse} from './import.js';
 import {ImagesStore} from './import.js';
 import {Keyboard} from './import.js';
@@ -793,31 +794,42 @@ export default {
         },
         handleConvertCandidates() {
             this.startLoading();
+            // Loading finishes when the broadcast event of the conversion arrives.
             JobApi.convertAnnotationCandidates({id: this.job.id}, {})
-                .then(this.waitForConvertedCandidates);
+                .catch((response) => {
+                    handleErrorResponse(response);
+                    this.finishLoading();
+                });
         },
-        waitForConvertedCandidates() {
-            let wait = () => {
-                window.setTimeout(() => {
-                    JobApi.convertingAnnotationCandidates({id: this.job.id})
-                        .then(wait, this.handleConvertedCandidates);
-                }, 2000);
-            };
-
-            wait();
-        },
-        handleConvertedCandidates(response) {
-            if (response.status === 404) {
-                return this.fetchCandidates(true)
-                    .then(() => {
-                        let next = this.nextFocussedCandidate;
-                        this.candidates.map(c => this.maybeUnsetFocussedCandidate(c, next));
-                    })
-                    .then(this.finishLoading);
-            } else {
-                handleErrorResponse(response);
-                this.finishLoading();
+        handleConvertedCandidates(event) {
+            // Ignore events of conversions that were started in another browser tab.
+            if (event.id !== this.job.id || !this.loading) {
+                return;
             }
+
+            if (event.has_unconverted) {
+                Messages.warning('Some annotation candidates were not converted because their label or shape is not allowed by the annotation guideline.');
+            }
+
+            return this.fetchCandidates(true)
+                .then(() => {
+                    let next = this.nextFocussedCandidate;
+                    this.candidates.map(c => this.maybeUnsetFocussedCandidate(c, next));
+                })
+                .finally(this.finishLoading);
+        },
+        handleConvertCandidatesFailed(event) {
+            if (event.id !== this.job.id || !this.loading) {
+                return;
+            }
+
+            this.finishLoading();
+            Messages.danger('There was an unexpected error while converting the annotation candidates.');
+        },
+        initializeEcho() {
+            Echo.getInstance().private(`user-${biigle.$require('maia.userId')}`)
+                .listen('.Biigle\\Modules\\Maia\\Events\\AnnotationCandidatesConverted', this.handleConvertedCandidates)
+                .listen('.Biigle\\Modules\\Maia\\Events\\ConvertAnnotationCandidatesFailed', this.handleConvertCandidatesFailed);
         },
         getSequenceId() {
             return this.sequenceCounter++;
@@ -931,6 +943,10 @@ export default {
         this.isInAnnotationCandidateState = biigle.$require('maia.isInAnnotationCandidateState');
         this.labelTrees = biigle.$require('maia.labelTrees');
         this.projectIds = biigle.$require('maia.projectIds');
+
+        if (this.isInAnnotationCandidateState) {
+            this.initializeEcho();
+        }
     },
 };
 </script>

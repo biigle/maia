@@ -2,18 +2,27 @@
 
 namespace Biigle\Modules\Maia\Http\Requests;
 
+use Biigle\AnnotationGuideline;
+use Biigle\Http\Requests\Traits\ValidatesAnnotationGuideline;
 use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SubmitAnnotationCandidates extends FormRequest
 {
+    use ValidatesAnnotationGuideline;
+
     /**
      * The job to submit candidates of
      *
      * @var MaiaJob
      */
     public $job;
+
+    /**
+     * The enforced annotation guideline that applies to the converted candidates.
+     */
+    public ?AnnotationGuideline $guideline = null;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -34,7 +43,9 @@ class SubmitAnnotationCandidates extends FormRequest
      */
     public function rules()
     {
-        return [];
+        return [
+            'guideline_id' => 'nullable|integer',
+        ];
     }
 
     /**
@@ -53,6 +64,17 @@ class SubmitAnnotationCandidates extends FormRequest
             if ($this->job->convertingCandidates) {
                 $validator->errors()->add('id', 'A job to convert annotation candidates is currently in progress. Please try again.');
             }
+
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            // Labels and shapes are checked when the candidates are converted.
+            $this->guideline = $this->validateGuideline(
+                $validator,
+                $this->job->volume_id,
+                $this->integer('guideline_id') ?: null
+            );
         });
     }
 }

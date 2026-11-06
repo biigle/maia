@@ -11,6 +11,7 @@
 {{vite_hot(base_path('vendor/biigle/maia/hot'), ['src/resources/assets/js/main.js'], 'vendor/maia')}}
 <script type="module">
     biigle.$declare('maia.job', {!! $job->toJson() !!});
+    biigle.$declare('maia.userId', {{ $user->id }});
     biigle.$declare('maia.isInTrainingProposalState', @json($job->state === MaiaJobState::TRAINING_PROPOSALS));
     biigle.$declare('maia.isInAnnotationCandidateState', @json($job->state === MaiaJobState::ANNOTATION_CANDIDATES));
     biigle.$declare('maia.labelTrees', {!! $trees->toJson() !!});

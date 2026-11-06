@@ -3,6 +3,10 @@
 namespace Biigle\Tests\Modules\Maia\Http\Controllers\Api;
 
 use ApiTestCase;
+use Biigle\AnnotationGuideline;
+use Biigle\AnnotationGuidelineLabel;
+use Biigle\Enums\Role;
+use Biigle\Enums\Shape;
 use Biigle\Modules\Maia\AnnotationCandidateFeatureVector;
 use Biigle\Modules\Maia\Jobs\ConvertAnnotationCandidates;
 use Biigle\Modules\Maia\Jobs\ProcessObjectDetectedImage;
@@ -13,6 +17,7 @@ use Biigle\Tests\LabelTest;
 use Biigle\Tests\Modules\Maia\AnnotationCandidateTest;
 use Biigle\Tests\Modules\Maia\MaiaJobTest;
 use Biigle\Tests\Modules\Maia\TrainingProposalTest;
+use Biigle\Tests\ProjectTest;
 use Illuminate\Testing\TestResponse;
 use Queue;
 use Symfony\Component\HttpFoundation\Response;
@@ -95,6 +100,72 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->assertTrue($job->fresh()->convertingCandidates);
     }
 
+    public function testSubmitGuidelineRequired()
+    {
+        $guideline = $this->createGuideline(['enforced' => true]);
+        $job = MaiaJobTest::create([
+            'state' => State::ANNOTATION_CANDIDATES,
+            'volume_id' => $this->volume()->id,
+        ]);
+
+        Queue::fake();
+        $this->beEditor();
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('guideline_id');
+
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates", [
+                'guideline_id' => $guideline->id,
+            ])
+            ->assertStatus(200);
+
+        Queue::assertPushed(ConvertAnnotationCandidates::class, function ($j) use ($guideline) {
+            return $j->guidelineId === $guideline->id;
+        });
+    }
+
+    public function testSubmitGuidelineOptional()
+    {
+        $this->createGuideline(['enforced' => true]);
+        // The editor can annotate in this project, too, and it has no guideline.
+        $project = ProjectTest::create();
+        $project->addVolumeId($this->volume()->id);
+        $project->addUserId($this->editor()->id, Role::EDITOR);
+        $job = MaiaJobTest::create([
+            'state' => State::ANNOTATION_CANDIDATES,
+            'volume_id' => $this->volume()->id,
+        ]);
+
+        Queue::fake();
+        $this->beEditor();
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")
+            ->assertStatus(200);
+
+        Queue::assertPushed(ConvertAnnotationCandidates::class, function ($j) {
+            return is_null($j->guidelineId);
+        });
+    }
+
+    public function testSubmitGuidelineNotEnforced()
+    {
+        $guideline = $this->createGuideline(['enforced' => false]);
+        $job = MaiaJobTest::create([
+            'state' => State::ANNOTATION_CANDIDATES,
+            'volume_id' => $this->volume()->id,
+        ]);
+
+        Queue::fake();
+        $this->beEditor();
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates", [
+                'guideline_id' => $guideline->id,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('guideline_id');
+
+        $this->postJson("/api/v1/maia-jobs/{$job->id}/annotation-candidates")
+            ->assertStatus(200);
+    }
+
     public function testUpdate()
     {
         $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
@@ -154,6 +225,112 @@ class AnnotationCandidateControllerTest extends ApiTestCase
             ->assertStatus(200);
 
         $this->assertNull($a->fresh()->label_id);
+    }
+
+    public function testUpdateLabelGuidelineRequired()
+    {
+        $guideline = $this->createGuideline(['enforced' => true]);
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $a = AnnotationCandidateTest::create(['job_id' => $job->id]);
+
+        $this->beEditor();
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $this->labelRoot()->id,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('guideline_id');
+
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $this->labelRoot()->id,
+                'guideline_id' => $guideline->id,
+            ])
+            ->assertStatus(200);
+
+        // Detaching a label or updating the points does not require a guideline.
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => null,
+            ])
+            ->assertStatus(200);
+
+        Queue::fake();
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'points' => [10, 20, 30],
+            ])
+            ->assertStatus(200);
+    }
+
+    public function testUpdateLabelGuidelineNotEnforced()
+    {
+        $guideline = $this->createGuideline(['enforced' => false]);
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $a = AnnotationCandidateTest::create(['job_id' => $job->id]);
+
+        $this->beEditor();
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $this->labelRoot()->id,
+                'guideline_id' => $guideline->id,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('guideline_id');
+    }
+
+    public function testUpdateLabelGuidelineLabel()
+    {
+        $guideline = $this->createGuideline(['enforced' => true]);
+        AnnotationGuidelineLabel::factory()->create([
+            'annotation_guideline_id' => $guideline->id,
+            'label_id' => $this->labelRoot()->id,
+        ]);
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $a = AnnotationCandidateTest::create(['job_id' => $job->id]);
+
+        $this->beEditor();
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $this->labelChild()->id,
+                'guideline_id' => $guideline->id,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('label_id');
+
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $this->labelRoot()->id,
+                'guideline_id' => $guideline->id,
+            ])
+            ->assertStatus(200);
+    }
+
+    public function testUpdateLabelGuidelineShape()
+    {
+        $guideline = $this->createGuideline(['enforced' => true]);
+        AnnotationGuidelineLabel::factory()->create([
+            'annotation_guideline_id' => $guideline->id,
+            'label_id' => $this->labelRoot()->id,
+            'shape' => Shape::POINT->value,
+        ]);
+        AnnotationGuidelineLabel::factory()->create([
+            'annotation_guideline_id' => $guideline->id,
+            'label_id' => $this->labelChild()->id,
+            'shape' => Shape::CIRCLE->value,
+        ]);
+        $job = MaiaJobTest::create(['volume_id' => $this->volume()->id]);
+        $a = AnnotationCandidateTest::create([
+            'job_id' => $job->id,
+            'shape' => Shape::CIRCLE,
+        ]);
+
+        $this->beEditor();
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $this->labelRoot()->id,
+                'guideline_id' => $guideline->id,
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('label_id');
+
+        $this->putJson("/api/v1/maia/annotation-candidates/{$a->id}", [
+                'label_id' => $this->labelChild()->id,
+                'guideline_id' => $guideline->id,
+            ])
+            ->assertStatus(200);
     }
 
     public function testUpdateConverted()
@@ -294,5 +471,12 @@ class AnnotationCandidateControllerTest extends ApiTestCase
         $this->beEditor();
         $this->getJson("/api/v1/maia-jobs/{$id}/annotation-candidates/similar-to/{$ac1->id}")
             ->assertStatus(404);
+    }
+
+    protected function createGuideline(array $attrs = []): AnnotationGuideline
+    {
+        return AnnotationGuideline::factory()->create(array_merge([
+            'project_id' => $this->project()->id,
+        ], $attrs));
     }
 }

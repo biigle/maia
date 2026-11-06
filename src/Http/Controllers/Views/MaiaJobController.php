@@ -141,6 +141,7 @@ class MaiaJobController extends Controller
         return view('maia::show', compact(
             'job',
             'volume',
+            'user',
             'trees',
             'projectIds',
             'tpUrlTemplate',
