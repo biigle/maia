@@ -54,6 +54,7 @@ export default {
             annotationGuidelines: [],
             mustUseAnnotationGuideline: false,
             annotationGuideline: null,
+            convertingCandidates: false,
             visitedSelectProposalsTab: false,
             visitedRefineProposalsTab: false,
             visitedSelectCandidatesTab: false,
@@ -644,15 +645,13 @@ export default {
         },
         selectCandidate(candidate) {
             if (this.selectedLabel) {
-                if (!this.checkCandidateShapeAllowed()) {
+                // Do not select candidates that have been converted.
+                if (candidate.annotation_id || !this.checkCandidateShapeAllowed()) {
                     return;
                 }
 
-                // Do not select candidates that have been converted.
-                if (!candidate.annotation_id) {
-                    this.updateSelectCandidate(candidate, this.selectedLabel)
-                        .then(this.maybeInitFocussedCandidate);
-                }
+                this.updateSelectCandidate(candidate, this.selectedLabel)
+                    .then(this.maybeInitFocussedCandidate);
             } else {
                 Messages.info('Please select a label first.');
             }
@@ -826,6 +825,7 @@ export default {
         },
         handleConvertCandidates() {
             this.startLoading();
+            this.convertingCandidates = true;
             // Loading finishes when the broadcast event of the conversion arrives.
             let payload = {};
             if (this.annotationGuidelineId) {
@@ -834,14 +834,17 @@ export default {
             JobApi.convertAnnotationCandidates({id: this.job.id}, payload)
                 .catch((response) => {
                     handleErrorResponse(response);
+                    this.convertingCandidates = false;
                     this.finishLoading();
                 });
         },
         handleConvertedCandidates(event) {
             // Ignore events of conversions that were started in another browser tab.
-            if (event.id !== this.job.id || !this.loading) {
+            if (event.id !== this.job.id || !this.convertingCandidates) {
                 return;
             }
+
+            this.convertingCandidates = false;
 
             if (event.has_unconverted) {
                 Messages.warning('Some annotation candidates were not converted because their label or shape is not allowed by the annotation guideline.');
@@ -855,10 +858,11 @@ export default {
                 .finally(this.finishLoading);
         },
         handleConvertCandidatesFailed(event) {
-            if (event.id !== this.job.id || !this.loading) {
+            if (event.id !== this.job.id || !this.convertingCandidates) {
                 return;
             }
 
+            this.convertingCandidates = false;
             this.finishLoading();
             Messages.danger('There was an unexpected error while converting the annotation candidates.');
         },

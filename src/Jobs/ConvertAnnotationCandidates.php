@@ -118,6 +118,11 @@ class ConvertAnnotationCandidates extends Job
      */
     public function failed(?Throwable $exception): void
     {
+        // The finally block of handle() does not run if the worker was killed (e.g.
+        // on timeout).
+        $this->job->convertingCandidates = false;
+        $this->job->save();
+
         ConvertAnnotationCandidatesFailed::dispatch($this->job->id, $this->user);
     }
 

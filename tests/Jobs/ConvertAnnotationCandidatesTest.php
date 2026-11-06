@@ -169,12 +169,14 @@ class ConvertAnnotationCandidatesTest extends TestCase
 
     public function testFailed()
     {
-        $job = MaiaJobTest::create();
+        $job = MaiaJobTest::create(['attrs' => ['converting_candidates' => true]]);
         $user = UserTest::create();
 
         Event::fake([ConvertAnnotationCandidatesFailed::class]);
 
         (new ConvertAnnotationCandidates($job, $user))->failed(new Exception);
+
+        $this->assertFalse($job->fresh()->convertingCandidates);
 
         Event::assertDispatched(function (ConvertAnnotationCandidatesFailed $event) use ($job, $user) {
             $this->assertSame($job->id, $event->id);
