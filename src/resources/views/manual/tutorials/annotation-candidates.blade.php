@@ -29,6 +29,10 @@
         </p>
 
         <p>
+            If a project of the volume has an annotation guideline, the <button class="btn btn-default btn-xs"><i class="fa fa-clipboard-list"></i> Use Guideline</button> button above the label trees can be used to select the guideline. The choice is shared with the annotation tools of the volume. If the guideline is enforced, only its labels can be selected. Annotation candidates are circles, so a label for which the guideline requires another shape can't be attached to them, either. Read more about this in the <a href="{{route('manual-tutorials', ['projects', 'about'])}}#use-a-guideline">annotation guideline</a> section of the projects article.
+        </p>
+
+        <p>
             We recommend you to go multiple times through the process of selecting annotation candidates, each time with a different label. It is much faster to review all image thumbnails of the annotation candidates and look only for a single class of objects or image regions than to switch frequently between many different classes. Remember that you can bulk-select annotation candidates with the <kbd>Shift</kbd> key and sort by similarity with the <button class="btn btn-default btn-xs"><i class="fa fa-thumbtack"></i></button> button (described <a href="{{route('manual-tutorials', ['maia', 'training-proposals'])}}#selection-of-training-proposals">previously</a>)!
         </p>
 
@@ -50,6 +54,10 @@
 
         <p>
             When you are statisfied with the labels and circles of the selected annotation candidates, click on the <button class="btn btn-success btn-xs">Convert annotation candidates</button> button in the <button class="btn btn-default btn-xs"><i class="fas fa-pen-square"></i></button>&nbsp;refine annotation candidates tab. This will convert all selected annotation candidates to real annotations.
+        </p>
+
+        <p>
+            If an enforced annotation guideline is selected, annotation candidates whose label or shape is not allowed by the guideline are not converted. This can happen if the labels were attached before the guideline was selected. A message is shown after the conversion if this was the case. These annotation candidates remain selected and can be modified, so you can attach another label and convert them again.
         </p>
 
         <p class="text-center">
