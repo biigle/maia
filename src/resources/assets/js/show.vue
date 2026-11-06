@@ -10,6 +10,7 @@ import RefineCanvas from './components/refineCanvas.vue';
 import RefineProposalsTab from './components/refineProposalsTab.vue';
 import SelectCandidatesTab from './components/selectCandidatesTab.vue';
 import SelectProposalsTab from './components/selectProposalsTab.vue';
+import {AnnotationGuideline} from './import.js';
 import {Echo} from './import.js';
 import {handleErrorResponse} from './import.js';
 import {ImagesStore} from './import.js';
@@ -19,6 +20,9 @@ import {Messages} from './import.js';
 import {SidebarTab} from './import.js';
 import {Sidebar} from './import.js';
 import {markRaw, toRaw} from 'vue';
+
+// Detection always creates circles (see DetectionJob).
+const CANDIDATE_SHAPE = 'Circle';
 
 /**
  * View model for the main view of a MAIA job
@@ -47,6 +51,9 @@ export default {
             isInAnnotationCandidateState: false,
             labelTrees: [],
             projectIds: [],
+            annotationGuidelines: [],
+            mustUseAnnotationGuideline: false,
+            annotationGuideline: null,
             visitedSelectProposalsTab: false,
             visitedRefineProposalsTab: false,
             visitedSelectCandidatesTab: false,
@@ -96,6 +103,10 @@ export default {
         };
     },
     computed: {
+        // Only enforced guidelines are validated by the API.
+        annotationGuidelineId() {
+            return this.annotationGuideline?.isEnforced ? this.annotationGuideline.id : null;
+        },
         infoTabOpen() {
             return this.openTab === 'info';
         },
@@ -611,6 +622,10 @@ export default {
                 this.unselectCandidate(candidate);
             } else {
                 if (event.shiftKey && this.lastSelectedCandidate && this.selectedLabel) {
+                    // Checked once here so the warning is not shown for each candidate.
+                    if (!this.checkCandidateShapeAllowed()) {
+                        return;
+                    }
                     this.doForEachBetween(this.sortedCandidates, candidate, this.lastSelectedCandidate, this.selectCandidate);
                 } else {
                     this.lastSelectedCandidate = candidate;
@@ -618,8 +633,21 @@ export default {
                 }
             }
         },
+        checkCandidateShapeAllowed() {
+            if (this.annotationGuideline?.allowsShape(CANDIDATE_SHAPE, this.selectedLabel.id) === false) {
+                Messages.warning(`The annotation guideline does not allow the label "${this.selectedLabel.name}" for ${CANDIDATE_SHAPE.toLowerCase()} annotations.`);
+
+                return false;
+            }
+
+            return true;
+        },
         selectCandidate(candidate) {
             if (this.selectedLabel) {
+                if (!this.checkCandidateShapeAllowed()) {
+                    return;
+                }
+
                 // Do not select candidates that have been converted.
                 if (!candidate.annotation_id) {
                     this.updateSelectCandidate(candidate, this.selectedLabel)
@@ -642,7 +670,11 @@ export default {
             candidate.label = label;
             this.setSelectedCandidateId(candidate);
             let labelId = label ? label.id : null;
-            let promise = CandidatesApi.update({id: candidate.id}, {label_id: labelId});
+            let payload = {label_id: labelId};
+            if (labelId && this.annotationGuidelineId) {
+                payload.guideline_id = this.annotationGuidelineId;
+            }
+            let promise = CandidatesApi.update({id: candidate.id}, payload);
 
             promise.catch((response) => {
                 handleErrorResponse(response);
@@ -795,7 +827,11 @@ export default {
         handleConvertCandidates() {
             this.startLoading();
             // Loading finishes when the broadcast event of the conversion arrives.
-            JobApi.convertAnnotationCandidates({id: this.job.id}, {})
+            let payload = {};
+            if (this.annotationGuidelineId) {
+                payload.guideline_id = this.annotationGuidelineId;
+            }
+            JobApi.convertAnnotationCandidates({id: this.job.id}, payload)
                 .catch((response) => {
                     handleErrorResponse(response);
                     this.finishLoading();
@@ -833,6 +869,9 @@ export default {
         },
         getSequenceId() {
             return this.sequenceCounter++;
+        },
+        handleSelectedAnnotationGuideline(guideline) {
+            this.annotationGuideline = guideline;
         },
         handleSaveProposals() {
             JobApi.saveTrainingProposals({id: this.job.id}, {})
@@ -943,6 +982,10 @@ export default {
         this.isInAnnotationCandidateState = biigle.$require('maia.isInAnnotationCandidateState');
         this.labelTrees = biigle.$require('maia.labelTrees');
         this.projectIds = biigle.$require('maia.projectIds');
+        const shapes = biigle.$require('maia.availableShapes');
+        this.annotationGuidelines = biigle.$require('maia.annotationGuidelines')
+            .map(g => new AnnotationGuideline(g, shapes));
+        this.mustUseAnnotationGuideline = biigle.$require('maia.mustUseAnnotationGuideline');
 
         if (this.isInAnnotationCandidateState) {
             this.initializeEcho();

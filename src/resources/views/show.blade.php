@@ -16,6 +16,9 @@
     biigle.$declare('maia.isInAnnotationCandidateState', @json($job->state === MaiaJobState::ANNOTATION_CANDIDATES));
     biigle.$declare('maia.labelTrees', {!! $trees->toJson() !!});
     biigle.$declare('maia.projectIds', {!! $projectIds->toJson() !!});
+    biigle.$declare('maia.annotationGuidelines', @json($annotationGuidelines));
+    biigle.$declare('maia.mustUseAnnotationGuideline', @json($mustUseAnnotationGuideline));
+    biigle.$declare('maia.availableShapes', {!! $shapes !!});
     biigle.$declare('annotations.imageFileUri', '{!! url('api/v1/images/:id/file') !!}');
     biigle.$declare('maia.tpUrlTemplate', '{{$tpUrlTemplate}}');
     biigle.$declare('maia.acUrlTemplate', '{{$acUrlTemplate}}');

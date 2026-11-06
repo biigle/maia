@@ -9,16 +9,31 @@
                     This job reached the allowed maximum of {{candidatesLimit}} annotation candidates!
                 </div>
             </div>
+            <annotation-guideline-selector
+                :model-value="annotationGuideline"
+                :guidelines="annotationGuidelines"
+                :must-use-guideline="mustUseAnnotationGuideline"
+                :volume-id="volumeId"
+                @update:model-value="handleSelectedGuideline"
+                ></annotation-guideline-selector>
             <label-trees
                 :trees="labelTrees"
                 :sorting-project-ids="sortingProjectIds"
                 :show-favourites="true"
+                :labels-in-guideline="labelsInGuideline"
+                :enforce-guideline="enforceGuideline"
                 listener-set="select-candidates"
                 @select="handleSelectedLabel"
                 @deselect="handleDeselectedLabel"
                 @clear="handleDeselectedLabel"
                 ></label-trees>
         </div>
+        <label-indicator
+            v-if="showLabelIndicator"
+            class="maia-tab-content__label-indicator"
+            :label="selectedLabel"
+            :guideline="annotationGuideline"
+            ></label-indicator>
         <div class="maia-tab-content__bottom">
             <div class="panel panel-info">
                 <div class="panel-body text-info">
@@ -30,6 +45,7 @@
     </div>
 </template>
 <script>
+import GuidelineTabMixin from '../mixins/guidelineTab.js';
 import {LabelTrees} from '../import.js';
 
 /**
@@ -38,6 +54,7 @@ import {LabelTrees} from '../import.js';
  * @type {Object}
  */
 export default {
+    mixins: [GuidelineTabMixin],
     emits: [
         'select',
         'proceed',
