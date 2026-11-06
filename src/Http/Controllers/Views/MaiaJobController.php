@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Http\Controllers\Views;
 
+use Biigle\Enums\Shape;
 use Biigle\Http\Controllers\Views\Controller;
 use Biigle\ImageAnnotation;
 use Biigle\LabelTree;
@@ -9,6 +10,7 @@ use Biigle\Modules\Maia\MaiaJob;
 use Biigle\Modules\Maia\MaiaJobState as State;
 use Biigle\Project;
 use Biigle\Enums\Role;
+use Biigle\Services\AnnotationGuidelineService;
 use Biigle\Volume;
 use DB;
 use Illuminate\Http\Request;
@@ -88,11 +90,12 @@ class MaiaJobController extends Controller
      * Show a MAIA job
      *
      * @param Request $request
+     * @param AnnotationGuidelineService $guidelineService
      * @param int $id
      *
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show(Request $request, AnnotationGuidelineService $guidelineService, $id)
     {
         $job = MaiaJob::findOrFail($id);
         $this->authorize('access', $job);
@@ -125,9 +128,20 @@ class MaiaJobController extends Controller
                         ->whereIn('project_id', $projectIds);
                 })
                 ->get();
+
+            $annotationGuidelines = $guidelineService->getGuidelines($user, $volume->id)
+                ->load('labels', 'project:id,name');
+
+            $mustUseAnnotationGuideline = $annotationGuidelines->isNotEmpty()
+                && $guidelineService->mustUseGuideline($user, $volume->id);
         } else {
             $trees = collect([]);
+            // Guidelines are only needed to attach labels to annotation candidates.
+            $annotationGuidelines = collect([]);
+            $mustUseAnnotationGuideline = false;
         }
+
+        $shapes = Shape::pluckById(except: Shape::WHOLE_FRAME);
 
         $tpUrlTemplate = Storage::disk(config('maia.training_proposal_storage_disk'))
             ->url(':prefix/:id.'.config('largo.patch_format'));
@@ -141,12 +155,16 @@ class MaiaJobController extends Controller
         return view('maia::show', compact(
             'job',
             'volume',
+            'user',
             'trees',
             'projectIds',
             'tpUrlTemplate',
             'acUrlTemplate',
             'tpLimit',
-            'acLimit'
+            'acLimit',
+            'annotationGuidelines',
+            'mustUseAnnotationGuideline',
+            'shapes'
         ));
     }
 }

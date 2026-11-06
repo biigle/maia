@@ -2,6 +2,7 @@
 
 namespace Biigle\Modules\Maia\Http\Requests;
 
+use Biigle\Http\Requests\Traits\ValidatesAnnotationGuideline;
 use Biigle\Label;
 use Biigle\Modules\Maia\AnnotationCandidate;
 use Biigle\Modules\Maia\MaiaJobState as State;
@@ -10,6 +11,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAnnotationCandidate extends FormRequest
 {
+    use ValidatesAnnotationGuideline;
+
     /**
      * The annotation candidate to update
      *
@@ -52,6 +55,7 @@ class UpdateAnnotationCandidate extends FormRequest
                 'array',
                 new AnnotationPoints($this->candidate->shape->value),
             ],
+            'guideline_id' => 'nullable|integer',
         ];
     }
 
@@ -65,7 +69,41 @@ class UpdateAnnotationCandidate extends FormRequest
     {
         $validator->after(function ($validator) {
             $this->maybeRestrictUpdating($validator);
+            $this->validateLabelGuideline($validator);
         });
+    }
+
+    /**
+     * Validate the annotation guideline if a label should be attached. Detaching a label
+     * or updating the points is always allowed because the shape does not change.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     */
+    protected function validateLabelGuideline($validator)
+    {
+        if (!$this->filled('label_id') || $validator->errors()->isNotEmpty()) {
+            return;
+        }
+
+        $guideline = $this->validateGuideline(
+            $validator,
+            $this->candidate->job->volume_id,
+            $this->integer('guideline_id') ?: null
+        );
+
+        if (is_null($guideline)) {
+            return;
+        }
+
+        $labelId = $this->integer('label_id');
+        $this->validateGuidelineLabel($validator, $guideline, $labelId);
+        $this->validateGuidelineShape(
+            $validator,
+            $guideline,
+            $this->candidate->shape,
+            $labelId,
+            'label_id'
+        );
     }
 
     /**

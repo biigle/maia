@@ -2,7 +2,13 @@
     :selected-candidates="selectedCandidates"
     :label-trees="labelTrees"
     :sorting-project-ids="projectIds"
+    :selected-label="selectedLabel"
+    :annotation-guideline="annotationGuideline"
+    :annotation-guidelines="annotationGuidelines"
+    :must-use-annotation-guideline="mustUseAnnotationGuideline"
+    :volume-id="job.volume_id"
     :loading="loading"
     v-on:select="handleSelectedLabel"
+    v-on:select-guideline="handleSelectedAnnotationGuideline"
     v-on:convert="handleConvertCandidates"
     ></refine-candidates-tab>
