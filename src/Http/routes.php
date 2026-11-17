@@ -40,8 +40,6 @@ $router->group([
     $router->put('maia/annotation-candidates/{id}', 'AnnotationCandidateController@update');
     $router->get('maia-jobs/{id}/annotation-candidates/similar-to/{id2}', 'AnnotationCandidateController@indexSimilar');
 
-    $router->get('maia-jobs/{id}/converting-candidates', 'MaiaJobConvertingCandidatesController@get');
-
     $router->get('maia-jobs/{id}/images/{id2}/training-proposals', 'MaiaJobImagesController@indexTrainingProposals');
     $router->get('maia-jobs/{id}/images/{id2}/annotation-candidates', 'MaiaJobImagesController@indexAnnotationCandidates');
 
