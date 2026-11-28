@@ -143,16 +143,21 @@ class AnnotationCandidateController extends Controller
      * @apiGroup Maia
      * @apiName ConvertAnnotationCandidates
      * @apiPermission projectEditor
-     * @apiDescription This converts all annotation candidates with attached label which have not been converted yet. Conversion is done asynchronously. The process can be polled using (#Maia:GetConvertingAnnotations).
+     * @apiDescription This converts all annotation candidates with attached label which have not been converted yet. Conversion is done asynchronously. The `AnnotationCandidatesConverted` or `ConvertAnnotationCandidatesFailed` event is broadcast on the private user channel when the conversion is finished. Candidates whose label or shape is not allowed by the annotation guideline are not converted. In this case, `has_unconverted` of the `AnnotationCandidatesConverted` event is `true`.
      *
      * @apiParam {Number} id The job ID.
+     * @apiParam (Optional arguments) {Number} guideline_id ID of the enforced annotation guideline that should be used. Required if all projects of the user and the volume have an enforced annotation guideline.
      *
      * @param SubmitAnnotationCandidates $request
      * @return \Illuminate\Http\Response
      */
     public function submit(SubmitAnnotationCandidates $request)
     {
-        Queue::push(new ConvertAnnotationCandidates($request->job, $request->user()));
+        Queue::push(new ConvertAnnotationCandidates(
+            $request->job,
+            $request->user(),
+            $request->guideline?->id
+        ));
         $request->job->convertingCandidates = true;
         $request->job->save();
     }
@@ -168,6 +173,7 @@ class AnnotationCandidateController extends Controller
      * @apiParam {Number} id The annotation candidate ID.
      * @apiParam (Attributes that can be updated) {Number[]} points Array containing three numbers representing the x- and y-coordinates as well as the radius of the annotation candidate circle.
      * @apiParam (Attributes that can be updated) {Number} label_id ID of the label to attach to the annotation candidate. Set to null to detach the label again. This label will be attached to the annotation when the annotation candidate is converted.
+     * @apiParam (Optional arguments) {Number} guideline_id ID of the enforced annotation guideline that should be used if a label is attached. Required if all projects of the user and the volume have an enforced annotation guideline.
      *
      * @param UpdateAnnotationCandidate $request
      * @return \Illuminate\Http\Response
